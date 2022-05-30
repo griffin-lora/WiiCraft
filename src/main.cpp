@@ -4,9 +4,6 @@
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 
-static void* xfb = NULL;
-static GXRModeObj* rmode = NULL;
-
 int main(int argc, char** argv) {
 	// Initialise the video system
 	VIDEO_Init();
@@ -16,10 +13,10 @@ int main(int argc, char** argv) {
 
 	// Obtain the preferred video mode from the system
 	// This will correspond to the settings in the Wii menu
-	rmode = VIDEO_GetPreferredMode(NULL);
+	GXRModeObj* rmode = VIDEO_GetPreferredMode(NULL);
 
 	// Allocate memory for the display in the uncached region
-	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+	void* xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 
 	// Initialise the console, required for printf
 	CON_Init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
@@ -62,7 +59,7 @@ int main(int argc, char** argv) {
 
 		// We return to the launcher application via exit
 		if (pressed & WPAD_BUTTON_HOME) {
-			exit(0);
+			std::exit(0);
 		}
 
 		// Wait for the next frame
