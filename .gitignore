@@ -1,0 +1,5 @@
+.vscode
+build
+*.elf
+*.dol
+run.sh
