@@ -1,16 +1,13 @@
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 
-static void *xfb = NULL;
-static GXRModeObj *rmode = NULL;
+static void* xfb = NULL;
+static GXRModeObj* rmode = NULL;
 
-//---------------------------------------------------------------------------------
-int main(int argc, char **argv) {
-//---------------------------------------------------------------------------------
-
+int main(int argc, char** argv) {
 	// Initialise the video system
 	VIDEO_Init();
 
@@ -25,7 +22,7 @@ int main(int argc, char **argv) {
 	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 
 	// Initialise the console, required for printf
-	console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
+	CON_Init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
 
 	// Set up the video registers with the chosen mode
 	VIDEO_Configure(rmode);
@@ -41,19 +38,20 @@ int main(int argc, char **argv) {
 
 	// Wait for Video setup to complete
 	VIDEO_WaitVSync();
-	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
+	if (rmode->viTVMode & VI_NON_INTERLACE) {
+		VIDEO_WaitVSync();
+	}
 
 
 	// The console understands VT terminal escape codes
 	// This positions the cursor on row 2, column 0
 	// we can use variables for this with format codes too
 	// e.g. printf ("\x1b[%d;%dH", row, column );
-	printf("\x1b[2;0H");
+	std::printf("\x1b[2;0H");
 
+	std::printf("Hello World!");
 
-	printf("Hello World!");
-
-	while(1) {
+	while (true) {
 
 		// Call WPAD_ScanPads each loop, this reads the latest controller states
 		WPAD_ScanPads();
@@ -63,7 +61,9 @@ int main(int argc, char **argv) {
 		u32 pressed = WPAD_ButtonsDown(0);
 
 		// We return to the launcher application via exit
-		if ( pressed & WPAD_BUTTON_HOME ) exit(0);
+		if (pressed & WPAD_BUTTON_HOME) {
+			exit(0);
+		}
 
 		// Wait for the next frame
 		VIDEO_WaitVSync();
