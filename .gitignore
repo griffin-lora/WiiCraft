@@ -2,4 +2,4 @@
 build
 *.elf
 *.dol
-run.sh
+*.iso

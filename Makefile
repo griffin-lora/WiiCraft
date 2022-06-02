@@ -93,7 +93,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES), -iquote $(CURDIR)/$(dir)) \
 export LIBPATHS	:= -L$(LIBOGC_LIB) $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
-.PHONY: $(BUILD) clean
+.PHONY: $(BUILD) clean run textures image
 
 #---------------------------------------------------------------------------------
 $(BUILD):
@@ -106,8 +106,16 @@ clean:
 	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).dol
 
 #---------------------------------------------------------------------------------
-run:
-	wiiload $(TARGET).dol
+run: $(BUILD)
+	dolphin-emu-nogui -e new_wii.elf
+
+textures:
+	./textures.sh
+
+image:
+	test ! -f image.iso && mksdcard 50M image.iso
+	sudo mount -o defaults,umask=000 image.iso build/data
+	sudo umount build/data
 
 
 #---------------------------------------------------------------------------------
