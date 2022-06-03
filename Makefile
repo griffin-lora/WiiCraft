@@ -33,7 +33,7 @@ LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lwiiuse -lbte -logc -lm
+LIBS	:=	-lwiiuse -lbte -lfat -logc -lm -ldi
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -113,9 +113,7 @@ textures:
 	./textures.sh
 
 image:
-	test ! -f image.iso && mksdcard 50M image.iso
-	sudo mount -o defaults,umask=000 image.iso build/data
-	sudo umount build/data
+	./image.sh
 
 
 #---------------------------------------------------------------------------------

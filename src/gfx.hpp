@@ -1,14 +1,25 @@
 #pragma once
 #include <gccore.h>
+#include <unistd.h>
+#include <string>
 
-enum class gfx_mode {
-    console,
-    gx,
-    none
-};
+namespace gfx {
+    enum class mode {
+        console,
+        gx,
+        none
+    };
 
-void enable_gfx_mode(gfx_mode mode);
+    void enable_mode(mode mode);
 
-inline void wait_for_vsync() {
-    VIDEO_WaitVSync();
+    class texture {
+        GXTexObj tex_obj;
+        public:
+            bool load_from_file(const std::string& path);
+            void use();
+    };
+
+    inline void wait_for_vsync() {
+        VIDEO_WaitVSync();
+    }
 }

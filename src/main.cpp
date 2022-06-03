@@ -3,14 +3,30 @@
 #include <cstdlib>
 #include <wiiuse/wpad.h>
 #include "gfx.hpp"
+#include "error.hpp"
+#include <fstream>
+#include <fat.h>
 
 int main(int argc, char** argv) {
+
 	// This function initialises the attached controllers
 	WPAD_Init();
 
-	enable_gfx_mode(gfx_mode::console);
+	gfx::enable_mode(gfx::mode::console);
 
-	std::printf("Hello World!");
+	if (!fatInitDefault()) {
+		std::puts("fatInitDefault failed");
+		freeze();
+	}
+
+	gfx::texture chunk_texture;
+	if (!chunk_texture.load_from_file("data/textures/chunk.tpl")) {
+		std::printf("Failed to load chunk texture\n");
+		freeze();
+	}
+	chunk_texture.use();
+
+	std::puts("Hello World!");
 
 	while (true) {
 
@@ -27,7 +43,7 @@ int main(int argc, char** argv) {
 		}
 
 		// Wait for the next frame
-		wait_for_vsync();
+		gfx::wait_for_vsync();
 	}
 
 	return 0;

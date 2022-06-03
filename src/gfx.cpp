@@ -4,6 +4,8 @@
 #include <malloc.h>
 #include <array>
 
+using namespace gfx;
+
 static void enable_console() {
     // Initialise the video system
 	VIDEO_Init();
@@ -102,16 +104,36 @@ static void enable_gx() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGB8, 0);
+
+
+	GX_InvVtxCache();
+	GX_InvalidateTexAll();
 }
 
-static gfx_mode cur_mode = gfx_mode::none;
+static mode cur_mode = mode::none;
 
-void enable_gfx_mode(gfx_mode mode) {
+void gfx::enable_mode(mode mode) {
     if (mode == cur_mode) { return; }
     cur_mode = mode;
-    if (cur_mode == gfx_mode::console) {
+    if (cur_mode == mode::console) {
         enable_console();
     } else {
         enable_gx();
     }
+}
+
+bool texture::load_from_file(const std::string& path) {
+	if (access(path.c_str(), F_OK)) {
+		return false;
+	}
+	TPLFile tpl_file;
+	TPL_OpenTPLFromFile(&tpl_file, path.c_str());
+	TPL_GetTexture(&tpl_file, 0, &tex_obj);
+	return true;
+}
+
+void texture::use() {
+	if (cur_mode == mode::gx) {
+		GX_LoadTexObj(&tex_obj, GX_TEXMAP0);
+	}
 }
