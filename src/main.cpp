@@ -182,18 +182,18 @@ int main(int argc, char** argv) {
 
 		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 		GX_SetColorUpdate(GX_TRUE);
-		GX_CopyDisp(draw.frameBuffer[draw.fb],GX_TRUE);
+		GX_CopyDisp(draw.frame_buffers[draw.fb_index],GX_TRUE);
 
 		GX_DrawDone();
 
-		VIDEO_SetNextFramebuffer(draw.frameBuffer[draw.fb]);
+		VIDEO_SetNextFramebuffer(draw.frame_buffers[draw.fb_index]);
 		if(first_frame) {
 			first_frame = 0;
 			VIDEO_SetBlack(FALSE);
 		}
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
-		draw.fb ^= 1;
+		draw.fb_index ^= 1;
 
 		rquad -= 0.15f;				// Decrease The Rotation Variable For The Quad     ( NEW )
 	}

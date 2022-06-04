@@ -56,17 +56,17 @@ void gfx::init(draw_state& s, color4 bkg) {
 	std::memset(s.gpfifo,0,DEFAULT_FIFO_SIZE);
 
 	// allocate 2 framebuffers for double buffering
-	s.frameBuffer[0] = SYS_AllocateFramebuffer(s.rmode);
-	s.frameBuffer[1] = SYS_AllocateFramebuffer(s.rmode);
+	s.frame_buffers[0] = SYS_AllocateFramebuffer(s.rmode);
+	s.frame_buffers[1] = SYS_AllocateFramebuffer(s.rmode);
 
 	// configure video
 	VIDEO_Configure(s.rmode);
-	VIDEO_SetNextFramebuffer(s.frameBuffer[s.fb]);
+	VIDEO_SetNextFramebuffer(s.frame_buffers[s.fb_index]);
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
 	if(s.rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
 
-	s.fb ^= 1;
+	s.fb_index ^= 1;
 
 	// init the flipper
 	GX_Init(s.gpfifo,DEFAULT_FIFO_SIZE);
@@ -91,7 +91,7 @@ void gfx::init(draw_state& s, color4 bkg) {
 	}
 
 	GX_SetCullMode(GX_CULL_NONE);
-	GX_CopyDisp(s.frameBuffer[s.fb],GX_TRUE);
+	GX_CopyDisp(s.frame_buffers[s.fb_index],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
 	// setup the vertex attribute table

@@ -20,8 +20,8 @@ namespace gfx {
 
     struct draw_state {
         GXRModeObj* rmode = nullptr;
-        u32 fb = 0;
-        std::array<void*, 2> frameBuffer{{ NULL, NULL }};
+        u32 fb_index = 0;
+        std::array<void*, 2> frame_buffers{{ NULL, NULL }};
         void* gpfifo;
     };
 
