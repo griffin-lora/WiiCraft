@@ -39,6 +39,7 @@ namespace gfx {
     using texture = GXTexObj;
 
     std::tuple<bool, error_code> load_from_file(texture& texture, const char* path);
+    void safe_load_from_file(texture& texture, const char* path);
 
     inline void set_filtering_mode(texture& texture, u8 min, u8 mag) {
         GX_InitTexObjFilterMode(&texture, min, mag);

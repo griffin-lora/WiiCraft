@@ -3,6 +3,7 @@
 #include <cstring>
 #include <malloc.h>
 #include <unistd.h>
+#include "dbg.hpp"
 
 using namespace gfx;
 
@@ -123,4 +124,12 @@ std::tuple<bool, error_code> gfx::load_from_file(texture& tex, const char* path)
 	TPL_OpenTPLFromFile(&tpl_file, path);
 	TPL_GetTexture(&tpl_file, 0, &tex);
 	return { true, code };
+}
+
+void gfx::safe_load_from_file(texture& tex, const char* path) {
+	dbg::try_catch([](auto& tex, auto path) {
+		return gfx::load_from_file(tex, path);
+	}, [](auto code, auto& _, auto path) {
+		std::printf("Failed to load texture from \"%s\", error code: %d\n", path, code);
+	}, tex, path);
 }
