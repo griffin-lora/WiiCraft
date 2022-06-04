@@ -4,67 +4,37 @@
 
 ---------------------------------------------------------------------------------*/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <malloc.h>
-#include <math.h>
+#include <cmath>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 #include <fat.h>
+#include <array>
 
-#define DEFAULT_FIFO_SIZE	(256*1024)
+constexpr std::size_t DEFAULT_FIFO_SIZE = 256*1024;
 
-typedef struct tagtexdef
-{
-	void *pal_data;
-	void *tex_data;
-	u32 sz_x;
-	u32 sz_y;
-	u32 fmt;
-	u32 min_lod;
-	u32 max_lod;
-	u32 min;
-	u32 mag;
-	u32 wrap_s;
-	u32 wrap_t;
-	void *nextdef;
-} texdef;
-
-static GXRModeObj *rmode = NULL;
-static void *frameBuffer[2] = { NULL, NULL};
-//static texdef *txdef = (texdef*)crate0_texture;
-
-int main(int argc,char **argv) {
+int main(int argc, char** argv) {
 
 	if (!fatInitDefault()) {
 		return 1;
 	}
 
-	f32 yscale,zt = 0;
-	u32 xfbHeight;
 	u32 fb = 0;
-	f32 rquad = 0.0f;
-	u32 first_frame = 1;
-	GXTexObj texture;
-	Mtx view; // view and perspective matrices
-	Mtx model, modelview;
-	Mtx44 perspective;
-	void *gpfifo = NULL;
-	GXColor background = {0, 0, 0, 0xff};
-	guVector cam = {0.0F, 0.0F, 0.0F},
-			up = {0.0F, 1.0F, 0.0F},
-		  look = {0.0F, 0.0F, -1.0F};
-	TPLFile crateTPL;
+	constexpr GXColor background = {0, 0, 0, 0xff};
 
 	VIDEO_Init();
 	WPAD_Init();
 
-	rmode = VIDEO_GetPreferredMode(NULL);
+	GXRModeObj* rmode = VIDEO_GetPreferredMode(NULL);
 
 	// allocate the fifo buffer
-	gpfifo = memalign(32,DEFAULT_FIFO_SIZE);
+	void* gpfifo = memalign(32,DEFAULT_FIFO_SIZE);
 	memset(gpfifo,0,DEFAULT_FIFO_SIZE);
+
+	std::array<void*, 2> frameBuffer{{ NULL, NULL }};
 
 	// allocate 2 framebuffers for double buffering
 	frameBuffer[0] = SYS_AllocateFramebuffer(rmode);
@@ -87,8 +57,8 @@ int main(int argc,char **argv) {
 
 	// other gx setup
 	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
-	yscale = GX_GetYScaleFactor(rmode->efbHeight,rmode->xfbHeight);
-	xfbHeight = GX_SetDispCopyYScale(yscale);
+	f32 yscale = GX_GetYScaleFactor(rmode->efbHeight,rmode->xfbHeight);
+	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
 	GX_SetScissor(0,0,rmode->fbWidth,rmode->efbHeight);
 	GX_SetDispCopySrc(0,0,rmode->fbWidth,rmode->efbHeight);
 	GX_SetDispCopyDst(rmode->fbWidth,xfbHeight);
@@ -122,11 +92,22 @@ int main(int argc,char **argv) {
 
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
+
+	GXTexObj texture;
+
+	TPLFile crateTPL;
 	TPL_OpenTPLFromFile(&crateTPL, "data/textures/chunk.tpl");
 	TPL_GetTexture(&crateTPL,0,&texture);
 
+	Mtx view; // view and perspective matrices
+
 	// setup our camera at the origin
 	// looking down the -z axis with y up
+
+	guVector cam = {0.0F, 0.0F, 0.0F};
+	guVector up = {0.0F, 1.0F, 0.0F};
+	guVector look = {0.0F, 0.0F, -1.0F};
+
 	guLookAt(view, &cam, &up, &look);
 
 	// setup our projection matrix
@@ -134,10 +115,15 @@ int main(int argc,char **argv) {
 	// and aspect ratio based on the display resolution
 	f32 w = rmode->viWidth;
 	f32 h = rmode->viHeight;
+	Mtx44 perspective;
 	guPerspective(perspective, 45, (f32)w/h, 0.1F, 300.0F);
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
 	guVector cubeAxis = {1,1,1};
+
+	f32 zt = 0;
+	f32 rquad = 0.0f;
+	bool first_frame = true;
 
 	while(1) {
 
@@ -161,6 +147,8 @@ int main(int argc,char **argv) {
 
 		GX_LoadTexObj(&texture, GX_TEXMAP0);
 
+		Mtx model;
+		Mtx modelview;
 		guMtxIdentity(model);
 		guMtxRotAxisDeg(model, &cubeAxis, rquad);
 		guMtxTransApply(model, model, 0.0f,0.0f,zt-7.0f);
