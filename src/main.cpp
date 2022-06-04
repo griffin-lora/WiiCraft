@@ -30,13 +30,18 @@ int main(int argc, char** argv) {
 	gfx::draw_state draw;
 	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
 
-	GXTexObj texture;
+	gfx::texture texture;
+	{
+		auto [ success, code ] = gfx::load_from_file(texture, "data/textures/chunk.tpl");
+		if (!success) {
+			auto c = code;
+			dbg::error([c]() {
+				printf("Failed to load chunk.tpl, error code: %d\n", c);
+			});
+		}
+	}
 
-	TPLFile crateTPL;
-	TPL_OpenTPLFromFile(&crateTPL, "data/textures/chunk.tpl");
-	TPL_GetTexture(&crateTPL,0,&texture);
-
-	GX_InitTexObjFilterMode(&texture, GX_NEAR, GX_NEAR);
+	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
 	math::matrix view; // view and perspective matrices
 

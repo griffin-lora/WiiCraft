@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstring>
 #include <malloc.h>
+#include <unistd.h>
 
 using namespace gfx;
 
@@ -111,4 +112,15 @@ void gfx::init(draw_state& s, color4 bkg) {
 
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
+}
+
+std::tuple<bool, error_code> gfx::load_from_file(texture& tex, const char* path) {
+	int code = access(path, F_OK);
+	if (code != 0) {
+		return { false, code };
+	}
+	TPLFile tpl_file;
+	TPL_OpenTPLFromFile(&tpl_file, path);
+	TPL_GetTexture(&tpl_file, 0, &tex);
+	return { true, code };
 }
