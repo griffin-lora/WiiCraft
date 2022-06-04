@@ -62,16 +62,16 @@ int main(int argc, char** argv) {
 
 	guVector cubeAxis = {1,1,1};
 
-	f32 zt = 0;
+	f32 z_offset = -7.0f;
 	f32 rquad = 0.0f;
 	bool first_frame = true;
 
-	while(1) {
+	for (;;) {
 
 		WPAD_ScanPads();
-		if(WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) exit(0);
-		else if (WPAD_ButtonsHeld(0)&WPAD_BUTTON_UP) zt -= 0.25f;
-		else if (WPAD_ButtonsHeld(0)&WPAD_BUTTON_DOWN) zt += 0.25f;
+		if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) { std::exit(0); }
+		else if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_UP) { z_offset -= 0.25f; }
+		else if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_DOWN) { z_offset += 0.25f; }
 
 		// set number of rasterized color channels
 		GX_SetNumChans(1);
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		Mtx modelview;
 		guMtxIdentity(model);
 		guMtxRotAxisDeg(model, &cubeAxis, rquad);
-		guMtxTransApply(model, model, 0.0f,0.0f,zt-7.0f);
+		guMtxTransApply(model, model, 0.0f,0.0f,z_offset);
 		guMtxConcat(view,model,modelview);
 		// load the modelview matrix into matrix memory
 		GX_LoadPosMtxImm(modelview, GX_PNMTX3);
@@ -101,81 +101,57 @@ int main(int argc, char** argv) {
 		GX_Begin(GX_QUADS, GX_VTXFMT0, 24);			// Draw a Cube
 
 		GX_Position3f32(-1.0f, 1.0f, -1.0f);	// Top Left of the quad (top)
-		set_vert_color(VERT_COLOR);			// Set The Color To Green
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32(-1.0f, 1.0f, 1.0f);	// Top Right of the quad (top)
-		set_vert_color(VERT_COLOR);			// Set The Color To Green
 		GX_TexCoord2f32(1.0f,0.0f);
 		GX_Position3f32(-1.0f, -1.0f, 1.0f);	// Bottom Right of the quad (top)
-		set_vert_color(VERT_COLOR);			// Set The Color To Green
 		GX_TexCoord2f32(1.0f,1.0f);
 		GX_Position3f32(- 1.0f, -1.0f, -1.0f);		// Bottom Left of the quad (top)
-		set_vert_color(VERT_COLOR);			// Set The Color To Green
 		GX_TexCoord2f32(0.0f,1.0f);
 
 		GX_Position3f32( 1.0f,1.0f, -1.0f);	// Top Left of the quad (bottom)
-		set_vert_color(VERT_COLOR);			// Set The Color To Orange
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32(1.0f,-1.0f, -1.0f);	// Top Right of the quad (bottom)
-		set_vert_color(VERT_COLOR);			// Set The Color To Orange
 		GX_TexCoord2f32(1.0f,0.0f);
 		GX_Position3f32(1.0f,-1.0f,1.0f);	// Bottom Right of the quad (bottom)
-		set_vert_color(VERT_COLOR);			// Set The Color To Orange
 		GX_TexCoord2f32(1.0f,1.0f);
 		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Left of the quad (bottom)
-		set_vert_color(VERT_COLOR);			// Set The Color To Orange
 		GX_TexCoord2f32(0.0f,1.0f);
 
 		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Right Of The Quad (Front)
-		set_vert_color(VERT_COLOR);			// Set The Color To Red
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Front)
-		set_vert_color(VERT_COLOR);			// Set The Color To Red
 		GX_TexCoord2f32(1.0f,0.0f);
 		GX_Position3f32(1.0f,-1.0f, -1.0f);	// Bottom Left Of The Quad (Front)
-		set_vert_color(VERT_COLOR);			// Set The Color To Red
 		GX_TexCoord2f32(1.0f,1.0f);
 		GX_Position3f32( -1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Front)
-		set_vert_color(VERT_COLOR);			// Set The Color To Red
 		GX_TexCoord2f32(0.0f,1.0f);
 
 		GX_Position3f32( -1.0f,1.0f,1.0f);	// Bottom Left Of The Quad (Back)
-		set_vert_color(VERT_COLOR);			// Set The Color To Yellow
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Right Of The Quad (Back)
-		set_vert_color(VERT_COLOR);			// Set The Color To Yellow
 		GX_TexCoord2f32(1.0f,0.0f);
 		GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Right Of The Quad (Back)
-		set_vert_color(VERT_COLOR);			// Set The Color To Yellow
 		GX_TexCoord2f32(1.0f,1.0f);
 		GX_Position3f32( 1.0f, 1.0f,1.0f);	// Top Left Of The Quad (Back)
-		set_vert_color(VERT_COLOR);			// Set The Color To Yellow
 		GX_TexCoord2f32(0.0f,1.0f);
 
 		GX_Position3f32(1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Left)
-		set_vert_color(VERT_COLOR);			// Set The Color To Blue
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Left Of The Quad (Left)
-		set_vert_color(VERT_COLOR);			// Set The Color To Blue
 		GX_TexCoord2f32(1.0f,0.0f);
 		GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Left Of The Quad (Left)
-		set_vert_color(VERT_COLOR);			// Set The Color To Blue
 		GX_TexCoord2f32(1.0f,1.0f);
 		GX_Position3f32(-1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Left)
-		set_vert_color(VERT_COLOR);			// Set The Color To Blue
 		GX_TexCoord2f32(0.0f,1.0f);
 
 		GX_Position3f32( 1.0f, -1.0f,1.0f);	// Top Right Of The Quad (Right)
-		set_vert_color(VERT_COLOR);			// Set The Color To Violet
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Left Of The Quad (Right)
-		set_vert_color(VERT_COLOR);			// Set The Color To Violet
 		GX_TexCoord2f32(0.0625f,0.0f);
 		GX_Position3f32( -1.0f,1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
-		set_vert_color(VERT_COLOR);			// Set The Color To Violet
 		GX_TexCoord2f32(0.0625f,0.0625f);
 		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Right Of The Quad (Right)
-		set_vert_color(VERT_COLOR);			// Set The Color To Violet
 		GX_TexCoord2f32(0.0f,0.0625f);
 
 		GX_End();									// Done Drawing The Quad
