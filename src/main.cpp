@@ -101,6 +101,8 @@ int main(int argc, char** argv) {
 	TPL_OpenTPLFromFile(&crateTPL, "data/textures/chunk.tpl");
 	TPL_GetTexture(&crateTPL,0,&texture);
 
+	GX_InitTexObjFilterMode(&texture, GX_NEAR, GX_NEAR);
+
 	Mtx view; // view and perspective matrices
 
 	// setup our camera at the origin
@@ -231,13 +233,13 @@ int main(int argc, char** argv) {
 		GX_TexCoord2f32(0.0f,0.0f);
 		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Left Of The Quad (Right)
 		set_vert_color(VERT_COLOR);			// Set The Color To Violet
-		GX_TexCoord2f32(1.0f,0.0f);
+		GX_TexCoord2f32(0.0625f,0.0f);
 		GX_Position3f32( -1.0f,1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
 		set_vert_color(VERT_COLOR);			// Set The Color To Violet
-		GX_TexCoord2f32(1.0f,1.0f);
+		GX_TexCoord2f32(0.0625f,0.0625f);
 		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Right Of The Quad (Right)
 		set_vert_color(VERT_COLOR);			// Set The Color To Violet
-		GX_TexCoord2f32(0.0f,1.0f);
+		GX_TexCoord2f32(0.0f,0.0625f);
 
 		GX_End();									// Done Drawing The Quad
 
