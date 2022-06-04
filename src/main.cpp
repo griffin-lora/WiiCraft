@@ -14,21 +14,25 @@
 #include <fat.h>
 #include <array>
 #include "gfx.hpp"
+#include "dbg.hpp"
 
 constexpr std::size_t DEFAULT_FIFO_SIZE = 256*1024;
 constexpr gfx::color VERT_COLOR = {0xFF, 0xFF, 0xFF};
 
 int main(int argc, char** argv) {
 
+	WPAD_Init();
+
 	if (!fatInitDefault()) {
-		return 1;
+		dbg::error([]() {
+			printf("fatInitDefault() failed!\n");
+		});
 	}
 
 	u32 fb = 0;
 	constexpr GXColor background = {0, 0, 0, 0xff};
 
 	VIDEO_Init();
-	WPAD_Init();
 
 	GXRModeObj* rmode = VIDEO_GetPreferredMode(NULL);
 
