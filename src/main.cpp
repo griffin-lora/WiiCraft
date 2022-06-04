@@ -16,8 +16,8 @@
 #include "gfx.hpp"
 #include "dbg.hpp"
 
-constexpr std::size_t DEFAULT_FIFO_SIZE = 256*1024;
-constexpr gfx::color VERT_COLOR = {0xFF, 0xFF, 0xFF};
+
+constexpr gfx::color3 VERT_COLOR = {0xFF, 0xFF, 0xFF};
 
 int main(int argc, char** argv) {
 
@@ -29,75 +29,8 @@ int main(int argc, char** argv) {
 		});
 	}
 
-	u32 fb = 0;
-	constexpr GXColor background = {0, 0, 0, 0xff};
-
-	VIDEO_Init();
-
-	GXRModeObj* rmode = VIDEO_GetPreferredMode(NULL);
-
-	// allocate the fifo buffer
-	void* gpfifo = memalign(32,DEFAULT_FIFO_SIZE);
-	memset(gpfifo,0,DEFAULT_FIFO_SIZE);
-
-	std::array<void*, 2> frameBuffer{{ NULL, NULL }};
-
-	// allocate 2 framebuffers for double buffering
-	frameBuffer[0] = SYS_AllocateFramebuffer(rmode);
-	frameBuffer[1] = SYS_AllocateFramebuffer(rmode);
-
-	// configure video
-	VIDEO_Configure(rmode);
-	VIDEO_SetNextFramebuffer(frameBuffer[fb]);
-	VIDEO_Flush();
-	VIDEO_WaitVSync();
-	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
-
-	fb ^= 1;
-
-	// init the flipper
-	GX_Init(gpfifo,DEFAULT_FIFO_SIZE);
-
-	// clears the bg to color and clears the z buffer
-	GX_SetCopyClear(background, 0x00ffffff);
-
-	// other gx setup
-	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
-	f32 yscale = GX_GetYScaleFactor(rmode->efbHeight,rmode->xfbHeight);
-	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
-	GX_SetScissor(0,0,rmode->fbWidth,rmode->efbHeight);
-	GX_SetDispCopySrc(0,0,rmode->fbWidth,rmode->efbHeight);
-	GX_SetDispCopyDst(rmode->fbWidth,xfbHeight);
-	GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_TRUE,rmode->vfilter);
-	GX_SetFieldMode(rmode->field_rendering,((rmode->viHeight==2*rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
-
-	if (rmode->aa) {
-		GX_SetPixelFmt(GX_PF_RGB565_Z16, GX_ZC_LINEAR);
-	} else {
-		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
-	}
-
-	GX_SetCullMode(GX_CULL_NONE);
-	GX_CopyDisp(frameBuffer[fb],GX_TRUE);
-	GX_SetDispCopyGamma(GX_GM_1_0);
-
-	// setup the vertex attribute table
-	// describes the data
-	// args: vat location 0-7, type of data, data format, size, scale
-	// so for ex. in the first call we are sending position data with
-	// 3 values X,Y,Z of size F32. scale sets the number of fractional
-	// bits for non float data.
-	GX_ClearVtxDesc();
-	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
-	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGB8, 0);
-
-	GX_InvVtxCache();
-	GX_InvalidateTexAll();
+	gfx::draw_state draw;
+	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
 
 	GXTexObj texture;
 
@@ -121,8 +54,8 @@ int main(int argc, char** argv) {
 	// setup our projection matrix
 	// this creates a perspective matrix with a view angle of 90,
 	// and aspect ratio based on the display resolution
-	f32 w = rmode->viWidth;
-	f32 h = rmode->viHeight;
+	f32 w = draw.rmode->viWidth;
+	f32 h = draw.rmode->viHeight;
 	Mtx44 perspective;
 	guPerspective(perspective, 45, (f32)w/h, 0.1F, 300.0F);
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
@@ -249,18 +182,18 @@ int main(int argc, char** argv) {
 
 		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 		GX_SetColorUpdate(GX_TRUE);
-		GX_CopyDisp(frameBuffer[fb],GX_TRUE);
+		GX_CopyDisp(draw.frameBuffer[draw.fb],GX_TRUE);
 
 		GX_DrawDone();
 
-		VIDEO_SetNextFramebuffer(frameBuffer[fb]);
+		VIDEO_SetNextFramebuffer(draw.frameBuffer[draw.fb]);
 		if(first_frame) {
 			first_frame = 0;
 			VIDEO_SetBlack(FALSE);
 		}
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
-		fb ^= 1;
+		draw.fb ^= 1;
 
 		rquad -= 0.15f;				// Decrease The Rotation Variable For The Quad     ( NEW )
 	}

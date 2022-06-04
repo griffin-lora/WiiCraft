@@ -1,5 +1,7 @@
 #include "gfx.hpp"
 #include <cstdio>
+#include <cstring>
+#include <malloc.h>
 
 using namespace gfx;
 
@@ -39,4 +41,74 @@ void gfx::init(console_state& s) {
 	// we can use variables for this with format codes too
 	// e.g. printf ("\x1b[%d;%dH", row, column );
 	std::printf("\x1b[2;0H");
+}
+
+constexpr std::size_t DEFAULT_FIFO_SIZE = 256*1024;
+
+void gfx::init(draw_state& s, color4 bkg) {
+
+	VIDEO_Init();
+
+	s.rmode = VIDEO_GetPreferredMode(NULL);
+
+	// allocate the fifo buffer
+	s.gpfifo = memalign(32,DEFAULT_FIFO_SIZE);
+	std::memset(s.gpfifo,0,DEFAULT_FIFO_SIZE);
+
+	// allocate 2 framebuffers for double buffering
+	s.frameBuffer[0] = SYS_AllocateFramebuffer(s.rmode);
+	s.frameBuffer[1] = SYS_AllocateFramebuffer(s.rmode);
+
+	// configure video
+	VIDEO_Configure(s.rmode);
+	VIDEO_SetNextFramebuffer(s.frameBuffer[s.fb]);
+	VIDEO_Flush();
+	VIDEO_WaitVSync();
+	if(s.rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
+
+	s.fb ^= 1;
+
+	// init the flipper
+	GX_Init(s.gpfifo,DEFAULT_FIFO_SIZE);
+
+	// clears the bg to color and clears the z buffer
+	GX_SetCopyClear(bkg, 0x00ffffff);
+
+	// other gx setup
+	GX_SetViewport(0,0,s.rmode->fbWidth,s.rmode->efbHeight,0,1);
+	f32 yscale = GX_GetYScaleFactor(s.rmode->efbHeight,s.rmode->xfbHeight);
+	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
+	GX_SetScissor(0,0,s.rmode->fbWidth,s.rmode->efbHeight);
+	GX_SetDispCopySrc(0,0,s.rmode->fbWidth,s.rmode->efbHeight);
+	GX_SetDispCopyDst(s.rmode->fbWidth,xfbHeight);
+	GX_SetCopyFilter(s.rmode->aa,s.rmode->sample_pattern,GX_TRUE,s.rmode->vfilter);
+	GX_SetFieldMode(s.rmode->field_rendering,((s.rmode->viHeight==2*s.rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
+
+	if (s.rmode->aa) {
+		GX_SetPixelFmt(GX_PF_RGB565_Z16, GX_ZC_LINEAR);
+	} else {
+		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
+	}
+
+	GX_SetCullMode(GX_CULL_NONE);
+	GX_CopyDisp(s.frameBuffer[s.fb],GX_TRUE);
+	GX_SetDispCopyGamma(GX_GM_1_0);
+
+	// setup the vertex attribute table
+	// describes the data
+	// args: vat location 0-7, type of data, data format, size, scale
+	// so for ex. in the first call we are sending position data with
+	// 3 values X,Y,Z of size F32. scale sets the number of fractional
+	// bits for non float data.
+	GX_ClearVtxDesc();
+	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGB8, 0);
+
+	GX_InvVtxCache();
+	GX_InvalidateTexAll();
 }
