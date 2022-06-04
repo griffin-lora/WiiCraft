@@ -15,9 +15,7 @@
 #include <array>
 #include "gfx.hpp"
 #include "dbg.hpp"
-
-
-constexpr gfx::color3 VERT_COLOR = {0xFF, 0xFF, 0xFF};
+#include "math.hpp"
 
 int main(int argc, char** argv) {
 
@@ -40,14 +38,14 @@ int main(int argc, char** argv) {
 
 	GX_InitTexObjFilterMode(&texture, GX_NEAR, GX_NEAR);
 
-	Mtx view; // view and perspective matrices
+	math::matrix view; // view and perspective matrices
 
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 
-	guVector cam = {0.0F, 0.0F, 0.0F};
-	guVector up = {0.0F, 1.0F, 0.0F};
-	guVector look = {0.0F, 0.0F, -1.0F};
+	math::vector3 cam{0.0F, 0.0F, 0.0F};
+	math::vector3 up{0.0F, 1.0F, 0.0F};
+	math::vector3 look{0.0F, 0.0F, -1.0F};
 
 	guLookAt(view, &cam, &up, &look);
 
@@ -56,11 +54,11 @@ int main(int argc, char** argv) {
 	// and aspect ratio based on the display resolution
 	f32 w = draw.rmode->viWidth;
 	f32 h = draw.rmode->viHeight;
-	Mtx44 perspective;
+	math::matrix44 perspective;
 	guPerspective(perspective, 45, (f32)w/h, 0.1F, 300.0F);
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
-	guVector cubeAxis = {1,1,1};
+	math::vector3 cubeAxis = {1,1,1};
 
 	f32 z_offset = -7.0f;
 	f32 rquad = 0.0f;
@@ -88,8 +86,8 @@ int main(int argc, char** argv) {
 
 		GX_LoadTexObj(&texture, GX_TEXMAP0);
 
-		Mtx model;
-		Mtx modelview;
+		math::matrix model;
+		math::matrix modelview;
 		guMtxIdentity(model);
 		guMtxRotAxisDeg(model, &cubeAxis, rquad);
 		guMtxTransApply(model, model, 0.0f,0.0f,z_offset);
@@ -98,63 +96,109 @@ int main(int argc, char** argv) {
 		GX_LoadPosMtxImm(modelview, GX_PNMTX3);
 		GX_SetCurrentMtx(GX_PNMTX3);
 
-		GX_Begin(GX_QUADS, GX_VTXFMT0, 24);			// Draw a Cube
+		gfx::draw_quads(24, []() {
+			gfx::draw_vertex(
+				-1.0f, 1.0f, -1.0f,	// Top Left of the quad (top)
+				0.0f,0.0f
+			);
+			gfx::draw_vertex(
+				-1.0f, 1.0f, 1.0f,	// Top Right of the quad (top)
+				1.0f,0.0f
+			);
+			gfx::draw_vertex(
+				-1.0f, -1.0f, 1.0f,	// Bottom Right of the quad (top)
+				1.0f,1.0f
+			);
+			gfx::draw_vertex(
+				- 1.0f, -1.0f, -1.0f,		// Bottom Left of the quad (top)
+				0.0f,1.0f
+			);
 
-		GX_Position3f32(-1.0f, 1.0f, -1.0f);	// Top Left of the quad (top)
-		GX_TexCoord2f32(0.0f,0.0f);
-		GX_Position3f32(-1.0f, 1.0f, 1.0f);	// Top Right of the quad (top)
-		GX_TexCoord2f32(1.0f,0.0f);
-		GX_Position3f32(-1.0f, -1.0f, 1.0f);	// Bottom Right of the quad (top)
-		GX_TexCoord2f32(1.0f,1.0f);
-		GX_Position3f32(- 1.0f, -1.0f, -1.0f);		// Bottom Left of the quad (top)
-		GX_TexCoord2f32(0.0f,1.0f);
+			gfx::draw_vertex(
+				1.0f,1.0f, -1.0f,	// Top Left of the quad (bottom)
+				0.0f,0.0f
+			);
+			gfx::draw_vertex(
+				1.0f,-1.0f, -1.0f,	// Top Right of the quad (bottom)
+				1.0f,0.0f
+			);
+			gfx::draw_vertex(
+				1.0f,-1.0f,1.0f,	// Bottom Right of the quad (bottom)
+				1.0f,1.0f
+			);
+			gfx::draw_vertex(
+				1.0f,1.0f,1.0f,	// Bottom Left of the quad (bottom)
+				0.0f,1.0f
+			);
 
-		GX_Position3f32( 1.0f,1.0f, -1.0f);	// Top Left of the quad (bottom)
-		GX_TexCoord2f32(0.0f,0.0f);
-		GX_Position3f32(1.0f,-1.0f, -1.0f);	// Top Right of the quad (bottom)
-		GX_TexCoord2f32(1.0f,0.0f);
-		GX_Position3f32(1.0f,-1.0f,1.0f);	// Bottom Right of the quad (bottom)
-		GX_TexCoord2f32(1.0f,1.0f);
-		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Left of the quad (bottom)
-		GX_TexCoord2f32(0.0f,1.0f);
+			gfx::draw_vertex(
+				-1.0f, -1.0f, 1.0f,		// Top Right Of The Quad (Front)
+				0.0f,0.0f
+			);
+			gfx::draw_vertex(
+				1.0f, -1.0f, 1.0f,	// Top Left Of The Quad (Front)
+				1.0f,0.0f
+			);
+			gfx::draw_vertex(
+				1.0f,-1.0f, -1.0f,	// Bottom Left Of The Quad (Front)
+				1.0f,1.0f
+			);
+			gfx::draw_vertex(
+				-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Front)
+				0.0f,1.0f
+			);
 
-		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Right Of The Quad (Front)
-		GX_TexCoord2f32(0.0f,0.0f);
-		GX_Position3f32(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Front)
-		GX_TexCoord2f32(1.0f,0.0f);
-		GX_Position3f32(1.0f,-1.0f, -1.0f);	// Bottom Left Of The Quad (Front)
-		GX_TexCoord2f32(1.0f,1.0f);
-		GX_Position3f32( -1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Front)
-		GX_TexCoord2f32(0.0f,1.0f);
+			gfx::draw_vertex(
+				-1.0f,1.0f,1.0f,	// Bottom Left Of The Quad (Back)
+				0.0f,0.0f
+			);
+			gfx::draw_vertex(
+				-1.0f,1.0f,-1.0f,	// Bottom Right Of The Quad (Back)
+				1.0f,0.0f
+			);
+			gfx::draw_vertex(
+				1.0f, 1.0f,-1.0f,	// Top Right Of The Quad (Back)
+				1.0f,1.0f
+			);
+			gfx::draw_vertex(
+				1.0f, 1.0f,1.0f,	// Top Left Of The Quad (Back)
+				0.0f,1.0f
+			);
 
-		GX_Position3f32( -1.0f,1.0f,1.0f);	// Bottom Left Of The Quad (Back)
-		GX_TexCoord2f32(0.0f,0.0f);
-		GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Right Of The Quad (Back)
-		GX_TexCoord2f32(1.0f,0.0f);
-		GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Right Of The Quad (Back)
-		GX_TexCoord2f32(1.0f,1.0f);
-		GX_Position3f32( 1.0f, 1.0f,1.0f);	// Top Left Of The Quad (Back)
-		GX_TexCoord2f32(0.0f,1.0f);
+			gfx::draw_vertex(
+				1.0f, -1.0f, -1.0f,	// Top Right Of The Quad (Left)
+				0.0f,0.0f
+			);
+			gfx::draw_vertex(
+				1.0f, 1.0f,-1.0f,	// Top Left Of The Quad (Left)
+				1.0f,0.0f
+			);
+			gfx::draw_vertex(
+				-1.0f,1.0f,-1.0f,	// Bottom Left Of The Quad (Left)
+				1.0f,1.0f
+			);
+			gfx::draw_vertex(
+				-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Left)
+				0.0f,1.0f
+			);
 
-		GX_Position3f32(1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Left)
-		GX_TexCoord2f32(0.0f,0.0f);
-		GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Left Of The Quad (Left)
-		GX_TexCoord2f32(1.0f,0.0f);
-		GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Left Of The Quad (Left)
-		GX_TexCoord2f32(1.0f,1.0f);
-		GX_Position3f32(-1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Left)
-		GX_TexCoord2f32(0.0f,1.0f);
-
-		GX_Position3f32( 1.0f, -1.0f,1.0f);	// Top Right Of The Quad (Right)
-		GX_TexCoord2f32(0.0f,0.0f);
-		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Left Of The Quad (Right)
-		GX_TexCoord2f32(0.0625f,0.0f);
-		GX_Position3f32( -1.0f,1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
-		GX_TexCoord2f32(0.0625f,0.0625f);
-		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Right Of The Quad (Right)
-		GX_TexCoord2f32(0.0f,0.0625f);
-
-		GX_End();									// Done Drawing The Quad
+			gfx::draw_vertex(
+				1.0f, -1.0f,1.0f,	// Top Right Of The Quad (Right)
+				0.0f,0.0f
+			);
+			gfx::draw_vertex(
+				-1.0f, -1.0f, 1.0f,		// Top Left Of The Quad (Right)
+				0.0625f,0.0f
+			);
+			gfx::draw_vertex(
+				-1.0f,1.0f, 1.0f,	// Bottom Left Of The Quad (Right)
+				0.0625f,0.0625f
+			);
+			gfx::draw_vertex(
+				1.0f,1.0f,1.0f,	// Bottom Right Of The Quad (Right)
+				0.0f,0.0625f
+			);
+		});
 
 		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 		GX_SetColorUpdate(GX_TRUE);

@@ -3,11 +3,6 @@
 #include <array>
 
 namespace gfx {
-    struct color3 {
-        u8 r;
-        u8 g;
-        u8 b;
-    };
 
     using color4 = GXColor;
 
@@ -27,7 +22,15 @@ namespace gfx {
 
     void init(draw_state& state, color4 bkg);
 
-    inline void set_vert_color(const color3& color) {
-        GX_Color3u8(color.r, color.g, color.b);
+    template<typename F>
+    inline void draw_quads(std::size_t vertices, F func) {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, vertices);
+        func();
+        GX_End();
+    }
+
+    inline void draw_vertex(f32 x, f32 y, f32 z, f32 u, f32 v) {
+        GX_Position3f32(x, y, z);
+        GX_TexCoord2f32(u, v);
     }
 }
