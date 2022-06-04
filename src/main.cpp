@@ -159,83 +159,83 @@ int main(int argc, char** argv) {
 
 		GX_Begin(GX_QUADS, GX_VTXFMT0, 24);			// Draw a Cube
 
-			GX_Position3f32(-1.0f, 1.0f, -1.0f);	// Top Left of the quad (top)
-			GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
-			GX_TexCoord2f32(0.0f,0.0f);
-			GX_Position3f32(-1.0f, 1.0f, 1.0f);	// Top Right of the quad (top)
-			GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
-			GX_TexCoord2f32(1.0f,0.0f);
-			GX_Position3f32(-1.0f, -1.0f, 1.0f);	// Bottom Right of the quad (top)
-			GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
-			GX_TexCoord2f32(1.0f,1.0f);
-			GX_Position3f32(- 1.0f, -1.0f, -1.0f);		// Bottom Left of the quad (top)
-			GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
-			GX_TexCoord2f32(0.0f,1.0f);
+		GX_Position3f32(-1.0f, 1.0f, -1.0f);	// Top Left of the quad (top)
+		GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
+		GX_TexCoord2f32(0.0f,0.0f);
+		GX_Position3f32(-1.0f, 1.0f, 1.0f);	// Top Right of the quad (top)
+		GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
+		GX_TexCoord2f32(1.0f,0.0f);
+		GX_Position3f32(-1.0f, -1.0f, 1.0f);	// Bottom Right of the quad (top)
+		GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
+		GX_TexCoord2f32(1.0f,1.0f);
+		GX_Position3f32(- 1.0f, -1.0f, -1.0f);		// Bottom Left of the quad (top)
+		GX_Color3f32(0.0f,1.0f,0.0f);			// Set The Color To Green
+		GX_TexCoord2f32(0.0f,1.0f);
 
-			GX_Position3f32( 1.0f,1.0f, -1.0f);	// Top Left of the quad (bottom)
-			GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
-			GX_TexCoord2f32(0.0f,0.0f);
-			GX_Position3f32(1.0f,-1.0f, -1.0f);	// Top Right of the quad (bottom)
-			GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
-			GX_TexCoord2f32(1.0f,0.0f);
-			GX_Position3f32(1.0f,-1.0f,1.0f);	// Bottom Right of the quad (bottom)
-			GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
-			GX_TexCoord2f32(1.0f,1.0f);
-			GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Left of the quad (bottom)
-			GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
-			GX_TexCoord2f32(0.0f,1.0f);
+		GX_Position3f32( 1.0f,1.0f, -1.0f);	// Top Left of the quad (bottom)
+		GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
+		GX_TexCoord2f32(0.0f,0.0f);
+		GX_Position3f32(1.0f,-1.0f, -1.0f);	// Top Right of the quad (bottom)
+		GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
+		GX_TexCoord2f32(1.0f,0.0f);
+		GX_Position3f32(1.0f,-1.0f,1.0f);	// Bottom Right of the quad (bottom)
+		GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
+		GX_TexCoord2f32(1.0f,1.0f);
+		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Left of the quad (bottom)
+		GX_Color3f32(1.0f,0.5f,0.0f);			// Set The Color To Orange
+		GX_TexCoord2f32(0.0f,1.0f);
 
-			GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Right Of The Quad (Front)
-			GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
-			GX_TexCoord2f32(0.0f,0.0f);
-			GX_Position3f32(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Front)
-			GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
-			GX_TexCoord2f32(1.0f,0.0f);
-			GX_Position3f32(1.0f,-1.0f, -1.0f);	// Bottom Left Of The Quad (Front)
-			GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
-			GX_TexCoord2f32(1.0f,1.0f);
-			GX_Position3f32( -1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Front)
-			GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
-			GX_TexCoord2f32(0.0f,1.0f);
+		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Right Of The Quad (Front)
+		GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
+		GX_TexCoord2f32(0.0f,0.0f);
+		GX_Position3f32(1.0f, -1.0f, 1.0f);	// Top Left Of The Quad (Front)
+		GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
+		GX_TexCoord2f32(1.0f,0.0f);
+		GX_Position3f32(1.0f,-1.0f, -1.0f);	// Bottom Left Of The Quad (Front)
+		GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
+		GX_TexCoord2f32(1.0f,1.0f);
+		GX_Position3f32( -1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Front)
+		GX_Color3f32(1.0f,0.0f,0.0f);			// Set The Color To Red
+		GX_TexCoord2f32(0.0f,1.0f);
 
-			GX_Position3f32( -1.0f,1.0f,1.0f);	// Bottom Left Of The Quad (Back)
-			GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
-			GX_TexCoord2f32(0.0f,0.0f);
-			GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Right Of The Quad (Back)
-			GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
-			GX_TexCoord2f32(1.0f,0.0f);
-			GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Right Of The Quad (Back)
-			GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
-			GX_TexCoord2f32(1.0f,1.0f);
-			GX_Position3f32( 1.0f, 1.0f,1.0f);	// Top Left Of The Quad (Back)
-			GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
-			GX_TexCoord2f32(0.0f,1.0f);
+		GX_Position3f32( -1.0f,1.0f,1.0f);	// Bottom Left Of The Quad (Back)
+		GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
+		GX_TexCoord2f32(0.0f,0.0f);
+		GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Right Of The Quad (Back)
+		GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
+		GX_TexCoord2f32(1.0f,0.0f);
+		GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Right Of The Quad (Back)
+		GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
+		GX_TexCoord2f32(1.0f,1.0f);
+		GX_Position3f32( 1.0f, 1.0f,1.0f);	// Top Left Of The Quad (Back)
+		GX_Color3f32(1.0f,1.0f,0.0f);			// Set The Color To Yellow
+		GX_TexCoord2f32(0.0f,1.0f);
 
-			GX_Position3f32(1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Left)
-			GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
-			GX_TexCoord2f32(0.0f,0.0f);
-			GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Left Of The Quad (Left)
-			GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
-			GX_TexCoord2f32(1.0f,0.0f);
-			GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Left Of The Quad (Left)
-			GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
-			GX_TexCoord2f32(1.0f,1.0f);
-			GX_Position3f32(-1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Left)
-			GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
-			GX_TexCoord2f32(0.0f,1.0f);
+		GX_Position3f32(1.0f, -1.0f, -1.0f);	// Top Right Of The Quad (Left)
+		GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
+		GX_TexCoord2f32(0.0f,0.0f);
+		GX_Position3f32(1.0f, 1.0f,-1.0f);	// Top Left Of The Quad (Left)
+		GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
+		GX_TexCoord2f32(1.0f,0.0f);
+		GX_Position3f32(-1.0f,1.0f,-1.0f);	// Bottom Left Of The Quad (Left)
+		GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
+		GX_TexCoord2f32(1.0f,1.0f);
+		GX_Position3f32(-1.0f,-1.0f, -1.0f);	// Bottom Right Of The Quad (Left)
+		GX_Color3f32(0.0f,0.0f,1.0f);			// Set The Color To Blue
+		GX_TexCoord2f32(0.0f,1.0f);
 
-			GX_Position3f32( 1.0f, -1.0f,1.0f);	// Top Right Of The Quad (Right)
-			GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
-			GX_TexCoord2f32(0.0f,0.0f);
-			GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Left Of The Quad (Right)
-			GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
-			GX_TexCoord2f32(1.0f,0.0f);
-			GX_Position3f32( -1.0f,1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
-			GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
-			GX_TexCoord2f32(1.0f,1.0f);
-			GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Right Of The Quad (Right)
-			GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
-			GX_TexCoord2f32(0.0f,1.0f);
+		GX_Position3f32( 1.0f, -1.0f,1.0f);	// Top Right Of The Quad (Right)
+		GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
+		GX_TexCoord2f32(0.0f,0.0f);
+		GX_Position3f32( -1.0f, -1.0f, 1.0f);		// Top Left Of The Quad (Right)
+		GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
+		GX_TexCoord2f32(1.0f,0.0f);
+		GX_Position3f32( -1.0f,1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
+		GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
+		GX_TexCoord2f32(1.0f,1.0f);
+		GX_Position3f32( 1.0f,1.0f,1.0f);	// Bottom Right Of The Quad (Right)
+		GX_Color3f32(1.0f,0.0f,1.0f);			// Set The Color To Violet
+		GX_TexCoord2f32(0.0f,1.0f);
 
 		GX_End();									// Done Drawing The Quad
 
