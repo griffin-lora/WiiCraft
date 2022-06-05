@@ -16,6 +16,7 @@
 #include "gfx.hpp"
 #include "dbg.hpp"
 #include "math.hpp"
+#include "game.hpp"
 
 int main(int argc, char** argv) {
 
@@ -37,37 +38,49 @@ int main(int argc, char** argv) {
 	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
 	math::matrix view; // view and perspective matrices
+	math::matrix44 perspective;
 
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 
-	math::vector3 cam{0.0F, 0.0F, 0.0F};
-	math::vector3 up{0.0F, 1.0F, 0.0F};
-	math::vector3 look{0.0F, 0.0F, -1.0F};
+	game::camera cam = {
+		.position = {0.0f, 0.0f, -7.0f},
+		.up = {0.0f, 1.0f, 0.0f},
+		.look = {0.0f, 0.0f, -1.0f},
+		.fov = 45.0f,
+		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
+		.near_clipping_plane_distance = 0.1f,
+		.far_clipping_plane_distance = 300.0f
+	};
+	game::camera_update_params cam_upd;
 
-	guLookAt(view, &cam, &up, &look);
+	game::update_view_from_camera(cam, view);
 
 	// setup our projection matrix
 	// this creates a perspective matrix with a view angle of 90,
 	// and aspect ratio based on the display resolution
-	f32 w = draw.rmode->viWidth;
-	f32 h = draw.rmode->viHeight;
-	math::matrix44 perspective;
-	guPerspective(perspective, 45, (f32)w/h, 0.1F, 300.0F);
+	game::update_perspective_from_camera(cam, perspective);
 	gfx::set_projection_matrix(perspective, GX_PERSPECTIVE);
 
 	math::vector3 cube_axis = {1,1,1};
 
-	f32 z_offset = -7.0f;
 	f32 rquad = 0.0f;
 	bool first_frame = true;
 
 	for (;;) {
 
 		WPAD_ScanPads();
-		if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) { std::exit(0); }
-		else if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_UP) { z_offset -= 0.25f; }
-		else if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_DOWN) { z_offset += 0.25f; }
+		u32 pad_buttons_down = WPAD_ButtonsHeld(0);
+		if (pad_buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
+		if (pad_buttons_down & WPAD_BUTTON_UP) { cam.position.z -= 0.25f; cam_upd.update_view = true; }
+		if (pad_buttons_down & WPAD_BUTTON_DOWN) { cam.position.z += 0.25f; cam_upd.update_view = true; }
+
+		if (cam_upd.update_view) {
+			game::update_view_from_camera(cam, view);
+		}
+		if (cam_upd.update_perspective) {
+			game::update_perspective_from_camera(cam, perspective);
+		}
 
 		gfx::set_channel_count(1);
 		gfx::set_texture_coordinate_generation_count(1);
@@ -84,7 +97,7 @@ int main(int argc, char** argv) {
 		math::matrix model_view;
 		guMtxIdentity(model);
 		guMtxRotAxisDeg(model, &cube_axis, rquad);
-		guMtxTransApply(model, model, 0.0f,0.0f,z_offset);
+		guMtxTransApply(model, model, 0.0f, 0.0f, 0.f);
 		guMtxConcat(view,model,model_view);
 		// load the modelview matrix into matrix memory
 		gfx::set_position_matrix_into_index(model_view, GX_PNMTX3);
@@ -204,12 +217,14 @@ int main(int argc, char** argv) {
 
 		VIDEO_SetNextFramebuffer(draw.frame_buffers[draw.fb_index]);
 		if (first_frame) {
-			first_frame = 0;
+			first_frame = false;
 			VIDEO_SetBlack(FALSE);
 		}
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
 		draw.fb_index ^= 1;
+
+		// Game logic
 
 		rquad -= 0.15f;				// Decrease The Rotation Variable For The Quad     ( NEW )
 	}
