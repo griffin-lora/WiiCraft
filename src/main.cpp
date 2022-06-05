@@ -54,9 +54,9 @@ int main(int argc, char** argv) {
 	f32 h = draw.rmode->viHeight;
 	math::matrix44 perspective;
 	guPerspective(perspective, 45, (f32)w/h, 0.1F, 300.0F);
-	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
+	gfx::set_projection_matrix(perspective, GX_PERSPECTIVE);
 
-	math::vector3 cubeAxis = {1,1,1};
+	math::vector3 cube_axis = {1,1,1};
 
 	f32 z_offset = -7.0f;
 	f32 rquad = 0.0f;
@@ -69,30 +69,27 @@ int main(int argc, char** argv) {
 		else if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_UP) { z_offset -= 0.25f; }
 		else if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_DOWN) { z_offset += 0.25f; }
 
-		// set number of rasterized color channels
-		GX_SetNumChans(1);
+		gfx::set_channel_count(1);
+		gfx::set_texture_coordinate_generation_count(1);
 
-		//set number of textures to generate
-		GX_SetNumTexGens(1);
-
-		// setup texture coordinate generation
 		// args: texcoord slot 0-7, matrix type, source to generate texture coordinates from, matrix to use
-		GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
+		gfx::init_texture_coordinate_generation(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 
-		GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
-		GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+		gfx::set_tev_operation(GX_TEVSTAGE0,GX_REPLACE);
+		gfx::set_tev_order(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
-		GX_LoadTexObj(&texture, GX_TEXMAP0);
+		gfx::load(texture);
 
 		math::matrix model;
-		math::matrix modelview;
+		math::matrix model_view;
 		guMtxIdentity(model);
-		guMtxRotAxisDeg(model, &cubeAxis, rquad);
+		guMtxRotAxisDeg(model, &cube_axis, rquad);
 		guMtxTransApply(model, model, 0.0f,0.0f,z_offset);
-		guMtxConcat(view,model,modelview);
+		guMtxConcat(view,model,model_view);
 		// load the modelview matrix into matrix memory
-		GX_LoadPosMtxImm(modelview, GX_PNMTX3);
-		GX_SetCurrentMtx(GX_PNMTX3);
+		gfx::set_position_matrix_into_index(model_view, GX_PNMTX3);
+		
+		gfx::set_position_matrix_from_index(GX_PNMTX3);
 
 		gfx::draw_quads(24, []() {
 			gfx::draw_vertex(
@@ -198,14 +195,15 @@ int main(int argc, char** argv) {
 			);
 		});
 
-		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
-		GX_SetColorUpdate(GX_TRUE);
-		GX_CopyDisp(draw.frame_buffers[draw.fb_index],GX_TRUE);
+		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
+		gfx::set_color_buffer_update(true);
 
-		GX_DrawDone();
+		gfx::copy_framebuffer(draw.frame_buffers[draw.fb_index], true);
+
+		gfx::draw_done();
 
 		VIDEO_SetNextFramebuffer(draw.frame_buffers[draw.fb_index]);
-		if(first_frame) {
+		if (first_frame) {
 			first_frame = 0;
 			VIDEO_SetBlack(FALSE);
 		}
