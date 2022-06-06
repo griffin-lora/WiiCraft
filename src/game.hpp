@@ -56,12 +56,50 @@ namespace game {
         };
     };
 
-    std::size_t get_face_vertex_count(block::type type, block::face face);
-    void add_face_vertices_at_mut_it(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type, block::face face);
-    inline chunk::mesh::vertex::it add_face_vertices_at(math::vector3u8 local_position, chunk::mesh::vertex::it it, block::type type, block::face face) {
-        add_face_vertices_at_mut_it(local_position, it, type, face);
+    std::size_t get_center_vertex_count(block::type type);
+    std::size_t get_any_face_vertex_count(block::type type);
+
+    template<block::face face>
+    constexpr std::size_t get_face_vertex_count(block::type type) {
+        if constexpr (face == block::face::center) {
+            return get_center_vertex_count(type);
+        } else {
+            return get_any_face_vertex_count(type);
+        }
+    }
+
+    void add_center_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    void add_front_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    void add_back_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    void add_left_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    void add_right_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    void add_top_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    void add_bottom_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+
+    template<block::face face>
+    constexpr void add_face_vertices_at_mut_it(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type) {
+        if constexpr (face == block::face::center) {
+            add_back_vertices(local_position, it, type);
+        } else if constexpr (face == block::face::front) {
+            add_front_vertices(local_position, it, type);
+        } else if constexpr (face == block::face::back) {
+            add_back_vertices(local_position, it, type);
+        } else if constexpr (face == block::face::left) {
+            add_left_vertices(local_position, it, type);
+        } else if constexpr (face == block::face::right) {
+            add_right_vertices(local_position, it, type);
+        } else if constexpr (face == block::face::top) {
+            add_top_vertices(local_position, it, type);
+        } else if constexpr (face == block::face::bottom) {
+            add_bottom_vertices(local_position, it, type);
+        }
+    }
+    template<block::face face>
+    constexpr chunk::mesh::vertex::it add_face_vertices_at(math::vector3u8 local_position, chunk::mesh::vertex::it it, block::type type) {
+        add_face_vertices_at_mut_it<face>(local_position, it, type);
         return it;
     }
+
     void draw_chunk(const chunk& chunk);
     void draw_chunk_mesh(chunk::mesh::vertex::const_it begin, chunk::mesh::vertex::const_it end);
 }
