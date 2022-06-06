@@ -54,7 +54,12 @@ namespace game {
     };
 
     using vert_it = std::vector<chunk::mesh::vertex>::iterator;
+    using const_vert_it = std::vector<chunk::mesh::vertex>::const_iterator;
 
-    vert_it add_face_vertices_at(math::vector3u8 local_position, vert_it begin, block::type type, block::face face);
-    void draw_chunk_mesh(const chunk::mesh& mesh);
+    void add_face_vertices_at_mut_it(math::vector3u8 local_position, vert_it& it, block::type type, block::face face);
+    inline vert_it add_face_vertices_at(math::vector3u8 local_position, vert_it it, block::type type, block::face face) {
+        add_face_vertices_at_mut_it(local_position, it, type, face);
+        return it;
+    }
+    void draw_chunk_mesh(const_vert_it begin, const_vert_it end);
 }

@@ -74,12 +74,13 @@ int main(int argc, char** argv) {
 	guMtxTransApply(model, model, 0.0f, 0.0f, 0.f);
 	guMtxConcat(view, model, model_view);
 
-	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>(16) };
+	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>() };
+	chunk_mesh.vertices.resize(16);
 	auto it = chunk_mesh.vertices.begin();
-	it = game::add_face_vertices_at({0, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
-	it = game::add_face_vertices_at({1, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
-	it = game::add_face_vertices_at({0, 1, 0}, it, game::block::type::GRASS, game::block::face::front);
-	it = game::add_face_vertices_at({0, 0, 1}, it, game::block::type::GRASS, game::block::face::front);
+	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
+	game::add_face_vertices_at_mut_it({1, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
+	game::add_face_vertices_at_mut_it({0, 1, 0}, it, game::block::type::GRASS, game::block::face::front);
+	game::add_face_vertices_at_mut_it({0, 0, 1}, it, game::block::type::GRASS, game::block::face::front);
 
 	for (;;) {
 
@@ -117,7 +118,7 @@ int main(int argc, char** argv) {
 		
 		gfx::set_position_matrix_from_index(GX_PNMTX3);
 
-		game::draw_chunk_mesh(chunk_mesh);
+		game::draw_chunk_mesh(chunk_mesh.vertices.begin(), it);
 
 		// gfx::draw_quads(24, []() {
 		// 	gfx::draw_vertex(

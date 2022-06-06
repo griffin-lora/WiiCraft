@@ -3,10 +3,10 @@
 
 using namespace game;
 
-game::vert_it game::add_face_vertices_at(math::vector3u8 local_pos, vert_it it, block::type type, block::face face) {
+void game::add_face_vertices_at_mut_it(math::vector3u8 local_pos, vert_it& it, block::type type, block::face face) {
     switch (type) {
         case block::type::AIR: {
-            return it;
+            return;
         }
         case block::type::GRASS: {
             math::vector2u8 uv_pos = { 0, 0 };
@@ -16,7 +16,7 @@ game::vert_it game::add_face_vertices_at(math::vector3u8 local_pos, vert_it it, 
 
             switch (face) {
                 default: {
-                    return it;
+                    return;
                 }
                 case block::face::front: {
                     *it++ = {
@@ -35,22 +35,22 @@ game::vert_it game::add_face_vertices_at(math::vector3u8 local_pos, vert_it it, 
                         { local_pos.x, local_pos.y, local_pos.z },	// Bottom Right Of The Quad (Front)
                         { uv_pos.x, uv_pos_o.y }
                     };
-                    return it;
+                    return;
                 }
             }
 
-            return it;
+            return;
         }
         default: {
-            return it;
+            return;
         }
     }
 }
 
-void game::draw_chunk_mesh(const chunk::mesh& mesh) {
-    gfx::draw_quads(mesh.vertices.size(), [mesh]() {
-        for (const auto& v : mesh.vertices) {
-            gfx::draw_vertex((f32)v.local_position.x, (f32)v.local_position.y, (f32)v.local_position.z, ((f32)v.uv_position.x)/16.f, ((f32)v.uv_position.y)/16.f);
+void game::draw_chunk_mesh(const_vert_it it, const_vert_it end) {
+    gfx::draw_quads(end - it, [&it, end]() {
+        for (; it != end; ++it) {
+            gfx::draw_vertex((f32)it->local_position.x, (f32)it->local_position.y, (f32)it->local_position.z, ((f32)it->uv_position.x)/16.f, ((f32)it->uv_position.y)/16.f);
         }
     });
 }
