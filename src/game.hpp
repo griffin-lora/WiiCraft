@@ -79,7 +79,7 @@ namespace game {
     template<block::face face>
     constexpr void add_face_vertices_at_mut_it(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type) {
         if constexpr (face == block::face::center) {
-            add_back_vertices(local_position, it, type);
+            add_center_vertices(local_position, it, type);
         } else if constexpr (face == block::face::front) {
             add_front_vertices(local_position, it, type);
         } else if constexpr (face == block::face::back) {
