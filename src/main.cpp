@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 	gfx::draw_state draw;
 	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
 
-	GX_SetCullMode(GX_CULL_FRONT);
+	GX_SetCullMode(GX_CULL_BACK);
 
 	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
@@ -75,12 +75,14 @@ int main(int argc, char** argv) {
 	guMtxConcat(view, model, model_view);
 
 	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>() };
-	chunk_mesh.vertices.resize(16);
+	chunk_mesh.vertices.resize(game::get_face_vertex_count(game::block::type::GRASS, game::block::face::front) * 6);
 	auto it = chunk_mesh.vertices.begin();
 	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
-	game::add_face_vertices_at_mut_it({1, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
-	game::add_face_vertices_at_mut_it({0, 1, 0}, it, game::block::type::GRASS, game::block::face::front);
-	game::add_face_vertices_at_mut_it({0, 0, 1}, it, game::block::type::GRASS, game::block::face::front);
+	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::back);
+	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::left);
+	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::right);
+	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::top);
+	game::add_face_vertices_at_mut_it({0, 0, 0}, it, game::block::type::GRASS, game::block::face::bottom);
 
 	for (;;) {
 
