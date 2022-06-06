@@ -3,3 +3,4 @@ build
 *.elf
 *.dol
 *.iso
+usb.sh

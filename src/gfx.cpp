@@ -3,6 +3,7 @@
 #include <cstring>
 #include <malloc.h>
 #include <unistd.h>
+#include <cerrno>
 #include "dbg.hpp"
 
 using namespace gfx;
@@ -116,14 +117,13 @@ void gfx::init(draw_state& s, color4 bkg) {
 }
 
 std::tuple<bool, error_code> gfx::load_from_file(texture& tex, const char* path) {
-	int code = access(path, F_OK);
-	if (code != 0) {
-		return { false, code };
-	}
+	// if (access(path, R_OK) != 0) {
+	// 	return { false, errno };
+	// }
 	TPLFile tpl_file;
 	TPL_OpenTPLFromFile(&tpl_file, path);
 	TPL_GetTexture(&tpl_file, 0, &tex);
-	return { true, code };
+	return { true, 0 };
 }
 
 void gfx::safe_load_from_file(texture& tex, const char* path) {

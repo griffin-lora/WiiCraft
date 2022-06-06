@@ -93,7 +93,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES), -iquote $(CURDIR)/$(dir)) \
 export LIBPATHS	:= -L$(LIBOGC_LIB) $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
-.PHONY: $(BUILD) clean run textures image
+.PHONY: $(BUILD) clean run textures image usb
 
 #---------------------------------------------------------------------------------
 $(BUILD):
@@ -114,6 +114,9 @@ textures:
 
 image:
 	./image.sh
+
+usb:
+	./usb.sh
 
 
 #---------------------------------------------------------------------------------

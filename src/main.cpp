@@ -20,20 +20,22 @@
 
 int main(int argc, char** argv) {
 
-	WPAD_Init();
+	gfx::console_state con;
+	gfx::init(con);
 
 	if (!fatInitDefault()) {
-		dbg::error([]() {
-			printf("fatInitDefault() failed!\n");
-		});
+		printf("fatInitDefault() failed!\n");
+		dbg::freeze();
 	}
-
-	gfx::draw_state draw;
-	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
 
 	gfx::texture texture;
 
 	gfx::safe_load_from_file(texture, "data/textures/chunk.tpl");
+
+	WPAD_Init();
+
+	gfx::draw_state draw;
+	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
 
 	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
