@@ -9,6 +9,7 @@ std::size_t game::get_center_vertex_count(block::type type) {
 
 std::size_t game::get_any_face_vertex_count(block::type type) {
     switch (type) {
+        default:
         case block::type::AIR: {
             return 0;
         }
@@ -132,11 +133,94 @@ inline void add_cube_bottom_vertices(math::vector3u8 l, math::vector3u8 lo, math
     };
 }
 
-void game::add_front_vertices(math::vector3u8 l /* local_pos */, chunk::mesh::vertex::it& it, block::type type) {
-    math::vector3u8 lo /* local_pos_offset */ = { l.x + 1, l.y + 1, l.z + 1 };
+inline math::vector3u8 get_local_position_offset(math::vector3u8 local_pos) {
+    return { local_pos.x + 1, local_pos.y + 1, local_pos.z + 1 };
+}
 
-    math::vector2u8 u /* uv_pos */ = { 0, 0 };
-    math::vector2u8 uo /* uv_pos_offset */ = { u.x + 1, u.y + 1 };
+inline math::vector2u8 get_uv_position_offset(math::vector2u8 uv_pos) {
+    return { uv_pos.x + 1, uv_pos.y + 1 };
+}
+
+void game::add_center_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    // no
+}
+
+void game::add_front_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    switch (type) {
+        default:
+        case block::type::AIR: {
+            return;
+        }
+        case block::type::GRASS: {
+            math::vector2u8 uv_pos = { 3, 0 };
+            add_cube_front_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
+        }
+    }
+}
+
+void game::add_back_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    switch (type) {
+        default:
+        case block::type::AIR: {
+            return;
+        }
+        case block::type::GRASS: {
+            math::vector2u8 uv_pos = { 3, 0 };
+            add_cube_back_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
+        }
+    }
+}
+
+void game::add_left_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    switch (type) {
+        default:
+        case block::type::AIR: {
+            return;
+        }
+        case block::type::GRASS: {
+            math::vector2u8 uv_pos = { 3, 0 };
+            add_cube_left_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
+        }
+    }
+}
+
+void game::add_right_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    switch (type) {
+        default:
+        case block::type::AIR: {
+            return;
+        }
+        case block::type::GRASS: {
+            math::vector2u8 uv_pos = { 3, 0 };
+            add_cube_right_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
+        }
+    }
+}
+
+void game::add_top_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    switch (type) {
+        default:
+        case block::type::AIR: {
+            return;
+        }
+        case block::type::GRASS: {
+            math::vector2u8 uv_pos = { 0, 0 };
+            add_cube_top_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
+        }
+    }
+}
+
+void game::add_bottom_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::it& it, block::type type) {
+    switch (type) {
+        default:
+        case block::type::AIR: {
+            return;
+        }
+        case block::type::GRASS: {
+            math::vector2u8 uv_pos = { 0, 0 };
+            add_cube_bottom_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
+        }
+    }
 }
 
 void game::draw_chunk_mesh(chunk::mesh::vertex::const_it it, chunk::mesh::vertex::const_it end) {
