@@ -1,6 +1,7 @@
 #pragma once
 #include "math.hpp"
 #include <gccore.h>
+#include <vector>
 
 namespace game {
     struct camera {
@@ -25,21 +26,35 @@ namespace game {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
     }
 
-    enum class face {
-        center,
-        front,
-        back,
-        left,
-        right,
-        top,
-        bottom
-    };
-
     struct block {
+        enum class face {
+            center,
+            front,
+            back,
+            left,
+            right,
+            top,
+            bottom
+        };
         enum class type {
             AIR,
             GRASS
         };
         type tp;
     };
+
+    struct chunk {
+        struct mesh {
+            struct vertex {
+                math::vector3u8 local_position;
+                math::vector2u8 uv_position;
+            };
+            std::vector<vertex> vertices;
+        };
+    };
+
+    using vert_it = std::vector<chunk::mesh::vertex>::iterator;
+
+    vert_it add_face_vertices_at(math::vector3u8 local_position, vert_it begin, block::type type, block::face face);
+    void draw_chunk_mesh(const chunk::mesh& mesh);
 }

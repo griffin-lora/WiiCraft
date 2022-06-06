@@ -107,7 +107,7 @@ clean:
 
 #---------------------------------------------------------------------------------
 run: $(BUILD)
-	dolphin-emu-nogui -e new_wii.elf
+	dolphin-emu-nogui -e $(OUTPUT).elf
 
 textures:
 	./textures.sh

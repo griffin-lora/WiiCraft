@@ -29,13 +29,14 @@ int main(int argc, char** argv) {
 	}
 
 	gfx::texture texture;
-
 	gfx::safe_load_from_file(texture, "data/textures/chunk.tpl");
 
 	WPAD_Init();
 
 	gfx::draw_state draw;
 	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
+
+	GX_SetCullMode(GX_CULL_FRONT);
 
 	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
@@ -46,9 +47,9 @@ int main(int argc, char** argv) {
 	// looking down the -z axis with y up
 
 	game::camera cam = {
-		.position = {0.0f, 0.0f, -7.0f},
+		.position = {0.0f, 10.0f, -4.0f},
 		.up = {0.0f, 1.0f, 0.0f},
-		.look = {0.0f, 0.0f, -1.0f},
+		.look = {0.0f, 0.0f, 2.0f},
 		.fov = 45.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
@@ -64,18 +65,29 @@ int main(int argc, char** argv) {
 	game::update_perspective_from_camera(cam, perspective);
 	gfx::set_projection_matrix(perspective, GX_PERSPECTIVE);
 
-	math::vector3 cube_axis = {1,1,1};
-
-	f32 rquad = 0.0f;
 	bool first_frame = true;
+
+
+	math::matrix model;
+	math::matrix model_view;
+	guMtxIdentity(model);
+	guMtxTransApply(model, model, 0.0f, 0.0f, 0.f);
+	guMtxConcat(view, model, model_view);
+
+	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>(16) };
+	auto it = chunk_mesh.vertices.begin();
+	it = game::add_face_vertices_at({0, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
+	it = game::add_face_vertices_at({1, 0, 0}, it, game::block::type::GRASS, game::block::face::front);
+	it = game::add_face_vertices_at({0, 1, 0}, it, game::block::type::GRASS, game::block::face::front);
+	it = game::add_face_vertices_at({0, 0, 1}, it, game::block::type::GRASS, game::block::face::front);
 
 	for (;;) {
 
 		WPAD_ScanPads();
 		u32 pad_buttons_down = WPAD_ButtonsHeld(0);
 		if (pad_buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
-		if (pad_buttons_down & WPAD_BUTTON_UP) { cam.position.z -= 0.25f; cam_upd.update_view = true; }
-		if (pad_buttons_down & WPAD_BUTTON_DOWN) { cam.position.z += 0.25f; cam_upd.update_view = true; }
+		if (pad_buttons_down & WPAD_BUTTON_UP) { cam.position.y -= 0.25f; cam_upd.update_view = true; }
+		if (pad_buttons_down & WPAD_BUTTON_DOWN) { cam.position.y += 0.25f; cam_upd.update_view = true; }
 
 		if (cam_upd.update_view) {
 			game::update_view_from_camera(cam, view);
@@ -95,120 +107,121 @@ int main(int argc, char** argv) {
 
 		gfx::load(texture);
 
-		math::matrix model;
-		math::matrix model_view;
-		guMtxIdentity(model);
-		guMtxRotAxisDeg(model, &cube_axis, rquad);
-		guMtxTransApply(model, model, 0.0f, 0.0f, 0.f);
-		guMtxConcat(view,model,model_view);
+		// guMtxRotAxisDeg(model, &cube_axis, rquad);
+		if (cam_upd.update_view) {
+			guMtxConcat(view, model, model_view);
+		}
+
 		// load the modelview matrix into matrix memory
 		gfx::set_position_matrix_into_index(model_view, GX_PNMTX3);
 		
 		gfx::set_position_matrix_from_index(GX_PNMTX3);
 
-		gfx::draw_quads(24, []() {
-			gfx::draw_vertex(
-				-1.0f, 1.0f, -1.0f,	// Top Left of the quad (top)
-				0.0f,0.0f
-			);
-			gfx::draw_vertex(
-				-1.0f, 1.0f, 1.0f,	// Top Right of the quad (top)
-				1.0f,0.0f
-			);
-			gfx::draw_vertex(
-				-1.0f, -1.0f, 1.0f,	// Bottom Right of the quad (top)
-				1.0f,1.0f
-			);
-			gfx::draw_vertex(
-				- 1.0f, -1.0f, -1.0f,		// Bottom Left of the quad (top)
-				0.0f,1.0f
-			);
+		game::draw_chunk_mesh(chunk_mesh);
 
-			gfx::draw_vertex(
-				1.0f,1.0f, -1.0f,	// Top Left of the quad (bottom)
-				0.0f,0.0f
-			);
-			gfx::draw_vertex(
-				1.0f,-1.0f, -1.0f,	// Top Right of the quad (bottom)
-				1.0f,0.0f
-			);
-			gfx::draw_vertex(
-				1.0f,-1.0f,1.0f,	// Bottom Right of the quad (bottom)
-				1.0f,1.0f
-			);
-			gfx::draw_vertex(
-				1.0f,1.0f,1.0f,	// Bottom Left of the quad (bottom)
-				0.0f,1.0f
-			);
+		// gfx::draw_quads(24, []() {
+		// 	gfx::draw_vertex(
+		// 		-1.0f, 1.0f, -1.0f,	// Top Left of the quad (top)
+		// 		0.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f, 1.0f, 1.0f,	// Top Right of the quad (top)
+		// 		1.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f, -1.0f, 1.0f,	// Bottom Right of the quad (top)
+		// 		1.0f,1.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		- 1.0f, -1.0f, -1.0f,		// Bottom Left of the quad (top)
+		// 		0.0f,1.0f
+		// 	);
 
-			gfx::draw_vertex(
-				-1.0f, -1.0f, 1.0f,		// Top Right Of The Quad (Front)
-				0.0f,0.0f
-			);
-			gfx::draw_vertex(
-				1.0f, -1.0f, 1.0f,	// Top Left Of The Quad (Front)
-				1.0f,0.0f
-			);
-			gfx::draw_vertex(
-				1.0f,-1.0f, -1.0f,	// Bottom Left Of The Quad (Front)
-				1.0f,1.0f
-			);
-			gfx::draw_vertex(
-				-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Front)
-				0.0f,1.0f
-			);
+		// 	gfx::draw_vertex(
+		// 		1.0f,1.0f, -1.0f,	// Top Left of the quad (bottom)
+		// 		0.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f,-1.0f, -1.0f,	// Top Right of the quad (bottom)
+		// 		1.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f,-1.0f,1.0f,	// Bottom Right of the quad (bottom)
+		// 		1.0f,1.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f,1.0f,1.0f,	// Bottom Left of the quad (bottom)
+		// 		0.0f,1.0f
+		// 	);
 
-			gfx::draw_vertex(
-				-1.0f,1.0f,1.0f,	// Bottom Left Of The Quad (Back)
-				0.0f,0.0f
-			);
-			gfx::draw_vertex(
-				-1.0f,1.0f,-1.0f,	// Bottom Right Of The Quad (Back)
-				1.0f,0.0f
-			);
-			gfx::draw_vertex(
-				1.0f, 1.0f,-1.0f,	// Top Right Of The Quad (Back)
-				1.0f,1.0f
-			);
-			gfx::draw_vertex(
-				1.0f, 1.0f,1.0f,	// Top Left Of The Quad (Back)
-				0.0f,1.0f
-			);
+		// 	gfx::draw_vertex(
+		// 		-1.0f, -1.0f, 1.0f,		// Top Right Of The Quad (Front)
+		// 		0.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f, -1.0f, 1.0f,	// Top Left Of The Quad (Front)
+		// 		1.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f,-1.0f, -1.0f,	// Bottom Left Of The Quad (Front)
+		// 		1.0f,1.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Front)
+		// 		0.0f,1.0f
+		// 	);
 
-			gfx::draw_vertex(
-				1.0f, -1.0f, -1.0f,	// Top Right Of The Quad (Left)
-				0.0f,0.0f
-			);
-			gfx::draw_vertex(
-				1.0f, 1.0f,-1.0f,	// Top Left Of The Quad (Left)
-				1.0f,0.0f
-			);
-			gfx::draw_vertex(
-				-1.0f,1.0f,-1.0f,	// Bottom Left Of The Quad (Left)
-				1.0f,1.0f
-			);
-			gfx::draw_vertex(
-				-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Left)
-				0.0f,1.0f
-			);
+		// 	gfx::draw_vertex(
+		// 		-1.0f,1.0f,1.0f,	// Bottom Left Of The Quad (Back)
+		// 		0.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f,1.0f,-1.0f,	// Bottom Right Of The Quad (Back)
+		// 		1.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f, 1.0f,-1.0f,	// Top Right Of The Quad (Back)
+		// 		1.0f,1.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f, 1.0f,1.0f,	// Top Left Of The Quad (Back)
+		// 		0.0f,1.0f
+		// 	);
 
-			gfx::draw_vertex(
-				1.0f, -1.0f,1.0f,	// Top Right Of The Quad (Right)
-				0.0f,0.0f
-			);
-			gfx::draw_vertex(
-				-1.0f, -1.0f, 1.0f,		// Top Left Of The Quad (Right)
-				0.0625f,0.0f
-			);
-			gfx::draw_vertex(
-				-1.0f,1.0f, 1.0f,	// Bottom Left Of The Quad (Right)
-				0.0625f,0.0625f
-			);
-			gfx::draw_vertex(
-				1.0f,1.0f,1.0f,	// Bottom Right Of The Quad (Right)
-				0.0f,0.0625f
-			);
-		});
+		// 	gfx::draw_vertex(
+		// 		1.0f, -1.0f, -1.0f,	// Top Right Of The Quad (Left)
+		// 		0.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f, 1.0f,-1.0f,	// Top Left Of The Quad (Left)
+		// 		1.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f,1.0f,-1.0f,	// Bottom Left Of The Quad (Left)
+		// 		1.0f,1.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Left)
+		// 		0.0f,1.0f
+		// 	);
+
+		// 	gfx::draw_vertex(
+		// 		1.0f, -1.0f,1.0f,	// Top Right Of The Quad (Right)
+		// 		0.0f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f, -1.0f, 1.0f,		// Top Left Of The Quad (Right)
+		// 		0.0625f,0.0f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		-1.0f,1.0f, 1.0f,	// Bottom Left Of The Quad (Right)
+		// 		0.0625f,0.0625f
+		// 	);
+		// 	gfx::draw_vertex(
+		// 		1.0f,1.0f,1.0f,	// Bottom Right Of The Quad (Right)
+		// 		0.0f,0.0625f
+		// 	);
+		// });
 
 		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
 		gfx::set_color_buffer_update(true);
@@ -228,6 +241,6 @@ int main(int argc, char** argv) {
 
 		// Game logic
 
-		rquad -= 0.15f;				// Decrease The Rotation Variable For The Quad     ( NEW )
+		// rquad -= 0.15f;				// Decrease The Rotation Variable For The Quad     ( NEW )
 	}
 }
