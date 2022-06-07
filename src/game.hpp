@@ -39,6 +39,7 @@ namespace game {
         };
         enum class type {
             AIR,
+            DEBUG,
             GRASS
         };
         type tp;
