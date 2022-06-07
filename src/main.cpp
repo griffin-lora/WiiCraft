@@ -113,11 +113,9 @@ int main(int argc, char** argv) {
 				math::vector2f delta = pointer_pos - last_pointer_pos;
 				delta *= video_size_reciprocal * cam_rotation_speed;
 				
-				cam.rotation *= math::from_euler_angles(-delta.x, 0, delta.y);
-				cam.rotation.normalize();
+				game::rotate_camera(cam, delta.x, delta.y);
 				
 				cam_upd.update_view = true;
-
 			}
 			was_last_pointer_pos_valid = true;
 			last_pointer_pos = pointer_pos;

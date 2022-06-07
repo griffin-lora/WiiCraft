@@ -27,6 +27,9 @@ namespace game {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
     }
 
+
+    void rotate_camera(camera& cam, f32 x, f32 y);
+
     struct block {
         enum class face : u8 {
             CENTER,
