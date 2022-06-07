@@ -147,8 +147,13 @@ int main(int argc, char** argv) {
 		}
 
 		if (pad_input_vector.is_non_zero()) {
+			math::matrix3f inp_matrix = {
+				0, 0, 0,
+				0, cam.rotation.vec2.y, 0,
+				cam.rotation.vec3.x, 0, cam.rotation.vec3.z
+			};
 
-			math::vector3f move_vector = (cam.rotation.vec1 * (f32)pad_input_vector.z) + (cam.rotation.vec3 * (f32)pad_input_vector.x) + (cam.rotation.vec2 * (f32)pad_input_vector.y);
+			math::vector3f move_vector = (cam.rotation.vec1 * (f32)pad_input_vector.z) + (inp_matrix.vec3 * (f32)pad_input_vector.x) + (inp_matrix.vec2 * (f32)pad_input_vector.y);
 
 			move_vector *= cam_speed;
 
