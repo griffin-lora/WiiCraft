@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
 	// looking down the -z axis with y up
 
 	game::camera cam = {
-		.position = {0.0f, 0.0f, -10.0f},
+		.position = {0.0f, 3.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.rotation = {
 			{0.0f, 0.0f, 1.0f},
@@ -85,14 +85,14 @@ int main(int argc, char** argv) {
 	guMtxConcat(view, model, model_view);
 
 	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>() };
-	chunk_mesh.vertices.resize(game::get_face_vertex_count<game::block::face::front>(game::block::type::GRASS) * 6);
+	chunk_mesh.vertices.resize(game::get_face_vertex_count<game::block::face::FRONT>(game::block::type::GRASS) * 6);
 	auto it = chunk_mesh.vertices.begin();
-	game::add_face_vertices_at_mut_it<game::block::face::front>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::back>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::left>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::right>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::top>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::bottom>({0, 0, 0}, it, game::block::type::GRASS);
+	game::add_face_vertices_at_mut_it<game::block::face::FRONT>({0, 0, 0}, it, game::block::type::GRASS);
+	game::add_face_vertices_at_mut_it<game::block::face::BACK>({0, 0, 0}, it, game::block::type::GRASS);
+	game::add_face_vertices_at_mut_it<game::block::face::LEFT>({0, 0, 0}, it, game::block::type::GRASS);
+	game::add_face_vertices_at_mut_it<game::block::face::RIGHT>({0, 0, 0}, it, game::block::type::GRASS);
+	game::add_face_vertices_at_mut_it<game::block::face::TOP>({0, 0, 0}, it, game::block::type::GRASS);
+	game::add_face_vertices_at_mut_it<game::block::face::BOTTOM>({0, 0, 0}, it, game::block::type::GRASS);
 
 	math::vector2f video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
 	math::vector2f video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};

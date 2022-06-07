@@ -28,16 +28,16 @@ namespace game {
     }
 
     struct block {
-        enum class face {
-            center,
-            front,
-            back,
-            left,
-            right,
-            top,
-            bottom
+        enum class face : u8 {
+            CENTER,
+            FRONT,
+            BACK,
+            LEFT,
+            RIGHT,
+            TOP,
+            BOTTOM
         };
-        enum class type {
+        enum class type : u8 {
             AIR,
             DEBUG,
             GRASS
@@ -63,7 +63,7 @@ namespace game {
 
     template<block::face face>
     constexpr std::size_t get_face_vertex_count(block::type type) {
-        if constexpr (face == block::face::center) {
+        if constexpr (face == block::face::CENTER) {
             return get_center_vertex_count(type);
         } else {
             return get_any_face_vertex_count(type);
@@ -80,19 +80,19 @@ namespace game {
 
     template<block::face face>
     constexpr void add_face_vertices_at_mut_it(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type) {
-        if constexpr (face == block::face::center) {
+        if constexpr (face == block::face::CENTER) {
             add_center_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::front) {
+        } else if constexpr (face == block::face::FRONT) {
             add_front_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::back) {
+        } else if constexpr (face == block::face::BACK) {
             add_back_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::left) {
+        } else if constexpr (face == block::face::LEFT) {
             add_left_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::right) {
+        } else if constexpr (face == block::face::RIGHT) {
             add_right_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::top) {
+        } else if constexpr (face == block::face::TOP) {
             add_top_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::bottom) {
+        } else if constexpr (face == block::face::BOTTOM) {
             add_bottom_vertices(local_position, it, type);
         }
     }
