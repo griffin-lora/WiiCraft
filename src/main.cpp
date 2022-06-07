@@ -19,7 +19,7 @@
 #include "game.hpp"
 
 constexpr f32 cam_speed = 0.3f;
-constexpr f32 cam_rotation_speed = 5.0f;
+constexpr f32 cam_rotation_speed = 3.0f;
 
 int main(int argc, char** argv) {
 
@@ -113,8 +113,8 @@ int main(int argc, char** argv) {
 			if ((pad_buttons_down & WPAD_BUTTON_A) && was_last_pointer_pos_valid && pointer_pos != last_pointer_pos) {
 				math::vector2f delta = pointer_pos - last_pointer_pos;
 				delta *= video_size_reciprocal * cam_rotation_speed;
-
-				cam.rotation *= math::from_euler_angles<f32>(delta.x, delta.y, 0);
+				
+				cam.rotation *= math::from_euler_angles<f32>(-delta.x, delta.y, 0);
 				cam.rotation.normalize();
 				
 				cam_upd.update_view = true;
