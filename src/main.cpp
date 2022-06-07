@@ -19,7 +19,7 @@
 #include "game.hpp"
 
 constexpr f32 cam_speed = 0.3f;
-constexpr f32 cam_rotation_speed = 1.0f;
+constexpr f32 cam_rotation_speed = 5.0f;
 
 int main(int argc, char** argv) {
 
@@ -110,19 +110,11 @@ int main(int argc, char** argv) {
 		WPAD_IR(0, &pointer);
 		if (pointer.valid) {
 			math::vector2f pointer_pos = {pointer.x, pointer.y};
-			if (was_last_pointer_pos_valid && pointer_pos != last_pointer_pos) {
+			if ((pad_buttons_down & WPAD_BUTTON_A) && was_last_pointer_pos_valid && pointer_pos != last_pointer_pos) {
 				math::vector2f delta = pointer_pos - last_pointer_pos;
 				delta *= video_size_reciprocal * cam_rotation_speed;
 
-				// get the desired rotation matrix for the xz plane rotation
-				math::matrix3f xz_plane_rotation = {
-					{ std::cos(delta.x), 0.0f, std::sin(delta.x) },
-					{ 0, 1, 0 },
-					{ -std::sin(delta.x), 0.0f, std::cos(delta.x) }
-				};
-
-				cam.rotation *= xz_plane_rotation;
-
+				cam.rotation *= math::from_euler_angles<f32>(delta.x, delta.y, 0);
 				cam.rotation.normalize();
 				
 				cam_upd.update_view = true;
@@ -147,10 +139,10 @@ int main(int argc, char** argv) {
 		if (pad_buttons_down & WPAD_BUTTON_RIGHT) {
 			pad_input_vector -= { 1, 0, 0 };
 		}
-		if (pad_buttons_down & WPAD_BUTTON_A) {
+		if (pad_buttons_down & WPAD_BUTTON_PLUS) {
 			pad_input_vector += { 0, 1, 0 };
 		}
-		if (pad_buttons_down & WPAD_BUTTON_B) {
+		if (pad_buttons_down & WPAD_BUTTON_MINUS) {
 			pad_input_vector -= { 0, 1, 0 };
 		}
 

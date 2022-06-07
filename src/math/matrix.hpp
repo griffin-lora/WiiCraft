@@ -13,7 +13,7 @@ namespace math {
                 other.vec1 * vec1.x + other.vec2 * vec1.y + other.vec3 * vec1.z,
                 other.vec1 * vec2.x + other.vec2 * vec2.y + other.vec3 * vec2.z,
                 other.vec1 * vec3.x + other.vec2 * vec3.y + other.vec3 * vec3.z
-            }
+            };
         }
 
         inline matrix3 operator*(const vector3<T>& other) const {
