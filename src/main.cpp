@@ -18,6 +18,8 @@
 #include "math.hpp"
 #include "game.hpp"
 
+constexpr f32 cam_speed = 0.3f;
+
 int main(int argc, char** argv) {
 
 	gfx::console_state con;
@@ -32,6 +34,8 @@ int main(int argc, char** argv) {
 	gfx::safe_load_from_file(texture, "data/textures/chunk.tpl");
 
 	WPAD_Init();
+	WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
+	WPAD_SetVRes(WPAD_CHAN_ALL, con.rmode->viWidth, con.rmode->viHeight);
 
 	gfx::draw_state draw;
 	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
@@ -47,9 +51,9 @@ int main(int argc, char** argv) {
 	// looking down the -z axis with y up
 
 	game::camera cam = {
-		.position = {0.0f, 10.0f, -4.0f},
+		.position = {0.0f, 0.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
-		.look = {0.0f, 0.0f, 2.0f},
+		.look_vector = {0.0f, 0.0f, 1.0f},
 		.fov = 45.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
@@ -89,8 +93,40 @@ int main(int argc, char** argv) {
 		WPAD_ScanPads();
 		u32 pad_buttons_down = WPAD_ButtonsHeld(0);
 		if (pad_buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
-		if (pad_buttons_down & WPAD_BUTTON_UP) { cam.position.y -= 0.25f; cam_upd.update_view = true; }
-		if (pad_buttons_down & WPAD_BUTTON_DOWN) { cam.position.y += 0.25f; cam_upd.update_view = true; }
+
+		math::vector3s8 pad_input_vector = { 0, 0, 0 };
+		if (pad_buttons_down & WPAD_BUTTON_UP) {
+			pad_input_vector += { 0, 0, 1 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_DOWN) {
+			pad_input_vector -= { 0, 0, 1 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_LEFT) {
+			pad_input_vector -= { 1, 0, 0 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_RIGHT) {
+			pad_input_vector += { 1, 0, 0 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_A) {
+			pad_input_vector += { 0, 1, 0 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_B) {
+			pad_input_vector -= { 0, 1, 0 };
+		}
+
+		if (pad_input_vector.x != 0 || pad_input_vector.y != 0 || pad_input_vector.z != 0) {
+			math::vector3f perp_look_vector = { -cam.look_vector.z, 0, cam.look_vector.x };
+			math::vector3f vert_look_vector = { 0, 1, 0 };
+
+			math::vector3f move_vector = (cam.look_vector * (f32)pad_input_vector.z) + (perp_look_vector * (f32)pad_input_vector.x) + (vert_look_vector * (f32)pad_input_vector.y);
+
+			move_vector *= cam_speed;
+
+			cam.position += move_vector;
+			
+			cam_upd.update_view = true;
+		}
+
 
 		if (cam_upd.update_view) {
 			game::update_view(cam, view);
