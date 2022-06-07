@@ -85,14 +85,13 @@ int main(int argc, char** argv) {
 	guMtxConcat(view, model, model_view);
 
 	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>() };
-	chunk_mesh.vertices.resize(game::get_face_vertex_count<game::block::face::FRONT>(game::block::type::GRASS) * 6);
+	chunk_mesh.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 100);
 	auto it = chunk_mesh.vertices.begin();
-	game::add_face_vertices_at_mut_it<game::block::face::FRONT>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::BACK>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::LEFT>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::RIGHT>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::TOP>({0, 0, 0}, it, game::block::type::GRASS);
-	game::add_face_vertices_at_mut_it<game::block::face::BOTTOM>({0, 0, 0}, it, game::block::type::GRASS);
+	for (u8 i = 0; i < 64; i++) {
+		for (u8 j = 0; j < 64; j++) {
+			game::add_face_vertices_at_mut_it<game::block::face::TOP>({i, 0, j}, it, game::block::type::GRASS);
+		}
+	}
 
 	math::vector2f video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
 	math::vector2f video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};
