@@ -16,8 +16,8 @@ namespace math {
             };
         }
 
-        inline matrix3 operator*(const vector3<T>& other) const {
-            return { vec1 * other, vec2 * other, vec3 * other };
+        inline vector3<T> operator*(const vector3<T>& other) const {
+            return vec1 * other.x + vec2 * other.y + vec3 * other.z;
         }
 
         inline matrix3 operator*(T scalar) const {
@@ -28,13 +28,6 @@ namespace math {
             vec1 = other.vec1 * vec1.x + other.vec2 * vec1.y + other.vec3 * vec1.z;
             vec2 = other.vec1 * vec2.x + other.vec2 * vec2.y + other.vec3 * vec2.z;
             vec3 = other.vec1 * vec3.x + other.vec2 * vec3.y + other.vec3 * vec3.z;
-            return *this;
-        }
-
-        inline matrix3& operator*=(const vector3<T>& other) {
-            vec1 *= other;
-            vec2 *= other;
-            vec3 *= other;
             return *this;
         }
 

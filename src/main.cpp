@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
 				math::vector2f delta = pointer_pos - last_pointer_pos;
 				delta *= video_size_reciprocal * cam_rotation_speed;
 				
-				cam.rotation *= math::from_euler_angles<f32>(-delta.x, delta.y, 0);
+				cam.rotation *= math::from_euler_angles(-delta.x, delta.y, 0);
 				cam.rotation.normalize();
 				
 				cam_upd.update_view = true;
@@ -125,18 +125,18 @@ int main(int argc, char** argv) {
 			was_last_pointer_pos_valid = false;
 		}
 
-		math::vector3s8 pad_input_vector = { 0, 0, 0 };
+		math::vector3f pad_input_vector = { 0, 0, 0 };
 		if (pad_buttons_down & WPAD_BUTTON_UP) {
-			pad_input_vector += { 0, 0, 1 };
-		}
-		if (pad_buttons_down & WPAD_BUTTON_DOWN) {
-			pad_input_vector -= { 0, 0, 1 };
-		}
-		if (pad_buttons_down & WPAD_BUTTON_LEFT) {
 			pad_input_vector += { 1, 0, 0 };
 		}
-		if (pad_buttons_down & WPAD_BUTTON_RIGHT) {
+		if (pad_buttons_down & WPAD_BUTTON_DOWN) {
 			pad_input_vector -= { 1, 0, 0 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_LEFT) {
+			pad_input_vector += { 0, 0, 1 };
+		}
+		if (pad_buttons_down & WPAD_BUTTON_RIGHT) {
+			pad_input_vector -= { 0, 0, 1 };
 		}
 		if (pad_buttons_down & WPAD_BUTTON_PLUS) {
 			pad_input_vector += { 0, 1, 0 };
@@ -146,13 +146,14 @@ int main(int argc, char** argv) {
 		}
 
 		if (pad_input_vector.is_non_zero()) {
-			math::matrix3f inp_matrix = {
-				0, 0, 0,
-				0, cam.rotation.vec2.y, 0,
-				cam.rotation.vec3.x, 0, cam.rotation.vec3.z
+			math::matrix3f cam_rot = {
+				cam.rotation.vec1,
+				{ 0, cam.rotation.vec2.y, 0 },
+				{ cam.rotation.vec3.x, 0, cam.rotation.vec3.z }
 			};
+			cam_rot.normalize();
 
-			math::vector3f move_vector = (cam.rotation.vec1 * (f32)pad_input_vector.z) + (inp_matrix.vec3 * (f32)pad_input_vector.x) + (inp_matrix.vec2 * (f32)pad_input_vector.y);
+			math::vector3f move_vector = cam_rot * pad_input_vector;
 
 			move_vector *= cam_speed;
 
