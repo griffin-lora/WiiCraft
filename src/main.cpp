@@ -57,12 +57,12 @@ int main(int argc, char** argv) {
 	};
 	game::camera_update_params cam_upd;
 
-	game::update_view_from_camera(cam, view);
+	game::update_view(cam, view);
 
 	// setup our projection matrix
 	// this creates a perspective matrix with a view angle of 90,
 	// and aspect ratio based on the display resolution
-	game::update_perspective_from_camera(cam, perspective);
+	game::update_perspective(cam, perspective);
 	gfx::set_projection_matrix(perspective, GX_PERSPECTIVE);
 
 	bool first_frame = true;
@@ -93,10 +93,10 @@ int main(int argc, char** argv) {
 		if (pad_buttons_down & WPAD_BUTTON_DOWN) { cam.position.y += 0.25f; cam_upd.update_view = true; }
 
 		if (cam_upd.update_view) {
-			game::update_view_from_camera(cam, view);
+			game::update_view(cam, view);
 		}
 		if (cam_upd.update_perspective) {
-			game::update_perspective_from_camera(cam, perspective);
+			game::update_perspective(cam, perspective);
 		}
 
 		gfx::set_channel_count(1);
