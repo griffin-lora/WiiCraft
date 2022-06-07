@@ -5,6 +5,7 @@
 
 namespace math {
     using vector3f = math::vector3<f32>;
+    using vector2f = math::vector2<f32>;
     using vector3u8 = math::vector3<u8>;
     using vector3s8 = math::vector3<s8>;
     using vector2u8 = math::vector2<u8>;

@@ -19,6 +19,7 @@
 #include "game.hpp"
 
 constexpr f32 cam_speed = 0.3f;
+constexpr f32 cam_rotation_speed = 8.0f;
 
 int main(int argc, char** argv) {
 
@@ -59,6 +60,7 @@ int main(int argc, char** argv) {
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
+	cam.look_vector.normalize();
 	game::camera_update_params cam_upd;
 
 	game::update_view(cam, view);
@@ -88,11 +90,43 @@ int main(int argc, char** argv) {
 	game::add_face_vertices_at_mut_it<game::block::face::top>({0, 0, 0}, it, game::block::type::GRASS);
 	game::add_face_vertices_at_mut_it<game::block::face::bottom>({0, 0, 0}, it, game::block::type::GRASS);
 
+	math::vector2f video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
+	math::vector2f video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};
+
+	bool was_last_pointer_pos_valid = false;
+	math::vector2f last_pointer_pos = {0.0f, 0.0f};
+
 	for (;;) {
 
 		WPAD_ScanPads();
 		u32 pad_buttons_down = WPAD_ButtonsHeld(0);
 		if (pad_buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
+
+		ir_t pointer;
+		WPAD_IR(0, &pointer);
+		if (pointer.valid) {
+			math::vector2f pointer_pos = {pointer.x, pointer.y};
+			if (was_last_pointer_pos_valid && pointer_pos != last_pointer_pos) {
+				math::vector2f delta = pointer_pos - last_pointer_pos;
+				delta *= video_size_reciprocal * cam_rotation_speed;
+
+				// get our basis vectors for the xz plane
+				math::vector3f forward_basis = { std::cos(delta.x), 0.0f, std::sin(delta.x) };
+				math::vector3f right_basis = { -std::sin(delta.x), 0.0f, std::cos(delta.x) };
+				math::vector3f up_basis = { 0, 1, 0 };
+
+				// transform our camera vector by the linear transformation formed by these basis vectors
+				cam.look_vector = forward_basis * cam.look_vector.x + up_basis * cam.look_vector.y + right_basis * cam.look_vector.z;
+				cam.look_vector.normalize();
+				
+				cam_upd.update_view = true;
+
+			}
+			was_last_pointer_pos_valid = true;
+			last_pointer_pos = pointer_pos;
+		} else {
+			was_last_pointer_pos_valid = false;
+		}
 
 		math::vector3s8 pad_input_vector = { 0, 0, 0 };
 		if (pad_buttons_down & WPAD_BUTTON_UP) {
@@ -102,10 +136,10 @@ int main(int argc, char** argv) {
 			pad_input_vector -= { 0, 0, 1 };
 		}
 		if (pad_buttons_down & WPAD_BUTTON_LEFT) {
-			pad_input_vector -= { 1, 0, 0 };
+			pad_input_vector += { 1, 0, 0 };
 		}
 		if (pad_buttons_down & WPAD_BUTTON_RIGHT) {
-			pad_input_vector += { 1, 0, 0 };
+			pad_input_vector -= { 1, 0, 0 };
 		}
 		if (pad_buttons_down & WPAD_BUTTON_A) {
 			pad_input_vector += { 0, 1, 0 };
@@ -114,8 +148,8 @@ int main(int argc, char** argv) {
 			pad_input_vector -= { 0, 1, 0 };
 		}
 
-		if (pad_input_vector.x != 0 || pad_input_vector.y != 0 || pad_input_vector.z != 0) {
-			math::vector3f perp_look_vector = { -cam.look_vector.z, 0, cam.look_vector.x };
+		if (pad_input_vector.is_non_zero()) {
+			math::vector3f perp_look_vector = { cam.look_vector.z, 0, cam.look_vector.x };
 			math::vector3f vert_look_vector = { 0, 1, 0 };
 
 			math::vector3f move_vector = (cam.look_vector * (f32)pad_input_vector.z) + (perp_look_vector * (f32)pad_input_vector.x) + (vert_look_vector * (f32)pad_input_vector.y);
@@ -158,109 +192,6 @@ int main(int argc, char** argv) {
 
 		game::draw_chunk_mesh(chunk_mesh.vertices.begin(), it);
 
-		// gfx::draw_quads(24, []() {
-		// 	gfx::draw_vertex(
-		// 		-1.0f, 1.0f, -1.0f,	// Top Left of the quad (top)
-		// 		0.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f, 1.0f, 1.0f,	// Top Right of the quad (top)
-		// 		1.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f, -1.0f, 1.0f,	// Bottom Right of the quad (top)
-		// 		1.0f,1.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		- 1.0f, -1.0f, -1.0f,		// Bottom Left of the quad (top)
-		// 		0.0f,1.0f
-		// 	);
-
-		// 	gfx::draw_vertex(
-		// 		1.0f,1.0f, -1.0f,	// Top Left of the quad (bottom)
-		// 		0.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f,-1.0f, -1.0f,	// Top Right of the quad (bottom)
-		// 		1.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f,-1.0f,1.0f,	// Bottom Right of the quad (bottom)
-		// 		1.0f,1.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f,1.0f,1.0f,	// Bottom Left of the quad (bottom)
-		// 		0.0f,1.0f
-		// 	);
-
-		// 	gfx::draw_vertex(
-		// 		-1.0f, -1.0f, 1.0f,		// Top Right Of The Quad (Front)
-		// 		0.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f, -1.0f, 1.0f,	// Top Left Of The Quad (Front)
-		// 		1.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f,-1.0f, -1.0f,	// Bottom Left Of The Quad (Front)
-		// 		1.0f,1.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Front)
-		// 		0.0f,1.0f
-		// 	);
-
-		// 	gfx::draw_vertex(
-		// 		-1.0f,1.0f,1.0f,	// Bottom Left Of The Quad (Back)
-		// 		0.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f,1.0f,-1.0f,	// Bottom Right Of The Quad (Back)
-		// 		1.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f, 1.0f,-1.0f,	// Top Right Of The Quad (Back)
-		// 		1.0f,1.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f, 1.0f,1.0f,	// Top Left Of The Quad (Back)
-		// 		0.0f,1.0f
-		// 	);
-
-		// 	gfx::draw_vertex(
-		// 		1.0f, -1.0f, -1.0f,	// Top Right Of The Quad (Left)
-		// 		0.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f, 1.0f,-1.0f,	// Top Left Of The Quad (Left)
-		// 		1.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f,1.0f,-1.0f,	// Bottom Left Of The Quad (Left)
-		// 		1.0f,1.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f,-1.0f, -1.0f,	// Bottom Right Of The Quad (Left)
-		// 		0.0f,1.0f
-		// 	);
-
-		// 	gfx::draw_vertex(
-		// 		1.0f, -1.0f,1.0f,	// Top Right Of The Quad (Right)
-		// 		0.0f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f, -1.0f, 1.0f,		// Top Left Of The Quad (Right)
-		// 		0.0625f,0.0f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		-1.0f,1.0f, 1.0f,	// Bottom Left Of The Quad (Right)
-		// 		0.0625f,0.0625f
-		// 	);
-		// 	gfx::draw_vertex(
-		// 		1.0f,1.0f,1.0f,	// Bottom Right Of The Quad (Right)
-		// 		0.0f,0.0625f
-		// 	);
-		// });
 
 		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
 		gfx::set_color_buffer_update(true);
