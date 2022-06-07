@@ -19,7 +19,7 @@
 #include "game.hpp"
 
 constexpr f32 cam_speed = 0.3f;
-constexpr f32 cam_rotation_speed = 8.0f;
+constexpr f32 cam_rotation_speed = 1.0f;
 
 int main(int argc, char** argv) {
 
@@ -54,13 +54,17 @@ int main(int argc, char** argv) {
 	game::camera cam = {
 		.position = {0.0f, 0.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
-		.look_vector = {0.0f, 0.0f, 1.0f},
+		.rotation = {
+			{0.0f, 0.0f, 1.0f},
+			{0.0f, 1.0f, 0.0f},
+			{1.0f, 0.0f, 0.0f}
+		},
 		.fov = 45.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	cam.look_vector.normalize();
+	cam.rotation.normalize();
 	game::camera_update_params cam_upd;
 
 	game::update_view(cam, view);
@@ -110,14 +114,16 @@ int main(int argc, char** argv) {
 				math::vector2f delta = pointer_pos - last_pointer_pos;
 				delta *= video_size_reciprocal * cam_rotation_speed;
 
-				// get our basis vectors for the xz plane
-				math::vector3f forward_basis = { std::cos(delta.x), 0.0f, std::sin(delta.x) };
-				math::vector3f right_basis = { -std::sin(delta.x), 0.0f, std::cos(delta.x) };
-				math::vector3f up_basis = { 0, 1, 0 };
+				// get the desired rotation matrix for the xz plane rotation
+				math::matrix3f xz_plane_rotation = {
+					{ std::cos(delta.x), 0.0f, std::sin(delta.x) },
+					{ 0, 1, 0 },
+					{ -std::sin(delta.x), 0.0f, std::cos(delta.x) }
+				};
 
-				// transform our camera vector by the linear transformation formed by these basis vectors
-				cam.look_vector = forward_basis * cam.look_vector.x + up_basis * cam.look_vector.y + right_basis * cam.look_vector.z;
-				cam.look_vector.normalize();
+				cam.rotation *= xz_plane_rotation;
+
+				cam.rotation.normalize();
 				
 				cam_upd.update_view = true;
 
@@ -149,10 +155,8 @@ int main(int argc, char** argv) {
 		}
 
 		if (pad_input_vector.is_non_zero()) {
-			math::vector3f perp_look_vector = { cam.look_vector.z, 0, cam.look_vector.x };
-			math::vector3f vert_look_vector = { 0, 1, 0 };
 
-			math::vector3f move_vector = (cam.look_vector * (f32)pad_input_vector.z) + (perp_look_vector * (f32)pad_input_vector.x) + (vert_look_vector * (f32)pad_input_vector.y);
+			math::vector3f move_vector = (cam.rotation.vec1 * (f32)pad_input_vector.z) + (cam.rotation.vec3 * (f32)pad_input_vector.x) + (cam.rotation.vec2 * (f32)pad_input_vector.y);
 
 			move_vector *= cam_speed;
 

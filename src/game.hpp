@@ -7,7 +7,7 @@ namespace game {
     struct camera {
         math::vector3f position;
         math::vector3f up;
-        math::vector3f look_vector;
+        math::matrix3f rotation;
         f32 fov;
         f32 aspect;
         f32 near_clipping_plane_distance;
@@ -20,7 +20,7 @@ namespace game {
     };
 
     inline void update_view(const camera& cam, math::matrix view) {
-        auto look_at = cam.position + cam.look_vector;
+        auto look_at = cam.position + cam.rotation.vec1;
         guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
     }
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
