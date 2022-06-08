@@ -95,10 +95,6 @@ namespace math {
         T y;
         T z;
 
-        inline operator guVector() const {
-            return {x, y, z};
-        }
-
         inline vector3 operator+(const vector3& other) const {
             return {x + other.x, y + other.y, z + other.z};
         }
