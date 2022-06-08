@@ -179,4 +179,104 @@ namespace math {
             z /= mag;
         }
     };
+
+
+    template<typename T>
+    struct vector4 {
+        T x;
+        T y;
+        T z;
+        T w;
+
+        inline vector4 operator+(const vector4& other) const {
+            return {x + other.x, y + other.y, z + other.z, w + other.w};
+        }
+        inline vector4 operator-(const vector4& other) const {
+            return {x - other.x, y - other.y, z - other.z, w - other.w};
+        }
+        inline vector4 operator*(const vector4& other) const {
+            return {x * other.x, y * other.y, z * other.z, w * other.w};
+        }
+        inline vector4 operator/(const vector4& other) const {
+            return {x / other.x, y / other.y, z / other.z, w / other.w};
+        }
+        inline vector4 operator*(T scalar) const {
+            return {x * scalar, y * scalar, z * scalar, w * scalar};
+        }
+        inline vector4 operator/(T scalar) const {
+            return {x / scalar, y / scalar, z / scalar, w / scalar};
+        }
+
+        inline vector4& operator+=(const vector4& other) {
+            x += other.x;
+            y += other.y;
+            z += other.z;
+            w += other.w;
+            return *this;
+        }
+
+        inline vector4& operator-=(const vector4& other) {
+            x -= other.x;
+            y -= other.y;
+            z -= other.z;
+            w -= other.w;
+            return *this;
+        }
+
+        inline vector4& operator*=(const vector4& other) {
+            x *= other.x;
+            y *= other.y;
+            z *= other.z;
+            w *= other.w;
+            return *this;
+        }
+
+        inline vector4& operator/=(const vector4& other) {
+            x /= other.x;
+            y /= other.y;
+            z /= other.z;
+            w /= other.w;
+            return *this;
+        }
+
+        inline vector4& operator*=(T scalar) {
+            x *= scalar;
+            y *= scalar;
+            z *= scalar;
+            w *= scalar;
+            return *this;
+        }
+
+        inline vector4& operator/=(T scalar) {
+            x /= scalar;
+            y /= scalar;
+            z /= scalar;
+            w /= scalar;
+            return *this;
+        }
+
+        inline bool operator==(const vector4& other) const {
+            return x == other.x && y == other.y && z == other.z && w == other.w;
+        }
+
+        inline bool operator!=(const vector4& other) const {
+            return x != other.x || y != other.y || z != other.z || w != other.w;
+        }
+
+        inline bool is_non_zero() const {
+            return x != 0 || y != 0 || z != 0 || w != 0;
+        }
+
+        inline f32 magnitude() const {
+            return std::sqrt(x * x + y * y + z * z + w * w);
+        }
+
+        inline void normalize() {
+            auto mag = magnitude();
+            x /= mag;
+            y /= mag;
+            z /= mag;
+            w /= mag;
+        }
+    };
 }

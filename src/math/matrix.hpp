@@ -44,28 +44,38 @@ namespace math {
             return vec1 * other.x + vec2 * other.y + vec3 * other.z;
         }
 
-        matrix3 operator*(T scalar) const {
-            return { vec1 * scalar, vec2 * scalar, vec3 * scalar };
+        void normalize() {
+            vec1.normalize();
+            vec2.normalize();
+            vec3.normalize();
+        }
+    };
+
+    template<typename T>
+    struct matrix4 {
+        vector4<T> vec1;
+        vector4<T> vec2;
+        vector4<T> vec3;
+        vector4<T> vec4;
+
+        matrix4 operator*(const matrix4& other) const {
+            return {
+                other.vec1 * vec1.x + other.vec2 * vec1.y + other.vec3 * vec1.z + other.vec4 * vec1.w,
+                other.vec1 * vec2.x + other.vec2 * vec2.y + other.vec3 * vec2.z + other.vec4 * vec2.w,
+                other.vec1 * vec3.x + other.vec2 * vec3.y + other.vec3 * vec3.z + other.vec4 * vec3.w,
+                other.vec1 * vec4.x + other.vec2 * vec4.y + other.vec3 * vec4.z + other.vec4 * vec4.w
+            };
         }
 
-        matrix3& operator*=(const matrix3& other) {
-            vec1 = other.vec1 * vec1.x + other.vec2 * vec1.y + other.vec3 * vec1.z;
-            vec2 = other.vec1 * vec2.x + other.vec2 * vec2.y + other.vec3 * vec2.z;
-            vec3 = other.vec1 * vec3.x + other.vec2 * vec3.y + other.vec3 * vec3.z;
-            return *this;
-        }
-
-        matrix3& operator*=(T scalar) {
-            vec1 *= scalar;
-            vec2 *= scalar;
-            vec3 *= scalar;
-            return *this;
+        vector4<T> operator*(const vector4<T>& other) const {
+            return vec1 * other.x + vec2 * other.y + vec3 * other.z + vec4 * other.w;
         }
 
         void normalize() {
             vec1.normalize();
             vec2.normalize();
             vec3.normalize();
+            vec4.normalize();
         }
     };
 }
