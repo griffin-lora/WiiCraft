@@ -20,7 +20,7 @@
 #include "input.hpp"
 
 constexpr f32 cam_move_speed = 0.3f;
-constexpr f32 cam_rotation_speed = 3.0f;
+constexpr math::vector2f cam_rotation_speed = { 2.0f, 1.0f };
 
 int main(int argc, char** argv) {
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 
 		math::vector2f pointer_input_vector = input::get_pointer_input_vector(inp, buttons_held);
 		if (pointer_input_vector.is_non_zero()) {
-			pointer_input_vector *= video_size_reciprocal * cam_rotation_speed;
+			pointer_input_vector *= video_size_reciprocal * cam_rotation_speed * -1;
 			
 			game::rotate_camera(cam, pointer_input_vector.x, pointer_input_vector.y);
 			
