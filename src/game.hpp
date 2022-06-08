@@ -63,7 +63,7 @@ namespace game {
     };
 
     struct chunk {
-        static constexpr u32 SIZE = 32;
+        static constexpr s32 SIZE = 32;
 
         
         struct mesh {
