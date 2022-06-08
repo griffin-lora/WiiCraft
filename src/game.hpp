@@ -20,7 +20,7 @@ namespace game {
     };
 
     inline void update_view(const camera& cam, math::matrix view) {
-        auto look_at = cam.position + cam.rotation.vec1;
+        auto look_at = cam.position + cam.rotation.look();
         guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
     }
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {

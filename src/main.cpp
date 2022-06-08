@@ -145,9 +145,9 @@ int main(int argc, char** argv) {
 
 		if (pad_input_vector.is_non_zero()) {
 			math::matrix3f cam_rot = {
-				cam.rotation.vec1,
-				{ 0, cam.rotation.vec2.y, 0 },
-				{ cam.rotation.vec3.x, 0, cam.rotation.vec3.z }
+				cam.rotation.look(),
+				{ 0, cam.rotation.up().y, 0 },
+				{ cam.rotation.right().x, 0, cam.rotation.right().z }
 			};
 			cam_rot.normalize();
 

@@ -8,6 +8,30 @@ namespace math {
         vector3<T> vec2;
         vector3<T> vec3;
 
+        inline auto& look() {
+            return vec1;
+        }
+
+        inline auto& up() {
+            return vec2;
+        }
+
+        inline auto& right() {
+            return vec3;
+        }
+
+        inline const auto& look() const {
+            return vec1;
+        }
+
+        inline const auto& up() const {
+            return vec2;
+        }
+
+        inline const auto& right() const {
+            return vec3;
+        }
+
         inline matrix3 operator*(const matrix3& other) const {
             return {
                 other.vec1 * vec1.x + other.vec2 * vec1.y + other.vec3 * vec1.z,
