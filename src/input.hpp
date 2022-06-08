@@ -51,7 +51,10 @@ namespace input {
 		if (pointer.valid) {
 			math::vector2f pointer_pos = {pointer.x, pointer.y};
 			if ((buttons_held & WPAD_BUTTON_A) && s.was_last_pointer_pos_valid && pointer_pos != s.last_pointer_pos) {
-				return pointer_pos - s.last_pointer_pos;
+				math::vector2f pointer_input_vector = pointer_pos - s.last_pointer_pos;
+                s.was_last_pointer_pos_valid = true;
+                s.last_pointer_pos = pointer_pos;
+                return pointer_input_vector;
 			}
 			s.was_last_pointer_pos_valid = true;
 			s.last_pointer_pos = pointer_pos;

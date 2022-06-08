@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
 	math::vector2f video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
 	math::vector2f video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};
 
-	input::state s;
+	input::state inp;
 
 	for (;;) {
 
@@ -103,32 +103,13 @@ int main(int argc, char** argv) {
 		u32 buttons_held = input::get_buttons_held(0);
 		if (buttons_held & WPAD_BUTTON_HOME) { std::exit(0); }
 
-		// math::vector2f pointer_input_vector = input::get_pointer_input_vector(s, buttons_held);
-		// if (pointer_input_vector.is_non_zero()) {
-		// 	pointer_input_vector *= video_size_reciprocal * cam_rotation_speed;
+		math::vector2f pointer_input_vector = input::get_pointer_input_vector(inp, buttons_held);
+		if (pointer_input_vector.is_non_zero()) {
+			pointer_input_vector *= video_size_reciprocal * cam_rotation_speed;
 			
-		// 	game::rotate_camera(cam, pointer_input_vector.x, pointer_input_vector.y);
+			game::rotate_camera(cam, pointer_input_vector.x, pointer_input_vector.y);
 			
-		// 	cam_upd.update_view = true;
-		// }
-
-		ir_t pointer;
-		WPAD_IR(0, &pointer);
-		if (pointer.valid) {
-			math::vector2f pointer_pos = {pointer.x, pointer.y};
-			if ((buttons_held & WPAD_BUTTON_A) && s.was_last_pointer_pos_valid && pointer_pos != s.last_pointer_pos) {
-				math::vector2f pointer_input_vector = pointer_pos - s.last_pointer_pos;
-
-				pointer_input_vector *= video_size_reciprocal * cam_rotation_speed;
-			
-				game::rotate_camera(cam, pointer_input_vector.x, pointer_input_vector.y);
-				
-				cam_upd.update_view = true;
-			}
-			s.was_last_pointer_pos_valid = true;
-			s.last_pointer_pos = pointer_pos;
-		} else {
-			s.was_last_pointer_pos_valid = false;
+			cam_upd.update_view = true;
 		}
 
 		math::vector3f pad_input_vector = input::get_dpad_input_vector(buttons_held);
