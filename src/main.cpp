@@ -78,29 +78,20 @@ int main(int argc, char** argv) {
 
 	std::vector<game::chunk> chunks;
 
-	{
-		chunks.push_back({ .position = { 0, 0, 0 } });
-		auto& chunk = chunks.back();
-		chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024);
-		chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
-		for (u8 i = 0; i < 32; i++) {
-			for (u8 j = 0; j < 32; j++) {
-				game::add_face_vertices_at_mut_it<game::block::face::TOP>({i, 0, j}, chunk.ms.vertices_data_end, game::block::type::GRASS);
+	for (s32 i = -1; i <= 1; i++) {
+		for (s32 j = -1; j <= 1; j++) {
+			chunks.push_back({ .position = { i, 0, j } });
+			auto& chunk = chunks.back();
+			chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024);
+			chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
+			for (u8 k = 0; k < 32; k++) {
+				for (u8 l = 0; l < 32; l++) {
+					game::add_face_vertices_at_mut_it<game::block::face::TOP>({k, 0, l}, chunk.ms.vertices_data_end, game::block::type::GRASS);
+				}
 			}
 		}
 	}
-	{
-		chunks.push_back({ .position = { 0, 0, 1 } });
-		auto& chunk = chunks.back();
-		chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024);
-		chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
-		for (u8 i = 0; i < 32; i++) {
-			for (u8 j = 0; j < 32; j++) {
-				game::add_face_vertices_at_mut_it<game::block::face::TOP>({i, 0, j}, chunk.ms.vertices_data_end, game::block::type::GRASS);
-			}
-		}
-	}
-
+	
 	for (auto& chunk : chunks) {
 		game::init(chunk, view);
 	}
