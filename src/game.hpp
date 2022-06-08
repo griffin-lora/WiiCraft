@@ -27,6 +27,20 @@ namespace game {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
     }
 
+    inline void move_camera_from_input_vector(camera& cam, math::vector3f input_vector, f32 move_speed) {
+        math::matrix3f cam_rot = {
+            cam.rotation.look(),
+            { 0, cam.rotation.up().y, 0 },
+            { cam.rotation.right().x, 0, cam.rotation.right().z }
+        };
+        cam_rot.normalize();
+
+        math::vector3f move_vector = cam_rot * input_vector;
+
+        move_vector *= move_speed;
+
+        cam.position += move_vector;
+    }
 
     void rotate_camera(camera& cam, f32 x, f32 y);
 

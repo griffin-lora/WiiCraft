@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include "gfx.hpp"
 
 using namespace game;
 
@@ -305,12 +304,4 @@ void game::add_bottom_vertices(math::vector3u8 local_pos, chunk::mesh::vertex::i
             add_cube_bottom_vertices(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
         }
     }
-}
-
-void game::draw_chunk_mesh(chunk::mesh::vertex::const_it it, chunk::mesh::vertex::const_it end) {
-    gfx::draw_quads(end - it, [&it, end]() {
-        for (; it != end; ++it) {
-            gfx::draw_vertex((f32)it->local_position.x, (f32)it->local_position.y, (f32)it->local_position.z, ((f32)it->uv_position.x)/16.f, ((f32)it->uv_position.y)/16.f);
-        }
-    });
 }
