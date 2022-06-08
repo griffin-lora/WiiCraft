@@ -1,6 +1,6 @@
 #pragma once
 #include "math.hpp"
-#include <gccore.h>
+#include "gfx.hpp"
 #include <vector>
 
 namespace game {
@@ -63,6 +63,9 @@ namespace game {
     };
 
     struct chunk {
+        static constexpr u32 SIZE = 32;
+
+        
         struct mesh {
             struct vertex {
                 math::vector3u8 local_position;
@@ -71,9 +74,25 @@ namespace game {
                 using const_it = std::vector<chunk::mesh::vertex>::const_iterator;
             };
             std::vector<vertex> vertices;
-            vertex::it vertices_end;
+            vertex::it vertices_data_end;
         };
+
+        mesh ms;
+
+        const math::vector3s position;
+        math::matrix model;
+        math::matrix model_view;
     };
+
+    inline void update_model_view(chunk& chunk, math::matrix view) {
+        guMtxConcat(view, chunk.model, chunk.model_view);
+    }
+
+    inline void init(chunk& chunk, math::matrix view) {
+        guMtxIdentity(chunk.model);
+        guMtxTransApply(chunk.model, chunk.model, chunk.position.x * chunk::SIZE, chunk.position.y * chunk::SIZE, chunk.position.z * chunk::SIZE);
+        update_model_view(chunk, view);
+    }
 
     std::size_t get_center_vertex_count(block::type type);
     std::size_t get_any_face_vertex_count(block::type type);
@@ -119,6 +138,13 @@ namespace game {
         return it;
     }
 
-    void draw_chunk(const chunk& chunk);
     void draw_chunk_mesh(chunk::mesh::vertex::const_it begin, chunk::mesh::vertex::const_it end);
+    inline void draw_chunk(chunk& chunk) {
+		// load the modelview matrix into matrix memory
+		gfx::set_position_matrix_into_index(chunk.model_view, GX_PNMTX3);
+		
+		gfx::set_position_matrix_from_index(GX_PNMTX3);
+
+		game::draw_chunk_mesh(chunk.ms.vertices.begin(), chunk.ms.vertices_data_end);
+    }
 }

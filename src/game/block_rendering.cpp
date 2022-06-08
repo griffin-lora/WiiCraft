@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include "gfx.hpp"
 
 using namespace game;
 

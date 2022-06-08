@@ -76,20 +76,22 @@ int main(int argc, char** argv) {
 
 	bool first_frame = true;
 
+	std::vector<game::chunk> chunks;
 
-	math::matrix model;
-	math::matrix model_view;
-	guMtxIdentity(model);
-	guMtxTransApply(model, model, 0.0f, 0.0f, 0.f);
-	guMtxConcat(view, model, model_view);
-
-	game::chunk::mesh chunk_mesh = { .vertices = std::vector<game::chunk::mesh::vertex>() };
-	chunk_mesh.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 100);
-	auto it = chunk_mesh.vertices.begin();
-	for (u8 i = 0; i < 64; i++) {
-		for (u8 j = 0; j < 64; j++) {
-			game::add_face_vertices_at_mut_it<game::block::face::TOP>({i, 0, j}, it, game::block::type::GRASS);
+	{
+		chunks.push_back({ .position = { 0, 0, 0 } });
+		auto& chunk = chunks.back();
+		chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 100);
+		chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
+		for (u8 i = 0; i < 32; i++) {
+			for (u8 j = 0; j < 32; j++) {
+				game::add_face_vertices_at_mut_it<game::block::face::TOP>({i, 0, j}, chunk.ms.vertices_data_end, game::block::type::GRASS);
+			}
 		}
+	}
+
+	for (auto& chunk : chunks) {
+		game::init(chunk, view);
 	}
 
 	math::vector2f video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
@@ -141,16 +143,15 @@ int main(int argc, char** argv) {
 
 		// guMtxRotAxisDeg(model, &cube_axis, rquad);
 		if (cam_upd.update_view) {
-			guMtxConcat(view, model, model_view);
+			for (auto& chunk : chunks) {
+				game::update_model_view(chunk, view);
+				game::draw_chunk(chunk);
+			}
+		} else {
+			for (auto& chunk : chunks) {
+				game::draw_chunk(chunk);
+			}
 		}
-
-		// load the modelview matrix into matrix memory
-		gfx::set_position_matrix_into_index(model_view, GX_PNMTX3);
-		
-		gfx::set_position_matrix_from_index(GX_PNMTX3);
-
-		game::draw_chunk_mesh(chunk_mesh.vertices.begin(), it);
-
 
 		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
 		gfx::set_color_buffer_update(true);
