@@ -81,7 +81,18 @@ int main(int argc, char** argv) {
 	{
 		chunks.push_back({ .position = { 0, 0, 0 } });
 		auto& chunk = chunks.back();
-		chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 100);
+		chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024);
+		chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
+		for (u8 i = 0; i < 32; i++) {
+			for (u8 j = 0; j < 32; j++) {
+				game::add_face_vertices_at_mut_it<game::block::face::TOP>({i, 0, j}, chunk.ms.vertices_data_end, game::block::type::GRASS);
+			}
+		}
+	}
+	{
+		chunks.push_back({ .position = { 0, 0, 1 } });
+		auto& chunk = chunks.back();
+		chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024);
 		chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
 		for (u8 i = 0; i < 32; i++) {
 			for (u8 j = 0; j < 32; j++) {
