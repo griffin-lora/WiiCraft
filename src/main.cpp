@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 	for (s32 i = -1; i <= 1; i++) {
 		for (s32 j = -1; j <= 1; j++) {
 			auto size = game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024;
-			chunks.push_back({ .ms = { ext::fixed_array<game::chunk::mesh::vertex>(size) }, .position = { i, 0, j } });
+			chunks.push_back({ .ms = { { size } }, .position = { i, 0, j } });
 			auto& chunk = chunks.back();
 			auto it = chunk.ms.vertices.begin();
 			for (u8 k = 0; k < 32; k++) {
