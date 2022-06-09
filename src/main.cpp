@@ -20,7 +20,7 @@
 #include "input.hpp"
 
 constexpr f32 cam_move_speed = 0.3f;
-constexpr math::vector2f cam_rotation_speed = { 2.0f, 1.0f };
+constexpr glm::vec2 cam_rotation_speed = { 2.0f, 1.0f };
 
 int main(int argc, char** argv) {
 
@@ -60,7 +60,9 @@ int main(int argc, char** argv) {
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	cam.rotation.normalize();
+	glm::normalize(cam.rotation[0]);
+	glm::normalize(cam.rotation[1]);
+	glm::normalize(cam.rotation[2]);
 	game::camera_update_params cam_upd;
 
 	game::update_view(cam, view);
@@ -98,8 +100,8 @@ int main(int argc, char** argv) {
 		game::init(chunk, view);
 	}
 
-	math::vector2f video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
-	math::vector2f video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};
+	glm::vec2 video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
+	glm::vec2 video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};
 
 	input::state inp;
 
@@ -109,18 +111,19 @@ int main(int argc, char** argv) {
 		u32 buttons_held = input::get_buttons_held(0);
 		if (buttons_held & WPAD_BUTTON_HOME) { std::exit(0); }
 
-		math::vector2f pointer_input_vector = input::get_pointer_input_vector(inp, buttons_held);
-		if (pointer_input_vector.is_non_zero()) {
-			pointer_input_vector *= video_size_reciprocal * cam_rotation_speed * -1;
+		glm::vec2 pointer_input_vector = input::get_pointer_input_vector(inp, buttons_held);
+		if (math::is_non_zero(pointer_input_vector)) {
+			pointer_input_vector *= video_size_reciprocal * cam_rotation_speed;
+			pointer_input_vector *= -1.0f;
 			
 			game::rotate_camera(cam, pointer_input_vector.x, pointer_input_vector.y);
 			
 			cam_upd.update_view = true;
 		}
 
-		math::vector3f pad_input_vector = input::get_dpad_input_vector(buttons_held);
+		glm::vec3 pad_input_vector = input::get_dpad_input_vector(buttons_held);
 
-		if (pad_input_vector.is_non_zero()) {
+		if (math::is_non_zero(pad_input_vector)) {
 			game::move_camera_from_input_vector(cam, pad_input_vector, cam_move_speed);
 			
 			cam_upd.update_view = true;

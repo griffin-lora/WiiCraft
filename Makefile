@@ -19,7 +19,7 @@ TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	src src/game
 DATA		:=	data
-INCLUDES	:=  src
+INCLUDES	:=  src lib
 
 #---------------------------------------------------------------------------------
 # options for code generation
