@@ -46,6 +46,8 @@ namespace game {
         type tp;
     };
 
+    bool is_block_visible(block::type type);
+
     struct chunk {
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
