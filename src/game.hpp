@@ -68,6 +68,29 @@ namespace game {
         math::matrix model_view;
     };
 
+    template<typename F>
+    void iterate_over_chunk_positions(F func) {
+        for (u8 x = 0; x < chunk::SIZE; x++) {
+            for (u8 y = 0; y < chunk::SIZE; y++) {
+                for (u8 z = 0; z < chunk::SIZE; z++) {
+                    func({x, y, z});
+                }
+            }
+        }
+    }
+
+    template<typename B, typename F>
+    void iterate_over_chunk_blocks_and_positions(B& blocks, F func) {
+        for (u8 x = 0; x < chunk::SIZE; x++) {
+            for (u8 y = 0; y < chunk::SIZE; y++) {
+                for (u8 z = 0; z < chunk::SIZE; z++) {
+                    math::vector3u8 pos = {x, y, z};
+                    func(blocks[get_index_from_position(pos)], pos);
+                }
+            }
+        }
+    }
+
     inline void update_model_view(chunk& chunk, math::matrix view) {
         guMtxConcat(view, chunk.model, chunk.model_view);
     }
