@@ -65,7 +65,7 @@ namespace game {
 
     struct chunk {
         static constexpr s32 SIZE = 32;
-
+        static constexpr u32 CHUNK_SIZE = SIZE * SIZE * SIZE;
         
         struct mesh {
             struct vertex {
@@ -76,6 +76,7 @@ namespace game {
         };
 
         mesh ms;
+        ext::data_array<block> blocks = { CHUNK_SIZE };
 
         const math::vector3s position;
         math::matrix model;

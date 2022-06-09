@@ -47,9 +47,6 @@ int main(int argc, char** argv) {
 	math::matrix view; // view and perspective matrices
 	math::matrix44 perspective;
 
-	// setup our camera at the origin
-	// looking down the -z axis with y up
-
 	game::camera cam = {
 		.position = {0.0f, 3.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
