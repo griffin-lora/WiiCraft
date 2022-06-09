@@ -2,38 +2,39 @@
 #include <vector>
 
 namespace ext {
-    // This is a custom container that stores an array with a fixed size but the initial size is not known at compile time
+    // This is a custom container that stores POD arrays.
     template<typename T, typename A = std::allocator<T>>
-    class fixed_array {
+    class data_array {
+        static_assert(std::is_pod_v<T>, "T must be a POD type.");
         std::size_t m_size;
         T* m_data;
         A alloc;
         public:
-            inline fixed_array(std::size_t m_size) {
+            inline data_array(std::size_t m_size) {
                 this->m_size = m_size;
                 this->m_data = alloc.allocate(m_size);
             }
-            inline fixed_array(fixed_array&& other) {
+            inline data_array(data_array&& other) {
                 this->m_size = other.m_size;
                 this->m_data = other.m_data;
                 other.m_size = 0;
                 other.m_data = nullptr;
             }
 
-            inline ~fixed_array() {
+            inline ~data_array() {
                 if (m_data != nullptr) {
                     alloc.deallocate(m_data, m_size);
                 }
             }
 
-            fixed_array(const fixed_array& other) = delete;
-            fixed_array& operator=(const fixed_array& other) = delete;
+            data_array(const data_array& other) = delete;
+            data_array& operator=(const data_array& other) = delete;
 
             using pointer = T*;
             using const_pointer = const T*;
 
-            using iterator = __gnu_cxx::__normal_iterator<T*, fixed_array>;
-            using const_iterator = __gnu_cxx::__normal_iterator<const T*, fixed_array>;
+            using iterator = __gnu_cxx::__normal_iterator<T*, data_array>;
+            using const_iterator = __gnu_cxx::__normal_iterator<const T*, data_array>;
 
             inline T& operator[](std::size_t index) { return m_data[index]; }
             inline const T& operator[](std::size_t index) const { return m_data[index]; }

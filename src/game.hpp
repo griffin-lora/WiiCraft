@@ -1,7 +1,7 @@
 #pragma once
 #include "math.hpp"
 #include "gfx.hpp"
-#include "ext/fixed_array.hpp"
+#include "ext/data_array.hpp"
 #include <vector>
 
 namespace game {
@@ -72,7 +72,7 @@ namespace game {
                 math::vector3u8 local_position;
                 math::vector2u8 uv_position;
             };
-            ext::fixed_array<vertex> vertices;
+            ext::data_array<vertex> vertices;
         };
 
         mesh ms;
@@ -104,7 +104,7 @@ namespace game {
         }
     }
 
-    using vertex_it = ext::fixed_array<chunk::mesh::vertex>::iterator;
+    using vertex_it = ext::data_array<chunk::mesh::vertex>::iterator;
 
     void add_center_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_front_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
@@ -138,7 +138,7 @@ namespace game {
         return it;
     }
 
-    inline void draw_chunk_mesh_vertices(const ext::fixed_array<chunk::mesh::vertex>& vertices) {
+    inline void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices) {
         gfx::draw_quads(vertices.size(), [&vertices]() {
             for (auto& v : vertices) {
                 gfx::draw_vertex((f32)v.local_position.x, (f32)v.local_position.y, (f32)v.local_position.z, ((f32)v.uv_position.x)/16.f, ((f32)v.uv_position.y)/16.f);
