@@ -138,16 +138,16 @@ static void add_cube_bottom_vertices(math::vector3u8 l, math::vector3u8 lo, math
     };
 }
 
-inline math::vector3u8 get_local_position_offset(math::vector3u8 local_pos) {
+static inline math::vector3u8 get_local_position_offset(math::vector3u8 local_pos) {
     return { local_pos.x + 1, local_pos.y + 1, local_pos.z + 1 };
 }
 
-inline math::vector2u8 get_uv_position_offset(math::vector2u8 uv_pos) {
+static inline math::vector2u8 get_uv_position_offset(math::vector2u8 uv_pos) {
     return { uv_pos.x + 1, uv_pos.y + 1 };
 }
 
 template<typename F>
-void add_cube_vertices(F func, math::vector2u8 uv_pos, math::vector3u8 local_pos, vertex_it& it) {
+static void add_cube_vertices(F func, math::vector2u8 uv_pos, math::vector3u8 local_pos, vertex_it& it) {
     func(local_pos, get_local_position_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos), it);
 }
 
