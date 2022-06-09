@@ -1,4 +1,6 @@
 #include "game.hpp"
+#include "dbg.hpp"
+#include <cstdio>
 
 using namespace game;
 
@@ -30,8 +32,8 @@ inline void iter_chunk_vec(F func) {
 void game::generate_blocks(chunk& chunk) {
     iter_chunk_vec([&chunk](math::vector3u8 pos) {
         auto& block = chunk.blocks[get_index_from_position(pos)];
-        if (pos.y == 0) {
-            block = { .tp = block::type::GRASS };
+        if (pos.y == 2) {
+            block = { .tp = block::type::DEBUG };
         } else {
             block = { .tp = block::type::AIR };
         }
@@ -57,31 +59,29 @@ constexpr math::vector3u8 get_vector_moved_towards_face(math::vector3u8 inp) {
     return vec;
 }
 
-bool is_block_transparent(block block) {
+bool is_block_visible(block block) {
     switch (block.tp) {
         default:
         case block::type::AIR:
-            return true;
+            return false;
         case block::type::GRASS:
         case block::type::DEBUG:
-            return false;
+            return true;
     }
 }
 
 template<block::face face>
 bool should_render_face(const chunk& chunk, math::vector3u8 pos) {
     auto& block = chunk.blocks[get_index_from_position(pos)];
-    switch (block.tp) {
-        default:
-        case block::type::AIR: return false;
-        case block::type::GRASS: {
-            auto check_pos = pos + get_vector_moved_towards_face<block::face::FRONT>(pos);
-            if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
-                return false;
-            }
-            auto& check_block = chunk.blocks[get_index_from_position(check_pos)];
-            return !is_block_transparent(check_block);
-        } break;
+    if (is_block_visible(block)) {
+        auto check_pos = get_vector_moved_towards_face<block::face::FRONT>(pos);
+        if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
+            return true;
+        }
+        auto& check_block = chunk.blocks[get_index_from_position(check_pos)];
+        return !is_block_visible(check_block);
+    } else {
+        return false;
     }
 }
 
@@ -127,6 +127,11 @@ void game::update_mesh(chunk& chunk) {
         add_face_vertices_for_block<block::face::TOP>(chunk, it, pos);
         add_face_vertices_for_block<block::face::BOTTOM>(chunk, it, pos);
     });
+    if (it != chunk.ms.vertices.end()) {
+        dbg::error([]() {
+            std::printf("vertex count mismatch\n");
+        });
+    }
 }
 
 void game::draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices) {
