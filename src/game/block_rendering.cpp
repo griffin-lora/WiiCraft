@@ -2,10 +2,10 @@
 
 using namespace game;
 
-void game::draw_chunk_mesh(chunk::mesh::vertex::const_it it, chunk::mesh::vertex::const_it end) {
-    gfx::draw_quads(end - it, [&it, end]() {
-        for (; it != end; ++it) {
-            gfx::draw_vertex((f32)it->local_position.x, (f32)it->local_position.y, (f32)it->local_position.z, ((f32)it->uv_position.x)/16.f, ((f32)it->uv_position.y)/16.f);
+void game::draw_chunk_mesh_vertices(const ext::fixed_array<chunk::mesh::vertex>& vertices) {
+    gfx::draw_quads(vertices.size(), [&vertices]() {
+        for (auto& v : vertices) {
+            gfx::draw_vertex((f32)v.local_position.x, (f32)v.local_position.y, (f32)v.local_position.z, ((f32)v.uv_position.x)/16.f, ((f32)v.uv_position.y)/16.f);
         }
     });
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "math.hpp"
 #include "gfx.hpp"
+#include "ext/fixed_array.hpp"
 #include <vector>
 
 namespace game {
@@ -70,11 +71,8 @@ namespace game {
             struct vertex {
                 math::vector3u8 local_position;
                 math::vector2u8 uv_position;
-                using it = std::vector<chunk::mesh::vertex>::iterator;
-                using const_it = std::vector<chunk::mesh::vertex>::const_iterator;
             };
-            std::vector<vertex> vertices;
-            vertex::it vertices_data_end;
+            ext::fixed_array<vertex> vertices;
         };
 
         mesh ms;
@@ -106,16 +104,18 @@ namespace game {
         }
     }
 
-    void add_center_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
-    void add_front_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
-    void add_back_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
-    void add_left_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
-    void add_right_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
-    void add_top_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
-    void add_bottom_vertices(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type);
+    using vertex_it = ext::fixed_array<chunk::mesh::vertex>::iterator;
+
+    void add_center_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_front_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_back_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_left_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_right_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_top_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_bottom_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
 
     template<block::face face>
-    constexpr void add_face_vertices_at_mut_it(math::vector3u8 local_position, chunk::mesh::vertex::it& it, block::type type) {
+    constexpr void add_face_vertices_at_mut_it(math::vector3u8 local_position, vertex_it& it, block::type type) {
         if constexpr (face == block::face::CENTER) {
             add_center_vertices(local_position, it, type);
         } else if constexpr (face == block::face::FRONT) {
@@ -133,18 +133,18 @@ namespace game {
         }
     }
     template<block::face face>
-    constexpr chunk::mesh::vertex::it add_face_vertices_at(math::vector3u8 local_position, chunk::mesh::vertex::it it, block::type type) {
+    constexpr auto add_face_vertices_at(math::vector3u8 local_position, vertex_it it, block::type type) {
         add_face_vertices_at_mut_it<face>(local_position, it, type);
         return it;
     }
 
-    void draw_chunk_mesh(chunk::mesh::vertex::const_it begin, chunk::mesh::vertex::const_it end);
+    void draw_chunk_mesh_vertices(const ext::fixed_array<chunk::mesh::vertex>& vertices);
     inline void draw_chunk(chunk& chunk) {
 		// load the modelview matrix into matrix memory
 		gfx::set_position_matrix_into_index(chunk.model_view, GX_PNMTX3);
 		
 		gfx::set_position_matrix_from_index(GX_PNMTX3);
 
-		game::draw_chunk_mesh(chunk.ms.vertices.begin(), chunk.ms.vertices_data_end);
+		game::draw_chunk_mesh_vertices(chunk.ms.vertices);
     }
 }

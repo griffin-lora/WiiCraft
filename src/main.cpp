@@ -80,14 +80,19 @@ int main(int argc, char** argv) {
 
 	for (s32 i = -1; i <= 1; i++) {
 		for (s32 j = -1; j <= 1; j++) {
-			chunks.push_back({ .position = { i, 0, j } });
+			auto size = game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024;
+			chunks.push_back({ .ms = { ext::fixed_array<game::chunk::mesh::vertex>(size) }, .position = { i, 0, j } });
 			auto& chunk = chunks.back();
-			chunk.ms.vertices.resize(game::get_face_vertex_count<game::block::face::TOP>(game::block::type::GRASS) * 1024);
-			chunk.ms.vertices_data_end = chunk.ms.vertices.begin();
+			auto it = chunk.ms.vertices.begin();
 			for (u8 k = 0; k < 32; k++) {
 				for (u8 l = 0; l < 32; l++) {
-					game::add_face_vertices_at_mut_it<game::block::face::TOP>({k, 0, l}, chunk.ms.vertices_data_end, game::block::type::GRASS);
+					game::add_face_vertices_at_mut_it<game::block::face::TOP>({k, 0, l}, it, game::block::type::GRASS);
 				}
+			}
+			if (it != chunk.ms.vertices.end()) {
+				dbg::error([it, &chunk]() {
+					std::printf("0x%p, 0x%p\n", &(*it), &(*chunk.ms.vertices.end()));
+				});
 			}
 		}
 	}
