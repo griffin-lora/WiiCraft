@@ -68,6 +68,16 @@ namespace game {
         math::matrix model_view;
     };
 
+    inline void update_model_view(chunk& chunk, math::matrix view) {
+        guMtxConcat(view, chunk.model, chunk.model_view);
+    }
+
+    math::vector3u8 get_position_from_index(std::size_t index);
+    inline std::size_t get_index_from_position(math::vector3u8 position) {
+        return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
+    }
+    void init(chunk& chunk, math::matrix view);
+
     template<typename F>
     void iterate_over_chunk_positions(F func) {
         for (u8 x = 0; x < chunk::SIZE; x++) {
@@ -91,15 +101,6 @@ namespace game {
         }
     }
 
-    inline void update_model_view(chunk& chunk, math::matrix view) {
-        guMtxConcat(view, chunk.model, chunk.model_view);
-    }
-
-    math::vector3u8 get_position_from_index(std::size_t index);
-    inline std::size_t get_index_from_position(math::vector3u8 position) {
-        return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
-    }
-    void init(chunk& chunk, math::matrix view);
     void generate_blocks(chunk& chunk);
     void update_mesh(chunk& chunk);
 
