@@ -45,5 +45,10 @@ namespace math {
         return mat[2];
     }
 
+    template<typename V>
+    inline void normalize(V& v) {
+        v = glm::normalize(v);
+    }
+
     glm::mat3x3 from_euler_angles(f32 yaw, f32 pitch, f32 roll);
 };

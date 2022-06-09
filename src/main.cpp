@@ -60,9 +60,9 @@ int main(int argc, char** argv) {
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	glm::normalize(cam.rotation[0]);
-	glm::normalize(cam.rotation[1]);
-	glm::normalize(cam.rotation[2]);
+	math::normalize(cam.rotation[0]);
+	math::normalize(cam.rotation[1]);
+	math::normalize(cam.rotation[2]);
 	game::camera_update_params cam_upd;
 
 	game::update_view(cam, view);
