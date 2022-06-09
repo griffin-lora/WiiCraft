@@ -2,7 +2,7 @@
 
 using namespace math;
 
-glm::mat3x3 math::from_euler_angles(f32 yaw, f32 pitch, f32 roll) {
+glm::mat3 math::from_euler_angles(f32 yaw, f32 pitch, f32 roll) {
     f32 ch = cosf(yaw);
     f32 sh = sinf(yaw);
     f32 ca = cosf(pitch);

@@ -21,27 +21,27 @@ namespace math {
         return v.x != 0 || v.y != 0 || v.z != 0;
     }
 
-    inline const glm::vec3& look(const glm::mat3x3& mat) {
+    inline const glm::vec3& look(const glm::mat3& mat) {
         return mat[0];
     }
 
-    inline const glm::vec3& up(const glm::mat3x3& mat) {
+    inline const glm::vec3& up(const glm::mat3& mat) {
         return mat[1];
     }
 
-    inline const glm::vec3& right(const glm::mat3x3& mat) {
+    inline const glm::vec3& right(const glm::mat3& mat) {
         return mat[2];
     }
 
-    inline glm::vec3& look(glm::mat3x3& mat) {
+    inline glm::vec3& look(glm::mat3& mat) {
         return mat[0];
     }
 
-    inline glm::vec3& up(glm::mat3x3& mat) {
+    inline glm::vec3& up(glm::mat3& mat) {
         return mat[1];
     }
 
-    inline glm::vec3& right(glm::mat3x3& mat) {
+    inline glm::vec3& right(glm::mat3& mat) {
         return mat[2];
     }
 
@@ -50,5 +50,5 @@ namespace math {
         v = glm::normalize(v);
     }
 
-    glm::mat3x3 from_euler_angles(f32 yaw, f32 pitch, f32 roll);
+    glm::mat3 from_euler_angles(f32 yaw, f32 pitch, f32 roll);
 };

@@ -8,7 +8,7 @@ void game::update_view(const camera& cam, math::matrix view) {
 }
 
 void game::move_camera_from_input_vector(camera& cam, const glm::vec3& input_vector, f32 move_speed) {
-    glm::mat3x3 cam_rot = {
+    glm::mat3 cam_rot = {
         math::look(cam.rotation),
         { 0, math::up(cam.rotation).y, 0 },
         { math::right(cam.rotation).x, 0, math::right(cam.rotation).z }

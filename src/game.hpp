@@ -8,7 +8,7 @@ namespace game {
     struct camera {
         glm::vec3 position;
         glm::vec3 up;
-        glm::mat3x3 rotation;
+        glm::mat3 rotation;
         f32 fov;
         f32 aspect;
         f32 near_clipping_plane_distance;
