@@ -20,30 +20,13 @@ namespace game {
 	    bool update_perspective = false;
     };
 
-    inline void update_view(const camera& cam, math::matrix view) {
-        auto look_at = cam.position + cam.rotation.look();
-        guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
-    }
+    void update_view(const camera& cam, math::matrix view);
+    void move_camera_from_input_vector(camera& cam, const math::vector3f& input_vector, f32 move_speed);
+    void rotate_camera(camera& cam, f32 x, f32 y);
+
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
     }
-
-    inline void move_camera_from_input_vector(camera& cam, math::vector3f input_vector, f32 move_speed) {
-        math::matrix3f cam_rot = {
-            cam.rotation.look(),
-            { 0, cam.rotation.up().y, 0 },
-            { cam.rotation.right().x, 0, cam.rotation.right().z }
-        };
-        cam_rot.normalize();
-
-        math::vector3f move_vector = cam_rot * input_vector;
-
-        move_vector *= move_speed;
-
-        cam.position += move_vector;
-    }
-
-    void rotate_camera(camera& cam, f32 x, f32 y);
 
     struct block {
         enum class face : u8 {
@@ -87,11 +70,7 @@ namespace game {
         guMtxConcat(view, chunk.model, chunk.model_view);
     }
 
-    inline void init(chunk& chunk, math::matrix view) {
-        guMtxIdentity(chunk.model);
-        guMtxTransApply(chunk.model, chunk.model, chunk.position.x * chunk::SIZE, chunk.position.y * chunk::SIZE, chunk.position.z * chunk::SIZE);
-        update_model_view(chunk, view);
-    }
+    void init(chunk& chunk, math::matrix view);
 
     std::size_t get_center_vertex_count(block::type type);
     std::size_t get_any_face_vertex_count(block::type type);
@@ -139,19 +118,6 @@ namespace game {
         return it;
     }
 
-    inline void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices) {
-        gfx::draw_quads(vertices.size(), [&vertices]() {
-            for (auto& v : vertices) {
-                gfx::draw_vertex((f32)v.local_position.x, (f32)v.local_position.y, (f32)v.local_position.z, ((f32)v.uv_position.x)/16.f, ((f32)v.uv_position.y)/16.f);
-            }
-        });
-    }
-    inline void draw_chunk(chunk& chunk) {
-		// load the modelview matrix into matrix memory
-		gfx::set_position_matrix_into_index(chunk.model_view, GX_PNMTX3);
-		
-		gfx::set_position_matrix_from_index(GX_PNMTX3);
-
-		game::draw_chunk_mesh_vertices(chunk.ms.vertices);
-    }
+    void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
+    void draw_chunk(chunk& chunk);
 }

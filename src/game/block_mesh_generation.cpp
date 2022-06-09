@@ -18,7 +18,7 @@ std::size_t game::get_any_face_vertex_count(block::type type) {
     }
 }
 
-inline void add_cube_front_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
+static void add_cube_front_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
     // +x
     *it++ = {
         { lo.x,lo.y, l.z },	// Top Left of the quad (bottom)
@@ -38,7 +38,7 @@ inline void add_cube_front_vertices(math::vector3u8 l, math::vector3u8 lo, math:
     };
 }
 
-inline void add_cube_back_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
+static void add_cube_back_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
     // -x
     *it++ = {
         {  l.x, lo.y, l.z },	// Top Left of the quad (top)
@@ -58,7 +58,7 @@ inline void add_cube_back_vertices(math::vector3u8 l, math::vector3u8 lo, math::
     };
 }
 
-inline void add_cube_left_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
+static void add_cube_left_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
     // +z
     *it++ = {
         {  lo.x, l.y,lo.z },	// Top Right Of The Quad (Right)
@@ -78,7 +78,7 @@ inline void add_cube_left_vertices(math::vector3u8 l, math::vector3u8 lo, math::
     };
 }
 
-inline void add_cube_right_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
+static void add_cube_right_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
     // -z
     *it++ = {
         { lo.x, l.y, l.z },	// Top Right Of The Quad (Left)
@@ -98,7 +98,7 @@ inline void add_cube_right_vertices(math::vector3u8 l, math::vector3u8 lo, math:
     };
 }
 
-inline void add_cube_top_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
+static void add_cube_top_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
     // +y
    *it++ = {
         { l.x,lo.y,lo.z },	// Bottom Left Of The Quad (Back)
@@ -118,7 +118,7 @@ inline void add_cube_top_vertices(math::vector3u8 l, math::vector3u8 lo, math::v
     };
 }
 
-inline void add_cube_bottom_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
+static void add_cube_bottom_vertices(math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo, vertex_it& it) {
     // -y
     *it++ = {
         { l.x, l.y, lo.z },		// Top Right Of The Quad (Front)
