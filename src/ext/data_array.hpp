@@ -10,6 +10,7 @@ namespace ext {
         T* m_data;
         A alloc;
         public:
+            inline data_array() : m_size(0), m_data(nullptr) {}
             inline data_array(std::size_t m_size) : m_size(m_size), m_data(alloc.allocate(m_size)) {}
             inline data_array(data_array&& other) {
                 this->m_size = other.m_size;

@@ -48,7 +48,7 @@ namespace game {
 
     struct chunk {
         static constexpr s32 SIZE = 32;
-        static constexpr u32 CHUNK_SIZE = SIZE * SIZE * SIZE;
+        static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         
         struct mesh {
             struct vertex {
@@ -59,7 +59,7 @@ namespace game {
         };
 
         mesh ms;
-        ext::data_array<block> blocks = { CHUNK_SIZE };
+        ext::data_array<block> blocks = { BLOCKS_COUNT };
 
         const math::vector3s position;
         math::matrix model;
@@ -70,7 +70,16 @@ namespace game {
         guMtxConcat(view, chunk.model, chunk.model_view);
     }
 
+    math::vector3u8 get_position_from_index(std::size_t index);
+    inline std::size_t get_index_from_position(math::vector3u8 position) {
+        return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
+    }
     void init(chunk& chunk, math::matrix view);
+    void generate_blocks(chunk& chunk);
+    void update_mesh(chunk& chunk);
+
+    void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
+    void draw_chunk(chunk& chunk);
 
     std::size_t get_center_vertex_count(block::type type);
     std::size_t get_any_face_vertex_count(block::type type);
@@ -117,7 +126,4 @@ namespace game {
         add_face_vertices_at_mut_it<face>(local_position, it, type);
         return it;
     }
-
-    void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
-    void draw_chunk(chunk& chunk);
 }
