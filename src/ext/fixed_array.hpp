@@ -3,14 +3,15 @@
 
 namespace ext {
     // This is a custom container that stores an array with a fixed size but the initial size is not known at compile time
-    template<typename T>
+    template<typename T, typename A = std::allocator<T>>
     class fixed_array {
         std::size_t m_size;
         T* m_data;
+        A alloc;
         public:
             inline fixed_array(std::size_t m_size) {
                 this->m_size = m_size;
-                this->m_data = new T[m_size];
+                this->m_data = alloc.allocate(m_size);
             }
             inline fixed_array(fixed_array&& other) {
                 this->m_size = other.m_size;
@@ -19,7 +20,11 @@ namespace ext {
                 other.m_data = nullptr;
             }
 
-            inline ~fixed_array() { delete[] m_data; }
+            inline ~fixed_array() {
+                if (m_data != nullptr) {
+                    alloc.deallocate(m_data, m_size);
+                }
+            }
 
             fixed_array(const fixed_array& other) = delete;
             fixed_array& operator=(const fixed_array& other) = delete;
