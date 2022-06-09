@@ -2,7 +2,7 @@
 #include <vector>
 
 namespace ext {
-    // This is a custom container that stores POD arrays.
+    // This is a custom container that stores a POD array.
     template<typename T, typename A = std::allocator<T>>
     class data_array {
         static_assert(std::is_pod_v<T>, "T must be a POD type.");
@@ -35,6 +35,12 @@ namespace ext {
 
             using iterator = __gnu_cxx::__normal_iterator<T*, data_array>;
             using const_iterator = __gnu_cxx::__normal_iterator<const T*, data_array>;
+
+            inline void resize_without_copying(std::size_t new_size) {
+                alloc.deallocate(m_data, m_size);
+                m_size = new_size;
+                m_data = alloc.allocate(m_size);
+            }
 
             inline T& operator[](std::size_t index) { return m_data[index]; }
             inline const T& operator[](std::size_t index) const { return m_data[index]; }
