@@ -18,6 +18,7 @@
 #include "math.hpp"
 #include "game.hpp"
 #include "input.hpp"
+#include <map>
 
 constexpr f32 cam_move_speed = 0.3f;
 constexpr glm::vec2 cam_rotation_speed = { 2.0f, 1.0f };
@@ -75,19 +76,19 @@ int main(int argc, char** argv) {
 
 	bool first_frame = true;
 
-	std::vector<game::chunk> chunks;
+	std::unordered_map<math::vector3s32, game::chunk> chunks;
 
 	for (s32 i = -1; i <= 1; i++) {
 		for (s32 j = -1; j <= 1; j++) {
-			chunks.push_back({ .position = { i, 0, j } });
-			auto& chunk = chunks.back();
+			chunks.insert(std::make_pair<math::vector3s32, game::chunk>({i, 0, j}, {}));
+			auto& chunk = chunks.at({i, 0, j});
 			game::generate_blocks(chunk);
 			game::update_mesh(chunk);
 		}
 	}
 	
-	for (auto& chunk : chunks) {
-		game::init(chunk, view);
+	for (auto& [ pos, chunk ] : chunks) {
+		game::init(chunk, pos, view);
 	}
 
 	glm::vec2 video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
@@ -140,12 +141,12 @@ int main(int argc, char** argv) {
 
 		// guMtxRotAxisDeg(model, &cube_axis, rquad);
 		if (cam_upd.update_view) {
-			for (auto& chunk : chunks) {
+			for (auto& [ pos, chunk ] : chunks) {
 				game::update_model_view(chunk, view);
 				game::draw_chunk(chunk);
 			}
 		} else {
-			for (auto& chunk : chunks) {
+			for (auto& [ pos, chunk ] : chunks) {
 				game::draw_chunk(chunk);
 			}
 		}

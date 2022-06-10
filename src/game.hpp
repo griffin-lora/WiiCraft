@@ -63,7 +63,6 @@ namespace game {
         mesh ms;
         ext::data_array<block> blocks = { BLOCKS_COUNT };
 
-        const math::vector3s position;
         math::matrix model;
         math::matrix model_view;
     };
@@ -76,7 +75,7 @@ namespace game {
     inline std::size_t get_index_from_position(math::vector3u8 position) {
         return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
     }
-    void init(chunk& chunk, math::matrix view);
+    void init(chunk& chunk, math::vector3s32 position, math::matrix view);
 
     template<typename F>
     void iterate_over_chunk_positions(F func) {

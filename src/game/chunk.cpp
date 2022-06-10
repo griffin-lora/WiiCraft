@@ -2,9 +2,9 @@
 
 using namespace game;
 
-void game::init(chunk& chunk, math::matrix view) {
+void game::init(chunk& chunk, math::vector3s32 pos, math::matrix view) {
     guMtxIdentity(chunk.model);
-    guMtxTransApply(chunk.model, chunk.model, chunk.position.x * chunk::SIZE, chunk.position.y * chunk::SIZE, chunk.position.z * chunk::SIZE);
+    guMtxTransApply(chunk.model, chunk.model, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
     update_model_view(chunk, view);
 }
 
