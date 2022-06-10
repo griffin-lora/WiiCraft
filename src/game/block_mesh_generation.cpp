@@ -9,12 +9,9 @@ std::size_t game::get_center_vertex_count(block::type type) {
 std::size_t game::get_any_face_vertex_count(block::type type) {
     switch (type) {
         default:
-        case block::type::AIR: {
-            return 0;
-        }
-        case block::type::GRASS: {
-            return 4;
-        }
+        case block::type::AIR: return 0;
+        case block::type::DEBUG:
+        case block::type::GRASS: return 4;
     }
 }
 
