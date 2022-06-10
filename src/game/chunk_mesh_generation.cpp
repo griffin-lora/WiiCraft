@@ -86,8 +86,8 @@ void game::update_mesh(chunk& chunk) {
     });
 
     if (it != chunk.ms.vertices.end()) {
-        dbg::error([]() {
-            printf("Vertex count mismatch!\n");
+        dbg::error([&chunk, it]() {
+            printf("Vertex count mismatch! Expected %d vertices but got %d vertices\n", chunk.ms.vertices.size(), it - chunk.ms.vertices.begin());
         });
     }
 }
