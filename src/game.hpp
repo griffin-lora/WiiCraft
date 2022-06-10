@@ -48,6 +48,25 @@ namespace game {
 
     bool is_block_visible(block::type type);
 
+    template<block::face face, typename T>
+    constexpr T get_face_offset_position(T pos) {
+        T offset_pos = pos;
+        if constexpr (face == block::face::FRONT) {
+            offset_pos.x += 1;
+        } else if constexpr (face == block::face::BACK) {
+            offset_pos.x -= 1;
+        } else if constexpr (face == block::face::LEFT) {
+            offset_pos.z += 1;
+        } else if constexpr (face == block::face::RIGHT) {
+            offset_pos.z -= 1;
+        } else if constexpr (face == block::face::TOP) {
+            offset_pos.y += 1;
+        } else if constexpr (face == block::face::BOTTOM) {
+            offset_pos.y -= 1;
+        }
+        return offset_pos;
+    }
+
     struct chunk {
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
@@ -72,10 +91,11 @@ namespace game {
     }
 
     math::vector3u8 get_position_from_index(std::size_t index);
-    inline std::size_t get_index_from_position(math::vector3u8 position) {
+    template<typename T>
+    inline std::size_t get_index_from_position(T position) {
         return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
     }
-    void init(chunk& chunk, math::vector3s32 position, math::matrix view);
+    void init(chunk& chunk, const math::vector3s32& position, math::matrix view);
 
     template<typename F>
     void iterate_over_chunk_positions(F func) {
@@ -101,7 +121,18 @@ namespace game {
     }
 
     void generate_blocks(chunk& chunk);
-    void update_mesh(chunk& chunk);
+
+    struct chunk_neighbors {
+        const chunk* front;
+        const chunk* back;
+        const chunk* left;
+        const chunk* right;
+        const chunk* top;
+        const chunk* bottom;
+    };
+
+    chunk_neighbors get_chunk_neighbors(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& chunk_position);
+    void update_mesh(chunk& chunk, const chunk_neighbors& neighbors);
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);

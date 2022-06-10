@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 	input::init(con.rmode->viWidth, con.rmode->viHeight);
 
 	gfx::draw_state draw;
-	gfx::init(draw, {0x0, 0x0, 0x0, 0xFF});
+	gfx::init(draw, {0xFF, 0xFF, 0xFF, 0xFF});
 
 	GX_SetCullMode(GX_CULL_BACK);
 
@@ -81,9 +81,10 @@ int main(int argc, char** argv) {
 	for (s32 i = -1; i <= 1; i++) {
 		for (s32 j = -1; j <= 1; j++) {
 			chunks.insert(std::make_pair<math::vector3s32, game::chunk>({i, 0, j}, {}));
-			auto& chunk = chunks.at({i, 0, j});
+			math::vector3s32 pos = {i, 0, j};
+			auto& chunk = chunks.at(pos);
 			game::generate_blocks(chunk);
-			game::update_mesh(chunk);
+			game::update_mesh(chunk, game::get_chunk_neighbors(chunks, pos));
 		}
 	}
 	

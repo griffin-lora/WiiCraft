@@ -2,7 +2,7 @@
 
 using namespace game;
 
-void game::init(chunk& chunk, math::vector3s32 pos, math::matrix view) {
+void game::init(chunk& chunk, const math::vector3s32& pos, math::matrix view) {
     guMtxIdentity(chunk.model);
     guMtxTransApply(chunk.model, chunk.model, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
     update_model_view(chunk, view);
@@ -24,4 +24,25 @@ void game::generate_blocks(chunk& chunk) {
             block = { .tp = block::type::AIR };
         }
     });
+}
+
+template<block::face face>
+static inline const chunk* get_chunk_neighbor(const std::unordered_map<math::vector3s32, chunk>& chunks, math::vector3s32 pos) {
+    pos = get_face_offset_position<face>(pos);
+    if (chunks.count(pos) == 0) {
+        return nullptr;
+    } else {
+        return &chunks.at(pos);
+    }
+}
+
+chunk_neighbors game::get_chunk_neighbors(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& pos) {
+    return {
+        .front = get_chunk_neighbor<block::face::FRONT>(chunks, pos),
+        .back = get_chunk_neighbor<block::face::BACK>(chunks, pos),
+        .left = get_chunk_neighbor<block::face::LEFT>(chunks, pos),
+        .right = get_chunk_neighbor<block::face::RIGHT>(chunks, pos),
+        .top = get_chunk_neighbor<block::face::TOP>(chunks, pos),
+        .bottom = get_chunk_neighbor<block::face::BOTTOM>(chunks, pos),
+    };
 }

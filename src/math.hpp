@@ -52,4 +52,10 @@ namespace math {
     }
 
     glm::mat3 from_euler_angles(f32 yaw, f32 pitch, f32 roll);
+    
+    template<typename T>
+    T mod(T a, T b) {
+        T ret = a % b;
+        return ret >= 0 ? ret : ret + b;
+    }
 };
