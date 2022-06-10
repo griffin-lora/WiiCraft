@@ -31,12 +31,12 @@ namespace game {
     struct block {
         enum class face : u8 {
             CENTER,
-            FRONT,
-            BACK,
-            LEFT,
-            RIGHT,
-            TOP,
-            BOTTOM
+            FRONT, // +x
+            BACK, // -x
+            LEFT, // +z
+            RIGHT, // -z
+            TOP, // +y
+            BOTTOM // -z
         };
         enum class type : u8 {
             AIR,
