@@ -97,9 +97,12 @@ int main(int argc, char** argv) {
 		auto joystick_input_vector = input::get_joystick_input_vector();
 		auto plus_minus_input_scalar = input::get_plus_minus_input_scalar(buttons_held);
 
-		if (math::is_non_zero(joystick_input_vector)) {
-			glm::vec3 input_vector = { joystick_input_vector.y, plus_minus_input_scalar, -joystick_input_vector.x };
-			math::normalize(input_vector);
+		if (math::is_non_zero(joystick_input_vector) || plus_minus_input_scalar != 0) {
+			if (glm::length(joystick_input_vector) < 6.0f) {
+				joystick_input_vector.x = 0;
+				joystick_input_vector.y = 0;
+			}
+			glm::vec3 input_vector = { joystick_input_vector.y / 100.0f, plus_minus_input_scalar, -joystick_input_vector.x / 100.0f };
 			game::move_camera_from_input_vector(cam, input_vector, cam_move_speed);
 			
 			cam_upd.update_view = true;
