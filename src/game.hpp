@@ -150,6 +150,18 @@ namespace game {
         }
     }
 
+    template<typename B, typename F>
+    void iterate_over_chunk_positions_and_blocks(B& blocks, F func) {
+        for (u8 x = 0; x < chunk::SIZE; x++) {
+            for (u8 y = 0; y < chunk::SIZE; y++) {
+                for (u8 z = 0; z < chunk::SIZE; z++) {
+                    math::vector3u8 pos = {x, y, z};
+                    func(pos, blocks[get_index_from_position(pos)]);
+                }
+            }
+        }
+    }
+
     void generate_blocks(chunk& chunk);
 
     void update_mesh(chunk& chunk);
@@ -175,17 +187,17 @@ namespace game {
 
     using vertex_it = ext::data_array<chunk::mesh::vertex>::iterator;
 
-    void add_front_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
-    void add_back_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
-    void add_left_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
-    void add_right_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
-    void add_top_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
-    void add_bottom_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
-    void add_center_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_front_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_back_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_left_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_right_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_top_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_bottom_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_center_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
 
     template<block::face face>
-    constexpr void add_face_vertices(math::vector3u8 local_position, vertex_it& it, block::type type) {
-        call_face_func_if<void(*)(math::vector3u8, vertex_it&, block::type)>{
+    constexpr void add_face_vertices(vertex_it& it, math::vector3u8 local_position, block::type type) {
+        call_face_func_if<void(*)(vertex_it&, math::vector3u8, block::type)>{
             .front = add_front_vertices,
             .back = add_back_vertices,
             .left = add_left_vertices,
@@ -193,6 +205,6 @@ namespace game {
             .top = add_top_vertices,
             .bottom = add_bottom_vertices,
             .center = add_center_vertices
-        }.call<face>(local_position, it, type);
+        }.call<face>(it, local_position, type);
     }
 }
