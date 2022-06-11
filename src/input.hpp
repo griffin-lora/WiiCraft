@@ -18,6 +18,8 @@ namespace input {
         return WPAD_ButtonsHeld(chan);
     }
 
-    glm::vec3 get_dpad_input_vector(u32 buttons_held);
+    glm::vec2 get_dpad_input_vector(u32 buttons_held);
     glm::vec2 get_pointer_input_vector(state& s, u32 buttons_held);
+    glm::vec2 get_joystick_input_vector();
+    float get_plus_minus_input_scalar(u32 buttons_held);
 }

@@ -1,9 +1,3 @@
-/*---------------------------------------------------------------------------------
-
-	nehe lesson 6 port to GX by shagkur
-
----------------------------------------------------------------------------------*/
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -21,7 +15,7 @@
 #include <map>
 
 constexpr f32 cam_move_speed = 0.3f;
-constexpr glm::vec2 cam_rotation_speed = { 2.0f, 1.0f };
+constexpr glm::vec2 cam_rotation_speed = { 0.02f, 0.02f };
 
 int main(int argc, char** argv) {
 
@@ -92,9 +86,6 @@ int main(int argc, char** argv) {
 		game::init(chunk, pos, view);
 	}
 
-	glm::vec2 video_size = {(f32)draw.rmode->viWidth, (f32)draw.rmode->viHeight};
-	glm::vec2 video_size_reciprocal = {1.f / video_size.x, 1.f / video_size.y};
-
 	input::state inp;
 
 	for (;;) {
@@ -103,20 +94,25 @@ int main(int argc, char** argv) {
 		u32 buttons_held = input::get_buttons_held(0);
 		if (buttons_held & WPAD_BUTTON_HOME) { std::exit(0); }
 
-		glm::vec2 pointer_input_vector = input::get_pointer_input_vector(inp, buttons_held);
-		if (math::is_non_zero(pointer_input_vector)) {
-			pointer_input_vector *= video_size_reciprocal * cam_rotation_speed;
-			pointer_input_vector *= -1.0f;
-			
-			game::rotate_camera(cam, pointer_input_vector.x, pointer_input_vector.y);
+		auto joystick_input_vector = input::get_joystick_input_vector();
+		auto plus_minus_input_scalar = input::get_plus_minus_input_scalar(buttons_held);
+
+		if (math::is_non_zero(joystick_input_vector)) {
+			glm::vec3 input_vector = { joystick_input_vector.y, plus_minus_input_scalar, -joystick_input_vector.x };
+			math::normalize(input_vector);
+			game::move_camera_from_input_vector(cam, input_vector, cam_move_speed);
 			
 			cam_upd.update_view = true;
 		}
 
-		glm::vec3 pad_input_vector = input::get_dpad_input_vector(buttons_held);
+
+		auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 
 		if (math::is_non_zero(pad_input_vector)) {
-			game::move_camera_from_input_vector(cam, pad_input_vector, cam_move_speed);
+			math::normalize(pad_input_vector);
+			pad_input_vector *= cam_rotation_speed;
+			
+			game::rotate_camera(cam, pad_input_vector.x, pad_input_vector.y);
 			
 			cam_upd.update_view = true;
 		}

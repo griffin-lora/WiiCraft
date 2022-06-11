@@ -8,24 +8,18 @@ void input::init(u32 width, u32 height) {
     WPAD_SetVRes(WPAD_CHAN_ALL, width, height);
 }
 
-glm::vec3 input::get_dpad_input_vector(u32 buttons_held) {
-    glm::vec3 pad_input_vector = {0.0f, 0.0f, 0.0f};
-    if (buttons_held & WPAD_BUTTON_UP) {
+glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {
+    glm::vec2 pad_input_vector = {0.0f, 0.0f};
+    if (buttons_held & WPAD_BUTTON_LEFT) {
         pad_input_vector.x += 1.0f;
     }
-    if (buttons_held & WPAD_BUTTON_DOWN) {
+    if (buttons_held & WPAD_BUTTON_RIGHT) {
         pad_input_vector.x -= 1.0f;
     }
-    if (buttons_held & WPAD_BUTTON_LEFT) {
-        pad_input_vector.z += 1.0f;
-    }
-    if (buttons_held & WPAD_BUTTON_RIGHT) {
-        pad_input_vector.z -= 1.0f;
-    }
-    if (buttons_held & WPAD_BUTTON_PLUS) {
+    if (buttons_held & WPAD_BUTTON_UP) {
         pad_input_vector.y += 1.0f;
     }
-    if (buttons_held & WPAD_BUTTON_MINUS) {
+    if (buttons_held & WPAD_BUTTON_DOWN) {
         pad_input_vector.y -= 1.0f;
     }
     return pad_input_vector;
@@ -48,4 +42,25 @@ glm::vec2 input::get_pointer_input_vector(state& s, u32 buttons_held) {
         s.was_last_pointer_pos_valid = false;
     }
     return {0.0f, 0.0f};
+}
+
+glm::vec2 input::get_joystick_input_vector() {
+    expansion_t exp;
+    WPAD_Expansion(0, &exp);
+
+    if (exp.type == WPAD_EXP_NUNCHUK) {
+        return { exp.nunchuk.js.pos.x - exp.nunchuk.js.center.x, exp.nunchuk.js.pos.y - exp.nunchuk.js.center.y };
+    }
+    return { 0.0f, 0.0f };
+}
+
+float input::get_plus_minus_input_scalar(u32 buttons_held) {
+    float scalar = 0.0f;
+    if (buttons_held & WPAD_BUTTON_PLUS) {
+        scalar += 1.0f;
+    }
+    if (buttons_held & WPAD_BUTTON_MINUS) {
+        scalar -= 1.0f;
+    }
+    return scalar;
 }
