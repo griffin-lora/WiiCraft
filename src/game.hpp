@@ -30,13 +30,13 @@ namespace game {
 
     struct block {
         enum class face : u8 {
-            CENTER,
             FRONT, // +x
             BACK, // -x
             LEFT, // +z
             RIGHT, // -z
             TOP, // +y
-            BOTTOM // -z
+            BOTTOM, // -z
+            CENTER
         };
         enum class type : u8 {
             AIR,
@@ -44,6 +44,36 @@ namespace game {
             GRASS
         };
         type tp;
+    };
+
+    template<typename F>
+    struct call_face_func_if {
+        F front;
+        F back;
+        F left;
+        F right;
+        F top;
+        F bottom;
+        F center;
+
+        template<block::face face, typename ...A>
+        constexpr auto call(A&&... args) {
+            if constexpr (face == block::face::FRONT) {
+                return front(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::BACK) {
+                return back(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::LEFT) {
+                return left(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::RIGHT) {
+                return right(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::TOP) {
+                return top(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::BOTTOM) {
+                return bottom(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::CENTER) {
+                return center(std::forward<A>(args)...);
+            }
+        }
     };
 
     bool is_block_visible(block::type type);
@@ -132,44 +162,37 @@ namespace game {
 
     template<block::face face>
     constexpr std::size_t get_face_vertex_count(block::type type) {
-        if constexpr (face == block::face::CENTER) {
-            return get_center_vertex_count(type);
-        } else {
-            return get_any_face_vertex_count(type);
-        }
+        return call_face_func_if<std::size_t(*)(block::type)>{
+            .front = get_any_face_vertex_count,
+            .back = get_any_face_vertex_count,
+            .left = get_any_face_vertex_count,
+            .right = get_any_face_vertex_count,
+            .top = get_any_face_vertex_count,
+            .bottom = get_any_face_vertex_count,
+            .center = get_center_vertex_count
+        }.call<face>(type);
     }
 
     using vertex_it = ext::data_array<chunk::mesh::vertex>::iterator;
 
-    void add_center_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_front_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_back_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_left_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_right_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_top_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
     void add_bottom_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
+    void add_center_vertices(math::vector3u8 local_position, vertex_it& it, block::type type);
 
     template<block::face face>
-    constexpr void add_face_vertices_at_mut_it(math::vector3u8 local_position, vertex_it& it, block::type type) {
-        if constexpr (face == block::face::CENTER) {
-            add_center_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::FRONT) {
-            add_front_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::BACK) {
-            add_back_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::LEFT) {
-            add_left_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::RIGHT) {
-            add_right_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::TOP) {
-            add_top_vertices(local_position, it, type);
-        } else if constexpr (face == block::face::BOTTOM) {
-            add_bottom_vertices(local_position, it, type);
-        }
-    }
-    template<block::face face>
-    constexpr auto add_face_vertices_at(math::vector3u8 local_position, vertex_it it, block::type type) {
-        add_face_vertices_at_mut_it<face>(local_position, it, type);
-        return it;
+    constexpr void add_face_vertices(math::vector3u8 local_position, vertex_it& it, block::type type) {
+        call_face_func_if<void(*)(math::vector3u8, vertex_it&, block::type)>{
+            .front = add_front_vertices,
+            .back = add_back_vertices,
+            .left = add_left_vertices,
+            .right = add_right_vertices,
+            .top = add_top_vertices,
+            .bottom = add_bottom_vertices,
+            .center = add_center_vertices
+        }.call<face>(local_position, it, type);
     }
 }

@@ -46,7 +46,7 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk) {
 template<block::face face>
 static void add_needed_face_vertices(chunk& chunk, vertex_it& it, block::type type, math::vector3u8 pos) {
     if (should_render_face<face>(chunk, type, pos)) {
-        add_face_vertices_at_mut_it<face>(pos, it, type);
+        add_face_vertices<face>(pos, it, type);
     }
 }
 
