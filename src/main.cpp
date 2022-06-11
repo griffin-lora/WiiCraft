@@ -92,7 +92,8 @@ int main(int argc, char** argv) {
 
 		WPAD_ScanPads();
 		u32 buttons_held = input::get_buttons_held(0);
-		if (buttons_held & WPAD_BUTTON_HOME) { std::exit(0); }
+		u32 buttons_down = input::get_buttons_down(0);
+		if (buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
 
 		auto joystick_input_vector = input::get_joystick_input_vector();
 		auto plus_minus_input_scalar = input::get_plus_minus_input_scalar(buttons_held);
@@ -108,7 +109,6 @@ int main(int argc, char** argv) {
 			cam_upd.update_view = true;
 		}
 
-
 		auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 
 		if (math::is_non_zero(pad_input_vector)) {
@@ -118,6 +118,32 @@ int main(int argc, char** argv) {
 			game::rotate_camera(cam, pad_input_vector.x, pad_input_vector.y);
 			
 			cam_upd.update_view = true;
+		}
+
+		if (buttons_down & WPAD_BUTTON_A) {
+			glm::vec3 raycast_pos = cam.position;
+			for (;;) {
+				math::vector3s32 raycast_block_pos = raycast_pos;
+				math::vector3s32 chunk_pos = raycast_block_pos / game::chunk::SIZE;
+				if (chunks.count(chunk_pos)) {
+					raycast_block_pos.x = math::mod(raycast_block_pos.x, game::chunk::SIZE);
+					raycast_block_pos.y = math::mod(raycast_block_pos.y, game::chunk::SIZE);
+					raycast_block_pos.z = math::mod(raycast_block_pos.z, game::chunk::SIZE);
+					auto& chunk = chunks.at(chunk_pos);
+					auto& block = chunk.blocks[game::get_index_from_position(raycast_block_pos)];
+					if (block.tp != game::block::type::AIR) {
+						dbg::error([&]() {
+							std::printf("%d, %d, %d\n%d, %d, %d", raycast_block_pos.x, raycast_block_pos.y, raycast_block_pos.z, chunk_pos.x, chunk_pos.y, chunk_pos.z);
+						});
+						block = { .tp = game::block::type::AIR };
+						game::update_mesh(chunk);
+						break;
+					}
+				} else {
+					break;
+				}
+				raycast_pos += glm::vec3(0.5);
+			}
 		}
 
 
