@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
 			math::vector3s32 pos = {i, 0, j};
 			auto& chunk = chunks.at(pos);
 			game::generate_blocks(chunk);
-			game::update_mesh(chunk, game::get_chunk_neighbors(chunks, pos));
+			game::update_mesh(chunk);
 		}
 	}
 	

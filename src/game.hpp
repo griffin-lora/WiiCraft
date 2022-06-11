@@ -122,17 +122,7 @@ namespace game {
 
     void generate_blocks(chunk& chunk);
 
-    struct chunk_neighbors {
-        const chunk* front;
-        const chunk* back;
-        const chunk* left;
-        const chunk* right;
-        const chunk* top;
-        const chunk* bottom;
-    };
-
-    chunk_neighbors get_chunk_neighbors(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& chunk_position);
-    void update_mesh(chunk& chunk, const chunk_neighbors& neighbors);
+    void update_mesh(chunk& chunk);
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);
