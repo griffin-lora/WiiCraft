@@ -12,9 +12,7 @@ namespace ext {
         public:
             inline data_array() : m_size(0), m_data(nullptr) {}
             inline data_array(std::size_t m_size) : m_size(m_size), m_data(alloc.allocate(m_size)) {}
-            inline data_array(data_array&& other) {
-                this->m_size = other.m_size;
-                this->m_data = other.m_data;
+            inline data_array(data_array&& other) : m_size(other.m_size), m_data(other.m_data) {
                 other.m_size = 0;
                 other.m_data = nullptr;
             }
