@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 
 	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
-	math::matrix view; // view and perspective matrices
+	math::matrix view;
 	math::matrix44 perspective;
 
 	game::camera cam = {
@@ -68,9 +68,11 @@ int main(int argc, char** argv) {
 	std::unordered_map<math::vector3s32, game::chunk> chunks;
 	bool update_chunk_neighborhoods = true;
 
-	for (s32 i = -1; i <= 1; i++) {
-		for (s32 j = -1; j <= 1; j++) {
-			chunks.insert(std::make_pair<math::vector3s32, game::chunk>({i, 0, j}, {}));
+	for (s32 x = -1; x <= 1; x++) {
+		for (s32 y = -1; y <= 1; y++) {
+			for (s32 z = -1; z <= 1; z++) {
+				chunks.insert(std::make_pair<math::vector3s32, game::chunk>({x, y, z}, {}));
+			}
 		}
 	}
 	
@@ -186,9 +188,5 @@ int main(int argc, char** argv) {
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
 		draw.fb_index ^= 1;
-
-		// Game logic
-
-		// rquad -= 0.15f;				// Decrease The Rotation Variable For The Quad     ( NEW )
 	}
 }
