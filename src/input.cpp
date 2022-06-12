@@ -10,10 +10,10 @@ void input::init(u32 width, u32 height) {
 
 glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {
     glm::vec2 pad_input_vector = {0.0f, 0.0f};
-    if (buttons_held & WPAD_BUTTON_LEFT) {
+    if (buttons_held & WPAD_BUTTON_RIGHT) {
         pad_input_vector.x += 1.0f;
     }
-    if (buttons_held & WPAD_BUTTON_RIGHT) {
+    if (buttons_held & WPAD_BUTTON_LEFT) {
         pad_input_vector.x -= 1.0f;
     }
     if (buttons_held & WPAD_BUTTON_UP) {

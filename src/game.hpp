@@ -8,7 +8,9 @@ namespace game {
     struct camera {
         glm::vec3 position;
         glm::vec3 up;
-        glm::mat3 rotation;
+        glm::vec3 look;
+        f32 yaw = 0.0f;
+        f32 pitch = 0.0f;
         f32 fov;
         f32 aspect;
         f32 near_clipping_plane_distance;
@@ -17,12 +19,16 @@ namespace game {
 
     struct camera_update_params {
         bool update_view = false;
+        bool update_look = false;
 	    bool update_perspective = false;
     };
 
     void update_view(const camera& cam, math::matrix view);
-    void move_camera_from_input_vector(camera& cam, const glm::vec3& input_vector, f32 move_speed);
-    void rotate_camera(camera& cam, f32 x, f32 y);
+    void update_look(camera& cam);
+
+    void move_camera(camera& cam, const glm::vec3& input_vector, f32 move_speed);
+    void rotate_camera(camera& cam, const glm::vec2& input_vector, f32 rotate_speed);
+    
 
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);

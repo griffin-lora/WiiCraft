@@ -15,7 +15,7 @@
 #include <map>
 
 constexpr f32 cam_move_speed = 0.3f;
-constexpr glm::vec2 cam_rotation_speed = { 0.02f, 0.02f };
+constexpr f32 cam_rotation_speed = 0.15f;
 
 int main(int argc, char** argv) {
 
@@ -45,21 +45,16 @@ int main(int argc, char** argv) {
 	game::camera cam = {
 		.position = {0.0f, 3.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
-		.rotation = {
-			{0.0f, 0.0f, 1.0f},
-			{0.0f, 1.0f, 0.0f},
-			{1.0f, 0.0f, 0.0f}
-		},
+		.look = {0.0f, 0.0f, 1.0f},
 		.fov = 45.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	math::normalize(cam.rotation[0]);
-	math::normalize(cam.rotation[1]);
-	math::normalize(cam.rotation[2]);
+	math::normalize(cam.look);
 	game::camera_update_params cam_upd;
 
+	game::update_look(cam);
 	game::update_view(cam, view);
 
 	// setup our projection matrix
@@ -103,8 +98,8 @@ int main(int argc, char** argv) {
 				joystick_input_vector.x = 0;
 				joystick_input_vector.y = 0;
 			}
-			glm::vec3 input_vector = { joystick_input_vector.y / 100.0f, plus_minus_input_scalar, -joystick_input_vector.x / 100.0f };
-			game::move_camera_from_input_vector(cam, input_vector, cam_move_speed);
+			glm::vec3 input_vector = { joystick_input_vector.y / 100.0f, plus_minus_input_scalar, joystick_input_vector.x / 100.0f };
+			game::move_camera(cam, input_vector, cam_move_speed);
 			
 			cam_upd.update_view = true;
 		}
@@ -114,10 +109,11 @@ int main(int argc, char** argv) {
 		if (math::is_non_zero(pad_input_vector)) {
 			math::normalize(pad_input_vector);
 			pad_input_vector *= cam_rotation_speed;
-			
-			game::rotate_camera(cam, pad_input_vector.x, pad_input_vector.y);
+
+			game::rotate_camera(cam, pad_input_vector, cam_rotation_speed);
 			
 			cam_upd.update_view = true;
+			cam_upd.update_look = true;
 		}
 
 		if (buttons_down & WPAD_BUTTON_A) {
@@ -146,7 +142,9 @@ int main(int argc, char** argv) {
 			}
 		}
 
-
+		if (cam_upd.update_look) {
+			game::update_look(cam);
+		}
 		if (cam_upd.update_view) {
 			game::update_view(cam, view);
 		}
