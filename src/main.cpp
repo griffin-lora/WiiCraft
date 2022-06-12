@@ -94,11 +94,13 @@ int main(int argc, char** argv) {
 		auto plus_minus_input_scalar = input::get_plus_minus_input_scalar(buttons_held);
 
 		if (math::is_non_zero(joystick_input_vector) || plus_minus_input_scalar != 0) {
-			if (glm::length(joystick_input_vector) < 6.0f) {
-				joystick_input_vector.x = 0;
-				joystick_input_vector.y = 0;
+			if (std::abs(joystick_input_vector.x) < 6.0f) {
+				joystick_input_vector.x = 0.0f;
 			}
-			glm::vec3 input_vector = { joystick_input_vector.y / 100.0f, plus_minus_input_scalar, joystick_input_vector.x / 100.0f };
+			if (std::abs(joystick_input_vector.y) < 6.0f) {
+				joystick_input_vector.y = 0.0f;
+			}
+			glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, plus_minus_input_scalar, joystick_input_vector.x / 96.0f };
 			game::move_camera(cam, input_vector, cam_move_speed);
 			
 			cam_upd.update_view = true;
