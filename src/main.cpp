@@ -78,10 +78,6 @@ int main(int argc, char** argv) {
 		game::generate_blocks(chunk, pos, 100);
 	}
 
-	for (auto& [ pos, chunk ] : chunks) {
-		game::update_mesh(chunk, game::get_chunk_neighborhood(chunks, pos));
-	}
-
 	input::state inp;
 
 	for (;;) {
@@ -139,6 +135,13 @@ int main(int argc, char** argv) {
 		gfx::set_tev_order(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
 		gfx::load(texture);
+		
+		for (auto& [ pos, chunk ] : chunks) {
+			if (chunk.update_mesh) {
+				chunk.update_mesh = false;
+				game::update_mesh(chunk, game::get_chunk_neighborhood(chunks, pos));
+			}
+		}
 
 		// guMtxRotAxisDeg(model, &cube_axis, rquad);
 		if (cam_upd.update_view) {
@@ -151,6 +154,10 @@ int main(int argc, char** argv) {
 				game::draw_chunk(chunk);
 			}
 		}
+
+		cam_upd.update_view = false;
+		cam_upd.update_look = false;
+		cam_upd.update_perspective = false;
 
 		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
 		gfx::set_color_buffer_update(true);

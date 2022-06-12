@@ -120,6 +120,7 @@ namespace game {
         };
 
         mesh ms;
+        bool update_mesh = true;
         ext::data_array<block> blocks = { BLOCKS_COUNT };
 
         math::matrix model;
