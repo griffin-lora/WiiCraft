@@ -34,8 +34,8 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk) {
         if (is_block_visible(type)) {
             vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, pos, type);
         }
@@ -59,8 +59,8 @@ void game::update_mesh(chunk& chunk) {
         if (is_block_visible(type)) {
             add_needed_face_vertices<block::face::FRONT>(chunk, it, pos, type);
             add_needed_face_vertices<block::face::BACK>(chunk, it, pos, type);
-            add_needed_face_vertices<block::face::LEFT>(chunk, it, pos, type);
             add_needed_face_vertices<block::face::RIGHT>(chunk, it, pos, type);
+            add_needed_face_vertices<block::face::LEFT>(chunk, it, pos, type);
             add_needed_face_vertices<block::face::TOP>(chunk, it, pos, type);
             add_needed_face_vertices<block::face::BOTTOM>(chunk, it, pos, type);
         }

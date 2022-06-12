@@ -38,8 +38,8 @@ namespace game {
         enum class face : u8 {
             FRONT, // +x
             BACK, // -x
-            LEFT, // +z
-            RIGHT, // -z
+            RIGHT, // +z
+            LEFT, // -z
             TOP, // +y
             BOTTOM, // -z
             CENTER
@@ -56,8 +56,8 @@ namespace game {
     struct call_face_func_if {
         F front;
         F back;
-        F left;
         F right;
+        F left;
         F top;
         F bottom;
         F center;
@@ -68,10 +68,10 @@ namespace game {
                 return front(std::forward<A>(args)...);
             } else if constexpr (face == block::face::BACK) {
                 return back(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::LEFT) {
-                return left(std::forward<A>(args)...);
             } else if constexpr (face == block::face::RIGHT) {
                 return right(std::forward<A>(args)...);
+            } else if constexpr (face == block::face::LEFT) {
+                return left(std::forward<A>(args)...);
             } else if constexpr (face == block::face::TOP) {
                 return top(std::forward<A>(args)...);
             } else if constexpr (face == block::face::BOTTOM) {
@@ -91,9 +91,9 @@ namespace game {
             offset_pos.x += 1;
         } else if constexpr (face == block::face::BACK) {
             offset_pos.x -= 1;
-        } else if constexpr (face == block::face::LEFT) {
-            offset_pos.z += 1;
         } else if constexpr (face == block::face::RIGHT) {
+            offset_pos.z += 1;
+        } else if constexpr (face == block::face::LEFT) {
             offset_pos.z -= 1;
         } else if constexpr (face == block::face::TOP) {
             offset_pos.y += 1;
@@ -183,8 +183,8 @@ namespace game {
         return call_face_func_if<std::size_t(*)(block::type)>{
             .front = get_any_face_vertex_count,
             .back = get_any_face_vertex_count,
-            .left = get_any_face_vertex_count,
             .right = get_any_face_vertex_count,
+            .left = get_any_face_vertex_count,
             .top = get_any_face_vertex_count,
             .bottom = get_any_face_vertex_count,
             .center = get_center_vertex_count
@@ -195,8 +195,8 @@ namespace game {
 
     void add_front_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_back_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_left_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_right_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_left_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_top_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_bottom_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_center_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
@@ -206,8 +206,8 @@ namespace game {
         call_face_func_if<void(*)(vertex_it&, math::vector3u8, block::type)>{
             .front = add_front_vertices,
             .back = add_back_vertices,
-            .left = add_left_vertices,
             .right = add_right_vertices,
+            .left = add_left_vertices,
             .top = add_top_vertices,
             .bottom = add_bottom_vertices,
             .center = add_center_vertices

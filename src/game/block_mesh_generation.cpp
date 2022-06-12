@@ -55,7 +55,7 @@ static void add_cube_back_vertices(vertex_it& it, math::vector3u8 l, math::vecto
     };
 }
 
-static void add_cube_left_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_right_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +z
     *it++ = {
         {  lo.x, l.y,lo.z },	// Top Right Of The Quad (Right)
@@ -75,7 +75,7 @@ static void add_cube_left_vertices(vertex_it& it, math::vector3u8 l, math::vecto
     };
 }
 
-static void add_cube_right_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_left_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -z
     *it++ = {
         { lo.x, l.y, l.z },	// Top Right Of The Quad (Left)
@@ -173,20 +173,20 @@ void game::add_back_vertices(vertex_it& it, math::vector3u8 local_pos, block::ty
 }
 
 // +z
-void game::add_left_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
-    auto& func = add_cube_left_vertices;
+void game::add_right_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+    auto& func = add_cube_right_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
         case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
         default: return;
     }
 }
 
 // -z
-void game::add_right_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
-    auto& func = add_cube_right_vertices;
+void game::add_left_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+    auto& func = add_cube_left_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
         case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
         default: return;
     }
