@@ -107,6 +107,18 @@ namespace game {
         return offset_pos;
     }
 
+    struct chunk;
+
+    struct chunk_neighborhood {
+        using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
+        const_opt_ref front;
+        const_opt_ref back;
+        const_opt_ref right;
+        const_opt_ref left;
+        const_opt_ref top;
+        const_opt_ref bottom;
+    };
+
     struct chunk {
         using map = std::unordered_map<math::vector3s32, chunk>;
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
@@ -124,20 +136,12 @@ namespace game {
         };
 
         mesh ms;
+        chunk_neighborhood nh;
         bool update_mesh = true;
         ext::data_array<block> blocks = { BLOCKS_COUNT };
 
         math::matrix model;
         math::matrix model_view;
-    };
-
-    struct chunk_neighborhood {
-        chunk::const_opt_ref front;
-        chunk::const_opt_ref back;
-        chunk::const_opt_ref right;
-        chunk::const_opt_ref left;
-        chunk::const_opt_ref top;
-        chunk::const_opt_ref bottom;
     };
 
     chunk_neighborhood get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& position);
