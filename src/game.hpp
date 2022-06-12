@@ -110,7 +110,6 @@ namespace game {
     struct chunk {
         using map = std::unordered_map<math::vector3s32, chunk>;
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
-        using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
@@ -126,12 +125,12 @@ namespace game {
         mesh ms;
 
         struct neighborhood {
-            const_opt_ref front;
-            const_opt_ref back;
-            const_opt_ref right;
-            const_opt_ref left;
-            const_opt_ref top;
-            const_opt_ref bottom;
+            opt_ref front;
+            opt_ref back;
+            opt_ref right;
+            opt_ref left;
+            opt_ref top;
+            opt_ref bottom;
         };
 
         neighborhood nh;
@@ -142,7 +141,7 @@ namespace game {
         math::matrix model_view;
     };
 
-    chunk::neighborhood get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& position);
+    chunk::neighborhood get_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& position);
 
     inline void update_model_view(chunk& chunk, math::matrix view) {
         guMtxConcat(view, chunk.model, chunk.model_view);

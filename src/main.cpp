@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_mesh) {
 				chunk.update_mesh = false;
-				game::update_mesh(chunk);
+				game::update_mesh_and_neighborhood_meshes(chunk);
 			}
 		}
 

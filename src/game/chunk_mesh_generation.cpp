@@ -5,7 +5,7 @@
 using namespace game;
 
 template<block::face face>
-static chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
+static chunk::opt_ref get_neighbor(const chunk::neighborhood& nh) {
     if constexpr (face == block::face::FRONT) {
         return nh.front;
     } else if constexpr (face == block::face::BACK) {
@@ -26,10 +26,10 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
     auto check_pos = get_face_offset_position<face>(pos);
     if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
         // Since the position is outside of the chunk, we need to check the neighbor chunk
-        auto chunk_opt = get_neighbor<face>(chunk.nh);
+        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
 
-        if (chunk_opt.has_value()) {
-            auto& chunk = chunk_opt.value().get();
+        if (nb_chunk_opt.has_value()) {
+            auto& nb_chunk = nb_chunk_opt.value().get();
 
             auto nb_check_pos = get_face_offset_position<face, math::vector3s32>(pos);
 
@@ -39,7 +39,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
 
             auto index = get_index_from_position(nb_check_pos);
 
-            auto& block = chunk.blocks[index];
+            auto& block = nb_chunk.blocks[index];
             if (is_block_visible(block.tp)) {
                 return false;
             }
@@ -110,4 +110,23 @@ void game::update_mesh(chunk& chunk) {
             printf("Vertex count mismatch! Expected %d vertices but got %d vertices\n", chunk.ms.vertices.size(), it - chunk.ms.vertices.begin());
         });
     }
+}
+
+template<block::face face>
+static void update_neighbor_mesh(chunk& chunk) {
+    auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
+    if (nb_chunk_opt.has_value()) {
+        auto& nb_chunk = nb_chunk_opt->get();
+        update_mesh(nb_chunk);
+    }
+}
+
+void game::update_mesh_and_neighborhood_meshes(chunk& chunk) {
+    update_mesh(chunk);
+    update_neighbor_mesh<block::face::FRONT>(chunk);
+    update_neighbor_mesh<block::face::BACK>(chunk);
+    update_neighbor_mesh<block::face::RIGHT>(chunk);
+    update_neighbor_mesh<block::face::LEFT>(chunk);
+    update_neighbor_mesh<block::face::TOP>(chunk);
+    update_neighbor_mesh<block::face::BOTTOM>(chunk);
 }
