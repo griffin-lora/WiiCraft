@@ -23,7 +23,7 @@ static void add_cube_front_vertices(vertex_it& it, math::vector3u8 l, math::vect
     };
     *it++ = {
         { lo.x,l.y, l.z },	// Top Right of the quad (bottom)
-        { uo.x,u.y }
+        { u.x, uo.y }
     };
     *it++ = {
         { lo.x,l.y,lo.z },	// Bottom Right of the quad (bottom)
@@ -31,7 +31,7 @@ static void add_cube_front_vertices(vertex_it& it, math::vector3u8 l, math::vect
     };
     *it++ = {
         { lo.x,lo.y,lo.z },	// Bottom Left of the quad (bottom)
-        { u.x,uo.y }
+        { uo.x, u.y }
     };
 }
 
@@ -59,19 +59,19 @@ static void add_cube_right_vertices(vertex_it& it, math::vector3u8 l, math::vect
     // +z
     *it++ = {
         {  lo.x, l.y,lo.z },	// Top Right Of The Quad (Right)
-        { u.x,u.y }
+        { u.x,uo.y }
     };
     *it++ = {
         { l.x, l.y, lo.z },		// Top Left Of The Quad (Right)
-        { uo.x,u.y }
-    };
-    *it++ = {
-        { l.x,lo.y, lo.z },	// Bottom Left Of The Quad (Right)
         { uo.x,uo.y }
     };
     *it++ = {
+        { l.x,lo.y, lo.z },	// Bottom Left Of The Quad (Right)
+        { uo.x,u.y }
+    };
+    *it++ = {
         { lo.x,lo.y,lo.z },	// Bottom Right Of The Quad (Right)
-        { u.x,uo.y }
+        { u.x,u.y }
     };
 }
 
@@ -79,19 +79,19 @@ static void add_cube_left_vertices(vertex_it& it, math::vector3u8 l, math::vecto
     // -z
     *it++ = {
         { lo.x, l.y, l.z },	// Top Right Of The Quad (Left)
-        { u.x,u.y }
+        { u.x,uo.y }
     };
     *it++ = {
         { lo.x, lo.y,l.z },	// Top Left Of The Quad (Left)
-        { uo.x,u.y }
+        { u.x,u.y }
     };
     *it++ = {
         { l.x,lo.y,l.z },	// Bottom Left Of The Quad (Left)
-        { uo.x,uo.y }
+        { uo.x,u.y }
     };
     *it++ = {
         { l.x,l.y, l.z },	// Bottom Right Of The Quad (Left)
-        { u.x,uo.y }
+        { uo.x,uo.y }
     };
 }
 
