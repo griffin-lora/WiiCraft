@@ -75,8 +75,10 @@ int main(int argc, char** argv) {
 	
 	for (auto& [ pos, chunk ] : chunks) {
 		game::init(chunk, pos, view);
-
 		game::generate_blocks(chunk, pos, 100);
+	}
+
+	for (auto& [ pos, chunk ] : chunks) {
 		game::update_mesh(chunk, game::get_chunk_neighborhood(chunks, pos));
 	}
 

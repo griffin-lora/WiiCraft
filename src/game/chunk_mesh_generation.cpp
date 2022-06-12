@@ -26,16 +26,19 @@ static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nb,
     auto check_pos = get_face_offset_position<face>(pos);
     if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
         // Since the position is outside of the chunk, we need to check the neighbor chunk
-        auto nb_check_pos = get_face_offset_position<face, math::vector3s32>(pos);
-        nb_check_pos.x = math::mod(nb_check_pos.x, chunk::SIZE);
-        nb_check_pos.y = math::mod(nb_check_pos.y, chunk::SIZE);
-        nb_check_pos.z = math::mod(nb_check_pos.z, chunk::SIZE);
-
-        auto index = get_index_from_position(nb_check_pos);
-
         auto chunk_ref_opt = get_chunk_ref_opt_from_nb<face>(nb);
+
         if (chunk_ref_opt.has_value()) {
             auto& chunk_ref = chunk_ref_opt.value().get();
+
+            auto nb_check_pos = get_face_offset_position<face, math::vector3s32>(pos);
+
+            nb_check_pos.x = math::mod(nb_check_pos.x, chunk::SIZE);
+            nb_check_pos.y = math::mod(nb_check_pos.y, chunk::SIZE);
+            nb_check_pos.z = math::mod(nb_check_pos.z, chunk::SIZE);
+
+            auto index = get_index_from_position(nb_check_pos);
+
             auto& block = chunk_ref.blocks[index];
             if (is_block_visible(block.tp)) {
                 return false;
