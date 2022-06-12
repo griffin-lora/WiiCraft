@@ -5,7 +5,7 @@
 using namespace game;
 
 template<block::face face>
-static chunk::const_ref_opt get_neighbor(const chunk_neighborhood& nh) {
+static chunk::const_opt_ref get_neighbor(const chunk_neighborhood& nh) {
     if constexpr (face == block::face::FRONT) {
         return nh.front;
     } else if constexpr (face == block::face::BACK) {
@@ -26,10 +26,10 @@ static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nh,
     auto check_pos = get_face_offset_position<face>(pos);
     if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
         // Since the position is outside of the chunk, we need to check the neighbor chunk
-        auto chunk_ref_opt = get_neighbor<face>(nh);
+        auto chunk_opt = get_neighbor<face>(nh);
 
-        if (chunk_ref_opt.has_value()) {
-            auto& chunk_ref = chunk_ref_opt.value().get();
+        if (chunk_opt.has_value()) {
+            auto& chunk = chunk_opt.value().get();
 
             auto nb_check_pos = get_face_offset_position<face, math::vector3s32>(pos);
 
@@ -39,7 +39,7 @@ static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nh,
 
             auto index = get_index_from_position(nb_check_pos);
 
-            auto& block = chunk_ref.blocks[index];
+            auto& block = chunk.blocks[index];
             if (is_block_visible(block.tp)) {
                 return false;
             }

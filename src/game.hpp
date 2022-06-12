@@ -109,8 +109,8 @@ namespace game {
 
     struct chunk {
         using map = std::unordered_map<math::vector3s32, chunk>;
-        using ref_opt = std::optional<std::reference_wrapper<chunk>>;
-        using const_ref_opt = std::optional<std::reference_wrapper<const chunk>>;
+        using opt_ref = std::optional<std::reference_wrapper<chunk>>;
+        using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
@@ -132,12 +132,12 @@ namespace game {
     };
 
     struct chunk_neighborhood {
-        chunk::const_ref_opt front;
-        chunk::const_ref_opt back;
-        chunk::const_ref_opt right;
-        chunk::const_ref_opt left;
-        chunk::const_ref_opt top;
-        chunk::const_ref_opt bottom;
+        chunk::const_opt_ref front;
+        chunk::const_opt_ref back;
+        chunk::const_opt_ref right;
+        chunk::const_opt_ref left;
+        chunk::const_opt_ref top;
+        chunk::const_opt_ref bottom;
     };
 
     chunk_neighborhood get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& position);

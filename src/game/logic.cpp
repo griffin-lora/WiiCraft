@@ -8,7 +8,7 @@ void game::destroy_block_from_camera(const camera& cam, chunk::map& chunks) {
     glm::vec3 raycast_pos = cam.position;
     glm::vec3 dir_vec = cam.look * 0.5f;
     std::optional<math::vector3s32> current_chunk_pos = {};
-    chunk::ref_opt current_chunk = {};
+    chunk::opt_ref current_chunk = {};
     for (u8 i = 0; i < 40; i++) {
         auto raycast_chunk_pos = get_chunk_position_from_world_position(raycast_pos);
 
