@@ -5,7 +5,24 @@
 using namespace game;
 
 template<block::face face>
-static chunk::opt_ref get_neighbor(const chunk::neighborhood& nh) {
+static chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
+    if constexpr (face == block::face::FRONT) {
+        return nh.front;
+    } else if constexpr (face == block::face::BACK) {
+        return nh.back;
+    } else if constexpr (face == block::face::RIGHT) {
+        return nh.right;
+    } else if constexpr (face == block::face::LEFT) {
+        return nh.left;
+    } else if constexpr (face == block::face::TOP) {
+        return nh.top;
+    } else if constexpr (face == block::face::BOTTOM) {
+        return nh.bottom;
+    }
+}
+
+template<block::face face>
+static chunk::opt_ref get_neighbor(chunk::neighborhood& nh) {
     if constexpr (face == block::face::FRONT) {
         return nh.front;
     } else if constexpr (face == block::face::BACK) {

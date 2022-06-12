@@ -110,6 +110,7 @@ namespace game {
     struct chunk {
         using map = std::unordered_map<math::vector3s32, chunk>;
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
+        using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
