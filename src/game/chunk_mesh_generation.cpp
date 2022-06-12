@@ -43,6 +43,9 @@ static bool should_render_face(const chunk& chunk, const chunk::neighborhood& nh
             if (is_block_visible(block.tp)) {
                 return false;
             }
+        } else {
+            // Don't render chunk faces if there is no neighbor chunk
+            return false;
         }
         return true;
     }
