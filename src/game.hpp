@@ -205,7 +205,8 @@ namespace game {
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
-    void update_mesh(chunk& chunk, const chunk::neighborhood& neighborhood);
+    void update_mesh(chunk& chunk);
+    void update_mesh_and_neighborhood_meshes(chunk& chunk);
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);

@@ -145,14 +145,13 @@ int main(int argc, char** argv) {
 			update_chunk_neighborhoods = false;
 			for (auto& [ pos, chunk ] : chunks) {
 				chunk.nh = game::get_chunk_neighborhood(chunks, pos);
-		
 			}
 		}
 		
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_mesh) {
 				chunk.update_mesh = false;
-				game::update_mesh(chunk, chunk.nh);
+				game::update_mesh(chunk);
 			}
 		}
 
