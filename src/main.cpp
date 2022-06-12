@@ -145,6 +145,7 @@ int main(int argc, char** argv) {
 			update_chunk_neighborhoods = false;
 			for (auto& [ pos, chunk ] : chunks) {
 				chunk.nh = game::get_chunk_neighborhood(chunks, pos);
+		
 			}
 		}
 		

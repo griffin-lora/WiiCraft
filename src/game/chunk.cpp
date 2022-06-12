@@ -53,7 +53,7 @@ static chunk::const_opt_ref get_neighbor(const std::unordered_map<math::vector3s
     }
 }
 
-chunk_neighborhood game::get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& pos) {
+chunk::neighborhood game::get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& pos) {
     return {
         .front = get_neighbor<block::face::FRONT>(chunks, pos),
         .back = get_neighbor<block::face::BACK>(chunks, pos),

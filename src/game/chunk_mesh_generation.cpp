@@ -5,7 +5,7 @@
 using namespace game;
 
 template<block::face face>
-static chunk::const_opt_ref get_neighbor(const chunk_neighborhood& nh) {
+static chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
     if constexpr (face == block::face::FRONT) {
         return nh.front;
     } else if constexpr (face == block::face::BACK) {
@@ -22,7 +22,7 @@ static chunk::const_opt_ref get_neighbor(const chunk_neighborhood& nh) {
 }
 
 template<block::face face>
-static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nh, math::vector3u8 pos, block::type type) {
+static bool should_render_face(const chunk& chunk, const chunk::neighborhood& nh, math::vector3u8 pos, block::type type) {
     auto check_pos = get_face_offset_position<face>(pos);
     if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
         // Since the position is outside of the chunk, we need to check the neighbor chunk
@@ -55,7 +55,7 @@ static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nh,
 }
 
 template<block::face face>
-static std::size_t get_needed_face_vertex_count(const chunk& chunk, const chunk_neighborhood& nh, math::vector3u8 pos, block::type type) {
+static std::size_t get_needed_face_vertex_count(const chunk& chunk, const chunk::neighborhood& nh, math::vector3u8 pos, block::type type) {
     if (should_render_face<face>(chunk, nh, pos, type)) {
         return get_face_vertex_count<face>(type);
     } else {
@@ -63,7 +63,7 @@ static std::size_t get_needed_face_vertex_count(const chunk& chunk, const chunk_
     }
 }
 
-static std::size_t get_chunk_vertex_count(const chunk& chunk, const chunk_neighborhood& nh) {
+static std::size_t get_chunk_vertex_count(const chunk& chunk, const chunk::neighborhood& nh) {
     std::size_t vertex_count = 0;
     iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &nh, &vertex_count](auto pos, auto& block) {
         auto type = block.tp;
@@ -80,13 +80,13 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk, const chunk_neighb
 }
 
 template<block::face face>
-static void add_needed_face_vertices(chunk& chunk, const chunk_neighborhood& nh, vertex_it& it, math::vector3u8 pos, block::type type) {
+static void add_needed_face_vertices(chunk& chunk, const chunk::neighborhood& nh, vertex_it& it, math::vector3u8 pos, block::type type) {
     if (should_render_face<face>(chunk, nh, pos, type)) {
         add_face_vertices<face>(it, pos, type);
     }
 }
 
-void game::update_mesh(chunk& chunk, const chunk_neighborhood& nh) {
+void game::update_mesh(chunk& chunk, const chunk::neighborhood& nh) {
     chunk.ms.vertices.resize_without_copying(get_chunk_vertex_count(chunk, nh));
     auto it = chunk.ms.vertices.begin();
 

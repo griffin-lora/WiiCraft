@@ -107,18 +107,6 @@ namespace game {
         return offset_pos;
     }
 
-    struct chunk;
-
-    struct chunk_neighborhood {
-        using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
-        const_opt_ref front;
-        const_opt_ref back;
-        const_opt_ref right;
-        const_opt_ref left;
-        const_opt_ref top;
-        const_opt_ref bottom;
-    };
-
     struct chunk {
         using map = std::unordered_map<math::vector3s32, chunk>;
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
@@ -136,7 +124,17 @@ namespace game {
         };
 
         mesh ms;
-        chunk_neighborhood nh;
+
+        struct neighborhood {
+            const_opt_ref front;
+            const_opt_ref back;
+            const_opt_ref right;
+            const_opt_ref left;
+            const_opt_ref top;
+            const_opt_ref bottom;
+        };
+
+        neighborhood nh;
         bool update_mesh = true;
         ext::data_array<block> blocks = { BLOCKS_COUNT };
 
@@ -144,7 +142,7 @@ namespace game {
         math::matrix model_view;
     };
 
-    chunk_neighborhood get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& position);
+    chunk::neighborhood get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& position);
 
     inline void update_model_view(chunk& chunk, math::matrix view) {
         guMtxConcat(view, chunk.model, chunk.model_view);
@@ -207,7 +205,7 @@ namespace game {
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
-    void update_mesh(chunk& chunk, const chunk_neighborhood& neighborhood);
+    void update_mesh(chunk& chunk, const chunk::neighborhood& neighborhood);
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);
