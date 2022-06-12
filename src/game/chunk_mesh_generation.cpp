@@ -50,7 +50,7 @@ static void add_needed_face_vertices(chunk& chunk, vertex_it& it, math::vector3u
     }
 }
 
-void game::update_mesh(chunk& chunk) {
+void game::update_mesh(chunk& chunk, const chunk_neighborhood& nb) {
     chunk.ms.vertices.resize_without_copying(get_chunk_vertex_count(chunk));
     auto it = chunk.ms.vertices.begin();
 

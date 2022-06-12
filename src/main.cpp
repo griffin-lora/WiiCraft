@@ -70,15 +70,14 @@ int main(int argc, char** argv) {
 	for (s32 i = -1; i <= 1; i++) {
 		for (s32 j = -1; j <= 1; j++) {
 			chunks.insert(std::make_pair<math::vector3s32, game::chunk>({i, 0, j}, {}));
-			math::vector3s32 pos = {i, 0, j};
-			auto& chunk = chunks.at(pos);
-			game::generate_blocks(chunk, pos, 100);
-			game::update_mesh(chunk);
 		}
 	}
 	
 	for (auto& [ pos, chunk ] : chunks) {
 		game::init(chunk, pos, view);
+
+		game::generate_blocks(chunk, pos, 100);
+		game::update_mesh(chunk, game::get_chunk_neighborhood(chunks, pos));
 	}
 
 	input::state inp;

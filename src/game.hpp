@@ -3,6 +3,9 @@
 #include "gfx.hpp"
 #include "ext/data_array.hpp"
 #include <vector>
+#include <optional>
+#include <functional>
+#include <map>
 
 namespace game {
     struct camera {
@@ -123,6 +126,18 @@ namespace game {
         math::matrix model_view;
     };
 
+    struct chunk_neighborhood {
+        using chunk_ref_opt = std::optional<std::reference_wrapper<const chunk>>;
+        chunk_ref_opt front;
+        chunk_ref_opt back;
+        chunk_ref_opt right;
+        chunk_ref_opt left;
+        chunk_ref_opt top;
+        chunk_ref_opt bottom;
+    };
+
+    chunk_neighborhood get_chunk_neighborhood(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& position);
+
     inline void update_model_view(chunk& chunk, math::matrix view) {
         guMtxConcat(view, chunk.model, chunk.model_view);
     }
@@ -174,7 +189,7 @@ namespace game {
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
-    void update_mesh(chunk& chunk);
+    void update_mesh(chunk& chunk, const chunk_neighborhood& neighborhood);
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);
