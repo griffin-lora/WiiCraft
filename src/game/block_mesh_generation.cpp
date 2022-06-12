@@ -181,7 +181,7 @@ void game::add_back_vertices(vertex_it& it, math::vector3u8 local_pos, block::ty
 void game::add_right_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_right_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
         case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
         case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
         default: return;
@@ -192,7 +192,7 @@ void game::add_right_vertices(vertex_it& it, math::vector3u8 local_pos, block::t
 void game::add_left_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_left_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
         case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
         case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
         default: return;
