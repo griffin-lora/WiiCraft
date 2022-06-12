@@ -44,7 +44,7 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos, u32 
 }
 
 template<block::face face>
-chunk_neighborhood::chunk_ref_opt get_chunk_ref_opt(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& pos) {
+chunk::const_ref_opt get_chunk_ref_opt(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& pos) {
     math::vector3s32 offset_pos = get_face_offset_position<face>(pos);
     if (chunks.count(offset_pos)) {
         return chunks.at(offset_pos);
@@ -53,7 +53,7 @@ chunk_neighborhood::chunk_ref_opt get_chunk_ref_opt(const std::unordered_map<mat
     }
 }
 
-chunk_neighborhood game::get_chunk_neighborhood(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& pos) {
+chunk_neighborhood game::get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& pos) {
     return {
         .front = get_chunk_ref_opt<block::face::FRONT>(chunks, pos),
         .back = get_chunk_ref_opt<block::face::BACK>(chunks, pos),

@@ -108,6 +108,10 @@ namespace game {
     }
 
     struct chunk {
+        using map = std::unordered_map<math::vector3s32, chunk>;
+        using ref_opt = std::optional<std::reference_wrapper<chunk>>;
+        using const_ref_opt = std::optional<std::reference_wrapper<const chunk>>;
+
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         
@@ -128,16 +132,15 @@ namespace game {
     };
 
     struct chunk_neighborhood {
-        using chunk_ref_opt = std::optional<std::reference_wrapper<const chunk>>;
-        chunk_ref_opt front;
-        chunk_ref_opt back;
-        chunk_ref_opt right;
-        chunk_ref_opt left;
-        chunk_ref_opt top;
-        chunk_ref_opt bottom;
+        chunk::const_ref_opt front;
+        chunk::const_ref_opt back;
+        chunk::const_ref_opt right;
+        chunk::const_ref_opt left;
+        chunk::const_ref_opt top;
+        chunk::const_ref_opt bottom;
     };
 
-    chunk_neighborhood get_chunk_neighborhood(const std::unordered_map<math::vector3s32, chunk>& chunks, const math::vector3s32& position);
+    chunk_neighborhood get_chunk_neighborhood(const chunk::map& chunks, const math::vector3s32& position);
 
     inline void update_model_view(chunk& chunk, math::matrix view) {
         guMtxConcat(view, chunk.model, chunk.model_view);
@@ -150,6 +153,16 @@ namespace game {
     }
     inline s32 get_world_coord_from_local_position(s32 local_coord, s32 chunk_coord) {
         return ((chunk_coord * chunk::SIZE) + local_coord);
+    }
+    inline math::vector3s32 floor_float_position(const glm::vec3& position) {
+        return {
+            floorf(position.x),
+            floorf(position.y),
+            floorf(position.z)
+        };
+    }
+    inline math::vector3s32 get_chunk_position_from_world_position(glm::vec3 world_position) {
+        return floor_float_position(world_position / (f32)chunk::SIZE);
     }
     void init(chunk& chunk, const math::vector3s32& chunk_position, math::matrix view);
 
@@ -233,4 +246,6 @@ namespace game {
             .center = add_center_vertices
         }.call<face>(it, local_position, type);
     }
+
+    void destroy_block_from_camera(const camera& cam, chunk::map& chunks);
 }

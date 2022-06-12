@@ -5,7 +5,7 @@
 using namespace game;
 
 template<block::face face>
-static chunk_neighborhood::chunk_ref_opt get_chunk_ref_opt_from_nb(const chunk_neighborhood& nb) {
+static chunk::const_ref_opt get_chunk_ref_opt_from_nb(const chunk_neighborhood& nb) {
     if constexpr (face == block::face::FRONT) {
         return nb.front;
     } else if constexpr (face == block::face::BACK) {

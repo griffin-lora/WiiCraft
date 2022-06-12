@@ -115,6 +115,10 @@ int main(int argc, char** argv) {
 			cam_upd.update_look = true;
 		}
 
+		if (buttons_down & WPAD_BUTTON_A) {
+			game::destroy_block_from_camera(cam, chunks);
+		}
+
 		if (cam_upd.update_look) {
 			game::update_look(cam);
 		}
