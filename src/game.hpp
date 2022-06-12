@@ -47,7 +47,8 @@ namespace game {
         enum class type : u8 {
             AIR,
             DEBUG,
-            GRASS
+            GRASS,
+            DIRT
         };
         type tp;
     };

@@ -9,6 +9,7 @@ bool game::is_block_visible(block::type type) {
             return false;
         case block::type::DEBUG:
         case block::type::GRASS:
+        case block::type::DIRT:
             return true;
     }
 }
