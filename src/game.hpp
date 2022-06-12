@@ -131,7 +131,10 @@ namespace game {
     inline std::size_t get_index_from_position(T position) {
         return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
     }
-    void init(chunk& chunk, const math::vector3s32& position, math::matrix view);
+    inline s32 get_world_coord_from_local_position(s32 local_coord, s32 chunk_coord) {
+        return ((chunk_coord * chunk::SIZE) + local_coord);
+    }
+    void init(chunk& chunk, const math::vector3s32& chunk_position, math::matrix view);
 
     template<typename F>
     void iterate_over_chunk_positions(F func) {
@@ -168,7 +171,7 @@ namespace game {
         }
     }
 
-    void generate_blocks(chunk& chunk);
+    void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
     void update_mesh(chunk& chunk);
 

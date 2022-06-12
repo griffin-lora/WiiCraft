@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
 			chunks.insert(std::make_pair<math::vector3s32, game::chunk>({i, 0, j}, {}));
 			math::vector3s32 pos = {i, 0, j};
 			auto& chunk = chunks.at(pos);
-			game::generate_blocks(chunk);
+			game::generate_blocks(chunk, pos, 100);
 			game::update_mesh(chunk);
 		}
 	}
