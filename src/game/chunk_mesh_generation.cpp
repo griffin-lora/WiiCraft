@@ -5,28 +5,28 @@
 using namespace game;
 
 template<block::face face>
-static chunk::const_ref_opt get_chunk_ref_opt_from_nb(const chunk_neighborhood& nb) {
+static chunk::const_ref_opt get_neighbor(const chunk_neighborhood& nh) {
     if constexpr (face == block::face::FRONT) {
-        return nb.front;
+        return nh.front;
     } else if constexpr (face == block::face::BACK) {
-        return nb.back;
+        return nh.back;
     } else if constexpr (face == block::face::RIGHT) {
-        return nb.right;
+        return nh.right;
     } else if constexpr (face == block::face::LEFT) {
-        return nb.left;
+        return nh.left;
     } else if constexpr (face == block::face::TOP) {
-        return nb.top;
+        return nh.top;
     } else if constexpr (face == block::face::BOTTOM) {
-        return nb.bottom;
+        return nh.bottom;
     }
 }
 
 template<block::face face>
-static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nb, math::vector3u8 pos, block::type type) {
+static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nh, math::vector3u8 pos, block::type type) {
     auto check_pos = get_face_offset_position<face>(pos);
     if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
         // Since the position is outside of the chunk, we need to check the neighbor chunk
-        auto chunk_ref_opt = get_chunk_ref_opt_from_nb<face>(nb);
+        auto chunk_ref_opt = get_neighbor<face>(nh);
 
         if (chunk_ref_opt.has_value()) {
             auto& chunk_ref = chunk_ref_opt.value().get();
@@ -55,50 +55,50 @@ static bool should_render_face(const chunk& chunk, const chunk_neighborhood& nb,
 }
 
 template<block::face face>
-static std::size_t get_needed_face_vertex_count(const chunk& chunk, const chunk_neighborhood& nb, math::vector3u8 pos, block::type type) {
-    if (should_render_face<face>(chunk, nb, pos, type)) {
+static std::size_t get_needed_face_vertex_count(const chunk& chunk, const chunk_neighborhood& nh, math::vector3u8 pos, block::type type) {
+    if (should_render_face<face>(chunk, nh, pos, type)) {
         return get_face_vertex_count<face>(type);
     } else {
         return 0;
     }
 }
 
-static std::size_t get_chunk_vertex_count(const chunk& chunk, const chunk_neighborhood& nb) {
+static std::size_t get_chunk_vertex_count(const chunk& chunk, const chunk_neighborhood& nh) {
     std::size_t vertex_count = 0;
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &nb, &vertex_count](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &nh, &vertex_count](auto pos, auto& block) {
         auto type = block.tp;
         if (is_block_visible(type)) {
-            vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, nb, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, nb, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, nb, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, nb, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, nb, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, nb, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, nh, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, nh, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, nh, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, nh, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, nh, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, nh, pos, type);
         }
     });
     return vertex_count;
 }
 
 template<block::face face>
-static void add_needed_face_vertices(chunk& chunk, const chunk_neighborhood& nb, vertex_it& it, math::vector3u8 pos, block::type type) {
-    if (should_render_face<face>(chunk, nb, pos, type)) {
+static void add_needed_face_vertices(chunk& chunk, const chunk_neighborhood& nh, vertex_it& it, math::vector3u8 pos, block::type type) {
+    if (should_render_face<face>(chunk, nh, pos, type)) {
         add_face_vertices<face>(it, pos, type);
     }
 }
 
-void game::update_mesh(chunk& chunk, const chunk_neighborhood& nb) {
-    chunk.ms.vertices.resize_without_copying(get_chunk_vertex_count(chunk, nb));
+void game::update_mesh(chunk& chunk, const chunk_neighborhood& nh) {
+    chunk.ms.vertices.resize_without_copying(get_chunk_vertex_count(chunk, nh));
     auto it = chunk.ms.vertices.begin();
 
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &nb, &it](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &nh, &it](auto pos, auto& block) {
         auto type = block.tp;
         if (is_block_visible(type)) {
-            add_needed_face_vertices<block::face::FRONT>(chunk, nb, it, pos, type);
-            add_needed_face_vertices<block::face::BACK>(chunk, nb, it, pos, type);
-            add_needed_face_vertices<block::face::RIGHT>(chunk, nb, it, pos, type);
-            add_needed_face_vertices<block::face::LEFT>(chunk, nb, it, pos, type);
-            add_needed_face_vertices<block::face::TOP>(chunk, nb, it, pos, type);
-            add_needed_face_vertices<block::face::BOTTOM>(chunk, nb, it, pos, type);
+            add_needed_face_vertices<block::face::FRONT>(chunk, nh, it, pos, type);
+            add_needed_face_vertices<block::face::BACK>(chunk, nh, it, pos, type);
+            add_needed_face_vertices<block::face::RIGHT>(chunk, nh, it, pos, type);
+            add_needed_face_vertices<block::face::LEFT>(chunk, nh, it, pos, type);
+            add_needed_face_vertices<block::face::TOP>(chunk, nh, it, pos, type);
+            add_needed_face_vertices<block::face::BOTTOM>(chunk, nh, it, pos, type);
         }
     });
 
