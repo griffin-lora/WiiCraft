@@ -41,50 +41,70 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
 }
 
 template<block::face face>
-static std::size_t get_needed_face_vertex_count(const chunk& chunk, math::vector3u8 pos, block::type type) {
+static constexpr bool& get_face_cache_flag(block::face_cache& face_cache) {
+    if constexpr (face == block::face::FRONT) {
+        return face_cache.front;
+    } else if constexpr (face == block::face::BACK) {
+        return face_cache.back;
+    } else if constexpr (face == block::face::LEFT) {
+        return face_cache.left;
+    } else if constexpr (face == block::face::RIGHT) {
+        return face_cache.right;
+    } else if constexpr (face == block::face::TOP) {
+        return face_cache.top;
+    } else if constexpr (face == block::face::BOTTOM) {
+        return face_cache.bottom;
+    }
+}
+
+template<block::face face>
+static std::size_t get_needed_face_vertex_count(const chunk& chunk, ext::data_array<game::block::face_cache>& face_caches, math::vector3u8 pos, block::type type) {
+    auto& face_cache_flag = get_face_cache_flag<face>(face_caches[get_index_from_position(pos)]);
     if (should_render_face<face>(chunk, pos, type)) {
+        face_cache_flag = true;
         return get_face_vertex_count<face>(type);
     } else {
+        face_cache_flag = false;
         return 0;
     }
 }
 
-static std::size_t get_chunk_vertex_count(const chunk& chunk) {
+static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<game::block::face_cache>& face_caches) {
     std::size_t vertex_count = 0;
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &vertex_count](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &face_caches, &vertex_count](auto pos, auto& block) {
         auto type = block.tp;
         if (is_block_visible(type)) {
-            vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, face_caches, pos, type);
         }
     });
     return vertex_count;
 }
 
 template<block::face face>
-static void add_needed_face_vertices(chunk& chunk, vertex_it& it, math::vector3u8 pos, block::type type) {
-    if (should_render_face<face>(chunk, pos, type)) {
+static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& face_caches, vertex_it& it, math::vector3u8 pos, block::type type) {
+    if (get_face_cache_flag<face>(face_caches[get_index_from_position(pos)])) {
         add_face_vertices<face>(it, pos, type);
     }
 }
 
-void game::update_mesh(chunk& chunk) {
-    chunk.ms.vertices.resize_without_copying(get_chunk_vertex_count(chunk));
+void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches) {
+    chunk.ms.vertices.resize_without_copying(get_chunk_vertex_count(chunk, face_caches));
     auto it = chunk.ms.vertices.begin();
 
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &it](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&face_caches, &it](auto pos, auto& block) {
         auto type = block.tp;
         if (is_block_visible(type)) {
-            add_needed_face_vertices<block::face::FRONT>(chunk, it, pos, type);
-            add_needed_face_vertices<block::face::BACK>(chunk, it, pos, type);
-            add_needed_face_vertices<block::face::RIGHT>(chunk, it, pos, type);
-            add_needed_face_vertices<block::face::LEFT>(chunk, it, pos, type);
-            add_needed_face_vertices<block::face::TOP>(chunk, it, pos, type);
-            add_needed_face_vertices<block::face::BOTTOM>(chunk, it, pos, type);
+            add_needed_face_vertices<block::face::FRONT>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::BACK>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::RIGHT>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::LEFT>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::TOP>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::BOTTOM>(face_caches, it, pos, type);
         }
     });
 

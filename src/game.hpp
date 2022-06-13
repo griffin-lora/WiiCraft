@@ -54,6 +54,15 @@ namespace game {
             DIRT
         };
         type tp;
+        // This is a cache of which faces the block needs to create face vertices for.
+        struct face_cache {
+            bool front;
+            bool back;
+            bool right;
+            bool left;
+            bool top;
+            bool bottom;
+        };
     };
 
     template<typename F>
@@ -239,7 +248,7 @@ namespace game {
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
-    void update_mesh(chunk& chunk);
+    void update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches);
 
     void add_chunk_mesh_update(chunk& chunk, math::vector3u8 block_position);
     template<block::face face>
