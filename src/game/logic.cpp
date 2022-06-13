@@ -37,7 +37,7 @@ void game::destroy_block_from_camera(const camera& cam, chunk::map& chunks) {
 
         if (block.tp != block::type::AIR) {
             block = { .tp = block::type::AIR };
-            game::add_chunk_update(current_chunk->get(), raycast_block_pos);
+            game::add_chunk_mesh_update(current_chunk->get(), raycast_block_pos);
             break;
         }
 

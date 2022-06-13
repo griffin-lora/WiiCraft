@@ -241,7 +241,15 @@ namespace game {
 
     void update_mesh(chunk& chunk);
 
-    void add_chunk_update(chunk& chunk, math::vector3u8 block_position);
+    void add_chunk_mesh_update(chunk& chunk, math::vector3u8 block_position);
+    template<block::face face>
+    void add_chunk_mesh_update_to_neighbor(chunk& chunk) {
+        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
+        if (nb_chunk_opt.has_value()) {
+            auto& nb_chunk = nb_chunk_opt->get();
+            nb_chunk.update_mesh = true;
+        }
+    }
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);

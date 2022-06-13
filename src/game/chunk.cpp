@@ -85,22 +85,18 @@ static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
 }
 
 template<block::face face>
-static void add_chunk_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
+static void add_needed_chunk_mesh_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
     if (is_block_position_at_face_edge<face>(pos)) {
-        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
-        if (nb_chunk_opt.has_value()) {
-            auto& nb_chunk = nb_chunk_opt->get();
-            nb_chunk.update_mesh = true;
-        }
+        add_chunk_mesh_update_to_neighbor<face>(chunk);
     }
 }
 
-void game::add_chunk_update(chunk& chunk, math::vector3u8 pos) {
+void game::add_chunk_mesh_update(chunk& chunk, math::vector3u8 pos) {
     chunk.update_mesh = true;
-    add_chunk_update_to_neighbor<block::face::FRONT>(chunk, pos);
-    add_chunk_update_to_neighbor<block::face::BACK>(chunk, pos);
-    add_chunk_update_to_neighbor<block::face::RIGHT>(chunk, pos);
-    add_chunk_update_to_neighbor<block::face::LEFT>(chunk, pos);
-    add_chunk_update_to_neighbor<block::face::TOP>(chunk, pos);
-    add_chunk_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::FRONT>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::BACK>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::TOP>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
 }
