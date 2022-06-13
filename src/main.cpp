@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
 			if (chunk.update_mesh) {
 				chunk.update_mesh = false;
 				game::update_mesh(chunk);
+				break;
 			}
 		}
 
