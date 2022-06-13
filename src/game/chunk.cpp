@@ -1,5 +1,7 @@
 #include "game.hpp"
 #include "PerlinNoise.hpp"
+#include "dbg.hpp"
+#include <cstdio>
 
 using namespace game;
 
@@ -44,7 +46,7 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos, u32 
 }
 
 template<block::face face>
-static chunk::opt_ref get_neighbor(chunk::map& chunks, const math::vector3s32& pos) {
+static chunk::opt_ref get_neighbor_from_map(chunk::map& chunks, const math::vector3s32& pos) {
     math::vector3s32 offset_pos = get_face_offset_position<face>(pos);
     if (chunks.count(offset_pos)) {
         return chunks.at(offset_pos);
@@ -55,11 +57,50 @@ static chunk::opt_ref get_neighbor(chunk::map& chunks, const math::vector3s32& p
 
 chunk::neighborhood game::get_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos) {
     return {
-        .front = get_neighbor<block::face::FRONT>(chunks, pos),
-        .back = get_neighbor<block::face::BACK>(chunks, pos),
-        .right = get_neighbor<block::face::RIGHT>(chunks, pos),
-        .left = get_neighbor<block::face::LEFT>(chunks, pos),
-        .top = get_neighbor<block::face::TOP>(chunks, pos),
-        .bottom = get_neighbor<block::face::BOTTOM>(chunks, pos),
+        .front = get_neighbor_from_map<block::face::FRONT>(chunks, pos),
+        .back = get_neighbor_from_map<block::face::BACK>(chunks, pos),
+        .right = get_neighbor_from_map<block::face::RIGHT>(chunks, pos),
+        .left = get_neighbor_from_map<block::face::LEFT>(chunks, pos),
+        .top = get_neighbor_from_map<block::face::TOP>(chunks, pos),
+        .bottom = get_neighbor_from_map<block::face::BOTTOM>(chunks, pos),
     };
+}
+
+template<block::face face>
+static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
+    constexpr auto edge_coord = (chunk::SIZE - 1);
+    if constexpr (face == block::face::FRONT) {
+        return pos.x == edge_coord;
+    } else if constexpr (face == block::face::BACK) {
+        return pos.x == 0;
+    } else if constexpr (face == block::face::RIGHT) {
+        return pos.z == edge_coord;
+    } else if constexpr (face == block::face::LEFT) {
+        return pos.z == 0;
+    } else if constexpr (face == block::face::TOP) {
+        return pos.y == edge_coord;
+    } else if constexpr (face == block::face::BOTTOM) {
+        return pos.y == 0;
+    }
+}
+
+template<block::face face>
+static void add_chunk_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
+    if (is_block_position_at_face_edge<face>(pos)) {
+        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
+        if (nb_chunk_opt.has_value()) {
+            auto& nb_chunk = nb_chunk_opt->get();
+            nb_chunk.update_mesh = true;
+        }
+    }
+}
+
+void game::add_chunk_update(chunk& chunk, math::vector3u8 pos) {
+    chunk.update_mesh = true;
+    add_chunk_update_to_neighbor<block::face::FRONT>(chunk, pos);
+    add_chunk_update_to_neighbor<block::face::BACK>(chunk, pos);
+    add_chunk_update_to_neighbor<block::face::RIGHT>(chunk, pos);
+    add_chunk_update_to_neighbor<block::face::LEFT>(chunk, pos);
+    add_chunk_update_to_neighbor<block::face::TOP>(chunk, pos);
+    add_chunk_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
 }

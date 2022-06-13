@@ -144,6 +144,40 @@ namespace game {
 
     chunk::neighborhood get_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& position);
 
+    template<block::face face>
+    constexpr chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
+        if constexpr (face == block::face::FRONT) {
+            return nh.front;
+        } else if constexpr (face == block::face::BACK) {
+            return nh.back;
+        } else if constexpr (face == block::face::RIGHT) {
+            return nh.right;
+        } else if constexpr (face == block::face::LEFT) {
+            return nh.left;
+        } else if constexpr (face == block::face::TOP) {
+            return nh.top;
+        } else if constexpr (face == block::face::BOTTOM) {
+            return nh.bottom;
+        }
+    }
+
+    template<block::face face>
+    constexpr chunk::opt_ref get_neighbor(chunk::neighborhood& nh) {
+        if constexpr (face == block::face::FRONT) {
+            return nh.front;
+        } else if constexpr (face == block::face::BACK) {
+            return nh.back;
+        } else if constexpr (face == block::face::RIGHT) {
+            return nh.right;
+        } else if constexpr (face == block::face::LEFT) {
+            return nh.left;
+        } else if constexpr (face == block::face::TOP) {
+            return nh.top;
+        } else if constexpr (face == block::face::BOTTOM) {
+            return nh.bottom;
+        }
+    }
+
     inline void update_model_view(chunk& chunk, math::matrix view) {
         guMtxConcat(view, chunk.model, chunk.model_view);
     }
@@ -206,7 +240,8 @@ namespace game {
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
     void update_mesh(chunk& chunk);
-    void update_mesh_and_neighborhood_meshes(chunk& chunk);
+
+    void add_chunk_update(chunk& chunk, math::vector3u8 block_position);
 
     void draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices);
     void draw_chunk(chunk& chunk);

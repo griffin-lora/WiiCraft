@@ -66,7 +66,6 @@ int main(int argc, char** argv) {
 	bool first_frame = true;
 
 	std::unordered_map<math::vector3s32, game::chunk> chunks;
-	bool update_chunk_neighborhoods = true;
 
 	for (s32 x = -1; x <= 1; x++) {
 		for (s32 y = -1; y <= 1; y++) {
@@ -79,6 +78,7 @@ int main(int argc, char** argv) {
 	for (auto& [ pos, chunk ] : chunks) {
 		game::init(chunk, pos, view);
 		game::generate_blocks(chunk, pos, 100);
+		chunk.nh = game::get_chunk_neighborhood(chunks, pos);
 	}
 
 	input::state inp;
@@ -142,18 +142,11 @@ int main(int argc, char** argv) {
 		gfx::set_tev_order(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
 		gfx::load(texture);
-
-		if (update_chunk_neighborhoods) {
-			update_chunk_neighborhoods = false;
-			for (auto& [ pos, chunk ] : chunks) {
-				chunk.nh = game::get_chunk_neighborhood(chunks, pos);
-			}
-		}
 		
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_mesh) {
 				chunk.update_mesh = false;
-				game::update_mesh_and_neighborhood_meshes(chunk);
+				game::update_mesh(chunk);
 			}
 		}
 
