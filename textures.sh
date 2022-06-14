@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir -p build/data/textures
 cd textures
 for file in *
