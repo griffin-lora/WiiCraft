@@ -299,5 +299,17 @@ namespace game {
 
     void destroy_block_from_camera(const camera& cam, chunk::map& chunks);
 
-    void remove_chunks_outside_radius();
+    template<typename T, typename F>
+    inline void iterate_positions_in_sphere(T radius, F func) {
+        for (T x = -radius; x <= radius; x++) {
+			for (T y = -radius; y <= radius; y++) {
+				for (T z = -radius; z <= radius; z++) {
+                    glm::vec<3, T, glm::defaultp> pos = {x, y, z};
+                    if (math::squared_length(pos) <= (radius * radius)) {
+                        func(pos);
+                    }
+                }
+            }
+        }
+    }
 }

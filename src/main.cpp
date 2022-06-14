@@ -131,21 +131,14 @@ int main(int argc, char** argv) {
 		}
 
 		// Generate chunks around the sphere of radius chunk_generation_radius
-		for (s32 x = -chunk_generation_radius; x <= chunk_generation_radius; x++) {
-			for (s32 y = -chunk_generation_radius; y <= chunk_generation_radius; y++) {
-				for (s32 z = -chunk_generation_radius; z <= chunk_generation_radius; z++) {
-					math::vector3s32 offset = {x, y, z};
-					if (math::squared_length(offset) <= chunk_generation_radius_squared) {
-						auto chunk_pos = cam_chunk_pos + offset;
-						if (!chunks.count(chunk_pos)) {
-							inserted_chunk_positions.push_back(chunk_pos);
-							// Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
-							chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), {}));
-						}
-					}
-				}
+		game::iterate_positions_in_sphere(chunk_generation_radius, [&chunks, &inserted_chunk_positions, &cam_chunk_pos](auto& offset) {
+			auto chunk_pos = cam_chunk_pos + offset;
+			if (!chunks.count(chunk_pos)) {
+				inserted_chunk_positions.push_back(chunk_pos);
+				// Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
+				chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), {}));
 			}
-		}
+		});
 		
 		for (auto pos : inserted_chunk_positions) {
 			auto& chunk = chunks.at(pos);
