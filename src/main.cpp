@@ -69,24 +69,11 @@ int main(int argc, char** argv) {
 	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
 	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
 
-	for (s32 x = -1; x <= 1; x++) {
-		for (s32 y = -1; y <= 1; y++) {
-			for (s32 z = -1; z <= 1; z++) {
-				chunks.insert(std::make_pair<math::vector3s32, game::chunk>({x, y, z}, {}));
-			}
-		}
-	}
-	
-	for (auto& [ pos, chunk ] : chunks) {
-		game::init(chunk, pos, view);
-		game::generate_blocks(chunk, pos, 100);
-		chunk.nh = game::get_chunk_neighborhood(chunks, pos);
-	}
-
 	input::state inp;
 
-	for (;;) {
+	std::vector<math::vector3s32> inserted_chunk_positions;
 
+	for (;;) {
 		WPAD_ScanPads();
 		u32 buttons_held = input::get_buttons_held(0);
 		u32 buttons_down = input::get_buttons_down(0);
@@ -123,6 +110,31 @@ int main(int argc, char** argv) {
 		if (buttons_down & WPAD_BUTTON_A) {
 			game::destroy_block_from_camera(cam, chunks);
 		}
+
+		// Generate chunks around the camera
+		
+		auto cam_chunk_pos = game::get_chunk_position_from_world_position(cam.position);
+		for (s32 x = -1; x <= 1; x++) {
+			for (s32 y = -1; y <= 1; y++) {
+				for (s32 z = -1; z <= 1; z++) {
+					auto chunk_pos = cam_chunk_pos + math::vector3s32{x, y, z};
+					if (!chunks.count(chunk_pos)) {
+						inserted_chunk_positions.push_back(chunk_pos);
+						// Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
+						chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), {}));
+					}
+				}
+			}
+		}
+		
+		for (auto pos : inserted_chunk_positions) {
+			auto& chunk = chunks.at(pos);
+			game::init(chunk, pos, view);
+			game::generate_blocks(chunk, pos, 100);
+			chunk.nh = game::get_chunk_neighborhood(chunks, pos);
+		}
+
+		inserted_chunk_positions.clear();
 
 		if (cam_upd.update_look) {
 			game::update_look(cam);

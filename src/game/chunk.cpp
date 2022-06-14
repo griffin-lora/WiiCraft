@@ -27,7 +27,7 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos, u32 
             auto world_z = game::get_world_coord_from_local_position(z, chunk_pos.z);
             auto height = noise.octave2D(world_x / 32.f, world_z / 32.f, 8);
 
-            s32 y_pos = (height * chunk::SIZE);
+            s32 y_pos = (height * 16);
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);
