@@ -1,4 +1,4 @@
-#include "game.hpp"
+#include "chunk.hpp"
 #include "PerlinNoise.hpp"
 #include "dbg.hpp"
 #include <cstdio>

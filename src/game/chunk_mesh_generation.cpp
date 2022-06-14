@@ -1,4 +1,5 @@
-#include "game.hpp"
+#include "chunk_mesh_generation.hpp"
+#include "face_mesh_generation.hpp"
 #include "dbg.hpp"
 #include <cstdio>
 

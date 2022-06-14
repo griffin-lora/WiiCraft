@@ -10,10 +10,15 @@
 #include "gfx.hpp"
 #include "dbg.hpp"
 #include "math.hpp"
-#include "game.hpp"
 #include "input.hpp"
 #include <map>
 #include <numeric>
+#include "game/camera.hpp"
+#include "game/chunk.hpp"
+#include "game/block_logic.hpp"
+#include "game/util.hpp"
+#include "game/chunk_mesh_generation.hpp"
+#include "game/chunk_rendering.hpp"
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -118,7 +123,7 @@ int main(int argc, char** argv) {
 
 		auto cam_chunk_pos = game::get_chunk_position_from_world_position(cam.position);
 
-		// Remove chunks outside of the sphere of radius chunk_generation_radius
+		// Remove chunks outside of the sphere of radius chunk_erasure_radius
 		for (auto it = chunks.begin(); it != chunks.end();) {
 			auto pos = it->first;
 			auto& chunk = it->second;

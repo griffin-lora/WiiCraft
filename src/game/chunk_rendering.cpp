@@ -1,4 +1,5 @@
-#include "game.hpp"
+#include "chunk_rendering.hpp"
+#include "gfx.hpp"
 
 using namespace game;
 

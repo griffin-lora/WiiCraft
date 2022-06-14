@@ -1,4 +1,5 @@
-#include "game.hpp"
+#include "camera.hpp"
+#include <algorithm>
 
 using namespace game;
 
