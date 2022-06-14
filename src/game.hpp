@@ -65,55 +65,49 @@ namespace game {
         };
     };
 
-    template<typename F>
-    struct call_face_func_if {
-        F front;
-        F back;
-        F right;
-        F left;
-        F top;
-        F bottom;
-        F center;
-
-        template<block::face face, typename ...A>
-        constexpr auto call(A&&... args) {
-            if constexpr (face == block::face::FRONT) {
-                return front(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::BACK) {
-                return back(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::RIGHT) {
-                return right(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::LEFT) {
-                return left(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::TOP) {
-                return top(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::BOTTOM) {
-                return bottom(std::forward<A>(args)...);
-            } else if constexpr (face == block::face::CENTER) {
-                return center(std::forward<A>(args)...);
-            }
+    template<
+        block::face face,
+        typename F0,
+        typename F1,
+        typename F2,
+        typename F3,
+        typename F4,
+        typename F5,
+        typename F6,
+        typename ...A
+    >
+    constexpr auto call_face_func_if(F0 front, F1 back, F2 right, F3 left, F4 top, F5 bottom, F6 center, A&&... args) {
+        if constexpr (face == block::face::FRONT) {
+            return front(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::BACK) {
+            return back(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::RIGHT) {
+            return right(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::LEFT) {
+            return left(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::TOP) {
+            return top(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::BOTTOM) {
+            return bottom(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::CENTER) {
+            return center(std::forward<A>(args)...);
         }
-    };
+    }
 
     bool is_block_visible(block::type type);
 
     template<block::face face, typename T>
     constexpr T get_face_offset_position(T pos) {
-        T offset_pos = pos;
-        if constexpr (face == block::face::FRONT) {
-            offset_pos.x += 1;
-        } else if constexpr (face == block::face::BACK) {
-            offset_pos.x -= 1;
-        } else if constexpr (face == block::face::RIGHT) {
-            offset_pos.z += 1;
-        } else if constexpr (face == block::face::LEFT) {
-            offset_pos.z -= 1;
-        } else if constexpr (face == block::face::TOP) {
-            offset_pos.y += 1;
-        } else if constexpr (face == block::face::BOTTOM) {
-            offset_pos.y -= 1;
-        }
-        return offset_pos;
+        call_face_func_if<face>(
+            [&pos]() { pos.x += 1; },
+            [&pos]() { pos.x -= 1; },
+            [&pos]() { pos.z += 1; },
+            [&pos]() { pos.z -= 1; },
+            [&pos]() { pos.y += 1; },
+            [&pos]() { pos.y -= 1; },
+            []() {}
+        );
+        return pos;
     }
 
     struct chunk {
@@ -268,15 +262,16 @@ namespace game {
 
     template<block::face face>
     constexpr std::size_t get_face_vertex_count(block::type type) {
-        return call_face_func_if<std::size_t(*)(block::type)>{
-            .front = get_any_face_vertex_count,
-            .back = get_any_face_vertex_count,
-            .right = get_any_face_vertex_count,
-            .left = get_any_face_vertex_count,
-            .top = get_any_face_vertex_count,
-            .bottom = get_any_face_vertex_count,
-            .center = get_center_vertex_count
-        }.call<face>(type);
+        return call_face_func_if<face>(
+            get_any_face_vertex_count,
+            get_any_face_vertex_count,
+            get_any_face_vertex_count,
+            get_any_face_vertex_count,
+            get_any_face_vertex_count,
+            get_any_face_vertex_count,
+            get_center_vertex_count,
+            type
+        );
     }
 
     using vertex_it = ext::data_array<chunk::mesh::vertex>::iterator;
@@ -291,15 +286,16 @@ namespace game {
 
     template<block::face face>
     constexpr void add_face_vertices(vertex_it& it, math::vector3u8 local_position, block::type type) {
-        call_face_func_if<void(*)(vertex_it&, math::vector3u8, block::type)>{
-            .front = add_front_vertices,
-            .back = add_back_vertices,
-            .right = add_right_vertices,
-            .left = add_left_vertices,
-            .top = add_top_vertices,
-            .bottom = add_bottom_vertices,
-            .center = add_center_vertices
-        }.call<face>(it, local_position, type);
+        call_face_func_if<face>(
+            add_front_vertices,
+            add_back_vertices,
+            add_right_vertices,
+            add_left_vertices,
+            add_top_vertices,
+            add_bottom_vertices,
+            add_center_vertices,
+            it, local_position, type
+        );
     }
 
     void destroy_block_from_camera(const camera& cam, chunk::map& chunks);
