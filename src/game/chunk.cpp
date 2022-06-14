@@ -70,7 +70,7 @@ template<block::face face>
 static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
     static_assert(face != block::face::CENTER, "Center face is not allowed.");
     constexpr auto edge_coord = (chunk::SIZE - 1);
-    return call_face_func_if<face, bool>(
+    return call_face_func_for<face, bool>(
         [&]() { return pos.x == edge_coord; },
         [&]() { return pos.x == 0; },
         [&]() { return pos.y == edge_coord; },

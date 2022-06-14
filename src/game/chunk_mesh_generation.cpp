@@ -43,7 +43,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
 template<block::face face>
 static constexpr bool& get_face_cache_flag(block::face_cache& face_cache) {
     static_assert(face != block::face::CENTER, "Center face is not allowed.");
-    return call_face_func_if<face, bool&>(
+    return call_face_func_for<face, bool&>(
         [](auto& c) -> bool& { return c.front; },
         [](auto& c) -> bool& { return c.back; },
         [](auto& c) -> bool& { return c.right; },
