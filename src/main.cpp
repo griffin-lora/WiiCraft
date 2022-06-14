@@ -12,7 +12,6 @@
 #include "math.hpp"
 #include "game.hpp"
 #include "input.hpp"
-#include "glm/gtx/norm.hpp"
 #include <map>
 #include <numeric>
 
