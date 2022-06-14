@@ -300,7 +300,7 @@ namespace game {
     void destroy_block_from_camera(const camera& cam, chunk::map& chunks);
 
     template<typename T, typename F>
-    inline void iterate_positions_in_sphere(T radius, F func) {
+    constexpr void iterate_positions_in_sphere(T radius, F func) {
         for (T x = -radius; x <= radius; x++) {
 			for (T y = -radius; y <= radius; y++) {
 				for (T z = -radius; z <= radius; z++) {

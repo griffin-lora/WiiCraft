@@ -19,7 +19,8 @@ constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
 constexpr s32 chunk_generation_radius = 2;
-constexpr s32 chunk_generation_radius_squared = chunk_generation_radius * chunk_generation_radius;
+
+constexpr s32 chunk_erasure_radius_squared = 5;
 
 int main(int argc, char** argv) {
 
@@ -121,7 +122,7 @@ int main(int argc, char** argv) {
 		for (auto it = chunks.begin(); it != chunks.end();) {
 			auto pos = it->first;
 			auto& chunk = it->second;
-			if (math::squared_length(pos - cam_chunk_pos) > chunk_generation_radius_squared) {
+			if (math::squared_length(pos - cam_chunk_pos) > chunk_erasure_radius_squared) {
 				// Notify neighbor chunks that they need to update their neighborhood to avoid a dangling reference
 				game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
 				it = chunks.erase(it);
