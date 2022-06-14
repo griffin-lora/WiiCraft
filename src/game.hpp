@@ -41,10 +41,10 @@ namespace game {
         enum class face : u8 {
             FRONT, // +x
             BACK, // -x
-            RIGHT, // +z
-            LEFT, // -z
             TOP, // +y
             BOTTOM, // -z
+            RIGHT, // +z
+            LEFT, // -z
             CENTER
         };
         enum class type : u8 {
@@ -58,10 +58,10 @@ namespace game {
         struct face_cache {
             bool front;
             bool back;
-            bool right;
-            bool left;
             bool top;
             bool bottom;
+            bool right;
+            bool left;
         };
     };
 
@@ -77,19 +77,19 @@ namespace game {
         typename F6,
         typename ...A
     >
-    constexpr R call_face_func_for(F0 front, F1 back, F2 right, F3 left, F4 top, F5 bottom, F6 center, A&&... args) {
+    constexpr R call_face_func_for(F0 front, F1 back, F2 top, F3 bottom, F4 right, F5 left, F6 center, A&&... args) {
         if constexpr (face == block::face::FRONT) {
             return front(std::forward<A>(args)...);
         } else if constexpr (face == block::face::BACK) {
             return back(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::RIGHT) {
-            return right(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::LEFT) {
-            return left(std::forward<A>(args)...);
         } else if constexpr (face == block::face::TOP) {
             return top(std::forward<A>(args)...);
         } else if constexpr (face == block::face::BOTTOM) {
             return bottom(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::RIGHT) {
+            return right(std::forward<A>(args)...);
+        } else if constexpr (face == block::face::LEFT) {
+            return left(std::forward<A>(args)...);
         } else if constexpr (face == block::face::CENTER) {
             return center(std::forward<A>(args)...);
         }
@@ -103,10 +103,10 @@ namespace game {
         call_face_func_for<face, void>(
             [&]() { pos.x += 1; },
             [&]() { pos.x -= 1; },
-            [&]() { pos.z += 1; },
-            [&]() { pos.z -= 1; },
             [&]() { pos.y += 1; },
             [&]() { pos.y -= 1; },
+            [&]() { pos.z += 1; },
+            [&]() { pos.z -= 1; },
             []() {}
         );
         return pos;
@@ -133,10 +133,10 @@ namespace game {
         struct neighborhood {
             opt_ref front;
             opt_ref back;
-            opt_ref right;
-            opt_ref left;
             opt_ref top;
             opt_ref bottom;
+            opt_ref right;
+            opt_ref left;
         };
 
         neighborhood nh;
@@ -155,10 +155,10 @@ namespace game {
         return call_face_func_for<face, chunk::const_opt_ref>(
             [&]() { return nh.front; },
             [&]() { return nh.back; },
-            [&]() { return nh.right; },
-            [&]() { return nh.left; },
             [&]() { return nh.top; },
             [&]() { return nh.bottom; },
+            [&]() { return nh.right; },
+            [&]() { return nh.left; },
             []() {}
         );
     }
@@ -169,10 +169,10 @@ namespace game {
         return call_face_func_for<face, chunk::opt_ref>(
             [&]() { return nh.front; },
             [&]() { return nh.back; },
-            [&]() { return nh.right; },
-            [&]() { return nh.left; },
             [&]() { return nh.top; },
             [&]() { return nh.bottom; },
+            [&]() { return nh.right; },
+            [&]() { return nh.left; },
             []() {}
         );
     }
@@ -274,10 +274,10 @@ namespace game {
 
     void add_front_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_back_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_right_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_left_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_top_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_bottom_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_right_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_left_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
     void add_center_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
 
     template<block::face face>
@@ -285,10 +285,10 @@ namespace game {
         call_face_func_for<face, void>(
             add_front_vertices,
             add_back_vertices,
-            add_right_vertices,
-            add_left_vertices,
             add_top_vertices,
             add_bottom_vertices,
+            add_right_vertices,
+            add_left_vertices,
             add_center_vertices,
             it, local_position, type
         );

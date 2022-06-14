@@ -46,10 +46,10 @@ static constexpr bool& get_face_cache_flag(block::face_cache& face_cache) {
     return call_face_func_for<face, bool&>(
         [](auto& c) -> bool& { return c.front; },
         [](auto& c) -> bool& { return c.back; },
-        [](auto& c) -> bool& { return c.right; },
-        [](auto& c) -> bool& { return c.left; },
         [](auto& c) -> bool& { return c.top; },
         [](auto& c) -> bool& { return c.bottom; },
+        [](auto& c) -> bool& { return c.right; },
+        [](auto& c) -> bool& { return c.left; },
         []() {},
         face_cache
     );
@@ -74,10 +74,10 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<ga
         if (is_block_visible(type)) {
             vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, face_caches, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, face_caches, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, face_caches, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, face_caches, pos, type);
         }
     });
     return vertex_count;
@@ -99,10 +99,10 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
         if (is_block_visible(type)) {
             add_needed_face_vertices<block::face::FRONT>(face_caches, it, pos, type);
             add_needed_face_vertices<block::face::BACK>(face_caches, it, pos, type);
-            add_needed_face_vertices<block::face::RIGHT>(face_caches, it, pos, type);
-            add_needed_face_vertices<block::face::LEFT>(face_caches, it, pos, type);
             add_needed_face_vertices<block::face::TOP>(face_caches, it, pos, type);
             add_needed_face_vertices<block::face::BOTTOM>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::RIGHT>(face_caches, it, pos, type);
+            add_needed_face_vertices<block::face::LEFT>(face_caches, it, pos, type);
         }
     });
 

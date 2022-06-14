@@ -59,10 +59,10 @@ chunk::neighborhood game::get_chunk_neighborhood(chunk::map& chunks, const math:
     return {
         .front = get_neighbor_from_map<block::face::FRONT>(chunks, pos),
         .back = get_neighbor_from_map<block::face::BACK>(chunks, pos),
-        .right = get_neighbor_from_map<block::face::RIGHT>(chunks, pos),
-        .left = get_neighbor_from_map<block::face::LEFT>(chunks, pos),
         .top = get_neighbor_from_map<block::face::TOP>(chunks, pos),
         .bottom = get_neighbor_from_map<block::face::BOTTOM>(chunks, pos),
+        .right = get_neighbor_from_map<block::face::RIGHT>(chunks, pos),
+        .left = get_neighbor_from_map<block::face::LEFT>(chunks, pos),
     };
 }
 
@@ -73,10 +73,10 @@ static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
     return call_face_func_for<face, bool>(
         [&]() { return pos.x == edge_coord; },
         [&]() { return pos.x == 0; },
-        [&]() { return pos.z == edge_coord; },
-        [&]() { return pos.z == 0; },
         [&]() { return pos.y == edge_coord; },
         [&]() { return pos.y == 0; },
+        [&]() { return pos.z == edge_coord; },
+        [&]() { return pos.z == 0; },
         []() {}
     );
 }
@@ -92,8 +92,8 @@ void game::add_chunk_mesh_update(chunk& chunk, math::vector3u8 pos) {
     chunk.update_mesh = true;
     add_needed_chunk_mesh_update_to_neighbor<block::face::FRONT>(chunk, pos);
     add_needed_chunk_mesh_update_to_neighbor<block::face::BACK>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
     add_needed_chunk_mesh_update_to_neighbor<block::face::TOP>(chunk, pos);
     add_needed_chunk_mesh_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
+    add_needed_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
 }
