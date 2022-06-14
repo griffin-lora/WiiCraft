@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mkdir -p build/image
 test ! -f image.iso && mksdcard 50M image.iso
 sudo mount -o defaults,umask=000 image.iso build/image
