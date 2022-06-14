@@ -117,19 +117,13 @@ int main(int argc, char** argv) {
 
 		auto cam_chunk_pos = game::get_chunk_position_from_world_position(cam.position);
 
-		// Delete chunks outside of the sphere of radius chunk_generation_radius
+		// Remove chunks outside of the sphere of radius chunk_generation_radius
 		for (auto it = chunks.begin(); it != chunks.end();) {
 			auto pos = it->first;
 			auto& chunk = it->second;
 			if (math::squared_length(pos - cam_chunk_pos) > chunk_generation_radius_squared) {
 				// Notify neighbor chunks that they need to update their neighborhood to avoid a dangling reference
-				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::FRONT>(chunk);
-				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BACK>(chunk);
-				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::TOP>(chunk);
-				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BOTTOM>(chunk);
-				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::RIGHT>(chunk);
-				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::LEFT>(chunk);
-
+				game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
 				it = chunks.erase(it);
 			} else {
 				++it;
@@ -160,12 +154,7 @@ int main(int argc, char** argv) {
 			game::update_chunk_neighborhood(chunks, pos, chunk);
 
 			// Notify old chunks that there is a new chunk neighboring them
-			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::FRONT>(chunk);
-			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BACK>(chunk);
-			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::TOP>(chunk);
-			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BOTTOM>(chunk);
-			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::RIGHT>(chunk);
-			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::LEFT>(chunk);
+			game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
 		}
 
 		// Clear the update neighborhood flag that was set before

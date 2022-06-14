@@ -239,15 +239,7 @@ namespace game {
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
 
-    template<block::face face>
-    void add_chunk_mesh_neighborhood_update_to_neighbor(chunk& chunk) {
-        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
-        if (nb_chunk_opt.has_value()) {
-            auto& nb_chunk = nb_chunk_opt->get();
-            nb_chunk.update_mesh = true;
-            nb_chunk.update_neighborhood = true;
-        }
-    }
+    void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 
     void update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches);
 
@@ -306,4 +298,6 @@ namespace game {
     }
 
     void destroy_block_from_camera(const camera& cam, chunk::map& chunks);
+
+    void remove_chunks_outside_radius();
 }

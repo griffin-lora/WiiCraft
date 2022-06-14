@@ -97,3 +97,22 @@ void game::add_chunk_mesh_update(chunk& chunk, math::vector3u8 pos) {
     add_needed_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
     add_needed_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
 }
+
+template<block::face face>
+static void add_chunk_mesh_neighborhood_update_to_neighbor(chunk& chunk) {
+    auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
+    if (nb_chunk_opt.has_value()) {
+        auto& nb_chunk = nb_chunk_opt->get();
+        nb_chunk.update_mesh = true;
+        nb_chunk.update_neighborhood = true;
+    }
+}
+
+void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
+    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::FRONT>(chunk);
+    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::BACK>(chunk);
+    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::TOP>(chunk);
+    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::BOTTOM>(chunk);
+    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::RIGHT>(chunk);
+    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
+}
