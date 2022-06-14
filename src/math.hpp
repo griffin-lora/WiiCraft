@@ -22,6 +22,11 @@ namespace math {
         return v.x != 0 || v.y != 0 || v.z != 0;
     }
 
+    template<typename T, glm::qualifier Q>
+    inline T squared_length(const glm::vec<3, T, Q>& v) {
+        return v.x * v.x + v.y * v.y + v.z * v.z;
+    }
+
     inline const glm::vec3& look(const glm::mat3& mat) {
         return mat[0];
     }

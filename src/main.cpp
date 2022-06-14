@@ -12,12 +12,14 @@
 #include "math.hpp"
 #include "game.hpp"
 #include "input.hpp"
+#include "glm/gtx/norm.hpp"
 #include <map>
+#include <numeric>
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
-constexpr s32 chunk_generation_radius = 1;
+constexpr s32 chunk_generation_radius = 2;
 constexpr s32 chunk_generation_radius_squared = chunk_generation_radius * chunk_generation_radius;
 
 int main(int argc, char** argv) {
@@ -114,17 +116,39 @@ int main(int argc, char** argv) {
 			game::destroy_block_from_camera(cam, chunks);
 		}
 
-		// Generate chunks around the camera
-		
 		auto cam_chunk_pos = game::get_chunk_position_from_world_position(cam.position);
+
+		// Delete chunks outside of the sphere of radius chunk_generation_radius
+		for (auto it = chunks.begin(); it != chunks.end();) {
+			auto pos = it->first;
+			auto& chunk = it->second;
+			if (math::squared_length(pos - cam_chunk_pos) > chunk_generation_radius_squared) {
+				// Notify neighbor chunks that they need to update their neighborhood to avoid a dangling reference
+				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::FRONT>(chunk);
+				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BACK>(chunk);
+				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::TOP>(chunk);
+				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BOTTOM>(chunk);
+				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::RIGHT>(chunk);
+				game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::LEFT>(chunk);
+
+				it = chunks.erase(it);
+			} else {
+				++it;
+			}
+		}
+
+		// Generate chunks around the sphere of radius chunk_generation_radius
 		for (s32 x = -chunk_generation_radius; x <= chunk_generation_radius; x++) {
 			for (s32 y = -chunk_generation_radius; y <= chunk_generation_radius; y++) {
 				for (s32 z = -chunk_generation_radius; z <= chunk_generation_radius; z++) {
-					auto chunk_pos = cam_chunk_pos + math::vector3s32{x, y, z};
-					if (!chunks.count(chunk_pos)) {
-						inserted_chunk_positions.push_back(chunk_pos);
-						// Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
-						chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), {}));
+					math::vector3s32 offset = {x, y, z};
+					if (math::squared_length(offset) <= chunk_generation_radius_squared) {
+						auto chunk_pos = cam_chunk_pos + offset;
+						if (!chunks.count(chunk_pos)) {
+							inserted_chunk_positions.push_back(chunk_pos);
+							// Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
+							chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), {}));
+						}
 					}
 				}
 			}
