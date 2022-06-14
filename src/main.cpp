@@ -14,7 +14,7 @@
 #include "input.hpp"
 #include <map>
 
-constexpr f32 cam_move_speed = 0.3f;
+constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
 int main(int argc, char** argv) {
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 		.position = {0.0f, 3.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.look = {0.0f, 0.0f, 1.0f},
-		.fov = 45.0f,
+		.fov = 90.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f

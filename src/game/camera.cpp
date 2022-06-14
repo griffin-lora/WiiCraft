@@ -27,7 +27,7 @@ void game::move_camera(camera& cam, const glm::vec3& input_vector, f32 move_spee
 void game::rotate_camera(camera& cam, const glm::vec2& input_vector, f32 rotate_speed) {
     cam.yaw = cam.yaw - (input_vector.x * rotate_speed);
     cam.pitch = cam.pitch + (input_vector.y * rotate_speed);
-    cam.pitch = std::clamp(cam.pitch, glm::radians(-80.f), glm::radians(80.f));
+    cam.pitch = std::clamp(cam.pitch, glm::radians(-89.9f), glm::radians(89.9f));
 }
 
 void game::update_look(camera& cam) {
