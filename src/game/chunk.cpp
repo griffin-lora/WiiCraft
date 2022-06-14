@@ -73,10 +73,10 @@ static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
     return call_face_func_for<face, bool>(
         [&]() { return pos.x == edge_coord; },
         [&]() { return pos.x == 0; },
-        [&]() { return pos.y == edge_coord; },
-        [&]() { return pos.y == 0; },
         [&]() { return pos.z == edge_coord; },
         [&]() { return pos.z == 0; },
+        [&]() { return pos.y == edge_coord; },
+        [&]() { return pos.y == 0; },
         []() {}
     );
 }
