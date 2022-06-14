@@ -55,8 +55,8 @@ static chunk::opt_ref get_neighbor_from_map(chunk::map& chunks, const math::vect
     }
 }
 
-chunk::neighborhood game::get_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos) {
-    return {
+void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk) {
+    chunk.nh = {
         .front = get_neighbor_from_map<block::face::FRONT>(chunks, pos),
         .back = get_neighbor_from_map<block::face::BACK>(chunks, pos),
         .top = get_neighbor_from_map<block::face::TOP>(chunks, pos),

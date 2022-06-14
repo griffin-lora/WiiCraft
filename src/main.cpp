@@ -17,6 +17,9 @@
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
+constexpr s32 chunk_generation_radius = 1;
+constexpr s32 chunk_generation_radius_squared = chunk_generation_radius * chunk_generation_radius;
+
 int main(int argc, char** argv) {
 
 	gfx::console_state con;
@@ -114,9 +117,9 @@ int main(int argc, char** argv) {
 		// Generate chunks around the camera
 		
 		auto cam_chunk_pos = game::get_chunk_position_from_world_position(cam.position);
-		for (s32 x = -1; x <= 1; x++) {
-			for (s32 y = -1; y <= 1; y++) {
-				for (s32 z = -1; z <= 1; z++) {
+		for (s32 x = -chunk_generation_radius; x <= chunk_generation_radius; x++) {
+			for (s32 y = -chunk_generation_radius; y <= chunk_generation_radius; y++) {
+				for (s32 z = -chunk_generation_radius; z <= chunk_generation_radius; z++) {
 					auto chunk_pos = cam_chunk_pos + math::vector3s32{x, y, z};
 					if (!chunks.count(chunk_pos)) {
 						inserted_chunk_positions.push_back(chunk_pos);
@@ -131,7 +134,21 @@ int main(int argc, char** argv) {
 			auto& chunk = chunks.at(pos);
 			game::init(chunk, pos, view);
 			game::generate_blocks(chunk, pos, 100);
-			chunk.nh = game::get_chunk_neighborhood(chunks, pos);
+			game::update_chunk_neighborhood(chunks, pos, chunk);
+
+			// Notify old chunks that there is a new chunk neighboring them
+			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::FRONT>(chunk);
+			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BACK>(chunk);
+			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::TOP>(chunk);
+			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::BOTTOM>(chunk);
+			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::RIGHT>(chunk);
+			game::add_chunk_mesh_neighborhood_update_to_neighbor<game::block::face::LEFT>(chunk);
+		}
+
+		// Clear the update neighborhood flag that was set before
+		for (auto pos : inserted_chunk_positions) {
+			auto& chunk = chunks.at(pos);
+			chunk.update_neighborhood = false;
 		}
 
 		inserted_chunk_positions.clear();
@@ -156,6 +173,13 @@ int main(int argc, char** argv) {
 		gfx::set_tev_order(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
 		gfx::load(texture);
+		
+		for (auto& [ pos, chunk ] : chunks) {
+			if (chunk.update_neighborhood) {
+				chunk.update_neighborhood = false;
+				game::update_chunk_neighborhood(chunks, pos, chunk);
+			}
+		}
 		
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_mesh) {

@@ -129,6 +129,7 @@ namespace game {
         };
 
         mesh ms;
+        bool update_mesh = true;
 
         struct neighborhood {
             opt_ref front;
@@ -140,14 +141,14 @@ namespace game {
         };
 
         neighborhood nh;
-        bool update_mesh = true;
+        bool update_neighborhood = false;
         ext::data_array<block> blocks = { BLOCKS_COUNT };
 
         math::matrix model;
         math::matrix model_view;
     };
 
-    chunk::neighborhood get_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& position);
+    void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 
     template<block::face face>
     constexpr chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
@@ -237,6 +238,16 @@ namespace game {
     }
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
+
+    template<block::face face>
+    void add_chunk_mesh_neighborhood_update_to_neighbor(chunk& chunk) {
+        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
+        if (nb_chunk_opt.has_value()) {
+            auto& nb_chunk = nb_chunk_opt->get();
+            nb_chunk.update_mesh = true;
+            nb_chunk.update_neighborhood = true;
+        }
+    }
 
     void update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches);
 
