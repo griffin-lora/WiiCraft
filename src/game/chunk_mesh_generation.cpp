@@ -42,19 +42,17 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
 
 template<block::face face>
 static constexpr bool& get_face_cache_flag(block::face_cache& face_cache) {
-    if constexpr (face == block::face::FRONT) {
-        return face_cache.front;
-    } else if constexpr (face == block::face::BACK) {
-        return face_cache.back;
-    } else if constexpr (face == block::face::LEFT) {
-        return face_cache.left;
-    } else if constexpr (face == block::face::RIGHT) {
-        return face_cache.right;
-    } else if constexpr (face == block::face::TOP) {
-        return face_cache.top;
-    } else if constexpr (face == block::face::BOTTOM) {
-        return face_cache.bottom;
-    }
+    static_assert(face != block::face::CENTER, "Center face is not allowed.");
+    return call_face_func_if<face, bool&>(
+        [](auto& c) -> bool& { return c.front; },
+        [](auto& c) -> bool& { return c.back; },
+        [](auto& c) -> bool& { return c.right; },
+        [](auto& c) -> bool& { return c.left; },
+        [](auto& c) -> bool& { return c.top; },
+        [](auto& c) -> bool& { return c.bottom; },
+        []() {},
+        face_cache
+    );
 }
 
 template<block::face face>

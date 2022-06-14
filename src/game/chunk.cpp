@@ -68,20 +68,17 @@ chunk::neighborhood game::get_chunk_neighborhood(chunk::map& chunks, const math:
 
 template<block::face face>
 static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
+    static_assert(face != block::face::CENTER, "Center face is not allowed.");
     constexpr auto edge_coord = (chunk::SIZE - 1);
-    if constexpr (face == block::face::FRONT) {
-        return pos.x == edge_coord;
-    } else if constexpr (face == block::face::BACK) {
-        return pos.x == 0;
-    } else if constexpr (face == block::face::RIGHT) {
-        return pos.z == edge_coord;
-    } else if constexpr (face == block::face::LEFT) {
-        return pos.z == 0;
-    } else if constexpr (face == block::face::TOP) {
-        return pos.y == edge_coord;
-    } else if constexpr (face == block::face::BOTTOM) {
-        return pos.y == 0;
-    }
+    return call_face_func_if<face, bool>(
+        [&]() { return pos.x == edge_coord; },
+        [&]() { return pos.x == 0; },
+        [&]() { return pos.y == edge_coord; },
+        [&]() { return pos.y == 0; },
+        [&]() { return pos.z == edge_coord; },
+        [&]() { return pos.z == 0; },
+        []() {}
+    );
 }
 
 template<block::face face>

@@ -67,6 +67,7 @@ namespace game {
 
     template<
         block::face face,
+        typename R,
         typename F0,
         typename F1,
         typename F2,
@@ -76,7 +77,7 @@ namespace game {
         typename F6,
         typename ...A
     >
-    constexpr auto call_face_func_if(F0 front, F1 back, F2 right, F3 left, F4 top, F5 bottom, F6 center, A&&... args) {
+    constexpr R call_face_func_if(F0 front, F1 back, F2 right, F3 left, F4 top, F5 bottom, F6 center, A&&... args) {
         if constexpr (face == block::face::FRONT) {
             return front(std::forward<A>(args)...);
         } else if constexpr (face == block::face::BACK) {
@@ -98,13 +99,13 @@ namespace game {
 
     template<block::face face, typename T>
     constexpr T get_face_offset_position(T pos) {
-        call_face_func_if<face>(
-            [&pos]() { pos.x += 1; },
-            [&pos]() { pos.x -= 1; },
-            [&pos]() { pos.z += 1; },
-            [&pos]() { pos.z -= 1; },
-            [&pos]() { pos.y += 1; },
-            [&pos]() { pos.y -= 1; },
+        call_face_func_if<face, void>(
+            [&]() { pos.x += 1; },
+            [&]() { pos.x -= 1; },
+            [&]() { pos.z += 1; },
+            [&]() { pos.z -= 1; },
+            [&]() { pos.y += 1; },
+            [&]() { pos.y -= 1; },
             []() {}
         );
         return pos;
@@ -149,36 +150,28 @@ namespace game {
 
     template<block::face face>
     constexpr chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
-        if constexpr (face == block::face::FRONT) {
-            return nh.front;
-        } else if constexpr (face == block::face::BACK) {
-            return nh.back;
-        } else if constexpr (face == block::face::RIGHT) {
-            return nh.right;
-        } else if constexpr (face == block::face::LEFT) {
-            return nh.left;
-        } else if constexpr (face == block::face::TOP) {
-            return nh.top;
-        } else if constexpr (face == block::face::BOTTOM) {
-            return nh.bottom;
-        }
+        return call_face_func_if<face, chunk::const_opt_ref>(
+            [&]() { return nh.front; },
+            [&]() { return nh.back; },
+            [&]() { return nh.right; },
+            [&]() { return nh.left; },
+            [&]() { return nh.top; },
+            [&]() { return nh.bottom; },
+            []() -> chunk::const_opt_ref { return {}; }
+        );
     }
 
     template<block::face face>
     constexpr chunk::opt_ref get_neighbor(chunk::neighborhood& nh) {
-        if constexpr (face == block::face::FRONT) {
-            return nh.front;
-        } else if constexpr (face == block::face::BACK) {
-            return nh.back;
-        } else if constexpr (face == block::face::RIGHT) {
-            return nh.right;
-        } else if constexpr (face == block::face::LEFT) {
-            return nh.left;
-        } else if constexpr (face == block::face::TOP) {
-            return nh.top;
-        } else if constexpr (face == block::face::BOTTOM) {
-            return nh.bottom;
-        }
+        return call_face_func_if<face, chunk::opt_ref>(
+            [&]() { return nh.front; },
+            [&]() { return nh.back; },
+            [&]() { return nh.right; },
+            [&]() { return nh.left; },
+            [&]() { return nh.top; },
+            [&]() { return nh.bottom; },
+            []() -> chunk::opt_ref { return {}; }
+        );
     }
 
     inline void update_model_view(chunk& chunk, math::matrix view) {
@@ -262,7 +255,7 @@ namespace game {
 
     template<block::face face>
     constexpr std::size_t get_face_vertex_count(block::type type) {
-        return call_face_func_if<face>(
+        return call_face_func_if<face, std::size_t>(
             get_any_face_vertex_count,
             get_any_face_vertex_count,
             get_any_face_vertex_count,
@@ -286,7 +279,7 @@ namespace game {
 
     template<block::face face>
     constexpr void add_face_vertices(vertex_it& it, math::vector3u8 local_position, block::type type) {
-        call_face_func_if<face>(
+        call_face_func_if<face, void>(
             add_front_vertices,
             add_back_vertices,
             add_right_vertices,
