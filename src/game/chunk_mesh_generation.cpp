@@ -114,8 +114,8 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
     });
 
     if (iters.pos_it != chunk.ms.pos_vertices.end() || iters.uv_it != chunk.ms.uv_vertices.end()) {
-        dbg::error([&chunk]() {
-            printf("Vertex count mismatch! Expected %d vertices\n", chunk.ms.pos_vertices.size());
+        dbg::error([vertex_count]() {
+            printf("Vertex count mismatch! Expected %d vertices\n", vertex_count);
         });
     }
 }
