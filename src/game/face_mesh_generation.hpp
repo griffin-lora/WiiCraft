@@ -19,18 +19,18 @@ namespace game {
         );
     }
 
-    using vertex_it = ext::data_array<chunk::mesh::vertex>::iterator;
+    using ms_iters = chunk::mesh::iterators;
 
-    void add_front_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_back_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_top_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_bottom_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_right_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_left_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
-    void add_center_vertices(vertex_it& it, math::vector3u8 local_position, block::type type);
+    void add_front_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_back_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_top_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_bottom_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_right_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_left_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_center_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
 
     template<block::face face>
-    constexpr void add_face_vertices(vertex_it& it, math::vector3u8 local_position, block::type type) {
+    constexpr void add_face_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type) {
         call_face_func_for<face, void>(
             add_front_vertices,
             add_back_vertices,
@@ -39,7 +39,7 @@ namespace game {
             add_right_vertices,
             add_left_vertices,
             add_center_vertices,
-            it, local_position, type
+            iters, local_position, type
         );
     }
 };

@@ -18,124 +18,97 @@ std::size_t game::get_any_face_vertex_count(block::type type) {
     }
 }
 
-static void add_cube_front_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_front_vertices(ms_iters& iters, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +x
-    *it++ = {
-        { lo.x,lo.y, l.z },	// Top Left of the quad (bottom)
-        { u.x,u.y }
-    };
-    *it++ = {
-        { lo.x,l.y, l.z },	// Top Right of the quad (bottom)
-        { u.x, uo.y }
-    };
-    *it++ = {
-        { lo.x,l.y,lo.z },	// Bottom Right of the quad (bottom)
-        { uo.x,uo.y }
-    };
-    *it++ = {
-        { lo.x,lo.y,lo.z },	// Bottom Left of the quad (bottom)
-        { uo.x, u.y }
-    };
+    *iters.pos_it++ = { lo.x,lo.y, l.z };	// Top Left of the quad (bottom)
+    *iters.uv_it++ = { u.x,u.y };
+    
+    *iters.pos_it++ = { lo.x,l.y, l.z };	// Top Right of the quad (bottom)
+    *iters.uv_it++ = { u.x, uo.y };
+
+    *iters.pos_it++ = { lo.x,l.y,lo.z };	// Bottom Right of the quad (bottom)
+    *iters.uv_it++ = { uo.x,uo.y };
+
+    *iters.pos_it++ = { lo.x,lo.y,lo.z };	// Bottom Left of the quad (bottom)
+    *iters.uv_it++ = { uo.x, u.y };
 }
 
-static void add_cube_back_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_back_vertices(ms_iters& iters, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -x
-    *it++ = {
-        {  l.x, lo.y, l.z },	// Top Left of the quad (top)
-        { u.x,u.y }
-    };
-    *it++ = {
-        { l.x, lo.y, lo.z },	// Top Right of the quad (top)
-        { uo.x,u.y }
-    };
-    *it++ = {
-        { l.x, l.y, lo.z },	// Bottom Right of the quad (top)
-        { uo.x,uo.y }
-    };
-    *it++ = {
-        { l.x, l.y, l.z },		// Bottom Left of the quad (top)
-        { u.x,uo.y }
-    };
+    *iters.pos_it++ = {  l.x, lo.y, l.z };	// Top Left of the quad (top)
+    *iters.uv_it++ = { u.x,u.y };
+
+    *iters.pos_it++ = { l.x, lo.y, lo.z };	// Top Right of the quad (top)
+    *iters.uv_it++ = { uo.x,u.y };
+
+    *iters.pos_it++ = { l.x, l.y, lo.z };	// Bottom Right of the quad (top)
+    *iters.uv_it++ = { uo.x,uo.y };
+
+    *iters.pos_it++ = { l.x, l.y, l.z };		// Bottom Left of the quad (top)
+    *iters.uv_it++ = { u.x,uo.y };
+    
 }
 
-static void add_cube_top_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_top_vertices(ms_iters& iters, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +y
-   *it++ = {
-        { l.x,lo.y,lo.z },	// Bottom Left Of The Quad (Back)
-        { u.x,u.y }
-    };
-    *it++ = {
-        { l.x,lo.y,l.z },	// Bottom Right Of The Quad (Back)
-        { uo.x,u.y }
-    };
-    *it++ = {
-        { lo.x, lo.y,l.z },	// Top Right Of The Quad (Back)
-        { uo.x,uo.y }
-    };
-    *it++ = {
-        { lo.x, lo.y,lo.z },	// Top Left Of The Quad (Back)
-        { u.x,uo.y }
-    };
+    *iters.pos_it++ = { l.x,lo.y,lo.z };	// Bottom Left Of The Quad (Back)
+    *iters.uv_it++ = { u.x,u.y };
+
+    *iters.pos_it++ = { l.x,lo.y,l.z };	// Bottom Right Of The Quad (Back)
+    *iters.uv_it++ = { uo.x,u.y };
+
+    *iters.pos_it++ = { lo.x, lo.y,l.z };	// Top Right Of The Quad (Back)
+    *iters.uv_it++ = { uo.x,uo.y };
+
+    *iters.pos_it++ = { lo.x, lo.y,lo.z };	// Top Left Of The Quad (Back)
+    *iters.uv_it++ = { u.x,uo.y };
+    
 }
 
-static void add_cube_bottom_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_bottom_vertices(ms_iters& iters, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -y
-    *it++ = {
-        { l.x, l.y, lo.z },		// Top Right Of The Quad (Front)
-        { u.x, u.y }
-    };
-    *it++ = {
-        { lo.x, l.y, lo.z },	// Top Left Of The Quad (Front)
-        { uo.x, u.y }
-    };
-    *it++ = {
-        { lo.x, l.y, l.z },	// Bottom Left Of The Quad (Front)
-        { uo.x, uo.y }
-    };
-    *it++ = {
-        { l.x, l.y, l.z },	// Bottom Right Of The Quad (Front)
-        { u.x, uo.y }
-    };
+    *iters.pos_it++ = { l.x, l.y, lo.z };		// Top Right Of The Quad (Front)
+    *iters.uv_it++ = { u.x, u.y };
+
+    *iters.pos_it++ = { lo.x, l.y, lo.z };	// Top Left Of The Quad (Front)
+    *iters.uv_it++ = { uo.x, u.y };
+
+    *iters.pos_it++ = { lo.x, l.y, l.z };	// Bottom Left Of The Quad (Front)
+    *iters.uv_it++ = { uo.x, uo.y };
+
+    *iters.pos_it++ = { l.x, l.y, l.z };	// Bottom Right Of The Quad (Front)
+    *iters.uv_it++ = { u.x, uo.y };
 }
 
-static void add_cube_right_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_right_vertices(ms_iters& iters, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +z
-    *it++ = {
-        {  lo.x, l.y,lo.z },	// Top Right Of The Quad (Right)
-        { u.x,uo.y }
-    };
-    *it++ = {
-        { l.x, l.y, lo.z },		// Top Left Of The Quad (Right)
-        { uo.x,uo.y }
-    };
-    *it++ = {
-        { l.x,lo.y, lo.z },	// Bottom Left Of The Quad (Right)
-        { uo.x,u.y }
-    };
-    *it++ = {
-        { lo.x,lo.y,lo.z },	// Bottom Right Of The Quad (Right)
-        { u.x,u.y }
-    };
+    *iters.pos_it++ = {  lo.x, l.y,lo.z };	// Top Right Of The Quad (Right)
+    *iters.uv_it++ = { u.x,uo.y };
+
+    *iters.pos_it++ = { l.x, l.y, lo.z };		// Top Left Of The Quad (Right)
+    *iters.uv_it++ = { uo.x,uo.y };
+
+    *iters.pos_it++ = { l.x,lo.y, lo.z };	// Bottom Left Of The Quad (Right)
+    *iters.uv_it++ = { uo.x,u.y };
+
+    *iters.pos_it++ = { lo.x,lo.y,lo.z };	// Bottom Right Of The Quad (Right)
+    *iters.uv_it++ = { u.x,u.y };
 }
 
-static void add_cube_left_vertices(vertex_it& it, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+static void add_cube_left_vertices(ms_iters& iters, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -z
-    *it++ = {
-        { lo.x, l.y, l.z },	// Top Right Of The Quad (Left)
-        { u.x,uo.y }
-    };
-    *it++ = {
-        { lo.x, lo.y,l.z },	// Top Left Of The Quad (Left)
-        { u.x,u.y }
-    };
-    *it++ = {
-        { l.x,lo.y,l.z },	// Bottom Left Of The Quad (Left)
-        { uo.x,u.y }
-    };
-    *it++ = {
-        { l.x,l.y, l.z },	// Bottom Right Of The Quad (Left)
-        { uo.x,uo.y }
-    };
+    *iters.pos_it++ = { lo.x, l.y, l.z };	// Top Right Of The Quad (Left)
+    *iters.uv_it++ = { u.x,uo.y };
+
+    *iters.pos_it++ = { lo.x, lo.y,l.z };	// Top Left Of The Quad (Left)
+    *iters.uv_it++ = { u.x,u.y };
+
+    *iters.pos_it++ = { l.x,lo.y,l.z };	// Bottom Left Of The Quad (Left)
+    *iters.uv_it++ = { uo.x,u.y };
+
+    *iters.pos_it++ = { l.x,l.y, l.z };	// Bottom Right Of The Quad (Left)
+    *iters.uv_it++ = { uo.x,uo.y };
+    
 }
 
 static inline math::vector3u8 get_local_pos_offset(math::vector3u8 local_pos) {
@@ -147,76 +120,76 @@ static inline math::vector2u8 get_uv_position_offset(math::vector2u8 uv_pos) {
 }
 
 template<typename F>
-static inline void add_cube_vertices(F func, math::vector2u8 uv_pos, vertex_it& it, math::vector3u8 local_pos) {
-    func(it, local_pos, get_local_pos_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos));
+static inline void add_cube_vertices(F func, math::vector2u8 uv_pos, ms_iters& iters, math::vector3u8 local_pos) {
+    func(iters, local_pos, get_local_pos_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos));
 }
 
-void game::add_center_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_center_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     // no
 }
 
 // +x
-void game::add_front_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_front_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_front_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 0, 0 }, it, local_pos); return;
-        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
-        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 0, 0 }, iters, local_pos); return;
+        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, iters, local_pos); return;
+        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
         default: return;
     }
 }
 
 // -x
-void game::add_back_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_back_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_back_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 1, 0 }, it, local_pos); return;
-        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
-        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 1, 0 }, iters, local_pos); return;
+        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, iters, local_pos); return;
+        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
         default: return;
     }
 }
 
 // +y
-void game::add_top_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_top_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_top_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
-        case block::type::GRASS: add_cube_vertices(func, { 0, 0 }, it, local_pos); return;
-        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
+        case block::type::GRASS: add_cube_vertices(func, { 0, 0 }, iters, local_pos); return;
+        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
         default: return;
     }
 }
 
 // -y
-void game::add_bottom_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_bottom_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_bottom_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
-        case block::type::GRASS: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
-        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 3, 0 }, iters, local_pos); return;
+        case block::type::GRASS: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
+        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
         default: return;
     }
 }
 
 // +z
-void game::add_right_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_right_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_right_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 4, 0 }, it, local_pos); return;
-        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
-        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 4, 0 }, iters, local_pos); return;
+        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, iters, local_pos); return;
+        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
         default: return;
     }
 }
 
 // -z
-void game::add_left_vertices(vertex_it& it, math::vector3u8 local_pos, block::type type) {
+void game::add_left_vertices(ms_iters& iters, math::vector3u8 local_pos, block::type type) {
     auto& func = add_cube_left_vertices;
     switch (type) {
-        case block::type::DEBUG: add_cube_vertices(func, { 5, 0 }, it, local_pos); return;
-        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, it, local_pos); return;
-        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, it, local_pos); return;
+        case block::type::DEBUG: add_cube_vertices(func, { 5, 0 }, iters, local_pos); return;
+        case block::type::GRASS: add_cube_vertices(func, { 3, 0 }, iters, local_pos); return;
+        case block::type::DIRT: add_cube_vertices(func, { 2, 0 }, iters, local_pos); return;
         default: return;
     }
 }
