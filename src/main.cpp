@@ -19,6 +19,7 @@
 #include "game/util.hpp"
 #include "game/chunk_mesh_generation.hpp"
 #include "game/chunk_rendering.hpp"
+#include "game/stored_chunk.hpp"
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -76,6 +77,7 @@ int main(int argc, char** argv) {
 	bool first_frame = true;
 
 	std::unordered_map<math::vector3s32, game::chunk> chunks;
+	std::unordered_map<math::vector3s32, game::stored_chunk> stored_chunks;
 	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
 	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
 
@@ -128,6 +130,10 @@ int main(int argc, char** argv) {
 			auto pos = it->first;
 			auto& chunk = it->second;
 			if (math::squared_length(pos - cam_chunk_pos) > chunk_erasure_radius_squared) {
+				if (chunk.modified) {
+					// If the chunk is modified the chunk in the stored_chunks map
+					stored_chunks.insert(std::make_pair<math::vector3s32, game::stored_chunk>(std::move(pos), { .blocks = std::move(chunk.blocks) }));
+				}
 				// Notify neighbor chunks that they need to update their neighborhood to avoid a dangling reference
 				game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
 				it = chunks.erase(it);
@@ -149,9 +155,17 @@ int main(int argc, char** argv) {
 		for (auto pos : inserted_chunk_positions) {
 			auto& chunk = chunks.at(pos);
 			game::init(chunk, pos, view);
-			game::generate_blocks(chunk, pos, 100);
-			game::update_chunk_neighborhood(chunks, pos, chunk);
 
+			if (stored_chunks.count(pos)) {
+				auto& stored_chunk = stored_chunks.at(pos);
+				chunk.blocks = std::move(stored_chunk.blocks);
+				stored_chunks.erase(pos);
+			} else {
+				chunk.blocks.resize_without_copying(game::chunk::BLOCKS_COUNT);
+				game::generate_blocks(chunk, pos, 100);
+			}
+
+			game::update_chunk_neighborhood(chunks, pos, chunk);
 			// Notify old chunks that there is a new chunk neighboring them
 			game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
 		}

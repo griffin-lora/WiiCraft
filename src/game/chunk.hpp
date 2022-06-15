@@ -37,9 +37,11 @@ namespace game {
 
         neighborhood nh;
         bool update_neighborhood = false;
-        ext::data_array<block> blocks = { BLOCKS_COUNT };
+        ext::data_array<block> blocks;
 
         math::matrix model;
         math::matrix model_view;
+
+        bool modified = false;
     };
 };

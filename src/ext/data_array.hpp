@@ -26,6 +26,17 @@ namespace ext {
             data_array(const data_array& other) = delete;
             data_array& operator=(const data_array& other) = delete;
 
+            inline data_array& operator=(data_array&& other) {
+                if (m_data != nullptr) {
+                    alloc.deallocate(m_data, m_size);
+                }
+                m_size = other.m_size;
+                m_data = other.m_data;
+                other.m_size = 0;
+                other.m_data = nullptr;
+                return *this;
+            }
+
             using pointer = T*;
             using const_pointer = const T*;
 
