@@ -93,6 +93,13 @@ static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& f
 
 void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches) {
     auto vertex_count = get_chunk_vertex_count(chunk, face_caches);
+
+    if (vertex_count > 65535) {
+        dbg::error([vertex_count]() {
+            printf("Chunk vertex count is too high: %d\n", vertex_count);
+        });
+    }
+
     chunk.ms.pos_vertices.resize_without_copying(vertex_count);
     chunk.ms.uv_vertices.resize_without_copying(vertex_count);
     
