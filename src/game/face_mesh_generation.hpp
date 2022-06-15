@@ -1,5 +1,5 @@
 #pragma once
-#include "chunk.hpp"
+#include "chunk_core.hpp"
 
 namespace game {
     std::size_t get_center_vertex_count(block::type type);

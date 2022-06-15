@@ -1,4 +1,5 @@
 #include "block_logic.hpp"
+#include "chunk_core.hpp"
 #include "dbg.hpp"
 #include <cstdio>
 

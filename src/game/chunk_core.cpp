@@ -1,4 +1,4 @@
-#include "chunk.hpp"
+#include "chunk_core.hpp"
 #include "PerlinNoise.hpp"
 #include "dbg.hpp"
 #include <cstdio>

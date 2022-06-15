@@ -14,7 +14,7 @@
 #include <map>
 #include <numeric>
 #include "game/camera.hpp"
-#include "game/chunk.hpp"
+#include "game/chunk_core.hpp"
 #include "game/block_logic.hpp"
 #include "game/util.hpp"
 #include "game/chunk_mesh_generation.hpp"
