@@ -49,6 +49,10 @@ namespace ext {
                 m_data = alloc.allocate(m_size);
             }
 
+            inline T* data() {
+                return m_data;
+            }
+
             inline T& operator[](std::size_t index) { return m_data[index]; }
             inline const T& operator[](std::size_t index) const { return m_data[index]; }
 
