@@ -6,7 +6,7 @@ using namespace game;
 void game::draw_chunk_mesh_vertices(const ext::data_array<chunk::mesh::vertex>& vertices) {
     gfx::draw_quads(vertices.size(), [&vertices]() {
         for (auto& v : vertices) {
-            gfx::draw_vertex((f32)v.local_position.x, (f32)v.local_position.y, (f32)v.local_position.z, ((f32)v.uv_position.x)/16.f, ((f32)v.uv_position.y)/16.f);
+            gfx::draw_vertex(v.local_position.x, v.local_position.y, v.local_position.z, v.uv_position.x, v.uv_position.y);
         }
     });
 }
