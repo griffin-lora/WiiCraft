@@ -100,8 +100,8 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
         });
     }
 
-    chunk.ms.pos_vertices.resize_without_copying(vertex_count);
-    chunk.ms.uv_vertices.resize_without_copying(vertex_count);
+    chunk.ms.pos_vertices.resize_without_copying_aligned(32, vertex_count);
+    chunk.ms.uv_vertices.resize_without_copying_aligned(32, vertex_count);
     
     ms_iters iters = {
         .pos_it = chunk.ms.pos_vertices.begin(),
