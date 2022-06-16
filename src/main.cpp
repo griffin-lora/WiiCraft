@@ -24,9 +24,9 @@
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
-constexpr s32 chunk_generation_radius = 1;
+constexpr s32 chunk_generation_radius = 3;
 
-constexpr s32 chunk_erasure_radius_squared = 2;
+constexpr s32 chunk_erasure_radius_squared = 11;
 
 int main(int argc, char** argv) {
 
@@ -78,7 +78,9 @@ int main(int argc, char** argv) {
 
 	std::unordered_map<math::vector3s32, game::chunk> chunks;
 	std::unordered_map<math::vector3s32, game::stored_chunk> stored_chunks;
-	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
+	// This are variables whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
+	game::chunk::mesh mesh;
+	// This are variables whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
 	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
 
 	input::state inp;
@@ -209,7 +211,7 @@ int main(int argc, char** argv) {
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_mesh) {
 				chunk.update_mesh = false;
-				game::update_mesh(chunk, face_caches);
+				game::update_mesh(chunk, mesh, face_caches);
 				break;
 			}
 		}

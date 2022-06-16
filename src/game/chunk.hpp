@@ -28,7 +28,6 @@ namespace game {
             };
         };
 
-        mesh ms;
         gfx::display_list disp_list;
         bool update_mesh = true;
         struct neighborhood {
