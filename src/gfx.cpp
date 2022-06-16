@@ -102,9 +102,9 @@ void gfx::init(draw_state& s, color4 bkg) {
 }
 
 std::tuple<bool, error_code> gfx::load_from_file(texture& tex, const char* path) {
-	if (access(path, R_OK) != 0) {
-		return { false, errno };
-	}
+	// if (access(path, R_OK) != 0) {
+	// 	return { false, errno };
+	// }
 	// TPLFile tpl_file;
 	// TPL_OpenTPLFromFile(&tpl_file, path);
 	// TPL_GetTexture(&tpl_file, 0, &tex);
