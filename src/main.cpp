@@ -24,9 +24,9 @@
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
-constexpr s32 chunk_generation_radius = 3;
+constexpr s32 chunk_generation_radius = 1;
 
-constexpr s32 chunk_erasure_radius_squared = 11;
+constexpr s32 chunk_erasure_radius_squared = 2;
 
 int main(int argc, char** argv) {
 
