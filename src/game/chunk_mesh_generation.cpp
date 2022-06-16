@@ -127,9 +127,6 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
     }
 
     std::size_t disp_list_size = (
-		1 + // GX_ClearVtxDesc
-		2 * 2 + // GX_SetVtxDesc
-		2 * 14 + // GX_SetVtxAttrFmt
 		4 + // GX_Begin
 		vertex_count * 3 + // GX_Position3u8
 		vertex_count * 2 + //GX_Position2u8
@@ -139,22 +136,6 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
     chunk.disp_list.resize(disp_list_size);
 
     chunk.disp_list.write_into([&chunk, vertex_count]() {
-        // setup the vertex attribute table
-        // describes the data
-        // args: vat location 0-7, type of data, data format, size, scale
-        // so for ex. in the first call we are sending position data with
-        // 3 values X,Y,Z of size F32. scale sets the number of fractional
-        // bits for non float data.
-        GX_ClearVtxDesc();
-        GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
-        GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-
-        // GX_VTXFMT0 is for standard cube geometry
-        
-        GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 0);
-        // Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
-        GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
-
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
         auto pos_it = chunk.ms.pos_vertices.begin();
