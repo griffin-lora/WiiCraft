@@ -19,13 +19,13 @@ namespace gfx {
 
             template<typename F>
             inline void write_into(F func) {
-                GX_BeginDispList(m_data, m_size);
-                func();
-                m_size = GX_EndDispList();
+                // GX_BeginDispList(m_data, m_size);
+                // func();
+                // m_size = GX_EndDispList();
             }
 
             inline void call() {
-                GX_CallDispList(m_data, m_size);
+                // GX_CallDispList(m_data, m_size);
             }
     };
 };

@@ -5,7 +5,7 @@ using namespace game;
 
 void game::update_view(const camera& cam, math::matrix view) {
     auto look_at = cam.position + cam.look;
-    guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
+    // guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
 }
 
 void game::move_camera(camera& cam, const glm::vec3& input_vector, f32 move_speed) {

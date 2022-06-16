@@ -7,12 +7,12 @@ using namespace dbg;
 
 void dbg::freeze() {
     for (;;) {
-		WPAD_ScanPads();
+		// WPAD_ScanPads();
 
-		if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) {
-			std::exit(1);
-		}
+		// if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) {
+		// 	std::exit(1);
+		// }
 
-		VIDEO_WaitVSync();
+		// VIDEO_WaitVSync();
 	}
 }

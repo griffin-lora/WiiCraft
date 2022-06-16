@@ -6,8 +6,8 @@
 using namespace game;
 
 void game::init(chunk& chunk, const math::vector3s32& pos, math::matrix view) {
-    guMtxIdentity(chunk.model);
-    guMtxTransApply(chunk.model, chunk.model, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
+    // guMtxIdentity(chunk.model);
+    // guMtxTransApply(chunk.model, chunk.model, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
     update_model_view(chunk, view);
 }
 

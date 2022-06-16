@@ -11,15 +11,17 @@ namespace input {
     void init(u32 width, u32 height);
 
     inline void scan_pads() {
-        WPAD_ScanPads();
+    //     WPAD_ScanPads();
     }
 
     inline u32 get_buttons_held(int chan) {
-        return WPAD_ButtonsHeld(chan);
+    //     return WPAD_ButtonsHeld(chan);
+        return 0;
     }
 
     inline u32 get_buttons_down(int chan) {
-        return WPAD_ButtonsDown(chan);
+    //     return WPAD_ButtonsDown(chan);
+        return 0;
     }
 
     glm::vec2 get_dpad_input_vector(u32 buttons_held);

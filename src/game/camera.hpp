@@ -28,6 +28,6 @@ namespace game {
     
 
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
-        guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
+        // guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
     }
 };

@@ -28,5 +28,5 @@ void display_list::resize(std::size_t size) {
     std::memset(m_data, 0, m_size);
 
     // Why???
-    DCInvalidateRange(m_data, m_size);
+    // DCInvalidateRange(m_data, m_size);
 }

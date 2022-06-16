@@ -33,10 +33,10 @@ int main(int argc, char** argv) {
 	gfx::console_state con;
 	gfx::init(con);
 
-	if (!fatInitDefault()) {
-		printf("fatInitDefault() failed!\n");
-		dbg::freeze();
-	}
+	// if (!fatInitDefault()) {
+	// 	printf("fatInitDefault() failed!\n");
+	// 	dbg::freeze();
+	// }
 
 	gfx::texture texture;
 	gfx::safe_load_from_file(texture, "data/textures/chunk.tpl");
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 	gfx::draw_state draw;
 	gfx::init(draw, {0xFF, 0xFF, 0xFF, 0xFF});
 
-	GX_SetCullMode(GX_CULL_BACK);
+	// GX_SetCullMode(GX_CULL_BACK);
 
 	gfx::set_filtering_mode(texture, GX_NEAR, GX_NEAR);
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 	std::vector<math::vector3s32> inserted_chunk_positions;
 
 	for (;;) {
-		WPAD_ScanPads();
+		// WPAD_ScanPads();
 		u32 buttons_held = input::get_buttons_held(0);
 		u32 buttons_down = input::get_buttons_down(0);
 		if (buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
@@ -237,13 +237,13 @@ int main(int argc, char** argv) {
 
 		gfx::draw_done();
 
-		VIDEO_SetNextFramebuffer(draw.frame_buffers[draw.fb_index]);
-		if (first_frame) {
-			first_frame = false;
-			VIDEO_SetBlack(FALSE);
-		}
-		VIDEO_Flush();
-		VIDEO_WaitVSync();
+		// VIDEO_SetNextFramebuffer(draw.frame_buffers[draw.fb_index]);
+		// if (first_frame) {
+		// 	first_frame = false;
+		// 	VIDEO_SetBlack(FALSE);
+		// }
+		// VIDEO_Flush();
+		// VIDEO_WaitVSync();
 		draw.fb_index ^= 1;
 	}
 }
