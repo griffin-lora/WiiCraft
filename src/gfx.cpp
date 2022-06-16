@@ -104,8 +104,8 @@ void gfx::init(draw_state& s, color4 bkg) {
 	// 3 values X,Y,Z of size F32. scale sets the number of fractional
 	// bits for non float data.
 	GX_ClearVtxDesc();
-	GX_SetVtxDesc(GX_VA_POS, GX_INDEX16);
-	GX_SetVtxDesc(GX_VA_TEX0, GX_INDEX16);
+	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
 
 	// GX_VTXFMT0 is for standard cube geometry
 	
