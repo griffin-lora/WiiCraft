@@ -100,8 +100,8 @@ void game::update_mesh(chunk& chunk, chunk::mesh& ms, ext::data_array<game::bloc
         });
     }
 
-    ms.pos_vertices.resize_without_copying_aligned(32, vertex_count);
-    ms.uv_vertices.resize_without_copying_aligned(32, vertex_count);
+    ms.pos_vertices.resize_without_copying_aligned_if_greater_size(32, vertex_count);
+    ms.uv_vertices.resize_without_copying_aligned_if_greater_size(32, vertex_count);
     
     ms_iters iters = {
         .pos_it = ms.pos_vertices.begin(),
