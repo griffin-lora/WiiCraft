@@ -5,6 +5,7 @@
 #include "math.hpp"
 #include "ext/data_array.hpp"
 #include "block.hpp"
+#include "gfx/display_list.hpp"
 
 namespace game {
     struct chunk {
@@ -28,8 +29,8 @@ namespace game {
         };
 
         mesh ms;
+        gfx::display_list disp_list;
         bool update_mesh = true;
-
         struct neighborhood {
             opt_ref front;
             opt_ref back;

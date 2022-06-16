@@ -97,22 +97,6 @@ void gfx::init(draw_state& s, color4 bkg) {
 	GX_CopyDisp(s.frame_buffers[s.fb_index],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
-	// setup the vertex attribute table
-	// describes the data
-	// args: vat location 0-7, type of data, data format, size, scale
-	// so for ex. in the first call we are sending position data with
-	// 3 values X,Y,Z of size F32. scale sets the number of fractional
-	// bits for non float data.
-	GX_ClearVtxDesc();
-	GX_SetVtxDesc(GX_VA_POS, GX_INDEX16);
-	GX_SetVtxDesc(GX_VA_TEX0, GX_INDEX16);
-
-	// GX_VTXFMT0 is for standard cube geometry
-	
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 0);
-	// Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
-
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
 }
