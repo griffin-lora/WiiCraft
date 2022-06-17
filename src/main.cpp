@@ -269,7 +269,12 @@ int main(int argc, char** argv) {
 		}
 
 		game::init_block_selection_attrs();
-		game::draw_block_selection(bl_sel);
+		if (cam_upd.update_view) {
+			gfx::update_model_view(bl_sel.pos_state, view);
+		}
+		if (raycast.has_value()) {
+			game::draw_block_selection(bl_sel);
+		}
 
 		cam_upd.update_view = false;
 		cam_upd.update_look = false;
