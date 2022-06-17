@@ -19,24 +19,30 @@ namespace game {
         );
     }
 
-    void add_front_vertices(math::vector3u8 local_position, block::type type);
-    void add_back_vertices(math::vector3u8 local_position, block::type type);
-    void add_top_vertices(math::vector3u8 local_position, block::type type);
-    void add_bottom_vertices(math::vector3u8 local_position, block::type type);
-    void add_right_vertices(math::vector3u8 local_position, block::type type);
-    void add_left_vertices(math::vector3u8 local_position, block::type type);
-    void add_center_vertices(math::vector3u8 local_position, block::type type);
+    /** Vf stands for a vertex_functions type
+     * The structure is as follows:
+     * Vf::add_pos_vert(u8 x, u8 y, u8 z);
+     * Vf::add_uv_vert(u8 u, u8 v);
+     */
 
-    template<block::face face>
+    template<typename Vf> void add_front_vertices(math::vector3u8 local_position, block::type type);
+    template<typename Vf> void add_back_vertices(math::vector3u8 local_position, block::type type);
+    template<typename Vf> void add_top_vertices( math::vector3u8 local_position, block::type type);
+    template<typename Vf> void add_bottom_vertices(math::vector3u8 local_position, block::type type);
+    template<typename Vf> void add_right_vertices(math::vector3u8 local_position, block::type type);
+    template<typename Vf> void add_left_vertices(math::vector3u8 local_position, block::type type);
+    template<typename Vf> void add_center_vertices(math::vector3u8 local_position, block::type type);
+
+    template<block::face face, typename Vf>
     constexpr void add_face_vertices(math::vector3u8 local_position, block::type type) {
         call_face_func_for<face, void>(
-            add_front_vertices,
-            add_back_vertices,
-            add_top_vertices,
-            add_bottom_vertices,
-            add_right_vertices,
-            add_left_vertices,
-            add_center_vertices,
+            add_front_vertices<Vf>,
+            add_back_vertices<Vf>,
+            add_top_vertices<Vf>,
+            add_bottom_vertices<Vf>,
+            add_right_vertices<Vf>,
+            add_left_vertices<Vf>,
+            add_center_vertices<Vf>,
             local_position, type
         );
     }
