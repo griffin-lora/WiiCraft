@@ -31,10 +31,7 @@ namespace game {
         );
     }
 
-    void init(chunk& chunk, const math::vector3s32& chunk_position, math::matrix view);
-    inline void update_model_view(chunk& chunk, math::matrix view) {
-        guMtxConcat(view, chunk.model, chunk.model_view);
-    }
+    void init(chunk& chunk, math::matrix view, const math::vector3s32& chunk_position);
 
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 

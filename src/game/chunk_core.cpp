@@ -5,10 +5,8 @@
 
 using namespace game;
 
-void game::init(chunk& chunk, const math::vector3s32& pos, math::matrix view) {
-    guMtxIdentity(chunk.model);
-    guMtxTransApply(chunk.model, chunk.model, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
-    update_model_view(chunk, view);
+void game::init(chunk& chunk, math::matrix view, const math::vector3s32& pos) {
+    gfx::init(chunk.pos_state, view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
 }
 
 math::vector3u8 game::get_position_from_index(std::size_t index) {

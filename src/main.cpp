@@ -79,18 +79,15 @@ int main(int argc, char** argv) {
 	bool first_frame = true;
 
 	std::unordered_map<math::vector3s32, game::chunk> chunks;
-	std::unordered_map<math::vector3s32, game::stored_chunk> stored_chunks;
 	// This are variables whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
 	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
+	std::unordered_map<math::vector3s32, game::stored_chunk> stored_chunks;
 
 	input::state inp;
 
 	std::vector<math::vector3s32> inserted_chunk_positions;
 
 	std::optional<math::vector3u8> last_hovered_block_pos;
-
-	math::vector3s32 block_hover_pos = {0, 0, 0};
-	gfx::display_list block_hover_dl;
 
 	for (;;) {
 		WPAD_ScanPads();
@@ -182,7 +179,7 @@ int main(int argc, char** argv) {
 			
 			for (auto pos : inserted_chunk_positions) {
 				auto& chunk = chunks.at(pos);
-				game::init(chunk, pos, view);
+				game::init(chunk, view, pos);
 
 				if (stored_chunks.count(pos)) {
 					auto& stored_chunk = stored_chunks.at(pos);
@@ -245,23 +242,15 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		// guMtxRotAxisDeg(model, &cube_axis, rquad);
+		game::init_chunk_attrs();
 		if (cam_upd.update_view) {
 			for (auto& [ pos, chunk ] : chunks) {
-				game::update_model_view(chunk, view);
+				gfx::update_model_view(chunk.pos_state, view);
 				game::draw_chunk(chunk);
-				// Render hovered block in the same way as the chunk
-				if (pos == block_hover_pos) {
-					block_hover_dl.checked_call();
-				}
 			}
 		} else {
 			for (auto& [ pos, chunk ] : chunks) {
 				game::draw_chunk(chunk);
-				// Render hovered block in the same way as the chunk
-				if (pos == block_hover_pos) {
-					block_hover_dl.checked_call();
-				}
 			}
 		}
 
