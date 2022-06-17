@@ -19,10 +19,8 @@ namespace game {
         );
     }
 
-    /** Vf stands for a vertex_functions type
-     * The structure is as follows:
-     * Vf::add_pos_vert(u8 x, u8 y, u8 z);
-     * Vf::add_uv_vert(u8 u, u8 v);
+    /** Vf stands for a vertex function type
+     * Vf::call(u8 x, u8 y, u8 z, u8 u, u8 v)
      */
 
     template<typename Vf> void add_front_vertices(math::vector3u8 local_position, block::type type);
