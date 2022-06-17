@@ -15,18 +15,6 @@ namespace game {
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
-        
-        struct mesh {
-            using pos_vertex = math::vector3u8;
-            using uv_vertex = math::vector2u8;
-            ext::data_array<pos_vertex> pos_vertices;
-            ext::data_array<uv_vertex> uv_vertices;
-
-            struct iterators {
-                ext::data_array<pos_vertex>::iterator pos_it;
-                ext::data_array<uv_vertex>::iterator uv_it;
-            };
-        };
 
         gfx::display_list disp_list;
         bool update_mesh = true;

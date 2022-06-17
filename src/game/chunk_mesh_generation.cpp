@@ -85,44 +85,18 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<ga
 }
 
 template<block::face face>
-static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& face_caches, ms_iters& iters, math::vector3u8 pos, block::type type) {
+static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& face_caches, math::vector3u8 pos, block::type type) {
     if (get_face_cache_flag<face>(face_caches[get_index_from_position(pos)])) {
-        add_face_vertices<face>(iters, pos, type);
+        add_face_vertices<face>(pos, type);
     }
 }
 
-void game::update_mesh(chunk& chunk, chunk::mesh& ms, ext::data_array<game::block::face_cache>& face_caches) {
+void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches) {
     auto vertex_count = get_chunk_vertex_count(chunk, face_caches);
 
     if (vertex_count > 65535) {
         dbg::error([vertex_count]() {
             printf("Chunk vertex count is too high: %d\n", vertex_count);
-        });
-    }
-
-    ms.pos_vertices.resize_without_copying_aligned_if_greater_size(32, vertex_count);
-    ms.uv_vertices.resize_without_copying_aligned_if_greater_size(32, vertex_count);
-    
-    ms_iters iters = {
-        .pos_it = ms.pos_vertices.begin(),
-        .uv_it = ms.uv_vertices.begin()
-    };
-
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&face_caches, &iters](auto pos, auto& block) {
-        auto type = block.tp;
-        if (is_block_visible(type)) {
-            add_needed_face_vertices<block::face::FRONT>(face_caches, iters, pos, type);
-            add_needed_face_vertices<block::face::BACK>(face_caches, iters, pos, type);
-            add_needed_face_vertices<block::face::TOP>(face_caches, iters, pos, type);
-            add_needed_face_vertices<block::face::BOTTOM>(face_caches, iters, pos, type);
-            add_needed_face_vertices<block::face::RIGHT>(face_caches, iters, pos, type);
-            add_needed_face_vertices<block::face::LEFT>(face_caches, iters, pos, type);
-        }
-    });
-
-    if (iters.pos_it != ms.pos_vertices.end() || iters.uv_it != ms.uv_vertices.end()) {
-        dbg::error([vertex_count]() {
-            printf("Vertex count mismatch! Expected %d vertices\n", vertex_count);
         });
     }
 
@@ -135,17 +109,20 @@ void game::update_mesh(chunk& chunk, chunk::mesh& ms, ext::data_array<game::bloc
 
     chunk.disp_list.resize(disp_list_size);
 
-    chunk.disp_list.write_into([&ms, vertex_count]() {
+    chunk.disp_list.write_into([&chunk, &face_caches, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
-        auto pos_it = ms.pos_vertices.begin();
-        auto uv_it = ms.uv_vertices.begin();
-        while (pos_it != ms.pos_vertices.end()) {
-            GX_Position3u8(pos_it->x, pos_it->y, pos_it->z);
-            GX_Position2u8(uv_it->x, uv_it->y);
-            ++pos_it;
-            ++uv_it;
-        }
+        iterate_over_chunk_positions_and_blocks(chunk.blocks, [&face_caches](auto pos, auto& block) {
+            auto type = block.tp;
+            if (is_block_visible(type)) {
+                add_needed_face_vertices<block::face::FRONT>(face_caches, pos, type);
+                add_needed_face_vertices<block::face::BACK>(face_caches, pos, type);
+                add_needed_face_vertices<block::face::TOP>(face_caches, pos, type);
+                add_needed_face_vertices<block::face::BOTTOM>(face_caches, pos, type);
+                add_needed_face_vertices<block::face::RIGHT>(face_caches, pos, type);
+                add_needed_face_vertices<block::face::LEFT>(face_caches, pos, type);
+            }
+        });
 
         GX_End();
     });

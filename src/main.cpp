@@ -80,8 +80,6 @@ int main(int argc, char** argv) {
 	std::unordered_map<math::vector3s32, game::chunk> chunks;
 	std::unordered_map<math::vector3s32, game::stored_chunk> stored_chunks;
 	// This are variables whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
-	game::chunk::mesh mesh;
-	// This are variables whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
 	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
 
 	input::state inp;
@@ -217,7 +215,7 @@ int main(int argc, char** argv) {
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_mesh) {
 				chunk.update_mesh = false;
-				game::update_mesh(chunk, mesh, face_caches);
+				game::update_mesh(chunk, face_caches);
 				break;
 			}
 		}

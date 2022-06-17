@@ -19,18 +19,16 @@ namespace game {
         );
     }
 
-    using ms_iters = chunk::mesh::iterators;
-
-    void add_front_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
-    void add_back_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
-    void add_top_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
-    void add_bottom_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
-    void add_right_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
-    void add_left_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
-    void add_center_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type);
+    void add_front_vertices(math::vector3u8 local_position, block::type type);
+    void add_back_vertices(math::vector3u8 local_position, block::type type);
+    void add_top_vertices(math::vector3u8 local_position, block::type type);
+    void add_bottom_vertices(math::vector3u8 local_position, block::type type);
+    void add_right_vertices(math::vector3u8 local_position, block::type type);
+    void add_left_vertices(math::vector3u8 local_position, block::type type);
+    void add_center_vertices(math::vector3u8 local_position, block::type type);
 
     template<block::face face>
-    constexpr void add_face_vertices(ms_iters& iters, math::vector3u8 local_position, block::type type) {
+    constexpr void add_face_vertices(math::vector3u8 local_position, block::type type) {
         call_face_func_for<face, void>(
             add_front_vertices,
             add_back_vertices,
@@ -39,7 +37,7 @@ namespace game {
             add_right_vertices,
             add_left_vertices,
             add_center_vertices,
-            iters, local_position, type
+            local_position, type
         );
     }
 };

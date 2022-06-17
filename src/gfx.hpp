@@ -32,11 +32,6 @@ namespace gfx {
         GX_End();
     }
 
-    inline void draw_vertex(u8 x, u8 y, u8 z, u8 u, u8 v) {
-        GX_Position3u8(x, y, z);
-        GX_TexCoord2u8(u, v);
-    }
-
     using texture = GXTexObj;
 
     std::tuple<bool, error_code> load_from_file(texture& texture, const char* path);
