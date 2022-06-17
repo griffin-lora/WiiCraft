@@ -87,7 +87,7 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<ga
 template<block::face face>
 static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& face_caches, math::vector3u8 pos, block::type type) {
     if (get_face_cache_flag<face>(face_caches[get_index_from_position(pos)])) {
-        add_face_vertices<face, chunk_mesh_vertex_functions>(pos, type);
+        add_face_vertices<face, chunk_mesh_vert_func>(pos, type);
     }
 }
 
