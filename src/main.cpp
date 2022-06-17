@@ -28,9 +28,9 @@
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
 
-constexpr s32 chunk_generation_radius = 3;
+constexpr s32 chunk_generation_radius = 2;
 
-constexpr s32 chunk_erasure_radius_squared = 11;
+constexpr s32 chunk_erasure_radius_squared = 12;
 
 int main(int argc, char** argv) {
 
@@ -229,17 +229,6 @@ int main(int argc, char** argv) {
 		if (cam_upd.update_perspective) {
 			game::update_perspective(cam, perspective);
 		}
-
-		gfx::set_channel_count(1);
-		gfx::set_texture_coordinate_generation_count(1);
-
-		// args: texcoord slot 0-7, matrix type, source to generate texture coordinates from, matrix to use
-		gfx::init_texture_coordinate_generation(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
-
-		gfx::set_tev_operation(GX_TEVSTAGE0,GX_REPLACE);
-		gfx::set_tev_order(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
-
-		gfx::load(texture);
 		
 		for (auto& [ pos, chunk ] : chunks) {
 			if (chunk.update_neighborhood) {
@@ -256,7 +245,8 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		game::init_chunk_attrs();
+		game::init_chunk_drawing();
+		gfx::load(texture);
 		if (cam_upd.update_view) {
 			for (auto& [ pos, chunk ] : chunks) {
 				gfx::update_model_view(chunk.pos_state, view);
@@ -268,7 +258,7 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		game::init_block_selection_attrs();
+		game::init_block_selection_drawing();
 		if (cam_upd.update_view) {
 			gfx::update_model_view(bl_sel.pos_state, view);
 		}

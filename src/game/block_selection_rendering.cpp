@@ -2,7 +2,14 @@
 
 using namespace game;
 
-void game::init_block_selection_attrs() {
+void game::init_block_selection_drawing() {
+	GX_SetNumChans(1);
+	GX_SetNumTexGens(0);
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+
+	//
+
 	GX_ClearVtxDesc();
 	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
 	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
