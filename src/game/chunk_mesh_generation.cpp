@@ -1,5 +1,6 @@
 #include "chunk_mesh_generation.hpp"
 #include "face_mesh_generation.hpp"
+#include "face_mesh_generation.inl"
 #include "dbg.hpp"
 #include <cstdio>
 
@@ -83,6 +84,12 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<ga
     });
     return vertex_count;
 }
+struct chunk_mesh_vert_func {
+    static inline void call(u8 x, u8 y, u8 z, u8 u, u8 v) {
+        GX_Position3u8(x, y, z);
+        GX_TexCoord2u8(u, v);
+    }
+};
 
 template<block::face face>
 static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& face_caches, math::vector3u8 pos, block::type type) {
