@@ -197,3 +197,13 @@ void game::add_left_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_left_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+
+std::size_t game::get_block_vertex_count(block::type type) {
+    return
+        get_face_vertex_count<block::face::FRONT>(type) +
+        get_face_vertex_count<block::face::BACK>(type) +
+        get_face_vertex_count<block::face::TOP>(type) +
+        get_face_vertex_count<block::face::BOTTOM>(type) +
+        get_face_vertex_count<block::face::RIGHT>(type) +
+        get_face_vertex_count<block::face::LEFT>(type);
+}

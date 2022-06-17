@@ -20,6 +20,7 @@
 #include "game/chunk_mesh_generation.hpp"
 #include "game/chunk_rendering.hpp"
 #include "game/stored_chunk.hpp"
+#include "game/face_mesh_generation.hpp"
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -86,6 +87,11 @@ int main(int argc, char** argv) {
 
 	std::vector<math::vector3s32> inserted_chunk_positions;
 
+	std::optional<math::vector3u8> last_hovered_block_pos;
+
+	math::vector3s32 block_hover_pos = {0, 0, 0};
+	gfx::display_list block_hover_dl;
+
 	for (;;) {
 		WPAD_ScanPads();
 		u32 buttons_held = input::get_buttons_held(0);
@@ -120,12 +126,26 @@ int main(int argc, char** argv) {
 			cam_upd.update_look = true;
 		}
 
+		// Check for hovered block
 		auto raycast = game::get_raycast(cam, chunks);
 		if (raycast.has_value()) {
+			// Check if we have a new hovered block
+			if (!last_hovered_block_pos.has_value() || raycast->bl_pos != last_hovered_block_pos) {
+				// auto vertex_count = game::get_block_vertex_count(raycast->bl_pos, raycast->bl.tp);
+				// std::size_t disp_list_size = (
+				// 	4 + // GX_Begin
+				// 	vertex_count * 3 + // GX_Position3u8
+				// 	vertex_count * 2 + // GX_TexCoord2u8
+				// 	1 // GX_End
+				// );
+			}
+
+			last_hovered_block_pos = raycast->bl_pos;
+
 			if (buttons_down & WPAD_BUTTON_A) {
 				raycast->bl = { .tp = game::block::type::AIR };
 				raycast->ch.modified = true;
-				game::add_chunk_mesh_update(raycast->ch, raycast->position);
+				game::add_chunk_mesh_update(raycast->ch, raycast->bl_pos);
 			}
 		}
 
@@ -230,10 +250,18 @@ int main(int argc, char** argv) {
 			for (auto& [ pos, chunk ] : chunks) {
 				game::update_model_view(chunk, view);
 				game::draw_chunk(chunk);
+				// Render hovered block in the same way as the chunk
+				if (pos == block_hover_pos) {
+					block_hover_dl.checked_call();
+				}
 			}
 		} else {
 			for (auto& [ pos, chunk ] : chunks) {
 				game::draw_chunk(chunk);
+				// Render hovered block in the same way as the chunk
+				if (pos == block_hover_pos) {
+					block_hover_dl.checked_call();
+				}
 			}
 		}
 

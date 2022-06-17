@@ -37,7 +37,7 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
         auto& block = current_chunk->get().blocks[index];
 
         if (block.tp != block::type::AIR) {
-            return raycast{ .position = raycast_block_pos, .ch = *current_chunk, .bl = block };
+            return raycast{ .ch_pos = *current_chunk_pos, .ch = *current_chunk, .bl_pos = raycast_chunk_pos, .bl = block };
         }
 
         raycast_pos += dir_vec;

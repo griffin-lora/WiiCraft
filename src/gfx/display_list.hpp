@@ -27,5 +27,12 @@ namespace gfx {
             inline void call() {
                 GX_CallDispList(m_data, m_size);
             }
+
+            inline void checked_call() {
+                if (m_size == 0) {
+                    return;
+                }
+                call();
+            }
     };
 };

@@ -44,4 +44,16 @@ namespace game {
             local_position, type
         );
     }
+
+    std::size_t get_block_vertex_count(block::type type);
+    template<typename Vf>
+    void add_block_vertices(math::vector3u8 local_position, block::type type) {
+        add_front_vertices<Vf>(local_position, type);
+        add_back_vertices<Vf>(local_position, type);
+        add_top_vertices<Vf>(local_position, type);
+        add_bottom_vertices<Vf>(local_position, type);
+        add_right_vertices<Vf>(local_position, type);
+        add_left_vertices<Vf>(local_position, type);
+        add_center_vertices<Vf>(local_position, type);
+    }
 };

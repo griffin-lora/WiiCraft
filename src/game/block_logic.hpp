@@ -7,8 +7,9 @@
 
 namespace game {
     struct raycast {
-        math::vector3u8 position;
+        math::vector3s32 ch_pos;
         chunk& ch;
+        math::vector3u8 bl_pos;
         block& bl;
     };
 
