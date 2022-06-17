@@ -120,8 +120,13 @@ int main(int argc, char** argv) {
 			cam_upd.update_look = true;
 		}
 
-		if (buttons_down & WPAD_BUTTON_A) {
-			game::destroy_block_from_camera(cam, chunks);
+		auto raycast = game::get_raycast(cam, chunks);
+		if (raycast.has_value()) {
+			if (buttons_down & WPAD_BUTTON_A) {
+				raycast->bl = { .tp = game::block::type::AIR };
+				raycast->ch.modified = true;
+				game::add_chunk_mesh_update(raycast->ch, raycast->position);
+			}
 		}
 
 		auto cam_chunk_pos = game::get_chunk_position_from_world_position(cam.position);

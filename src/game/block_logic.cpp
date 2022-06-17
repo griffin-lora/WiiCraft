@@ -5,7 +5,7 @@
 
 using namespace game;
 
-void game::destroy_block_from_camera(const camera& cam, chunk::map& chunks) {
+std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) {
     glm::vec3 raycast_pos = cam.position;
     glm::vec3 dir_vec = cam.look * 0.5f;
     std::optional<math::vector3s32> current_chunk_pos = {};
@@ -37,12 +37,10 @@ void game::destroy_block_from_camera(const camera& cam, chunk::map& chunks) {
         auto& block = current_chunk->get().blocks[index];
 
         if (block.tp != block::type::AIR) {
-            block = { .tp = block::type::AIR };
-            current_chunk->get().modified = true;
-            game::add_chunk_mesh_update(current_chunk->get(), raycast_block_pos);
-            break;
+            return raycast{ .position = raycast_block_pos, .ch = *current_chunk, .bl = block };
         }
 
         raycast_pos += dir_vec;
     }
+    return {};
 }
