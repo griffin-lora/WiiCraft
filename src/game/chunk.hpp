@@ -5,6 +5,7 @@
 #include "math.hpp"
 #include "ext/data_array.hpp"
 #include "block.hpp"
+#include "gfx/display_list.hpp"
 
 namespace game {
     struct chunk {
@@ -14,22 +15,9 @@ namespace game {
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
-        
-        struct mesh {
-            using pos_vertex = math::vector3u8;
-            using uv_vertex = math::vector2u8;
-            ext::data_array<pos_vertex> pos_vertices;
-            ext::data_array<uv_vertex> uv_vertices;
 
-            struct iterators {
-                ext::data_array<pos_vertex>::iterator pos_it;
-                ext::data_array<uv_vertex>::iterator uv_it;
-            };
-        };
-
-        mesh ms;
+        gfx::display_list disp_list;
         bool update_mesh = true;
-
         struct neighborhood {
             opt_ref front;
             opt_ref back;
