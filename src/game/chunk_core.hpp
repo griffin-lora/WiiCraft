@@ -103,4 +103,6 @@ namespace game {
             nb_chunk.update_mesh = true;
         }
     }
+
+    void update_chunks(chunk::map& chunks, ext::data_array<block::face_cache>& face_caches);
 };

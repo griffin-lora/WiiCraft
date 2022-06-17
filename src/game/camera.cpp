@@ -36,3 +36,21 @@ void game::update_look(camera& cam) {
     
     cam.look = {xz_length * cosf(cam.yaw), sinf(cam.pitch), xz_length * sinf(-cam.yaw)};
 }
+
+void game::update_needed(math::matrix view, math::matrix44 perspective, camera& cam) {
+    if (cam.update_look) {
+        game::update_look(cam);
+    }
+    if (cam.update_view) {
+        game::update_view(cam, view);
+    }
+    if (cam.update_perspective) {
+        game::update_perspective(cam, perspective);
+    }
+}
+
+void game::reset_update_params(camera& cam) {
+    cam.update_view = false;
+    cam.update_look = false;
+    cam.update_perspective = false;
+}

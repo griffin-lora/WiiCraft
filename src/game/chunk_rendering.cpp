@@ -36,3 +36,18 @@ void game::draw_chunk(chunk& chunk) {
 
     chunk.disp_list.call();
 }
+
+void game::draw_chunks(gfx::texture& chunk_tex, math::matrix view, const camera& cam, chunk::map& chunks) {
+	game::init_chunk_drawing();
+	gfx::load(chunk_tex);
+	if (cam.update_view) {
+		for (auto& [ pos, chunk ] : chunks) {
+			gfx::update_model_view(chunk.pos_state, view);
+			game::draw_chunk(chunk);
+		}
+	} else {
+		for (auto& [ pos, chunk ] : chunks) {
+			game::draw_chunk(chunk);
+		}
+	}
+}

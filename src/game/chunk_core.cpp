@@ -1,7 +1,7 @@
 #include "chunk_core.hpp"
 #include "PerlinNoise.hpp"
-#include "dbg.hpp"
-#include <cstdio>
+#include "chunk_mesh_generation.hpp"
+#include "common.hpp"
 
 using namespace game;
 
@@ -113,4 +113,21 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::BOTTOM>(chunk);
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::RIGHT>(chunk);
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
+}
+
+void game::update_chunks(chunk::map& chunks, ext::data_array<block::face_cache>& face_caches) {
+    for (auto& [ pos, chunk ] : chunks) {
+        if (chunk.update_neighborhood) {
+            chunk.update_neighborhood = false;
+            game::update_chunk_neighborhood(chunks, pos, chunk);
+        }
+    }
+    
+    for (auto& [ pos, chunk ] : chunks) {
+        if (chunk.update_mesh) {
+            chunk.update_mesh = false;
+            game::update_mesh(chunk, face_caches);
+            break;
+        }
+    }
 }

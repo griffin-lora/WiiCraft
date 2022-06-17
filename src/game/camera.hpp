@@ -12,9 +12,7 @@ namespace game {
         f32 aspect;
         f32 near_clipping_plane_distance;
         f32 far_clipping_plane_distance;
-    };
 
-    struct camera_update_params {
         bool update_view = false;
         bool update_look = false;
 	    bool update_perspective = false;
@@ -30,4 +28,7 @@ namespace game {
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);
     }
+
+    void update_needed(math::matrix view, math::matrix44 perspective, camera& cam);
+    void reset_update_params(camera& cam);
 };

@@ -1,6 +1,6 @@
 #include "face_mesh_generation.hpp"
 #include "chunk_mesh_generation.hpp"
-#include "block_selection_mesh_generation.hpp"
+#include "block_selection.hpp"
 
 using namespace game;
 
