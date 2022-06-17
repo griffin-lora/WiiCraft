@@ -1,5 +1,6 @@
 #include "face_mesh_generation.hpp"
 #include "chunk_mesh_generation.hpp"
+#include "block_selection_mesh_generation.hpp"
 
 using namespace game;
 
@@ -113,6 +114,7 @@ void game::add_center_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_center_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_center_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 // +x
 template<typename Vf>
@@ -127,6 +129,7 @@ void game::add_front_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_front_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_front_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 // -x
 template<typename Vf>
@@ -141,6 +144,7 @@ void game::add_back_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_back_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_back_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 // +y
 template<typename Vf>
@@ -155,6 +159,7 @@ void game::add_top_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_top_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_top_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 // -y
 template<typename Vf>
@@ -169,6 +174,7 @@ void game::add_bottom_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_bottom_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_bottom_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 // +z
 template<typename Vf>
@@ -183,6 +189,7 @@ void game::add_right_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_right_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_right_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 // -z
 template<typename Vf>
@@ -197,6 +204,7 @@ void game::add_left_vertices(math::vector3u8 local_pos, block::type type) {
 }
 
 template void game::add_left_vertices<chunk_mesh_vert_func>(math::vector3u8 local_pos, block::type type);
+template void game::add_left_vertices<block_selection_vert_func>(math::vector3u8 local_pos, block::type type);
 
 std::size_t game::get_block_vertex_count(block::type type) {
     return

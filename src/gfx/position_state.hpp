@@ -7,7 +7,7 @@ namespace gfx {
         math::matrix model_view;
     };
 
-    void init(position_state& pos_state, math::matrix view, f32 x, f32 y, f32 z);
+    void set_position(position_state& pos_state, math::matrix view, f32 x, f32 y, f32 z);
 
     void load(position_state& pos_state);
 

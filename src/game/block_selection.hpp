@@ -2,12 +2,13 @@
 #include <optional>
 #include "math.hpp"
 #include "gfx/display_list.hpp"
+#include "gfx/position_state.hpp"
 
 namespace game {
-    struct block_selection_state {
-        math::vector3s32 chunk_pos = {0, 0, 0};
+    struct block_selection {
         std::optional<math::vector3u8> last_block_pos;
-        math::vector3u8 block_pos = {0, 0, 0};
+
 	    gfx::display_list disp_list;
+        gfx::position_state pos_state;
     };
 };

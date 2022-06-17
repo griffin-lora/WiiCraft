@@ -2,7 +2,7 @@
 
 using namespace gfx;
 
-void gfx::init(position_state& ps, math::matrix view, f32 x, f32 y, f32 z) {
+void gfx::set_position(position_state& ps, math::matrix view, f32 x, f32 y, f32 z) {
     guMtxIdentity(ps.model);
     guMtxTransApply(ps.model, ps.model, x, y, z);
     update_model_view(ps, view);

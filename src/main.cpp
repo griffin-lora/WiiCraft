@@ -21,6 +21,9 @@
 #include "game/chunk_rendering.hpp"
 #include "game/stored_chunk.hpp"
 #include "game/face_mesh_generation.hpp"
+#include "game/block_selection.hpp"
+#include "game/block_selection_rendering.hpp"
+#include "game/block_selection_mesh_generation.hpp"
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -87,7 +90,7 @@ int main(int argc, char** argv) {
 
 	std::vector<math::vector3s32> inserted_chunk_positions;
 
-	std::optional<math::vector3u8> last_hovered_block_pos;
+	game::block_selection bl_sel;
 
 	for (;;) {
 		WPAD_ScanPads();
@@ -123,21 +126,32 @@ int main(int argc, char** argv) {
 			cam_upd.update_look = true;
 		}
 
-		// Check for hovered block
+		// Check for selected block
 		auto raycast = game::get_raycast(cam, chunks);
 		if (raycast.has_value()) {
-			// Check if we have a new hovered block
-			if (!last_hovered_block_pos.has_value() || raycast->bl_pos != last_hovered_block_pos) {
-				// auto vertex_count = game::get_block_vertex_count(raycast->bl_pos, raycast->bl.tp);
-				// std::size_t disp_list_size = (
-				// 	4 + // GX_Begin
-				// 	vertex_count * 3 + // GX_Position3u8
-				// 	vertex_count * 2 + // GX_TexCoord2u8
-				// 	1 // GX_End
-				// );
+			// Check if we have a new selected block
+			if (!bl_sel.last_block_pos.has_value() || raycast->bl_pos != bl_sel.last_block_pos) {
+				auto& pos = raycast->ch_pos;
+				gfx::set_position(bl_sel.pos_state, view, pos.x * game::chunk::SIZE, pos.y * game::chunk::SIZE, pos.z * game::chunk::SIZE);
+
+				auto vertex_count = game::get_block_vertex_count(raycast->bl.tp);
+				std::size_t disp_list_size = (
+					4 + // GX_Begin
+					vertex_count * 3 + // GX_Position3u8
+					vertex_count * 4 + // GX_Color4u8
+					1 // GX_End
+				);
+
+				bl_sel.disp_list.resize(disp_list_size);
+
+				bl_sel.disp_list.write_into([&raycast, vertex_count]() {
+					GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
+					game::add_block_vertices<game::block_selection_vert_func>(raycast->bl_pos, raycast->bl.tp);
+        			GX_End();
+				});
 			}
 
-			last_hovered_block_pos = raycast->bl_pos;
+			bl_sel.last_block_pos = raycast->bl_pos;
 
 			if (buttons_down & WPAD_BUTTON_A) {
 				raycast->bl = { .tp = game::block::type::AIR };
@@ -253,6 +267,9 @@ int main(int argc, char** argv) {
 				game::draw_chunk(chunk);
 			}
 		}
+
+		game::init_block_selection_attrs();
+		game::draw_block_selection(bl_sel);
 
 		cam_upd.update_view = false;
 		cam_upd.update_look = false;
