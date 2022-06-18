@@ -20,12 +20,15 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
 }
 
-void block_selection::draw(const math::matrix view, const camera& cam, const std::optional<raycast>& raycast) {
+void block_selection::update_if_needed(const math::matrix view, const camera& cam) {
+    if (cam.update_view) {
+        tf.update_model_view(view);
+    }
+}
+
+void block_selection::draw(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
-        if (cam.update_view) {
-            tf.update_model_view(view);
-        }
         tf.load(GX_PNMTX3);
 	    disp_list.call();
     }

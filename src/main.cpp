@@ -116,7 +116,8 @@ int main(int argc, char** argv) {
 		skybox.update_if_needed(view, cam);
 		skybox.draw(skybox_tex);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
-		bl_sel.draw(view, cam, raycast);
+		bl_sel.update_if_needed(view, cam);
+		bl_sel.draw(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		cursor.draw(icons_tex);

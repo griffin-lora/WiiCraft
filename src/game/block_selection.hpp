@@ -11,8 +11,9 @@ namespace game {
 
 	    gfx::display_list disp_list;
         math::transform_3d tf;
-    
-        void draw(const math::matrix view, const camera& cam, const std::optional<raycast>& raycast);
+
+        void update_if_needed(const math::matrix view, const camera& cam);
+        void draw(const std::optional<raycast>& raycast) const;
         void handle_raycast(const math::matrix view, const std::optional<raycast>& raycast);
 
         private:
