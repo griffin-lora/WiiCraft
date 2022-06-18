@@ -19,11 +19,11 @@ void game::init(cursor& cursor) {
 
         GX_Position2u8(0, 0);
         GX_TexCoord2u8(0, 0);
-        GX_Position2u8(100, 0);
+        GX_Position2u8(48, 0);
         GX_TexCoord2u8(1, 0);
-        GX_Position2u8(100, 100);
+        GX_Position2u8(48, 48);
         GX_TexCoord2u8(1, 1);
-        GX_Position2u8(0, 100);
+        GX_Position2u8(0, 48);
         GX_TexCoord2u8(0, 1);
 
         GX_End();

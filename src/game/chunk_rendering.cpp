@@ -32,7 +32,7 @@ void game::init_chunk_drawing() {
 
 void game::draw_chunk(chunk& chunk) {
     // load the modelview matrix into matrix memory
-    gfx::load(chunk.pos_state);
+    gfx::load(chunk.tf);
 
     chunk.disp_list.call();
 }
@@ -42,7 +42,7 @@ void game::draw_chunks(gfx::texture& chunk_tex, math::matrix view, const camera&
 	gfx::load(chunk_tex);
 	if (cam.update_view) {
 		for (auto& [ pos, chunk ] : chunks) {
-			gfx::update_model_view(chunk.pos_state, view);
+			gfx::update_model_view(chunk.tf, view);
 			game::draw_chunk(chunk);
 		}
 	} else {
