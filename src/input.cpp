@@ -6,7 +6,7 @@ using namespace input;
 void input::init(u32 width, u32 height) {
     WPAD_Init();
     WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
-    WPAD_SetVRes(WPAD_CHAN_ALL, width, height);
+    set_resolution(width, height);
 }
 
 glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {

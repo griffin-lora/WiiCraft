@@ -50,6 +50,8 @@ int main(int argc, char** argv) {
 	gfx::draw_state draw;
 	gfx::init(draw, {0xFF, 0xFF, 0xFF, 0xFF});
 
+	input::set_resolution(draw.rmode->viWidth, draw.rmode->viHeight);
+
 	GX_SetCullMode(GX_CULL_BACK);
 
 	gfx::set_filtering_mode(chunk_tex, GX_NEAR, GX_NEAR);

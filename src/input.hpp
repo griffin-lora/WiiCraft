@@ -9,6 +9,10 @@ namespace input {
 
     void init(u32 width, u32 height);
 
+    inline void set_resolution(u32 width, u32 height) {
+        WPAD_SetVRes(WPAD_CHAN_ALL, width, height);
+    }
+
     inline void scan_pads() {
         WPAD_ScanPads();
     }

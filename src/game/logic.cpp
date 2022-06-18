@@ -2,6 +2,8 @@
 #include "chunk_core.hpp"
 #include "cursor.hpp"
 #include "input.hpp"
+#include "dbg.hpp"
+#include <cstdio>
 
 using namespace game;
 
@@ -91,7 +93,7 @@ void game::update_from_input(
     if (pointer_pos.has_value()) {
         cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
     } else {
-        cursor.tf.set_position(v_width / 2, v_height / 2);
+        cursor.tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
     }
 
     if (raycast.has_value() && buttons_down & WPAD_BUTTON_A) {
