@@ -93,7 +93,7 @@ void gfx::init(draw_state& s, color4 bkg) {
 		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
 	}
 
-	GX_SetCullMode(GX_CULL_NONE);
+	GX_SetCullMode(GX_CULL_BACK);
 	GX_CopyDisp(s.frame_buffers[s.fb_index],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 

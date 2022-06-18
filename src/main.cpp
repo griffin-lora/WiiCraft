@@ -21,6 +21,7 @@
 #include "game/logic.hpp"
 #include "game/block_selection.hpp"
 #include "game/cursor.hpp"
+#include "game/skybox.hpp"
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -45,14 +46,15 @@ int main(int argc, char** argv) {
 	gfx::texture icons_tex;
 	gfx::safe_load_from_file(icons_tex, "data/textures/icons.tpl");
 
+	gfx::texture skybox_tex;
+	gfx::safe_load_from_file(skybox_tex, "data/textures/skybox.tpl");
+
 	input::init(con.rmode->viWidth, con.rmode->viHeight);
 
 	gfx::draw_state draw;
 	gfx::init(draw, {0xFF, 0xFF, 0xFF, 0xFF});
 
 	input::set_resolution(draw.rmode->viWidth, draw.rmode->viHeight);
-
-	GX_SetCullMode(GX_CULL_BACK);
 
 	gfx::set_filtering_mode(chunk_tex, GX_NEAR, GX_NEAR);
 	gfx::set_filtering_mode(icons_tex, GX_NEAR, GX_NEAR);
@@ -90,6 +92,10 @@ int main(int argc, char** argv) {
 	input::state inp;
 
 	std::vector<math::vector3s32> inserted_chunk_positions;
+
+	game::skybox skybox;
+	game::init(skybox);
+	game::update_skybox(view, cam, skybox);
 	
 	game::cursor cursor;
 	game::init(cursor);
@@ -112,9 +118,11 @@ int main(int argc, char** argv) {
 		game::update_chunks(chunks, face_caches);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
+		if (cam.update_view) {
+			game::update_skybox(view, cam, skybox);
+		}
+		game::draw_skybox(skybox_tex, skybox);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
-
-		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_block_selection(view, cam, bl_sel, raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
