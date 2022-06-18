@@ -2,7 +2,7 @@
 #include <optional>
 #include "math.hpp"
 #include "gfx/display_list.hpp"
-#include "gfx/transform_3d.hpp"
+#include "math/transform_3d.hpp"
 #include "block_logic.hpp"
 
 namespace game {
@@ -10,7 +10,7 @@ namespace game {
         std::optional<math::vector3u8> last_block_pos;
 
 	    gfx::display_list disp_list;
-        gfx::transform_3d tf;
+        math::transform_3d tf;
     };
 
     void draw_block_selection(math::matrix view, const camera& cam, block_selection& bl_sel, std::optional<raycast>& raycast);

@@ -6,7 +6,7 @@
 #include "ext/data_array.hpp"
 #include "block.hpp"
 #include "gfx/display_list.hpp"
-#include "gfx/transform_3d.hpp"
+#include "math/transform_3d.hpp"
 
 namespace game {
     struct chunk {
@@ -32,7 +32,7 @@ namespace game {
         bool update_neighborhood = false;
         ext::data_array<block> blocks;
 
-        gfx::transform_3d tf;
+        math::transform_3d tf;
 
         bool modified = false;
     };

@@ -61,8 +61,7 @@ void game::draw_cursor(gfx::texture& texture, cursor& cursor) {
     init_cursor_drawing();
 
     gfx::load(texture);
-
-    gfx::load(cursor.tf);
+	cursor.tf.load(GX_PNMTX3);
 
     cursor.disp_list.call();
 }

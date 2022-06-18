@@ -23,10 +23,10 @@ static void init_drawing() {
 void game::draw_block_selection(math::matrix view, const camera& cam, block_selection& bl_sel, std::optional<raycast>& raycast) {
     init_drawing();
     if (cam.update_view) {
-        gfx::update_model_view(bl_sel.tf, view);
+        bl_sel.tf.update_model_view(view);
     }
     if (raycast.has_value()) {
-        gfx::load(bl_sel.tf);
+        bl_sel.tf.load(GX_PNMTX3);
 	    bl_sel.disp_list.call();
     }
 }
@@ -39,7 +39,7 @@ struct block_selection_vert_func {
 };
 
 static void update_mesh(math::matrix view, block_selection& bl_sel, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type) {
-    gfx::set_position(bl_sel.tf, view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
+    bl_sel.tf.set_position(view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
 
     auto vertex_count = game::get_block_vertex_count(type);
     std::size_t disp_list_size = (
