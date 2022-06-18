@@ -113,9 +113,7 @@ int main(int argc, char** argv) {
 		game::update_chunks(chunks, face_caches);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
-		if (cam.update_view) {
-			skybox.update_if_needed(view, cam);
-		}
+		skybox.update_if_needed(view, cam);
 		skybox.draw(skybox_tex);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
 		bl_sel.draw(view, cam, raycast);
