@@ -23,16 +23,16 @@ void game::init(skybox& skybox) {
         // Front (+x)
 
         GX_Position3s8(p, n, n);
-        GX_TexCoord2u8(1, 1);
+        GX_TexCoord2u8(1, 2);
 
         GX_Position3s8(p, p, n);
-        GX_TexCoord2u8(2, 1);
+        GX_TexCoord2u8(1, 1);
 
         GX_Position3s8(p, p, p);
-        GX_TexCoord2u8(2, 2);
+        GX_TexCoord2u8(2, 1);
 
         GX_Position3s8(p, n, p);
-        GX_TexCoord2u8(1, 2);
+        GX_TexCoord2u8(2, 2);
 
         // Back (-x)
 
@@ -51,44 +51,44 @@ void game::init(skybox& skybox) {
         // Top (+y)
 
         GX_Position3s8(n, p, n);
-        GX_TexCoord2u8(1, 1);
+        GX_TexCoord2u8(0, 0);
 
         GX_Position3s8(n, p, p);
-        GX_TexCoord2u8(2, 1);
+        GX_TexCoord2u8(1, 0);
 
         GX_Position3s8(p, p, p);
-        GX_TexCoord2u8(2, 2);
+        GX_TexCoord2u8(1, 1);
 
         GX_Position3s8(p, p, n);
-        GX_TexCoord2u8(1, 2);
+        GX_TexCoord2u8(0, 1);
 
         // Bottom (-y)
 
         GX_Position3s8(n, n, n);
-        GX_TexCoord2u8(1, 1);
+        GX_TexCoord2u8(1, 2);
 
         GX_Position3s8(p, n, n);
-        GX_TexCoord2u8(2, 1);
-
-        GX_Position3s8(p, n, p);
         GX_TexCoord2u8(2, 2);
 
+        GX_Position3s8(p, n, p);
+        GX_TexCoord2u8(2, 3);
+
         GX_Position3s8(n, n, p);
-        GX_TexCoord2u8(1, 2);
+        GX_TexCoord2u8(1, 3);
 
         // Right (+z)
 
         GX_Position3s8(n, n, p);
-        GX_TexCoord2u8(1, 1);
+        GX_TexCoord2u8(1, 2);
 
         GX_Position3s8(p, n, p);
-        GX_TexCoord2u8(2, 1);
-
-        GX_Position3s8(p, p, p);
         GX_TexCoord2u8(2, 2);
 
+        GX_Position3s8(p, p, p);
+        GX_TexCoord2u8(2, 1);
+
         GX_Position3s8(n, p, p);
-        GX_TexCoord2u8(1, 2);
+        GX_TexCoord2u8(1, 1);
 
         // Left (-z)
 
@@ -96,13 +96,13 @@ void game::init(skybox& skybox) {
         GX_TexCoord2u8(1, 1);
 
         GX_Position3s8(p, n, n);
-        GX_TexCoord2u8(2, 1);
+        GX_TexCoord2u8(1, 2);
 
         GX_Position3s8(n, n, n);
         GX_TexCoord2u8(2, 2);
 
         GX_Position3s8(n, p, n);
-        GX_TexCoord2u8(1, 2);
+        GX_TexCoord2u8(2, 1);
 
 
         GX_End();
@@ -136,8 +136,8 @@ static void init_drawing() {
 	// GX_VTXFMT0 is for standard cube geometry
 	
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_S8, 0);
-	// Since the fractional size of the fixed point number is 2, it is equivalent to 1 unit = 256 pixels
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 2);
+	// Since the fractional size of the fixed point number is 3, it is equivalent to 1 unit = 2 pixels
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
 }
 
 void game::draw_skybox(gfx::texture& tex, skybox& skybox) {
