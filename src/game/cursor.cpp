@@ -57,12 +57,12 @@ static void init_cursor_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void game::draw_cursor(gfx::texture& texture, math::matrix model_view, cursor& cursor) {
+void game::draw_cursor(gfx::texture& texture, cursor& cursor) {
     init_cursor_drawing();
 
     gfx::load(texture);
 
-    GX_LoadPosMtxImm(model_view, GX_PNMTX3);
+    gfx::load(cursor.tf);
 
     cursor.disp_list.call();
 }

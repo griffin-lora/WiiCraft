@@ -57,10 +57,6 @@ int main(int argc, char** argv) {
 
 	math::matrix44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
-
-    math::matrix model_view_2d;
-    guMtxIdentity(model_view_2d);
-    guMtxTransApply(model_view_2d, model_view_2d, 0.0F, 0.0F, -5.0F);
 	
 	math::matrix view;
 	math::matrix44 perspective_3d;
@@ -116,7 +112,7 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		game::draw_cursor(icons_tex, model_view_2d, cursor);
+		game::draw_cursor(icons_tex, cursor);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_block_selection(view, cam, bl_sel, raycast);

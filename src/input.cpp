@@ -93,9 +93,9 @@ void input::handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera&
 
     auto pointer_pos = get_pointer_position();
     if (pointer_pos.has_value()) {
-        cursor.pos = *pointer_pos;
+        gfx::set_position(cursor.tf, pointer_pos->x, pointer_pos->y);
     } else {
-        cursor.pos = { 0.0f, 0.0f };
+        gfx::set_position(cursor.tf, 0, 0);
     }
 
     if (raycast.has_value() && buttons_down & WPAD_BUTTON_A) {
