@@ -9,7 +9,7 @@ void input::init(u32 width, u32 height) {
     WPAD_SetVRes(WPAD_CHAN_ALL, width, height);
 }
 
-static glm::vec2 get_dpad_input_vector(u32 buttons_held) {
+glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {
     glm::vec2 pad_input_vector = {0.0f, 0.0f};
     if (buttons_held & WPAD_BUTTON_RIGHT) {
         pad_input_vector.x += 1.0f;
@@ -26,7 +26,7 @@ static glm::vec2 get_dpad_input_vector(u32 buttons_held) {
     return pad_input_vector;
 }
 
-static std::optional<glm::vec2> get_pointer_position() {
+std::optional<glm::vec2> input::get_pointer_position() {
     ir_t pointer;
     WPAD_IR(0, &pointer);
     if (pointer.valid) {
@@ -36,7 +36,7 @@ static std::optional<glm::vec2> get_pointer_position() {
     }
 }
 
-static glm::vec2 get_joystick_input_vector() {
+glm::vec2 input::get_joystick_input_vector() {
     expansion_t exp;
     WPAD_Expansion(0, &exp);
 
@@ -46,7 +46,7 @@ static glm::vec2 get_joystick_input_vector() {
     return { 0.0f, 0.0f };
 }
 
-static float get_plus_minus_input_scalar(u32 buttons_held) {
+float input::get_plus_minus_input_scalar(u32 buttons_held) {
     float scalar = 0.0f;
     if (buttons_held & WPAD_BUTTON_PLUS) {
         scalar += 1.0f;
@@ -55,60 +55,4 @@ static float get_plus_minus_input_scalar(u32 buttons_held) {
         scalar -= 1.0f;
     }
     return scalar;
-}
-
-void input::handle(
-    f32 cam_movement_speed,
-    f32 cam_rotation_speed,
-    u16 v_width,
-    u16 v_height,
-    game::camera& cam,
-    game::cursor& cursor,
-    std::optional<game::raycast>& raycast
-) {
-    WPAD_ScanPads();
-    u32 buttons_held = get_buttons_held(0);
-    u32 buttons_down = get_buttons_down(0);
-    if (buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
-
-    auto joystick_input_vector = get_joystick_input_vector();
-    auto plus_minus_input_scalar = get_plus_minus_input_scalar(buttons_held);
-
-    if (math::is_non_zero(joystick_input_vector) || plus_minus_input_scalar != 0) {
-        if (std::abs(joystick_input_vector.x) < 6.0f) {
-            joystick_input_vector.x = 0.0f;
-        }
-        if (std::abs(joystick_input_vector.y) < 6.0f) {
-            joystick_input_vector.y = 0.0f;
-        }
-        glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, plus_minus_input_scalar, joystick_input_vector.x / 96.0f };
-        game::move_camera(cam, input_vector, cam_movement_speed);
-        
-        cam.update_view = true;
-    }
-
-    auto pad_input_vector = get_dpad_input_vector(buttons_held);
-
-    if (math::is_non_zero(pad_input_vector)) {
-        math::normalize(pad_input_vector);
-        pad_input_vector *= cam_rotation_speed;
-
-        game::rotate_camera(cam, pad_input_vector, cam_rotation_speed);
-        
-        cam.update_view = true;
-        cam.update_look = true;
-    }
-
-    auto pointer_pos = get_pointer_position();
-    if (pointer_pos.has_value()) {
-        cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
-    } else {
-        cursor.tf.set_position(v_width / 2, v_height / 2);
-    }
-
-    if (raycast.has_value() && buttons_down & WPAD_BUTTON_A) {
-        raycast->bl = { .tp = game::block::type::AIR };
-        raycast->ch.modified = true;
-        game::add_chunk_mesh_update(raycast->ch, raycast->bl_pos);
-    }
 }

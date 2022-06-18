@@ -18,7 +18,7 @@
 #include "game/chunk_management.hpp"
 #include "game/chunk_rendering.hpp"
 #include "game/stored_chunk.hpp"
-#include "game/block_logic.hpp"
+#include "game/logic.hpp"
 #include "game/block_selection.hpp"
 #include "game/cursor.hpp"
 
@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 		auto raycast = game::get_raycast(cam, chunks);
 		game::handle_raycast(view, bl_sel, raycast);
 
-		input::handle(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, cursor, raycast);
+		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, cursor, raycast);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
 

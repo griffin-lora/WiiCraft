@@ -1,25 +1,13 @@
 #pragma once
 #include "math.hpp"
-#include "game/camera.hpp"
-#include "game/block_logic.hpp"
-#include "game/cursor.hpp"
 #include <wiiuse/wpad.h>
+#include <optional>
 
 namespace input {
     struct state {
     };
 
     void init(u32 width, u32 height);
-
-    void handle(
-        f32 cam_movement_speed,
-        f32 cam_rotation_speed,
-        u16 v_width,
-        u16 v_height,
-        game::camera& cam,
-        game::cursor& cursor,
-        std::optional<game::raycast>& raycast
-    );
 
     inline void scan_pads() {
         WPAD_ScanPads();
@@ -32,4 +20,9 @@ namespace input {
     inline u32 get_buttons_down(int chan) {
         return WPAD_ButtonsDown(chan);
     }
+
+    glm::vec2 get_dpad_input_vector(u32 buttons_held);
+    std::optional<glm::vec2> get_pointer_position();
+    glm::vec2 get_joystick_input_vector();
+    float get_plus_minus_input_scalar(u32 buttons_held);
 }

@@ -2,6 +2,7 @@
 #include "camera.hpp"
 #include "chunk.hpp"
 #include "block.hpp"
+#include "cursor.hpp"
 #include <optional>
 #include <tuple>
 
@@ -14,4 +15,14 @@ namespace game {
     };
 
     std::optional<raycast> get_raycast(const camera& cam, chunk::map& chunks);
+
+    void update_from_input(
+        f32 cam_movement_speed,
+        f32 cam_rotation_speed,
+        u16 v_width,
+        u16 v_height,
+        camera& cam,
+        cursor& cursor,
+        std::optional<raycast>& raycast
+    );
 };
