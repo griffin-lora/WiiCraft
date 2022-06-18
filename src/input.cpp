@@ -30,7 +30,7 @@ static std::optional<glm::vec2> get_pointer_position() {
     ir_t pointer;
     WPAD_IR(0, &pointer);
     if (pointer.valid) {
-        return glm::vec2{ pointer.sx, pointer.sy };
+        return glm::vec2{ pointer.x, pointer.y };
     } else {
         return {};
     }
@@ -57,7 +57,15 @@ static float get_plus_minus_input_scalar(u32 buttons_held) {
     return scalar;
 }
 
-void input::handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera& cam, game::cursor& cursor, std::optional<game::raycast>& raycast) {
+void input::handle(
+    f32 cam_movement_speed,
+    f32 cam_rotation_speed,
+    u16 v_width,
+    u16 v_height,
+    game::camera& cam,
+    game::cursor& cursor,
+    std::optional<game::raycast>& raycast
+) {
     WPAD_ScanPads();
     u32 buttons_held = get_buttons_held(0);
     u32 buttons_down = get_buttons_down(0);
@@ -95,7 +103,7 @@ void input::handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera&
     if (pointer_pos.has_value()) {
         cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
     } else {
-        cursor.tf.set_position(0, 0);
+        cursor.tf.set_position(v_width / 2, v_height / 2);
     }
 
     if (raycast.has_value() && buttons_down & WPAD_BUTTON_A) {

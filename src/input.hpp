@@ -11,7 +11,15 @@ namespace input {
 
     void init(u32 width, u32 height);
 
-    void handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera& cam, game::cursor& cursor, std::optional<game::raycast>& raycast);
+    void handle(
+        f32 cam_movement_speed,
+        f32 cam_rotation_speed,
+        u16 v_width,
+        u16 v_height,
+        game::camera& cam,
+        game::cursor& cursor,
+        std::optional<game::raycast>& raycast
+    );
 
     inline void scan_pads() {
         WPAD_ScanPads();

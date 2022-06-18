@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 		auto raycast = game::get_raycast(cam, chunks);
 		game::handle_raycast(view, bl_sel, raycast);
 
-		input::handle(cam_move_speed, cam_rotation_speed, cam, cursor, raycast);
+		input::handle(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, cursor, raycast);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
 
@@ -111,11 +111,12 @@ int main(int argc, char** argv) {
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
-		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		game::draw_cursor(icons_tex, cursor);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_block_selection(view, cam, bl_sel, raycast);
+		
+		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
+		game::draw_cursor(icons_tex, cursor);
 
 		game::reset_update_params(cam);
 
