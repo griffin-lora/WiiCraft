@@ -26,23 +26,14 @@ static glm::vec2 get_dpad_input_vector(u32 buttons_held) {
     return pad_input_vector;
 }
 
-static glm::vec2 get_pointer_input_vector(state& s, u32 buttons_held) {
+static std::optional<glm::vec2> get_pointer_position() {
     ir_t pointer;
     WPAD_IR(0, &pointer);
     if (pointer.valid) {
-        glm::vec2 pointer_pos = {pointer.sx, pointer.sy};
-        if ((buttons_held & WPAD_BUTTON_A) && s.was_last_pointer_pos_valid && pointer_pos != s.last_pointer_pos) {
-            glm::vec2 pointer_input_vector = pointer_pos - s.last_pointer_pos;
-            s.was_last_pointer_pos_valid = true;
-            s.last_pointer_pos = pointer_pos;
-            return pointer_input_vector;
-        }
-        s.was_last_pointer_pos_valid = true;
-        s.last_pointer_pos = pointer_pos;
+        return glm::vec2{ pointer.sx, pointer.sy };
     } else {
-        s.was_last_pointer_pos_valid = false;
+        return {};
     }
-    return {0.0f, 0.0f};
 }
 
 static glm::vec2 get_joystick_input_vector() {
@@ -66,7 +57,7 @@ static float get_plus_minus_input_scalar(u32 buttons_held) {
     return scalar;
 }
 
-void input::handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera& cam, std::optional<game::raycast>& raycast) {
+void input::handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera& cam, game::cursor& cursor, std::optional<game::raycast>& raycast) {
     WPAD_ScanPads();
     u32 buttons_held = get_buttons_held(0);
     u32 buttons_down = get_buttons_down(0);
@@ -98,6 +89,13 @@ void input::handle(f32 cam_movement_speed, f32 cam_rotation_speed, game::camera&
         
         cam.update_view = true;
         cam.update_look = true;
+    }
+
+    auto pointer_pos = get_pointer_position();
+    if (pointer_pos.has_value()) {
+        cursor.pos = *pointer_pos;
+    } else {
+        cursor.pos = { 0.0f, 0.0f };
     }
 
     if (raycast.has_value() && buttons_down & WPAD_BUTTON_A) {

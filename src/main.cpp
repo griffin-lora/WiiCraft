@@ -15,13 +15,12 @@
 #include <numeric>
 #include "game/camera.hpp"
 #include "game/chunk_core.hpp"
-#include "game/block_logic.hpp"
-#include "game/util.hpp"
-#include "game/chunk_mesh_generation.hpp"
+#include "game/chunk_management.hpp"
 #include "game/chunk_rendering.hpp"
 #include "game/stored_chunk.hpp"
+#include "game/block_logic.hpp"
 #include "game/block_selection.hpp"
-#include "game/chunk_management.hpp"
+#include "game/cursor.hpp"
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -43,6 +42,9 @@ int main(int argc, char** argv) {
 	gfx::texture chunk_tex;
 	gfx::safe_load_from_file(chunk_tex, "data/textures/chunk.tpl");
 
+	gfx::texture icons_tex;
+	gfx::safe_load_from_file(icons_tex, "data/textures/icons.tpl");
+
 	input::init(con.rmode->viWidth, con.rmode->viHeight);
 
 	gfx::draw_state draw;
@@ -51,9 +53,17 @@ int main(int argc, char** argv) {
 	GX_SetCullMode(GX_CULL_BACK);
 
 	gfx::set_filtering_mode(chunk_tex, GX_NEAR, GX_NEAR);
+	gfx::set_filtering_mode(icons_tex, GX_NEAR, GX_NEAR);
 
+	math::matrix44 perspective_2d;
+	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
+
+    math::matrix model_view_2d;
+    guMtxIdentity(model_view_2d);
+    guMtxTransApply(model_view_2d, model_view_2d, 0.0F, 0.0F, -5.0F);
+	
 	math::matrix view;
-	math::matrix44 perspective;
+	math::matrix44 perspective_3d;
 
 	game::camera cam = {
 		.position = {0.0f, 3.0f, -10.0f},
@@ -70,11 +80,7 @@ int main(int argc, char** argv) {
 	game::update_look(cam);
 	game::update_view(cam, view);
 
-	// setup our projection matrix
-	// this creates a perspective matrix with a view angle of 90,
-	// and aspect ratio based on the display resolution
-	game::update_perspective(cam, perspective);
-	gfx::set_projection_matrix(perspective, GX_PERSPECTIVE);
+	game::update_perspective(cam, perspective_3d);
 
 	bool first_frame = true;
 
@@ -86,30 +92,41 @@ int main(int argc, char** argv) {
 	input::state inp;
 
 	std::vector<math::vector3s32> inserted_chunk_positions;
+	
+	game::cursor cursor;
+	game::init(cursor);
 
 	game::block_selection bl_sel;
 
+    GX_SetCurrentMtx(GX_PNMTX3);
+
 	for (;;) {
-		// Check for selected block
 		auto raycast = game::get_raycast(cam, chunks);
 		game::handle_raycast(view, bl_sel, raycast);
 
-		input::handle(cam_move_speed, cam_rotation_speed, cam, raycast);
+		input::handle(cam_move_speed, cam_rotation_speed, cam, cursor, raycast);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
 
-		game::update_needed(view, perspective, cam);
+
+		game::update_needed(view, perspective_3d, cam);
 
 		game::update_chunks(chunks, face_caches);
 
+		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
+		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
+		game::draw_cursor(icons_tex, model_view_2d, cursor);
 
+		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		game::draw_block_selection(view, cam, bl_sel, raycast);
 
 		game::reset_update_params(cam);
 
 		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
-		gfx::set_color_buffer_update(true);
+		GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+		GX_SetAlphaUpdate(GX_TRUE);
+		GX_SetColorUpdate(GX_TRUE);
 
 		gfx::copy_framebuffer(draw.frame_buffers[draw.fb_index], true);
 
