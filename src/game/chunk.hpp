@@ -35,5 +35,9 @@ namespace game {
         math::transform_3d tf;
 
         bool modified = false;
+        
+        inline chunk(math::matrix view, const math::vector3s32& pos) {
+            tf.set_position(view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
+        }
     };
 };

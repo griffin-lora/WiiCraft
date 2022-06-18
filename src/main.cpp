@@ -33,7 +33,6 @@ constexpr s32 chunk_erasure_radius = 3;
 int main(int argc, char** argv) {
 
 	gfx::console_state con;
-	gfx::init(con);
 
 	if (!fatInitDefault()) {
 		printf("fatInitDefault() failed!\n");
@@ -51,8 +50,7 @@ int main(int argc, char** argv) {
 
 	input::init(con.rmode->viWidth, con.rmode->viHeight);
 
-	gfx::draw_state draw;
-	gfx::init(draw, {0xFF, 0xFF, 0xFF, 0xFF});
+	gfx::draw_state draw{ {0xFF, 0xFF, 0xFF, 0xFF} };
 
 	input::set_resolution(draw.rmode->viWidth, draw.rmode->viHeight);
 
@@ -93,12 +91,9 @@ int main(int argc, char** argv) {
 
 	std::vector<math::vector3s32> inserted_chunk_positions;
 
-	game::skybox skybox;
-	game::init(skybox);
-	game::update_skybox(view, cam, skybox);
+	game::skybox skybox{view, cam};
 	
 	game::cursor cursor;
-	game::init(cursor);
 
 	game::block_selection bl_sel;
 
@@ -106,7 +101,7 @@ int main(int argc, char** argv) {
 
 	for (;;) {
 		auto raycast = game::get_raycast(cam, chunks);
-		game::handle_raycast(view, bl_sel, raycast);
+		bl_sel.handle_raycast(view, raycast);
 
 		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, chunks, cursor, raycast);
 
@@ -119,14 +114,14 @@ int main(int argc, char** argv) {
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		if (cam.update_view) {
-			game::update_skybox(view, cam, skybox);
+			skybox.update_if_needed(view, cam);
 		}
-		game::draw_skybox(skybox_tex, skybox);
+		skybox.draw(skybox_tex);
 		game::draw_chunks(chunk_tex, view, cam, chunks);
-		game::draw_block_selection(view, cam, bl_sel, raycast);
+		bl_sel.draw(view, cam, raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		game::draw_cursor(icons_tex, cursor);
+		cursor.draw(icons_tex);
 
 		game::reset_update_params(cam);
 

@@ -8,11 +8,10 @@ namespace game {
     struct skybox {
         math::transform_3d tf;
         gfx::display_list disp_list;
+
+        skybox(math::matrix view, const camera& cam);
+        void update(math::matrix view, const camera& cam);
+        void update_if_needed(math::matrix view, const camera& cam);
+        void draw(gfx::texture& texture);
     };
-
-    void init(skybox& skybox);
-
-    void update_skybox(math::matrix view, const camera& cam, skybox& skybox);
-
-    void draw_skybox(gfx::texture& texture, skybox& skybox);
 }

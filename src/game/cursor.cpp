@@ -2,7 +2,7 @@
 
 using namespace game;
 
-void game::init(cursor& cursor) {
+cursor::cursor() {
     constexpr std::size_t vertex_count = 4;
     
     std::size_t disp_list_size = (
@@ -12,9 +12,9 @@ void game::init(cursor& cursor) {
 		1 // GX_End
 	);
 
-    cursor.disp_list.resize(disp_list_size);
+    disp_list.resize(disp_list_size);
 
-    cursor.disp_list.write_into([&cursor]() {
+    disp_list.write_into([vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
         GX_Position2u8(0, 0);
@@ -30,7 +30,7 @@ void game::init(cursor& cursor) {
     });
 }
 
-static void init_cursor_drawing() {
+static void init_drawing() {
     // set number of rasterized color channels
 	GX_SetNumChans(1);
 
@@ -57,11 +57,11 @@ static void init_cursor_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void game::draw_cursor(gfx::texture& texture, cursor& cursor) {
-    init_cursor_drawing();
+void cursor::draw(gfx::texture& texture) {
+    init_drawing();
 
     gfx::load(texture);
-	cursor.tf.load(GX_PNMTX3);
+	tf.load(GX_PNMTX3);
 
-    cursor.disp_list.call();
+    disp_list.call();
 }

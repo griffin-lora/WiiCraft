@@ -31,8 +31,6 @@ namespace game {
         );
     }
 
-    void init(chunk& chunk, math::matrix view, const math::vector3s32& chunk_position);
-
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 
 

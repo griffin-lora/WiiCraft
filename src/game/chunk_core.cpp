@@ -5,10 +5,6 @@
 
 using namespace game;
 
-void game::init(chunk& chunk, math::matrix view, const math::vector3s32& pos) {
-    chunk.tf.set_position(view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
-}
-
 math::vector3u8 game::get_position_from_index(std::size_t index) {
     uint z = index / (chunk::SIZE * chunk::SIZE);
     index -= (z * chunk::SIZE * chunk::SIZE);

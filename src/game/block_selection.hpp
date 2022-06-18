@@ -11,9 +11,11 @@ namespace game {
 
 	    gfx::display_list disp_list;
         math::transform_3d tf;
-    };
-
-    void draw_block_selection(math::matrix view, const camera& cam, block_selection& bl_sel, std::optional<raycast>& raycast);
     
-    void handle_raycast(math::matrix view, block_selection& block_selection, std::optional<raycast>& raycast);
+        void draw(math::matrix view, const camera& cam, std::optional<raycast>& raycast);
+        void handle_raycast(math::matrix view, std::optional<raycast>& raycast);
+
+        private:
+            void update_mesh(math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type);
+    };
 };

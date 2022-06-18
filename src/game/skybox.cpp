@@ -2,7 +2,7 @@
 
 using namespace game;
 
-void game::init(skybox& skybox) {
+skybox::skybox(math::matrix view, const camera& cam) {
     constexpr std::size_t vertex_count = 24;
     
     std::size_t disp_list_size = (
@@ -12,9 +12,9 @@ void game::init(skybox& skybox) {
 		1 // GX_End
 	);
 
-    skybox.disp_list.resize(disp_list_size);
+    disp_list.resize(disp_list_size);
 
-    skybox.disp_list.write_into([&skybox]() {
+    disp_list.write_into([vertex_count]() {
         constexpr s8 n = -0x80;
         constexpr s8 p = 0x7f;
 
@@ -107,10 +107,18 @@ void game::init(skybox& skybox) {
 
         GX_End();
     });
+
+    update(view, cam);
 }
 
-void game::update_skybox(math::matrix view, const camera& cam, skybox& skybox) {
-    skybox.tf.set_position(view, cam.position.x, cam.position.y, cam.position.z);
+void skybox::update(math::matrix view, const camera& cam) {
+    tf.set_position(view, cam.position.x, cam.position.y, cam.position.z);
+}
+
+void skybox::update_if_needed(math::matrix view, const camera& cam) {
+    if (cam.update_view) {
+        update(view, cam);
+    }
 }
 
 static void init_drawing() {
@@ -140,9 +148,9 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
 }
 
-void game::draw_skybox(gfx::texture& tex, skybox& skybox) {
+void skybox::draw(gfx::texture& tex) {
     init_drawing();
     gfx::load(tex);
-    skybox.tf.load(GX_PNMTX3);
-    skybox.disp_list.call();
+    tf.load(GX_PNMTX3);
+    disp_list.call();
 }

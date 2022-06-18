@@ -20,14 +20,14 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
 }
 
-void game::draw_block_selection(math::matrix view, const camera& cam, block_selection& bl_sel, std::optional<raycast>& raycast) {
-    init_drawing();
-    if (cam.update_view) {
-        bl_sel.tf.update_model_view(view);
-    }
+void block_selection::draw(math::matrix view, const camera& cam, std::optional<raycast>& raycast) {
     if (raycast.has_value()) {
-        bl_sel.tf.load(GX_PNMTX3);
-	    bl_sel.disp_list.call();
+        init_drawing();
+        if (cam.update_view) {
+            tf.update_model_view(view);
+        }
+        tf.load(GX_PNMTX3);
+	    disp_list.call();
     }
 }
 
@@ -38,8 +38,8 @@ struct block_selection_vert_func {
     }
 };
 
-static void update_mesh(math::matrix view, block_selection& bl_sel, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type) {
-    bl_sel.tf.set_position(view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
+void block_selection::update_mesh(math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type) {
+    tf.set_position(view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
 
     auto vertex_count = game::get_block_vertex_count(type);
     std::size_t disp_list_size = (
@@ -49,22 +49,22 @@ static void update_mesh(math::matrix view, block_selection& bl_sel, const math::
         1 // GX_End
     );
 
-    bl_sel.disp_list.resize(disp_list_size);
+    disp_list.resize(disp_list_size);
 
-    bl_sel.disp_list.write_into([&bl_pos, type, vertex_count]() {
+    disp_list.write_into([&bl_pos, type, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
         game::add_block_vertices<block_selection_vert_func>(bl_pos, type);
         GX_End();
     });
 }
 
-void game::handle_raycast(math::matrix view, block_selection& bl_sel, std::optional<raycast>& raycast) {
+void block_selection::handle_raycast(math::matrix view, std::optional<raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
-        if (!bl_sel.last_block_pos.has_value() || raycast->bl_pos != bl_sel.last_block_pos) {
-            update_mesh(view, bl_sel, raycast->ch_pos, raycast->bl_pos, raycast->bl.tp);
+        if (!last_block_pos.has_value() || raycast->bl_pos != last_block_pos) {
+            update_mesh(view, raycast->ch_pos, raycast->bl_pos, raycast->bl.tp);
         }
 
-        bl_sel.last_block_pos = raycast->bl_pos;
+        last_block_pos = raycast->bl_pos;
     }
 }

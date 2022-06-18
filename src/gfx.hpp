@@ -12,18 +12,18 @@ namespace gfx {
     struct console_state {
         GXRModeObj* rmode = nullptr;
         void* xfb = nullptr;
-    };
 
-    void init(console_state& state);
+        console_state();
+    };
 
     struct draw_state {
         GXRModeObj* rmode = nullptr;
         u32 fb_index = 0;
         std::array<void*, 2> frame_buffers{{ NULL, NULL }};
         void* gpfifo;
-    };
 
-    void init(draw_state& state, color4 bkg);
+        draw_state(color4 bkg);
+    };
 
     template<typename F>
     inline void draw_quads(std::size_t vertices, F func) {

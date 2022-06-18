@@ -8,9 +8,9 @@ namespace game {
     struct cursor {
         math::transform_2d tf;
         gfx::display_list disp_list;
+
+        cursor();
+
+        void draw(gfx::texture& texture);
     };
-
-    void init(cursor& cursor);
-
-    void draw_cursor(gfx::texture& texture, cursor& cursor);
 };

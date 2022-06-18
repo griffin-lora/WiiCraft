@@ -7,7 +7,6 @@ namespace dbg {
     template<typename F>
     inline void error(F func) {
         gfx::console_state console;
-        gfx::init(console);
         func();
         freeze();
     }
@@ -17,7 +16,6 @@ namespace dbg {
         auto [ success, code ] = try_func(std::forward<Args>(args)...);
         if (!success) {
             gfx::console_state console;
-            gfx::init(console);
             catch_func(code, std::forward<Args>(args)...);
             freeze();
         }
