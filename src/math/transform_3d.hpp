@@ -13,13 +13,13 @@ namespace math {
 
             transform_3d(transform_3d&& other);
 
-            void set_position(matrix view, f32 x, f32 y, f32 z);
-            inline void update_model_view(matrix view) {
-                guMtxConcat(view, model, model_view);
+            void set_position(const matrix view, f32 x, f32 y, f32 z);
+            inline void update_model_view(const matrix view) {
+                guMtxConcat(const_cast<f32(*)[4]>(view), model, model_view);
             }
 
-            inline void load(u32 idx) {
-                GX_LoadPosMtxImm(model_view, idx);
+            inline void load(u32 idx) const {
+                GX_LoadPosMtxImm(const_cast<f32(*)[4]>(model_view), idx);
             }
     };
 }

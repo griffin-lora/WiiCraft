@@ -57,7 +57,7 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void cursor::draw(gfx::texture& texture) {
+void cursor::draw(const gfx::texture& texture) const {
     init_drawing();
 
     gfx::load(texture);

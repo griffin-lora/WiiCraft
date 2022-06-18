@@ -49,7 +49,7 @@ namespace game {
             floorf(position.z)
         };
     }
-    inline math::vector3s32 get_chunk_position_from_world_position(glm::vec3 world_position) {
+    inline math::vector3s32 get_chunk_position_from_world_position(const glm::vec3& world_position) {
         return floor_float_position(world_position / (f32)chunk::SIZE);
     }
 

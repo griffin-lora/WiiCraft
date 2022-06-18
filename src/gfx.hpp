@@ -37,8 +37,8 @@ namespace gfx {
     std::tuple<bool, error_code> load_from_file(texture& texture, const char* path);
     void safe_load_from_file(texture& texture, const char* path);
 
-    inline void load(texture& texture) {
-        GX_LoadTexObj(&texture, GX_TEXMAP0);
+    inline void load(const texture& texture) {
+        GX_LoadTexObj(const_cast<GXTexObj*>(&texture), GX_TEXMAP0);
     }
 
     inline void set_filtering_mode(texture& texture, u8 min, u8 mag) {

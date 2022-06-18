@@ -9,9 +9,9 @@ namespace game {
         math::transform_3d tf;
         gfx::display_list disp_list;
 
-        skybox(math::matrix view, const camera& cam);
-        void update(math::matrix view, const camera& cam);
-        void update_if_needed(math::matrix view, const camera& cam);
-        void draw(gfx::texture& texture);
+        skybox(const math::matrix view, const camera& cam);
+        void update(const math::matrix view, const camera& cam);
+        void update_if_needed(const math::matrix view, const camera& cam);
+        void draw(const gfx::texture& texture) const;
     };
 }

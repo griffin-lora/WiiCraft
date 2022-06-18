@@ -30,14 +30,14 @@ void game::init_chunk_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void game::draw_chunk(chunk& chunk) {
+void game::draw_chunk(const chunk& chunk) {
     // load the modelview matrix into matrix memory
     chunk.tf.load(GX_PNMTX3);
 
     chunk.disp_list.call();
 }
 
-void game::draw_chunks(gfx::texture& chunk_tex, math::matrix view, const camera& cam, chunk::map& chunks) {
+void game::draw_chunks(const gfx::texture& chunk_tex, const math::matrix view, const camera& cam, chunk::map& chunks) {
 	game::init_chunk_drawing();
 	gfx::load(chunk_tex);
 	if (cam.update_view) {

@@ -20,7 +20,7 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
 }
 
-void block_selection::draw(math::matrix view, const camera& cam, std::optional<raycast>& raycast) {
+void block_selection::draw(const math::matrix view, const camera& cam, const std::optional<raycast>& raycast) {
     if (raycast.has_value()) {
         init_drawing();
         if (cam.update_view) {
@@ -38,7 +38,7 @@ struct block_selection_vert_func {
     }
 };
 
-void block_selection::update_mesh(math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type) {
+void block_selection::update_mesh(const math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type) {
     tf.set_position(view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
 
     auto vertex_count = game::get_block_vertex_count(type);
@@ -58,7 +58,7 @@ void block_selection::update_mesh(math::matrix view, const math::vector3s32& ch_
     });
 }
 
-void block_selection::handle_raycast(math::matrix view, std::optional<raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, const std::optional<raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->bl_pos != last_block_pos) {

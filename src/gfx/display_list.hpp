@@ -24,11 +24,11 @@ namespace gfx {
                 m_size = GX_EndDispList();
             }
 
-            inline void call() {
+            inline void call() const {
                 GX_CallDispList(m_data, m_size);
             }
 
-            inline void checked_call() {
+            inline void checked_call() const {
                 if (m_size == 0) {
                     return;
                 }

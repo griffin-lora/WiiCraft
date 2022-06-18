@@ -2,7 +2,7 @@
 
 using namespace game;
 
-skybox::skybox(math::matrix view, const camera& cam) {
+skybox::skybox(const math::matrix view, const camera& cam) {
     constexpr std::size_t vertex_count = 24;
     
     std::size_t disp_list_size = (
@@ -111,11 +111,11 @@ skybox::skybox(math::matrix view, const camera& cam) {
     update(view, cam);
 }
 
-void skybox::update(math::matrix view, const camera& cam) {
+void skybox::update(const math::matrix view, const camera& cam) {
     tf.set_position(view, cam.position.x, cam.position.y, cam.position.z);
 }
 
-void skybox::update_if_needed(math::matrix view, const camera& cam) {
+void skybox::update_if_needed(const math::matrix view, const camera& cam) {
     if (cam.update_view) {
         update(view, cam);
     }
@@ -148,7 +148,7 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
 }
 
-void skybox::draw(gfx::texture& tex) {
+void skybox::draw(const gfx::texture& tex) const {
     init_drawing();
     gfx::load(tex);
     tf.load(GX_PNMTX3);
