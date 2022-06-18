@@ -10,6 +10,7 @@ bool game::is_block_visible(block::type type) {
         case block::type::DEBUG:
         case block::type::GRASS:
         case block::type::DIRT:
+        case block::type::WOOD_PLANKS:
             return true;
     }
 }

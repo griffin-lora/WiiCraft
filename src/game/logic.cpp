@@ -16,7 +16,7 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
         auto raycast_chunk_pos = get_chunk_position_from_world_position(raycast_pos);
 
         if (current_chunk_pos.has_value()) {
-            if (raycast_chunk_pos != current_chunk_pos.value()) {
+            if (raycast_chunk_pos != current_chunk_pos) {
                 if (!chunks.count(raycast_chunk_pos)) {
                     break;
                 }
@@ -39,12 +39,36 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
         auto& block = current_chunk->get().blocks[index];
 
         if (block.tp != block::type::AIR) {
-            return raycast{ .ch_pos = *current_chunk_pos, .ch = *current_chunk, .bl_pos = raycast_block_pos, .bl = block };
+            return raycast{ .pos = raycast_pos, .ch_pos = *current_chunk_pos, .ch = *current_chunk, .bl_pos = raycast_block_pos, .bl = block };
         }
 
         raycast_pos += dir_vec;
     }
     return {};
+}
+
+static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::map& chunks, const raycast& rc) {
+    auto chunk = &rc.ch;
+
+    auto pos = rc.pos - cam.look;
+    auto chunk_pos = get_chunk_position_from_world_position(pos);
+
+    if (chunk_pos != rc.ch_pos) {
+        if (!chunks.count(chunk_pos)) {
+            return {};
+        } else {
+            chunk = &chunks.at(chunk_pos);
+        }
+    }
+
+    math::vector3s32 block_pos = floor_float_position(pos);
+    block_pos.x = math::mod(block_pos.x, chunk::SIZE);
+    block_pos.y = math::mod(block_pos.y, chunk::SIZE);
+    block_pos.z = math::mod(block_pos.z, chunk::SIZE);
+    auto index = get_index_from_position(block_pos);
+    auto& block = chunk->blocks[index];
+
+    return raycast{ .pos = pos, .ch_pos = chunk_pos, .ch = *chunk, .bl_pos = block_pos, .bl = block };
 }
 
 void game::update_from_input(
@@ -53,6 +77,7 @@ void game::update_from_input(
     u16 v_width,
     u16 v_height,
     camera& cam,
+    chunk::map& chunks,
     cursor& cursor,
     std::optional<raycast>& raycast
 ) {
@@ -96,9 +121,19 @@ void game::update_from_input(
         cursor.tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
     }
 
-    if (raycast.has_value() && buttons_down & WPAD_BUTTON_A) {
-        raycast->bl = { .tp = block::type::AIR };
-        raycast->ch.modified = true;
-        add_chunk_mesh_update(raycast->ch, raycast->bl_pos);
+    if (raycast.has_value()) {
+        if (buttons_down & WPAD_BUTTON_A) {
+            raycast->bl = { .tp = block::type::AIR };
+            raycast->ch.modified = true;
+            add_chunk_mesh_update(raycast->ch, raycast->bl_pos);
+        }
+        if (buttons_down & WPAD_BUTTON_B) {
+            auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);
+            if (backtracked_raycast.has_value()) {
+                backtracked_raycast->bl = { .tp = block::type::WOOD_PLANKS };
+                backtracked_raycast->ch.modified = true;
+                add_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
+            }
+        }
     }
 }

@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 		auto raycast = game::get_raycast(cam, chunks);
 		game::handle_raycast(view, bl_sel, raycast);
 
-		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, cursor, raycast);
+		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, chunks, cursor, raycast);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
 

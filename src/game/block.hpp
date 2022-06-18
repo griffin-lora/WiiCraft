@@ -14,11 +14,21 @@ namespace game {
             LEFT, // -z
             CENTER
         };
+        
+        // TODO: Fix this mess
+        /**
+         * To add a block type:
+         * Add it to the enum
+         * Add it to the is_block_visible function
+         * Add it to the get_face_vertex_count function
+         * Add it to the add_face_vertices function
+         */
         enum class type : u8 {
             AIR,
             DEBUG,
             GRASS,
-            DIRT
+            DIRT,
+            WOOD_PLANKS
         };
         type tp;
         // This is a cache of which faces the block needs to create face vertices for.

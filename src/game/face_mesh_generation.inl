@@ -102,6 +102,7 @@ void game::add_front_vertices(math::vector3u8 local_pos, block::type type) {
         case block::type::DEBUG: add_cube_vertices<Vf>(func, { 0, 0 }, local_pos); return;
         case block::type::GRASS: add_cube_vertices<Vf>(func, { 3, 0 }, local_pos); return;
         case block::type::DIRT: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
+        case block::type::WOOD_PLANKS: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         default: return;
     }
 }
@@ -114,6 +115,7 @@ void game::add_back_vertices(math::vector3u8 local_pos, block::type type) {
         case block::type::DEBUG: add_cube_vertices<Vf>(func, { 1, 0 }, local_pos); return;
         case block::type::GRASS: add_cube_vertices<Vf>(func, { 3, 0 }, local_pos); return;
         case block::type::DIRT: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
+        case block::type::WOOD_PLANKS: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         default: return;
     }
 }
@@ -126,6 +128,7 @@ void game::add_top_vertices(math::vector3u8 local_pos, block::type type) {
         case block::type::DEBUG: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
         case block::type::GRASS: add_cube_vertices<Vf>(func, { 0, 0 }, local_pos); return;
         case block::type::DIRT: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
+        case block::type::WOOD_PLANKS: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         default: return;
     }
 }
@@ -138,6 +141,7 @@ void game::add_bottom_vertices(math::vector3u8 local_pos, block::type type) {
         case block::type::DEBUG: add_cube_vertices<Vf>(func, { 3, 0 }, local_pos); return;
         case block::type::GRASS: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
         case block::type::DIRT: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
+        case block::type::WOOD_PLANKS: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         default: return;
     }
 }
@@ -150,6 +154,7 @@ void game::add_right_vertices(math::vector3u8 local_pos, block::type type) {
         case block::type::DEBUG: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         case block::type::GRASS: add_cube_vertices<Vf>(func, { 3, 0 }, local_pos); return;
         case block::type::DIRT: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
+        case block::type::WOOD_PLANKS: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         default: return;
     }
 }
@@ -162,6 +167,7 @@ void game::add_left_vertices(math::vector3u8 local_pos, block::type type) {
         case block::type::DEBUG: add_cube_vertices<Vf>(func, { 5, 0 }, local_pos); return;
         case block::type::GRASS: add_cube_vertices<Vf>(func, { 3, 0 }, local_pos); return;
         case block::type::DIRT: add_cube_vertices<Vf>(func, { 2, 0 }, local_pos); return;
+        case block::type::WOOD_PLANKS: add_cube_vertices<Vf>(func, { 4, 0 }, local_pos); return;
         default: return;
     }
 }

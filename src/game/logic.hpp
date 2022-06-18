@@ -8,6 +8,7 @@
 
 namespace game {
     struct raycast {
+        glm::vec3 pos;
         math::vector3s32 ch_pos;
         chunk& ch;
         math::vector3u8 bl_pos;
@@ -22,6 +23,7 @@ namespace game {
         u16 v_width,
         u16 v_height,
         camera& cam,
+        chunk::map& chunks,
         cursor& cursor,
         std::optional<raycast>& raycast
     );
