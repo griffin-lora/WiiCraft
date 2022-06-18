@@ -27,6 +27,7 @@ namespace game {
             AIR,
             DEBUG,
             GRASS,
+            STONE,
             DIRT,
             WOOD_PLANKS
         };

@@ -13,6 +13,7 @@ std::size_t game::get_any_face_vertex_count(block::type type) {
             return 0;
         case block::type::DEBUG:
         case block::type::GRASS:
+        case block::type::STONE:
         case block::type::DIRT:
         case block::type::WOOD_PLANKS:
             return 4;

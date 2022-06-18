@@ -21,14 +21,18 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos, u32 
             auto world_z = game::get_world_coord_from_local_position(z, chunk_pos.z);
             auto height = noise.octave2D(world_x / 32.f, world_z / 32.f, 8);
 
-            s32 y_pos = (height * 16);
+            s32 y_pos = (height * 24);
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);
                 auto index = game::get_index_from_position(math::vector3u8{x, y, z});
 
                 if (world_y < y_pos) {
-                    chunk.blocks[index] = { .tp = block::type::DIRT };
+                    if (world_y < (y_pos - 2)) {
+                        chunk.blocks[index] = { .tp = block::type::STONE };
+                    } else {
+                        chunk.blocks[index] = { .tp = block::type::DIRT };
+                    }
                 } else if (world_y == y_pos) {
                     chunk.blocks[index] = { .tp = block::type::GRASS };
                 } else {
