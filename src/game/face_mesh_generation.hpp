@@ -1,22 +1,19 @@
 #pragma once
 #include "chunk_core.hpp"
+#include "block_type.hpp"
 
 namespace game {
     std::size_t get_center_vertex_count(block::type type);
     std::size_t get_any_face_vertex_count(block::type type);
 
+    #define EVAL_GET_FACE_VERTEX_COUNT_CASE(tp) case block::type::tp: return block_type<block::type::tp>::get_face_vertex_count<face>();
+
     template<block::face face>
-    constexpr std::size_t get_face_vertex_count(block::type type) {
-        return call_face_func_for<face, std::size_t>(
-            get_any_face_vertex_count,
-            get_any_face_vertex_count,
-            get_any_face_vertex_count,
-            get_any_face_vertex_count,
-            get_any_face_vertex_count,
-            get_any_face_vertex_count,
-            get_center_vertex_count,
-            type
-        );
+    std::size_t get_face_vertex_count(block::type type) {
+        switch (type) {
+            default: return 0;
+            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_GET_FACE_VERTEX_COUNT_CASE)
+        }
     }
 
     /** Vf stands for a vertex function type
