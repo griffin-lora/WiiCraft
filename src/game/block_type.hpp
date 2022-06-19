@@ -63,4 +63,45 @@ namespace game {
             );
         }
     };
+
+    template<>
+    struct block_type<block::type::GRASS> : public cube_block_type<block_type<block::type::GRASS>> {
+        template<block::face face>
+        static constexpr math::vector2u8 get_uv_pos() {
+            static_assert(face != block::face::CENTER, "Center face is not allowed.");
+            return call_face_func_for<face, math::vector2u8>(
+                []() -> math::vector2u8 { return { 3, 0 }; },
+                []() -> math::vector2u8 { return { 3, 0 }; },
+                []() -> math::vector2u8 { return { 0, 0 }; },
+                []() -> math::vector2u8 { return { 2, 0 }; },
+                []() -> math::vector2u8 { return { 3, 0 }; },
+                []() -> math::vector2u8 { return { 3, 0 }; },
+                []() {}
+            );
+        }
+    };
+
+    template<>
+    struct block_type<block::type::DIRT> : public cube_block_type<block_type<block::type::DIRT>> {
+        template<block::face face>
+        static constexpr math::vector2u8 get_uv_pos() {
+            return { 2, 0 };
+        }
+    };
+
+    template<>
+    struct block_type<block::type::STONE> : public cube_block_type<block_type<block::type::STONE>> {
+        template<block::face face>
+        static constexpr math::vector2u8 get_uv_pos() {
+            return { 1, 0 };
+        }
+    };
+
+    template<>
+    struct block_type<block::type::WOOD_PLANKS> : public cube_block_type<block_type<block::type::WOOD_PLANKS>> {
+        template<block::face face>
+        static constexpr math::vector2u8 get_uv_pos() {
+            return { 4, 0 };
+        }
+    };
 }

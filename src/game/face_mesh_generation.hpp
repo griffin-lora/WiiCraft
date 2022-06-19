@@ -23,7 +23,7 @@ namespace game {
     void add_face_vertices(math::vector3u8 local_position, block::type type) {
         switch (type) {
             default: break;
-            EVAL_ADD_FACE_VERTICES_CASE(DEBUG)
+            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_ADD_FACE_VERTICES_CASE)
         }
     }
 
