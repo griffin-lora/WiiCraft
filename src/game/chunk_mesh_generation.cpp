@@ -23,7 +23,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
             auto index = get_index_from_position(nb_check_pos);
 
             auto& block = nb_chunk.blocks[index];
-            if (is_block_visible(block.tp)) {
+            if (is_block_solid(block.tp)) {
                 return false;
             }
         } else {
@@ -33,7 +33,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
         return true;
     }
     auto check_block_type = chunk.blocks[get_index_from_position(check_pos)].tp;
-    if (is_block_visible(check_block_type)) {
+    if (is_block_solid(check_block_type)) {
         return false;
     } else {
         return true;
@@ -71,7 +71,7 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<ga
     std::size_t vertex_count = 0;
     iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &face_caches, &vertex_count](auto pos, auto& block) {
         auto type = block.tp;
-        if (is_block_visible(type)) {
+        if (is_block_solid(type)) {
             vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, face_caches, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, face_caches, pos, type);
             vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, face_caches, pos, type);
@@ -119,7 +119,7 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
 
         iterate_over_chunk_positions_and_blocks(chunk.blocks, [&face_caches](auto pos, auto& block) {
             auto type = block.tp;
-            if (is_block_visible(type)) {
+            if (is_block_solid(type)) {
                 add_needed_face_vertices<block::face::FRONT>(face_caches, pos, type);
                 add_needed_face_vertices<block::face::BACK>(face_caches, pos, type);
                 add_needed_face_vertices<block::face::TOP>(face_caches, pos, type);

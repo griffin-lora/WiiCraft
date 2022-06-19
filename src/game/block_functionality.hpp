@@ -6,7 +6,7 @@
 namespace game {
     template<block::type type>
     struct block_functionality {
-        static constexpr bool is_visible() { return false; }
+        static constexpr bool is_solid() { return false; }
 
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { return 0; }
@@ -25,7 +25,7 @@ namespace game {
 
     template<typename T>
     struct cube_block_functionality {
-        static constexpr bool is_visible() { return true; }
+        static constexpr bool is_solid() { return true; }
         
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { if constexpr (face != block::face::CENTER) return 4; return 0; }
