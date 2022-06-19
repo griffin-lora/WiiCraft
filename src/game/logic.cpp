@@ -9,10 +9,10 @@ using namespace game;
 
 std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) {
     glm::vec3 raycast_pos = cam.position;
-    glm::vec3 dir_vec = cam.look * 0.5f;
+    glm::vec3 dir_vec = cam.look * 0.01f;
     std::optional<math::vector3s32> current_chunk_pos = {};
     chunk::opt_ref current_chunk = {};
-    for (u8 i = 0; i < 40; i++) {
+    for (u8 i = 0; i < 256; i++) {
         auto raycast_chunk_pos = get_chunk_position_from_world_position(raycast_pos);
 
         if (current_chunk_pos.has_value()) {
@@ -31,7 +31,7 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
             current_chunk = chunks.at(raycast_chunk_pos);
         }
 
-        math::vector3s32 raycast_block_pos = floor_float_position(raycast_pos);
+        auto raycast_block_pos = floor_float_position<math::vector3s32>(raycast_pos);
         raycast_block_pos.x = math::mod(raycast_block_pos.x, chunk::SIZE);
         raycast_block_pos.y = math::mod(raycast_block_pos.y, chunk::SIZE);
         raycast_block_pos.z = math::mod(raycast_block_pos.z, chunk::SIZE);
@@ -61,7 +61,7 @@ static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::
         }
     }
 
-    math::vector3s32 block_pos = floor_float_position(pos);
+    auto block_pos = floor_float_position<math::vector3s32>(pos);
     block_pos.x = math::mod(block_pos.x, chunk::SIZE);
     block_pos.y = math::mod(block_pos.y, chunk::SIZE);
     block_pos.z = math::mod(block_pos.z, chunk::SIZE);

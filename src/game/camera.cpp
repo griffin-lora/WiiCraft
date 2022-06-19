@@ -35,6 +35,7 @@ void game::update_look(camera& cam) {
     f32 xz_length = cosf(cam.pitch);
     
     cam.look = {xz_length * cosf(cam.yaw), sinf(cam.pitch), xz_length * sinf(-cam.yaw)};
+	math::normalize(cam.look);
 }
 
 void game::update_needed(math::matrix view, math::matrix44 perspective, camera& cam) {
