@@ -42,15 +42,16 @@ namespace game {
     inline s32 get_world_coord_from_local_position(s32 local_coord, s32 chunk_coord) {
         return ((chunk_coord * chunk::SIZE) + local_coord);
     }
-    template<typename T>
-    inline T floor_float_position(const glm::vec3& position) {
+    template<typename O, typename T>
+    inline O floor_float_position(const T& position) {
         return {
-            floorf(position.x),
-            floorf(position.y),
-            floorf(position.z)
+            std::floor(position.x),
+            std::floor(position.y),
+            std::floor(position.z)
         };
     }
-    inline math::vector3s32 get_chunk_position_from_world_position(const glm::vec3& world_position) {
+    template<typename T>
+    inline math::vector3s32 get_chunk_position_from_world_position(const T& world_position) {
         return floor_float_position<math::vector3s32>(world_position / (f32)chunk::SIZE);
     }
 
@@ -89,7 +90,7 @@ namespace game {
         }
     }
 
-    void generate_blocks(chunk& chunk, const math::vector3s32& pos, u32 seed);
+    void generate_blocks(chunk& chunk, const math::vector3s32& pos);
 
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 

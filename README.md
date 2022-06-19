@@ -8,7 +8,6 @@ A Minecraft clone for the Wii
 
  - devkitPPC + portlibs
  - mksdcard or dosfstools
- - [PerlinNoise.hpp](https://raw.githubusercontent.com/Reputeless/PerlinNoise/a50dc1897b530b74f05fe8189c9397b8189f0fe6/PerlinNoise.hpp) (place in src/)
  - devkitPro tools (in $PATH for gxtexconv)
 
 #### Building

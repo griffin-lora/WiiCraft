@@ -1,7 +1,7 @@
 #include "chunk_core.hpp"
-#include "PerlinNoise.hpp"
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
+#include "glm/gtc/noise.hpp"
 
 using namespace game;
 
@@ -13,15 +13,14 @@ math::vector3u8 game::get_position_from_index(std::size_t index) {
     return { x, y, z };
 }
 
-void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos, u32 seed) {
-    siv::PerlinNoise noise(seed);
+void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 z = 0; z < chunk::SIZE; z++) {
-            auto world_x = game::get_world_coord_from_local_position(x, chunk_pos.x);
-            auto world_z = game::get_world_coord_from_local_position(z, chunk_pos.z);
-            auto height = noise.octave2D(world_x / 32.f, world_z / 32.f, 8);
+            f32 world_x = game::get_world_coord_from_local_position(x, chunk_pos.x);
+            f32 world_z = game::get_world_coord_from_local_position(z, chunk_pos.z);
+            auto height = glm::simplex(glm::vec2{ world_x / 32.f, world_z / 32.f }) * 0.5f;
 
-            s32 y_pos = (height * 24);
+            s32 y_pos = (height * 16);
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);

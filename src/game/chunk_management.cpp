@@ -57,7 +57,7 @@ void game::manage_chunks_around_camera(
                 stored_chunks.erase(pos);
             } else {
                 chunk.blocks.resize_without_copying(game::chunk::BLOCKS_COUNT);
-                game::generate_blocks(chunk, pos, 100);
+                game::generate_blocks(chunk, pos);
             }
 
             game::update_chunk_neighborhood(chunks, pos, chunk);
