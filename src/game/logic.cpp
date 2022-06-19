@@ -31,15 +31,18 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
             current_chunk = chunks.at(raycast_chunk_pos);
         }
 
-        auto raycast_block_pos = floor_float_position<math::vector3s32>(raycast_pos);
-        raycast_block_pos.x = math::mod(raycast_block_pos.x, chunk::SIZE);
-        raycast_block_pos.y = math::mod(raycast_block_pos.y, chunk::SIZE);
-        raycast_block_pos.z = math::mod(raycast_block_pos.z, chunk::SIZE);
+        auto raycast_block_pos = get_local_block_position(raycast_pos);
         auto index = get_index_from_position(raycast_block_pos);
         auto& block = current_chunk->get().blocks[index];
 
         if (block.tp != block::type::AIR) {
-            return raycast{ .pos = raycast_pos, .ch_pos = *current_chunk_pos, .ch = *current_chunk, .bl_pos = raycast_block_pos, .bl = block };
+            return raycast{
+                .pos = raycast_pos,
+                .ch_pos = *current_chunk_pos,
+                .ch = *current_chunk,
+                .bl_pos = raycast_block_pos,
+                .bl = block
+            };
         }
 
         raycast_pos += dir_vec;
@@ -48,25 +51,26 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
 }
 
 static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::map& chunks, const raycast& rc) {
-    auto look_axis_aligned_vec = get_camera_look_axis_aligned_vector<glm::vec3>(cam);
-
-    auto pos = rc.pos - look_axis_aligned_vec;
+    auto pos = rc.pos - cam.look;
 
     auto back_chunk_pos = get_chunk_position_from_world_position(pos);
     
     if (chunks.count(back_chunk_pos)) {
         auto& chunk = chunks.at(back_chunk_pos);
 
-        auto back_block_pos = floor_float_position<math::vector3s32>(pos);
-        back_block_pos.x = math::mod(back_block_pos.x, chunk::SIZE);
-        back_block_pos.y = math::mod(back_block_pos.y, chunk::SIZE);
-        back_block_pos.z = math::mod(back_block_pos.z, chunk::SIZE);
+        auto back_block_pos = get_local_block_position(pos);
 
         auto index = get_index_from_position(back_block_pos);
         auto& block = chunk.blocks[index];
 
         if (block.tp == block::type::AIR) {
-            return raycast{ .pos = pos, .ch_pos = back_chunk_pos, .ch = chunk, .bl_pos = back_block_pos, .bl = block };
+            return raycast{
+                .pos = pos,
+                .ch_pos = back_chunk_pos,
+                .ch = chunk,
+                .bl_pos = back_block_pos,
+                .bl = block
+            };
         }
     }
     return {};

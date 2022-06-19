@@ -2,17 +2,9 @@
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "glm/gtc/noise.hpp"
+#include "chunk_math.hpp"
 
 using namespace game;
-
-math::vector3u8 game::get_position_from_index(std::size_t index) {
-    uint z = index / (chunk::SIZE * chunk::SIZE);
-    index -= (z * chunk::SIZE * chunk::SIZE);
-    uint y = index / chunk::SIZE * chunk::SIZE;
-    uint x = index % chunk::SIZE * chunk::SIZE;
-    return { x, y, z };
-}
-
 void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 z = 0; z < chunk::SIZE; z++) {

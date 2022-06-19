@@ -1,6 +1,7 @@
 #pragma once
 #include "chunk.hpp"
 #include "block_core.hpp"
+#include "chunk_math.hpp"
 
 namespace game {
     template<block::face face>
@@ -32,28 +33,6 @@ namespace game {
     }
 
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
-
-
-    math::vector3u8 get_position_from_index(std::size_t index);
-    template<typename T>
-    inline std::size_t get_index_from_position(T position) {
-        return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
-    }
-    inline s32 get_world_coord_from_local_position(s32 local_coord, s32 chunk_coord) {
-        return ((chunk_coord * chunk::SIZE) + local_coord);
-    }
-    template<typename O, typename T>
-    inline O floor_float_position(const T& position) {
-        return {
-            std::floor(position.x),
-            std::floor(position.y),
-            std::floor(position.z)
-        };
-    }
-    template<typename T>
-    inline math::vector3s32 get_chunk_position_from_world_position(const T& world_position) {
-        return floor_float_position<math::vector3s32>(world_position / (f32)chunk::SIZE);
-    }
 
     template<typename F>
     void iterate_over_chunk_positions(F func) {

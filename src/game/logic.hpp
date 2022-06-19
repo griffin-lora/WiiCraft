@@ -3,6 +3,7 @@
 #include "chunk.hpp"
 #include "block.hpp"
 #include "cursor.hpp"
+#include "chunk_math.hpp"
 #include <optional>
 #include <tuple>
 

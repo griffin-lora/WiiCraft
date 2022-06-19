@@ -1,6 +1,7 @@
 #include "chunk_mesh_generation.hpp"
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
+#include "chunk_math.hpp"
 #include "dbg.hpp"
 #include <cstdio>
 
@@ -16,11 +17,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
         if (nb_chunk_opt.has_value()) {
             auto& nb_chunk = nb_chunk_opt->get();
 
-            auto nb_check_pos = get_face_offset_position<face, math::vector3s32>(pos);
-
-            nb_check_pos.x = math::mod(nb_check_pos.x, chunk::SIZE);
-            nb_check_pos.y = math::mod(nb_check_pos.y, chunk::SIZE);
-            nb_check_pos.z = math::mod(nb_check_pos.z, chunk::SIZE);
+            auto nb_check_pos = get_local_block_position(get_face_offset_position<face, math::vector3s32>(pos));
 
             auto index = get_index_from_position(nb_check_pos);
 
