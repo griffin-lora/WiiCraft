@@ -48,27 +48,28 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
 }
 
 static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::map& chunks, const raycast& rc) {
-    auto chunk = &rc.ch;
+    auto look_axis_aligned_vec = get_camera_look_axis_aligned_vector<glm::vec3>(cam);
 
-    auto pos = rc.pos - cam.look;
-    auto chunk_pos = get_chunk_position_from_world_position(pos);
+    auto pos = rc.pos - look_axis_aligned_vec;
 
-    if (chunk_pos != rc.ch_pos) {
-        if (!chunks.count(chunk_pos)) {
-            return {};
-        } else {
-            chunk = &chunks.at(chunk_pos);
+    auto back_chunk_pos = get_chunk_position_from_world_position(pos);
+    
+    if (chunks.count(back_chunk_pos)) {
+        auto& chunk = chunks.at(back_chunk_pos);
+
+        auto back_block_pos = floor_float_position<math::vector3s32>(pos);
+        back_block_pos.x = math::mod(back_block_pos.x, chunk::SIZE);
+        back_block_pos.y = math::mod(back_block_pos.y, chunk::SIZE);
+        back_block_pos.z = math::mod(back_block_pos.z, chunk::SIZE);
+
+        auto index = get_index_from_position(back_block_pos);
+        auto& block = chunk.blocks[index];
+
+        if (block.tp == block::type::AIR) {
+            return raycast{ .pos = pos, .ch_pos = back_chunk_pos, .ch = chunk, .bl_pos = back_block_pos, .bl = block };
         }
     }
-
-    auto block_pos = floor_float_position<math::vector3s32>(pos);
-    block_pos.x = math::mod(block_pos.x, chunk::SIZE);
-    block_pos.y = math::mod(block_pos.y, chunk::SIZE);
-    block_pos.z = math::mod(block_pos.z, chunk::SIZE);
-    auto index = get_index_from_position(block_pos);
-    auto& block = chunk->blocks[index];
-
-    return raycast{ .pos = pos, .ch_pos = chunk_pos, .ch = *chunk, .bl_pos = block_pos, .bl = block };
+    return {};
 }
 
 void game::update_from_input(
@@ -85,6 +86,22 @@ void game::update_from_input(
     u32 buttons_held = input::get_buttons_held(0);
     u32 buttons_down = input::get_buttons_down(0);
     if (buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
+
+    if (raycast.has_value()) {
+        if (buttons_down & WPAD_BUTTON_A) {
+            raycast->bl = { .tp = block::type::AIR };
+            raycast->ch.modified = true;
+            add_chunk_mesh_update(raycast->ch, raycast->bl_pos);
+        }
+        if (buttons_down & WPAD_BUTTON_B) {
+            auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);
+            if (backtracked_raycast.has_value()) {
+                backtracked_raycast->bl = { .tp = block::type::WOOD_PLANKS };
+                backtracked_raycast->ch.modified = true;
+                add_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
+            }
+        }
+    }
 
     auto joystick_input_vector = input::get_joystick_input_vector();
     auto plus_minus_input_scalar = input::get_plus_minus_input_scalar(buttons_held);
@@ -119,21 +136,5 @@ void game::update_from_input(
         cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
     } else {
         cursor.tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
-    }
-
-    if (raycast.has_value()) {
-        if (buttons_down & WPAD_BUTTON_A) {
-            raycast->bl = { .tp = block::type::AIR };
-            raycast->ch.modified = true;
-            add_chunk_mesh_update(raycast->ch, raycast->bl_pos);
-        }
-        if (buttons_down & WPAD_BUTTON_B) {
-            auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);
-            if (backtracked_raycast.has_value()) {
-                backtracked_raycast->bl = { .tp = block::type::WOOD_PLANKS };
-                backtracked_raycast->ch.modified = true;
-                add_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
-            }
-        }
     }
 }
