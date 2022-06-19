@@ -20,12 +20,12 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
 
                 if (world_y < y_pos) {
                     if (world_y < (y_pos - 2)) {
-                        chunk.blocks[index] = { .tp = block::type::STONE };
+                        chunk.blocks[index] = { .tp = block::type::DEBUG };
                     } else {
-                        chunk.blocks[index] = { .tp = block::type::DIRT };
+                        chunk.blocks[index] = { .tp = block::type::DEBUG };
                     }
                 } else if (world_y == y_pos) {
-                    chunk.blocks[index] = { .tp = block::type::GRASS };
+                    chunk.blocks[index] = { .tp = block::type::DEBUG };
                 } else {
                     chunk.blocks[index] = { .tp = block::type::AIR };
                 }

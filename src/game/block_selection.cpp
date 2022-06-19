@@ -1,6 +1,7 @@
 #include "block_selection.hpp"
 #include "face_mesh_generation.hpp"
-#include "face_mesh_generation.inl"
+#include "face_mesh_generation_core.hpp"
+#include "face_mesh_generation_core.inl"
 
 using namespace game;
 
