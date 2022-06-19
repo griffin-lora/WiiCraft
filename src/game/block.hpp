@@ -2,6 +2,10 @@
 #include <gctypes.h>
 #include <utility>
 
+/**
+ * To add a block first, add the type to this list
+ * Then add its functionality in block_type.hpp
+ */
 #define EVAL_MACRO_ON_BLOCK_TYPES(macro) \
 macro(AIR) \
 macro(DEBUG) \
@@ -23,14 +27,6 @@ namespace game {
             CENTER
         };
         
-        // TODO: Fix this mess
-        /**
-         * To add a block type:
-         * Add it to the enum
-         * Add it to the is_block_visible function
-         * Add it to the get_face_vertex_count function
-         * Add it to the add_face_vertices function
-         */
         #define EVAL_BLOCK_TYPE_ENUM(name) name,
         enum class type : u8 {
             EVAL_MACRO_ON_BLOCK_TYPES(EVAL_BLOCK_TYPE_ENUM)
