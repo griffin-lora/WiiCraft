@@ -4,7 +4,7 @@
 
 /**
  * To add a block first, add the type to this list
- * Then add its functionality in block_type.hpp
+ * Then add its functionality in block_functionality.hpp
  */
 #define EVAL_MACRO_ON_BLOCK_TYPES(macro) \
 macro(AIR) \

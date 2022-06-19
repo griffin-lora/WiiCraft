@@ -5,7 +5,7 @@
 
 namespace game {
     template<block::type type>
-    struct block_type {
+    struct block_functionality {
         static constexpr bool is_visible() { return false; }
 
         template<block::face face>
@@ -24,7 +24,7 @@ namespace game {
     }
 
     template<typename T>
-    struct cube_block_type {
+    struct cube_block_functionality {
         static constexpr bool is_visible() { return true; }
         
         template<block::face face>
@@ -48,7 +48,7 @@ namespace game {
     };
 
     template<>
-    struct block_type<block::type::DEBUG> : public cube_block_type<block_type<block::type::DEBUG>> {
+    struct block_functionality<block::type::DEBUG> : public cube_block_functionality<block_functionality<block::type::DEBUG>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
             static_assert(face != block::face::CENTER, "Center face is not allowed.");
@@ -65,7 +65,7 @@ namespace game {
     };
 
     template<>
-    struct block_type<block::type::GRASS> : public cube_block_type<block_type<block::type::GRASS>> {
+    struct block_functionality<block::type::GRASS> : public cube_block_functionality<block_functionality<block::type::GRASS>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
             static_assert(face != block::face::CENTER, "Center face is not allowed.");
@@ -82,7 +82,7 @@ namespace game {
     };
 
     template<>
-    struct block_type<block::type::DIRT> : public cube_block_type<block_type<block::type::DIRT>> {
+    struct block_functionality<block::type::DIRT> : public cube_block_functionality<block_functionality<block::type::DIRT>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
             return { 2, 0 };
@@ -90,7 +90,7 @@ namespace game {
     };
 
     template<>
-    struct block_type<block::type::STONE> : public cube_block_type<block_type<block::type::STONE>> {
+    struct block_functionality<block::type::STONE> : public cube_block_functionality<block_functionality<block::type::STONE>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
             return { 1, 0 };
@@ -98,7 +98,7 @@ namespace game {
     };
 
     template<>
-    struct block_type<block::type::WOOD_PLANKS> : public cube_block_type<block_type<block::type::WOOD_PLANKS>> {
+    struct block_functionality<block::type::WOOD_PLANKS> : public cube_block_functionality<block_functionality<block::type::WOOD_PLANKS>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
             return { 4, 0 };

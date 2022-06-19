@@ -1,9 +1,9 @@
 #pragma once
 #include "chunk_core.hpp"
-#include "block_type.hpp"
+#include "block_functionality.hpp"
 
 namespace game {
-    #define EVAL_GET_FACE_VERTEX_COUNT_CASE(tp) case block::type::tp: return block_type<block::type::tp>::get_face_vertex_count<face>();
+    #define EVAL_GET_FACE_VERTEX_COUNT_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::get_face_vertex_count<face>();
 
     template<block::face face>
     std::size_t get_face_vertex_count(block::type type) {
@@ -17,7 +17,7 @@ namespace game {
      * Vf::call(u8 x, u8 y, u8 z, u8 u, u8 v)
      */
 
-    #define EVAL_ADD_FACE_VERTICES_CASE(tp) case block::type::tp: block_type<block::type::tp>::add_face_vertices<face, Vf>(local_position); break;
+    #define EVAL_ADD_FACE_VERTICES_CASE(tp) case block::type::tp: block_functionality<block::type::tp>::add_face_vertices<face, Vf>(local_position); break;
 
     template<block::face face, typename Vf>
     void add_face_vertices(math::vector3u8 local_position, block::type type) {

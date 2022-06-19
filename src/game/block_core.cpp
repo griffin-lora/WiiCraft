@@ -1,9 +1,9 @@
 #include "block_core.hpp"
-#include "block_type.hpp"
+#include "block_functionality.hpp"
 
 using namespace game;
 
-#define EVAL_IS_BLOCK_VISIBLE_CASE(tp) case block::type::tp: return block_type<block::type::tp>::is_visible();
+#define EVAL_IS_BLOCK_VISIBLE_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::is_visible();
 
 bool game::is_block_visible(block::type type) {
     switch (type) {
