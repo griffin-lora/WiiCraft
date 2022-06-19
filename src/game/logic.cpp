@@ -7,9 +7,12 @@
 
 using namespace game;
 
+// Yes I know I should be using DDA algorithm but I couldnt FUCKING GET IT TO WORK IN 3D
+constexpr f32 raycast_step_scalar = 0.01f;
+
 std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) {
     glm::vec3 raycast_pos = cam.position;
-    glm::vec3 dir_vec = cam.look * 0.01f;
+    glm::vec3 dir_vec = cam.look * raycast_step_scalar;
     std::optional<math::vector3s32> current_chunk_pos = {};
     chunk::opt_ref current_chunk = {};
     for (u8 i = 0; i < 256; i++) {
@@ -51,28 +54,43 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
 }
 
 static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::map& chunks, const raycast& rc) {
-    auto pos = rc.pos - cam.look;
+    glm::vec3 dir_vec = cam.look * raycast_step_scalar;
 
-    auto back_chunk_pos = get_chunk_position_from_world_position(pos);
+    auto inp_raycast_world_block_pos = floor_float_position<math::vector3s32>(rc.pos);
+
+    glm::vec3 pos = rc.pos;
+
+    for (u8 i = 0; i < 256; i++) {
+        auto world_block_pos = floor_float_position<math::vector3s32>(pos);
+
+        if (world_block_pos != inp_raycast_world_block_pos) {
+            auto back_chunk_pos = get_chunk_position_from_world_position(pos);
     
-    if (chunks.count(back_chunk_pos)) {
-        auto& chunk = chunks.at(back_chunk_pos);
+            if (chunks.count(back_chunk_pos)) {
+                auto& chunk = chunks.at(back_chunk_pos);
 
-        auto back_block_pos = get_local_block_position(pos);
+                auto back_block_pos = get_local_block_position(pos);
 
-        auto index = get_index_from_position(back_block_pos);
-        auto& block = chunk.blocks[index];
+                auto index = get_index_from_position(back_block_pos);
+                auto& block = chunk.blocks[index];
 
-        if (block.tp == block::type::AIR) {
-            return raycast{
-                .pos = pos,
-                .ch_pos = back_chunk_pos,
-                .ch = chunk,
-                .bl_pos = back_block_pos,
-                .bl = block
-            };
+                if (block.tp == block::type::AIR) {
+                    return raycast{
+                        .pos = pos,
+                        .ch_pos = back_chunk_pos,
+                        .ch = chunk,
+                        .bl_pos = back_block_pos,
+                        .bl = block
+                    };
+                }
+            }
+            return {};
         }
+
+        pos -= dir_vec;
     }
+
+    
     return {};
 }
 
