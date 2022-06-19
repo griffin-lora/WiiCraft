@@ -2,6 +2,14 @@
 #include <gctypes.h>
 #include <utility>
 
+#define EVAL_MACRO_ON_BLOCK_TYPES(macro) \
+macro(AIR) \
+macro(DEBUG) \
+macro(GRASS) \
+macro(STONE) \
+macro(DIRT) \
+macro(WOOD_PLANKS)
+
 namespace game {
     
     struct block {
@@ -23,13 +31,9 @@ namespace game {
          * Add it to the get_face_vertex_count function
          * Add it to the add_face_vertices function
          */
+        #define EVAL_BLOCK_TYPE_ENUM(name) name,
         enum class type : u8 {
-            AIR,
-            DEBUG,
-            GRASS,
-            STONE,
-            DIRT,
-            WOOD_PLANKS
+            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_BLOCK_TYPE_ENUM)
         };
         type tp;
         // This is a cache of which faces the block needs to create face vertices for.
