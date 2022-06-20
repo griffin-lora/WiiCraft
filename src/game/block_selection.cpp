@@ -7,6 +7,11 @@ using namespace game;
 
 static void init_drawing() {
 	GX_SetNumChans(1);
+
+    GX_SetChanCtrl(GX_COLOR0A0, GX_ENABLE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT0, GX_DF_CLAMP, GX_AF_NONE);
+	GX_SetChanAmbColor(GX_COLOR0A0, { 0xff, 0xff, 0xff, 0x7f });
+	GX_SetChanMatColor(GX_COLOR0A0, { 0xff, 0xff, 0xff, 0x7f });
+
 	GX_SetNumTexGens(0);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
 	GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);

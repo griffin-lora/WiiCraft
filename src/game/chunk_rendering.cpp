@@ -7,14 +7,18 @@ void game::init_chunk_drawing() {
 	// set number of rasterized color channels
 	GX_SetNumChans(1);
 
+	GX_SetChanCtrl(GX_COLOR0A0, GX_ENABLE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT0, GX_DF_CLAMP, GX_AF_NONE);
+	GX_SetChanAmbColor(GX_COLOR0A0, { 0x80, 0x80, 0x80, 0xff });
+	GX_SetChanMatColor(GX_COLOR0A0, { 0x80, 0x80, 0x80, 0xff });
+
 	//set number of textures to generate
 	GX_SetNumTexGens(1);
 
 	// setup texture coordinate generation
 	// args: texcoord slot 0-7, matrix type, source to generate texture coordinates from, matrix to use
-	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
+	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_TEX0, GX_IDENTITY);
 
-	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
 	//
