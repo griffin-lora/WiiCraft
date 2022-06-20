@@ -83,7 +83,8 @@ int main(int argc, char** argv) {
 	bool first_frame = true;
 
 	game::chunk::map chunks;
-	// This are variables whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
+	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
+	ext::data_array<game::chunk::vertex> vertices(game::chunk::MAX_VERTEX_COUNT + 0x30);
 	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
 	game::stored_chunk::map stored_chunks;
 

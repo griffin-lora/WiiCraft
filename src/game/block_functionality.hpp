@@ -12,7 +12,7 @@ namespace game {
         static constexpr std::size_t get_face_vertex_count() { return 0; }
 
         template<block::face face, typename Vf>
-        static constexpr void add_face_vertices(math::vector3u8 local_position) { }
+        static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_position) { }
     };
 
     inline math::vector3u8 get_local_pos_offset(math::vector3u8 local_pos) {
@@ -31,7 +31,7 @@ namespace game {
         static constexpr std::size_t get_face_vertex_count() { if constexpr (face != block::face::CENTER) return 4; return 0; }
 
         template<block::face face, typename Vf>
-        static constexpr void add_face_vertices(math::vector3u8 local_pos) {
+        static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
             static_assert(face != block::face::CENTER, "Center face is not allowed.");
             auto uv_pos = T::template get_uv_pos<face>();
             call_face_func_for<face, void>(
@@ -42,7 +42,7 @@ namespace game {
                 add_cube_right_vertices<Vf>,
                 add_cube_left_vertices<Vf>,
                 []() {},
-                local_pos, get_local_pos_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos)
+                vf, local_pos, get_local_pos_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos)
             );
         }
     };

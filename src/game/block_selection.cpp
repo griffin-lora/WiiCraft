@@ -36,7 +36,7 @@ void block_selection::draw(const std::optional<raycast>& raycast) const {
 }
 
 struct block_selection_vert_func {
-    static inline void call(u8 x, u8 y, u8 z, u8, u8) {
+    inline void operator()(u8 x, u8 y, u8 z, u8, u8) {
         GX_Position3u8(x, y, z);
         GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
     }
@@ -57,7 +57,8 @@ void block_selection::update_mesh(const math::matrix view, const math::vector3s3
 
     disp_list.write_into([&bl_pos, type, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
-        game::add_block_vertices<block_selection_vert_func>(bl_pos, type);
+        block_selection_vert_func vf;
+        game::add_block_vertices(vf, bl_pos, type);
         GX_End();
     });
 }
