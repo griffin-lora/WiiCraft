@@ -12,8 +12,13 @@ namespace game {
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { return 0; }
 
+        static constexpr std::size_t get_general_vertex_count() { return 0; }
+
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_position) { }
+
+        template<typename Vf>
+        static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_position) { }
     };
 
     constexpr u8 block_size = 4;
@@ -35,6 +40,8 @@ namespace game {
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { return 4; }
 
+        static constexpr std::size_t get_general_vertex_count() { return 0; }
+
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
             auto uv_pos = T::template get_uv_pos<face>();
@@ -50,6 +57,9 @@ namespace game {
                 vf, local_pos, get_local_pos_offset(local_pos, block_size), uv_pos, get_uv_position_offset(uv_pos, block_size)
             );
         }
+
+        template<typename Vf>
+        static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_pos) { }
     };
 
     template<>
@@ -116,6 +126,8 @@ namespace game {
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { return 4; }
 
+        static constexpr std::size_t get_general_vertex_count() { return 0; }
+
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
             local_pos *= block_size;
@@ -157,5 +169,8 @@ namespace game {
                 );
             }
         }
+
+        template<typename Vf>
+        static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_pos) { }
     };
 }
