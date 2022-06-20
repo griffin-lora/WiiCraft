@@ -122,27 +122,46 @@ namespace game {
 
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
-            static_assert(face != block::face::CENTER, "Center face is not allowed.");
-            math::vector2u8 uv_pos = { 5, 0 };
-            uv_pos *= block_size;
             local_pos *= block_size;
+
             auto local_pos_offset = local_pos;
             local_pos_offset.x += block_size;
             local_pos_offset.y += half_block_size;
             local_pos_offset.z += block_size;
-            auto uv_pos_offset = uv_pos;
-            uv_pos_offset.x += block_size;
-            uv_pos_offset.y += half_block_size;
-            call_face_func_for<face, void>(
-                add_cube_front_vertices<Vf>,
-                add_cube_back_vertices<Vf>,
-                add_cube_top_vertices<Vf>,
-                add_cube_bottom_vertices<Vf>,
-                add_cube_right_vertices<Vf>,
-                add_cube_left_vertices<Vf>,
-                []() {},
-                vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
-            );
+            if constexpr (face == block::face::BOTTOM || face == block::face::TOP) {
+                math::vector2u8 uv_pos = { 6, 0 };
+                uv_pos *= block_size;
+                auto uv_pos_offset = get_uv_position_offset(uv_pos, block_size);
+
+                call_face_func_for<face, void>(
+                    []() {},
+                    []() {},
+                    add_cube_top_vertices<Vf>,
+                    add_cube_bottom_vertices<Vf>,
+                    []() {},
+                    []() {},
+                    []() {},
+                    vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
+                );
+            } else {
+                math::vector2u8 uv_pos = { 5, 0 };
+                uv_pos *= block_size;
+                
+                auto uv_pos_offset = uv_pos;
+                uv_pos_offset.x += block_size;
+                uv_pos_offset.y += half_block_size;
+                
+                call_face_func_for<face, void>(
+                    add_cube_front_vertices<Vf>,
+                    add_cube_back_vertices<Vf>,
+                    []() {},
+                    []() {},
+                    add_cube_right_vertices<Vf>,
+                    add_cube_left_vertices<Vf>,
+                    []() {},
+                    vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
+                );
+            }
         }
     };
 }
