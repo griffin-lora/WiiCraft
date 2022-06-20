@@ -10,6 +10,9 @@ using namespace game;
 
 template<block::face face>
 static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::type type) {
+    if (get_face_vertex_count<face>(type) == 0) {
+        return false;
+    }
     auto check_pos = get_face_offset_position<face>(pos);
     if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
         // Since the position is outside of the chunk, we need to check the neighbor chunk
