@@ -57,7 +57,6 @@ void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32&
 
 template<block::face face>
 static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
-    static_assert(face != block::face::CENTER, "Center face is not allowed.");
     constexpr auto edge_coord = (chunk::SIZE - 1);
     return call_face_func_for<face, bool>(
         [&]() { return pos.x == edge_coord; },
@@ -65,8 +64,7 @@ static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
         [&]() { return pos.y == edge_coord; },
         [&]() { return pos.y == 0; },
         [&]() { return pos.z == edge_coord; },
-        [&]() { return pos.z == 0; },
-        []() {}
+        [&]() { return pos.z == 0; }
     );
 }
 

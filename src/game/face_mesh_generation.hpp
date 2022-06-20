@@ -36,7 +36,5 @@ namespace game {
         add_face_vertices<block::face::BOTTOM, Vf>(vf, local_position, type);
         add_face_vertices<block::face::RIGHT, Vf>(vf, local_position, type);
         add_face_vertices<block::face::LEFT, Vf>(vf, local_position, type);
-        // TODO: make this work
-        // add_face_vertices<block::face::CENTER, Vf>(local_position, type);
     }
 };

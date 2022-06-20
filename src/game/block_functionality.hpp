@@ -33,11 +33,10 @@ namespace game {
         static constexpr bool is_solid() { return true; }
         
         template<block::face face>
-        static constexpr std::size_t get_face_vertex_count() { if constexpr (face != block::face::CENTER) return 4; return 0; }
+        static constexpr std::size_t get_face_vertex_count() { return 4; }
 
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
-            static_assert(face != block::face::CENTER, "Center face is not allowed.");
             auto uv_pos = T::template get_uv_pos<face>();
             uv_pos *= block_size;
             local_pos *= block_size;
@@ -48,7 +47,6 @@ namespace game {
                 add_cube_bottom_vertices<Vf>,
                 add_cube_right_vertices<Vf>,
                 add_cube_left_vertices<Vf>,
-                []() {},
                 vf, local_pos, get_local_pos_offset(local_pos, block_size), uv_pos, get_uv_position_offset(uv_pos, block_size)
             );
         }
@@ -58,15 +56,14 @@ namespace game {
     struct block_functionality<block::type::DEBUG> : public cube_block_functionality<block_functionality<block::type::DEBUG>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
-            static_assert(face != block::face::CENTER, "Center face is not allowed.");
-            return call_face_func_for<face, math::vector2u8>(
-                []() -> math::vector2u8 { return { 0, 0 }; },
-                []() -> math::vector2u8 { return { 1, 0 }; },
-                []() -> math::vector2u8 { return { 2, 0 }; },
-                []() -> math::vector2u8 { return { 3, 0 }; },
-                []() -> math::vector2u8 { return { 4, 0 }; },
-                []() -> math::vector2u8 { return { 5, 0 }; },
-                []() {}
+            using v2u8 = math::vector2u8;
+            return call_face_func_for<face, v2u8>(
+                []() { return v2u8{ 0, 0 }; },
+                []() { return v2u8{ 1, 0 }; },
+                []() { return v2u8{ 2, 0 }; },
+                []() { return v2u8{ 3, 0 }; },
+                []() { return v2u8{ 4, 0 }; },
+                []() { return v2u8{ 5, 0 }; }
             );
         }
     };
@@ -75,15 +72,14 @@ namespace game {
     struct block_functionality<block::type::GRASS> : public cube_block_functionality<block_functionality<block::type::GRASS>> {
         template<block::face face>
         static constexpr math::vector2u8 get_uv_pos() {
-            static_assert(face != block::face::CENTER, "Center face is not allowed.");
-            return call_face_func_for<face, math::vector2u8>(
-                []() -> math::vector2u8 { return { 3, 0 }; },
-                []() -> math::vector2u8 { return { 3, 0 }; },
-                []() -> math::vector2u8 { return { 0, 0 }; },
-                []() -> math::vector2u8 { return { 2, 0 }; },
-                []() -> math::vector2u8 { return { 3, 0 }; },
-                []() -> math::vector2u8 { return { 3, 0 }; },
-                []() {}
+            using v2u8 = math::vector2u8;
+            return call_face_func_for<face, v2u8>(
+                []() { return v2u8{ 3, 0 }; },
+                []() { return v2u8{ 3, 0 }; },
+                []() { return v2u8{ 0, 0 }; },
+                []() { return v2u8{ 2, 0 }; },
+                []() { return v2u8{ 3, 0 }; },
+                []() { return v2u8{ 3, 0 }; }
             );
         }
     };
@@ -118,7 +114,7 @@ namespace game {
         static constexpr bool is_solid() { return false; }
         
         template<block::face face>
-        static constexpr std::size_t get_face_vertex_count() { if constexpr (face != block::face::CENTER) return 4; return 0; }
+        static constexpr std::size_t get_face_vertex_count() { return 4; }
 
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
@@ -140,7 +136,6 @@ namespace game {
                     add_cube_bottom_vertices<Vf>,
                     []() {},
                     []() {},
-                    []() {},
                     vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
                 );
             } else {
@@ -158,7 +153,6 @@ namespace game {
                     []() {},
                     add_cube_right_vertices<Vf>,
                     add_cube_left_vertices<Vf>,
-                    []() {},
                     vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
                 );
             }

@@ -24,8 +24,7 @@ namespace game {
             TOP, // +y
             BOTTOM, // -z
             RIGHT, // +z
-            LEFT, // -z
-            CENTER
+            LEFT // -z
         };
         
         #define EVAL_BLOCK_TYPE_ENUM(name) name,

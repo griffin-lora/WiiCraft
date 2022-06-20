@@ -6,29 +6,25 @@
 namespace game {
     template<block::face face>
     constexpr chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
-        static_assert(face != block::face::CENTER, "Center face is not allowed.");
         return call_face_func_for<face, chunk::const_opt_ref>(
             [&]() { return nh.front; },
             [&]() { return nh.back; },
             [&]() { return nh.top; },
             [&]() { return nh.bottom; },
             [&]() { return nh.right; },
-            [&]() { return nh.left; },
-            []() {}
+            [&]() { return nh.left; }
         );
     }
 
     template<block::face face>
     constexpr chunk::opt_ref get_neighbor(chunk::neighborhood& nh) {
-        static_assert(face != block::face::CENTER, "Center face is not allowed.");
         return call_face_func_for<face, chunk::opt_ref>(
             [&]() { return nh.front; },
             [&]() { return nh.back; },
             [&]() { return nh.top; },
             [&]() { return nh.bottom; },
             [&]() { return nh.right; },
-            [&]() { return nh.left; },
-            []() {}
+            [&]() { return nh.left; }
         );
     }
 
