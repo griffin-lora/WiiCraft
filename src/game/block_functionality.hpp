@@ -1,11 +1,15 @@
 #pragma once
 #include "block.hpp"
-#include "block_core.hpp"
+#include "util.hpp"
 #include "face_mesh_generation_core.hpp"
+#include "block_core.hpp"
 
 namespace game {
     template<block::type type>
     struct block_functionality {
+        template<block::face face>
+        static constexpr bool is_face_visible(block::type) { return false; }
+
         static constexpr bool is_visible() { return false; }
         static constexpr bool is_solid() { return false; }
 
@@ -15,10 +19,10 @@ namespace game {
         static constexpr std::size_t get_general_vertex_count() { return 0; }
 
         template<block::face face, typename Vf>
-        static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_position) { }
+        static constexpr void add_face_vertices(Vf&, math::vector3u8) { }
 
         template<typename Vf>
-        static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_position) { }
+        static constexpr void add_general_vertices(Vf&, math::vector3u8) { }
     };
 
     constexpr u8 block_size = 4;
@@ -34,6 +38,9 @@ namespace game {
 
     template<typename T>
     struct cube_block_functionality {
+        template<block::face face>
+        static inline bool is_face_visible(block::type tp) { return is_block_solid(tp); }
+
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_solid() { return true; }
         
@@ -120,6 +127,9 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::STONE_SLAB> {
+        template<block::face face>
+        static inline bool is_face_visible(block::type tp) { return is_block_solid(tp) || tp == block::type::STONE_SLAB; }
+
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_solid() { return false; }
         

@@ -3,6 +3,7 @@
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
 #include "chunk_math.hpp"
+#include "is_block_face_visible.hpp"
 #include "dbg.hpp"
 #include <cstdio>
 
@@ -26,7 +27,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
             auto index = get_index_from_position(nb_check_pos);
 
             auto& block = nb_chunk.blocks[index];
-            if (is_block_solid(block.tp)) {
+            if (is_block_face_visible<face>(type, block.tp)) {
                 return false;
             }
         } else {
@@ -36,7 +37,7 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
         return true;
     }
     auto check_block_type = chunk.blocks[get_index_from_position(check_pos)].tp;
-    if (is_block_solid(check_block_type)) {
+    if (is_block_face_visible<face>(type, check_block_type)) {
         return false;
     } else {
         return true;
@@ -65,16 +66,13 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         auto type = block.tp;
         if (is_block_visible(type)) {
             if (get_general_vertex_count(type) != 0) {
-                bool should_render_general = false;
-                should_render_general |= add_needed_face_vertices<block::face::FRONT>(chunk, vf, pos, type);
-                should_render_general |= add_needed_face_vertices<block::face::BACK>(chunk, vf, pos, type);
-                should_render_general |= add_needed_face_vertices<block::face::TOP>(chunk, vf, pos, type);
-                should_render_general |= add_needed_face_vertices<block::face::BOTTOM>(chunk, vf, pos, type);
-                should_render_general |= add_needed_face_vertices<block::face::RIGHT>(chunk, vf, pos, type);
-                should_render_general |= add_needed_face_vertices<block::face::LEFT>(chunk, vf, pos, type);
-                if (should_render_general) {
-                    add_general_vertices(vf, pos, type);
-                }
+                add_needed_face_vertices<block::face::FRONT>(chunk, vf, pos, type);
+                add_needed_face_vertices<block::face::BACK>(chunk, vf, pos, type);
+                add_needed_face_vertices<block::face::TOP>(chunk, vf, pos, type);
+                add_needed_face_vertices<block::face::BOTTOM>(chunk, vf, pos, type);
+                add_needed_face_vertices<block::face::RIGHT>(chunk, vf, pos, type);
+                add_needed_face_vertices<block::face::LEFT>(chunk, vf, pos, type);
+                add_general_vertices(vf, pos, type);
             } else {
                 add_needed_face_vertices<block::face::FRONT>(chunk, vf, pos, type);
                 add_needed_face_vertices<block::face::BACK>(chunk, vf, pos, type);
