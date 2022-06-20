@@ -20,6 +20,7 @@ namespace game {
 
         struct vertex {
             math::vector3u8 pos;
+            math::vector3s8 norm;
             math::vector2u8 uv;
         };
 

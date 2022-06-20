@@ -50,7 +50,7 @@ void block_selection::update_mesh(const math::matrix view, const math::vector3s3
 
     disp_list.write_into([&bl_pos, type, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
-        auto vf = [](u8 x, u8 y, u8 z, u8, u8) {
+        auto vf = [](u8 x, u8 y, u8 z, s8, s8, s8, u8, u8) {
             GX_Position3u8(x, y, z);
             GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
         };

@@ -14,7 +14,7 @@ namespace game {
     }
 
     /** Vf stands for a vertex function type
-     * vf(u8 x, u8 y, u8 z, u8 u, u8 v)
+     * vf(u8 x, u8 y, u8 z, s8 nx, s8 ny, s8 nz, u8 u, u8 v)
      */
 
     #define EVAL_ADD_FACE_VERTICES_CASE(tp) case block::type::tp: block_functionality<block::type::tp>::add_face_vertices<face, Vf>(vf, local_position); break;

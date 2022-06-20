@@ -74,9 +74,10 @@ static void add_needed_face_vertices(const chunk& chunk, Vf& vf, math::vector3u8
 
 void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
     auto vert_it = building_verts.begin();
-    auto vf = [&vert_it](u8 x, u8 y, u8 z, u8 u, u8 v) {
+    auto vf = [&vert_it](u8 x, u8 y, u8 z, s8 nx, s8 ny, s8 nz, u8 u, u8 v) {
         *vert_it++ = {
             .pos = { x, y, z },
+            .norm = { nx, ny, nz },
             .uv = { u, v }
         };
     };
@@ -104,6 +105,7 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
     std::size_t disp_list_size = (
 		4 + // GX_Begin
 		vertex_count * 3 + // GX_Position3u8
+        vertex_count * 3 + // GX_Normal3s8
 		vertex_count * 2 + // GX_TexCoord2u8
 		1 // GX_End
 	);
@@ -115,6 +117,7 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
 
         for (auto it = building_verts.begin(); it != vert_it; ++it) {
             GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
+            GX_Normal3s8(it->norm.x, it->norm.y, it->norm.z);
             GX_TexCoord2u8(it->uv.x, it->uv.y);
         }
         
