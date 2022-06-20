@@ -84,8 +84,7 @@ int main(int argc, char** argv) {
 
 	game::chunk::map chunks;
 	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
-	ext::data_array<game::chunk::vertex> vertices(game::chunk::MAX_VERTEX_COUNT + 0x30);
-	ext::data_array<game::block::face_cache> face_caches(game::chunk::BLOCKS_COUNT);
+	ext::data_array<game::chunk::vertex> building_vertices(game::chunk::MAX_VERTEX_COUNT + 0x30);
 	game::stored_chunk::map stored_chunks;
 
 	input::state inp;
@@ -111,7 +110,7 @@ int main(int argc, char** argv) {
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(chunks, face_caches);
+		game::update_chunks(chunks, building_vertices);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);

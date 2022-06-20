@@ -106,7 +106,7 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
 }
 
-void game::update_chunks(chunk::map& chunks, ext::data_array<block::face_cache>& face_caches) {
+void game::update_chunks(chunk::map& chunks, ext::data_array<chunk::vertex>& building_vertices) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
@@ -117,7 +117,7 @@ void game::update_chunks(chunk::map& chunks, ext::data_array<block::face_cache>&
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_mesh) {
             chunk.update_mesh = false;
-            game::update_mesh(chunk, face_caches);
+            game::update_mesh(chunk, building_vertices);
             break;
         }
     }

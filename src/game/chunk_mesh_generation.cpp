@@ -41,43 +41,25 @@ static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::t
 }
 
 template<block::face face>
-static constexpr bool& get_face_cache_flag(block::face_cache& face_cache) {
-    static_assert(face != block::face::CENTER, "Center face is not allowed.");
-    return call_face_func_for<face, bool&>(
-        [](auto& c) -> bool& { return c.front; },
-        [](auto& c) -> bool& { return c.back; },
-        [](auto& c) -> bool& { return c.top; },
-        [](auto& c) -> bool& { return c.bottom; },
-        [](auto& c) -> bool& { return c.right; },
-        [](auto& c) -> bool& { return c.left; },
-        []() {},
-        face_cache
-    );
-}
-
-template<block::face face>
-static std::size_t get_needed_face_vertex_count(const chunk& chunk, ext::data_array<game::block::face_cache>& face_caches, math::vector3u8 pos, block::type type) {
-    auto& face_cache_flag = get_face_cache_flag<face>(face_caches[get_index_from_position(pos)]);
+static std::size_t get_needed_face_vertex_count(const chunk& chunk, math::vector3u8 pos, block::type type) {
     if (should_render_face<face>(chunk, pos, type)) {
-        face_cache_flag = true;
         return get_face_vertex_count<face>(type);
     } else {
-        face_cache_flag = false;
         return 0;
     }
 }
 
-static std::size_t get_chunk_vertex_count(const chunk& chunk, ext::data_array<game::block::face_cache>& face_caches) {
+static std::size_t get_chunk_vertex_count(const chunk& chunk) {
     std::size_t vertex_count = 0;
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &face_caches, &vertex_count](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &vertex_count](auto pos, auto& block) {
         auto type = block.tp;
         if (is_block_solid(type)) {
-            vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, face_caches, pos, type);
-            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, face_caches, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::FRONT>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::BACK>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::TOP>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::BOTTOM>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::RIGHT>(chunk, pos, type);
+            vertex_count += get_needed_face_vertex_count<block::face::LEFT>(chunk, pos, type);
         }
     });
     return vertex_count;
@@ -90,15 +72,15 @@ struct chunk_mesh_vert_func {
 };
 
 template<block::face face>
-static void add_needed_face_vertices(ext::data_array<game::block::face_cache>& face_caches, math::vector3u8 pos, block::type type) {
-    if (get_face_cache_flag<face>(face_caches[get_index_from_position(pos)])) {
+static void add_needed_face_vertices(const chunk& chunk, math::vector3u8 pos, block::type type) {
+    if (should_render_face<face>(chunk, pos, type)) {
         chunk_mesh_vert_func vf;
         add_face_vertices<face>(vf, pos, type);
     }
 }
 
-void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& face_caches) {
-    auto vertex_count = get_chunk_vertex_count(chunk, face_caches);
+void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
+    auto vertex_count = get_chunk_vertex_count(chunk);
 
     if (vertex_count > 65535) {
         dbg::error([vertex_count]() {
@@ -115,18 +97,18 @@ void game::update_mesh(chunk& chunk, ext::data_array<game::block::face_cache>& f
 
     chunk.disp_list.resize(disp_list_size);
 
-    chunk.disp_list.write_into([&chunk, &face_caches, vertex_count]() {
+    chunk.disp_list.write_into([&chunk, &building_verts, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
-        iterate_over_chunk_positions_and_blocks(chunk.blocks, [&face_caches](auto pos, auto& block) {
+        iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &building_verts](auto pos, auto& block) {
             auto type = block.tp;
             if (is_block_solid(type)) {
-                add_needed_face_vertices<block::face::FRONT>(face_caches, pos, type);
-                add_needed_face_vertices<block::face::BACK>(face_caches, pos, type);
-                add_needed_face_vertices<block::face::TOP>(face_caches, pos, type);
-                add_needed_face_vertices<block::face::BOTTOM>(face_caches, pos, type);
-                add_needed_face_vertices<block::face::RIGHT>(face_caches, pos, type);
-                add_needed_face_vertices<block::face::LEFT>(face_caches, pos, type);
+                add_needed_face_vertices<block::face::FRONT>(chunk, pos, type);
+                add_needed_face_vertices<block::face::BACK>(chunk, pos, type);
+                add_needed_face_vertices<block::face::TOP>(chunk, pos, type);
+                add_needed_face_vertices<block::face::BOTTOM>(chunk, pos, type);
+                add_needed_face_vertices<block::face::RIGHT>(chunk, pos, type);
+                add_needed_face_vertices<block::face::LEFT>(chunk, pos, type);
             }
         });
 

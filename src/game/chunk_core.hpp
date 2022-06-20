@@ -83,5 +83,5 @@ namespace game {
         }
     }
 
-    void update_chunks(chunk::map& chunks, ext::data_array<block::face_cache>& face_caches);
+    void update_chunks(chunk::map& chunks, ext::data_array<chunk::vertex>& building_vertices);
 };
