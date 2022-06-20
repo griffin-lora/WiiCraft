@@ -35,13 +35,6 @@ void block_selection::draw(const std::optional<raycast>& raycast) const {
     }
 }
 
-struct block_selection_vert_func {
-    inline void operator()(u8 x, u8 y, u8 z, u8, u8) {
-        GX_Position3u8(x, y, z);
-        GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
-    }
-};
-
 void block_selection::update_mesh(const math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, block::type type) {
     tf.set_position(view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
 
@@ -57,7 +50,10 @@ void block_selection::update_mesh(const math::matrix view, const math::vector3s3
 
     disp_list.write_into([&bl_pos, type, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
-        block_selection_vert_func vf;
+        auto vf = [](u8 x, u8 y, u8 z, u8, u8) {
+            GX_Position3u8(x, y, z);
+            GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
+        };
         game::add_block_vertices(vf, bl_pos, type);
         GX_End();
     });
