@@ -65,28 +65,46 @@ static std::size_t get_chunk_vertex_count(const chunk& chunk) {
     return vertex_count;
 }
 struct chunk_mesh_vert_func {
+    ext::data_array<chunk::vertex>::iterator it;
+
     inline void operator()(u8 x, u8 y, u8 z, u8 u, u8 v) {
-        GX_Position3u8(x, y, z);
-        GX_TexCoord2u8(u, v);
+        *it++ = {
+            .pos = { x, y, z },
+            .uv = { u, v }
+        };
     }
 };
 
-template<block::face face>
-static void add_needed_face_vertices(const chunk& chunk, math::vector3u8 pos, block::type type) {
+template<block::face face, typename Vf>
+static void add_needed_face_vertices(const chunk& chunk, Vf& vf, math::vector3u8 pos, block::type type) {
     if (should_render_face<face>(chunk, pos, type)) {
-        chunk_mesh_vert_func vf;
         add_face_vertices<face>(vf, pos, type);
     }
 }
 
 void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
-    auto vertex_count = get_chunk_vertex_count(chunk);
+    chunk_mesh_vert_func vf = { .it = building_verts.begin() };
 
-    if (vertex_count > 65535) {
-        dbg::error([vertex_count]() {
-            printf("Chunk vertex count is too high: %d\n", vertex_count);
-        });
-    }
+
+    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &building_verts, &vf](auto pos, auto& block) {
+        auto type = block.tp;
+        if (is_block_solid(type)) {
+            add_needed_face_vertices<block::face::FRONT>(chunk, vf, pos, type);
+            add_needed_face_vertices<block::face::BACK>(chunk, vf, pos, type);
+            add_needed_face_vertices<block::face::TOP>(chunk, vf, pos, type);
+            add_needed_face_vertices<block::face::BOTTOM>(chunk, vf, pos, type);
+            add_needed_face_vertices<block::face::RIGHT>(chunk, vf, pos, type);
+            add_needed_face_vertices<block::face::LEFT>(chunk, vf, pos, type);
+        }
+        std::size_t vertex_count = vf.it - building_verts.begin();
+        if (vertex_count > chunk::MAX_VERTEX_COUNT) {
+            dbg::error([vertex_count]() {
+                printf("Chunk vertex count is too high: %d\n", vertex_count);
+            });
+        }
+    });
+
+    std::size_t vertex_count = vf.it - building_verts.begin();
 
     std::size_t disp_list_size = (
 		4 + // GX_Begin
@@ -97,21 +115,14 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
 
     chunk.disp_list.resize(disp_list_size);
 
-    chunk.disp_list.write_into([&chunk, &building_verts, vertex_count]() {
+    chunk.disp_list.write_into([&building_verts, &vf, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
-        iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &building_verts](auto pos, auto& block) {
-            auto type = block.tp;
-            if (is_block_solid(type)) {
-                add_needed_face_vertices<block::face::FRONT>(chunk, pos, type);
-                add_needed_face_vertices<block::face::BACK>(chunk, pos, type);
-                add_needed_face_vertices<block::face::TOP>(chunk, pos, type);
-                add_needed_face_vertices<block::face::BOTTOM>(chunk, pos, type);
-                add_needed_face_vertices<block::face::RIGHT>(chunk, pos, type);
-                add_needed_face_vertices<block::face::LEFT>(chunk, pos, type);
-            }
-        });
-
+        for (auto it = building_verts.begin(); it != vf.it; ++it) {
+            GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
+            GX_TexCoord2u8(it->uv.x, it->uv.y);
+        }
+        
         GX_End();
     });
 }
