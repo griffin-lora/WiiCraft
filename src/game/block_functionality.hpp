@@ -124,9 +124,9 @@ namespace game {
         static constexpr bool is_solid() { return false; }
         
         template<block::face face>
-        static constexpr std::size_t get_face_vertex_count() { return 4; }
+        static constexpr std::size_t get_face_vertex_count() { if constexpr (face != block::face::TOP) return 4; return 0; }
 
-        static constexpr std::size_t get_general_vertex_count() { return 0; }
+        static constexpr std::size_t get_general_vertex_count() { return 4; }
 
         template<block::face face, typename Vf>
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
@@ -136,7 +136,7 @@ namespace game {
             local_pos_offset.x += block_size;
             local_pos_offset.y += half_block_size;
             local_pos_offset.z += block_size;
-            if constexpr (face == block::face::BOTTOM || face == block::face::TOP) {
+            if constexpr (face == block::face::BOTTOM) {
                 math::vector2u8 uv_pos = { 6, 0 };
                 uv_pos *= block_size;
                 auto uv_pos_offset = get_uv_position_offset(uv_pos, block_size);
@@ -144,13 +144,13 @@ namespace game {
                 call_face_func_for<face, void>(
                     []() {},
                     []() {},
-                    add_cube_top_vertices<Vf>,
+                    []() {},
                     add_cube_bottom_vertices<Vf>,
                     []() {},
                     []() {},
                     vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
                 );
-            } else {
+            } else if constexpr (face != block::face::TOP) {
                 math::vector2u8 uv_pos = { 5, 0 };
                 uv_pos *= block_size;
                 
@@ -171,6 +171,19 @@ namespace game {
         }
 
         template<typename Vf>
-        static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_pos) { }
+        static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_pos) {
+            local_pos *= block_size;
+
+            auto local_pos_offset = local_pos;
+            local_pos_offset.x += block_size;
+            local_pos_offset.y += half_block_size;
+            local_pos_offset.z += block_size;
+
+            math::vector2u8 uv_pos = { 6, 0 };
+            uv_pos *= block_size;
+            auto uv_pos_offset = get_uv_position_offset(uv_pos, block_size);
+
+            add_cube_top_vertices(vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset);
+        }
     };
 }
