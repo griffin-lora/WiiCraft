@@ -12,7 +12,8 @@ macro(DEBUG) \
 macro(GRASS) \
 macro(STONE) \
 macro(DIRT) \
-macro(WOOD_PLANKS)
+macro(WOOD_PLANKS) \
+macro(STONE_SLAB)
 
 namespace game {
     

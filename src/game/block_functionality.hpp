@@ -15,8 +15,11 @@ namespace game {
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_position) { }
     };
 
-    inline math::vector3u8 get_local_pos_offset(math::vector3u8 local_pos) {
-        return { local_pos.x + 1, local_pos.y + 1, local_pos.z + 1 };
+    constexpr u8 block_size = 4;
+    constexpr u8 half_block_size = block_size / 2;
+
+    inline math::vector3u8 get_local_pos_offset(math::vector3u8 local_pos, u8 offset) {
+        return { local_pos.x + offset, local_pos.y + offset, local_pos.z + offset };
     }
 
     inline math::vector2u8 get_uv_position_offset(math::vector2u8 uv_pos) {
@@ -34,6 +37,7 @@ namespace game {
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
             static_assert(face != block::face::CENTER, "Center face is not allowed.");
             auto uv_pos = T::template get_uv_pos<face>();
+            local_pos *= block_size;
             call_face_func_for<face, void>(
                 add_cube_front_vertices<Vf>,
                 add_cube_back_vertices<Vf>,
@@ -42,7 +46,7 @@ namespace game {
                 add_cube_right_vertices<Vf>,
                 add_cube_left_vertices<Vf>,
                 []() {},
-                vf, local_pos, get_local_pos_offset(local_pos), uv_pos, get_uv_position_offset(uv_pos)
+                vf, local_pos, get_local_pos_offset(local_pos, block_size), uv_pos, get_uv_position_offset(uv_pos)
             );
         }
     };
