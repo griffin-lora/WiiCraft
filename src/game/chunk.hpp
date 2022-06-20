@@ -24,7 +24,8 @@ namespace game {
         };
 
         gfx::display_list disp_list;
-        bool update_mesh = true;
+        bool update_mesh_important = false;
+        bool update_mesh_unimportant = false;
         struct neighborhood {
             opt_ref front;
             opt_ref back;

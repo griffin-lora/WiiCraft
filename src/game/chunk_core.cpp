@@ -71,20 +71,20 @@ static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
 }
 
 template<block::face face>
-static void add_needed_chunk_mesh_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
+static void add_needed_important_chunk_mesh_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
     if (is_block_position_at_face_edge<face>(pos)) {
-        add_chunk_mesh_update_to_neighbor<face>(chunk);
+        add_important_chunk_mesh_update_to_neighbor<face>(chunk);
     }
 }
 
-void game::add_chunk_mesh_update(chunk& chunk, math::vector3u8 pos) {
-    chunk.update_mesh = true;
-    add_needed_chunk_mesh_update_to_neighbor<block::face::FRONT>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::BACK>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::TOP>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
-    add_needed_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
+void game::add_important_chunk_mesh_update(chunk& chunk, math::vector3u8 pos) {
+    chunk.update_mesh_important = true;
+    add_needed_important_chunk_mesh_update_to_neighbor<block::face::FRONT>(chunk, pos);
+    add_needed_important_chunk_mesh_update_to_neighbor<block::face::BACK>(chunk, pos);
+    add_needed_important_chunk_mesh_update_to_neighbor<block::face::TOP>(chunk, pos);
+    add_needed_important_chunk_mesh_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
+    add_needed_important_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
+    add_needed_important_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
 }
 
 template<block::face face>
@@ -92,7 +92,7 @@ static void add_chunk_mesh_neighborhood_update_to_neighbor(chunk& chunk) {
     auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
     if (nb_chunk_opt.has_value()) {
         auto& nb_chunk = nb_chunk_opt->get();
-        nb_chunk.update_mesh = true;
+        nb_chunk.update_mesh_unimportant = true;
         nb_chunk.update_neighborhood = true;
     }
 }
@@ -114,11 +114,24 @@ void game::update_chunks(chunk::map& chunks, ext::data_array<chunk::vertex>& bui
         }
     }
     
+    bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
-        if (chunk.update_mesh) {
-            chunk.update_mesh = false;
+        if (chunk.update_mesh_important) {
+            did_important_mesh_update = true;
+            chunk.update_mesh_important = false;
+            chunk.update_mesh_unimportant = false;
             game::update_mesh(chunk, building_vertices);
-            break;
+        }
+    }
+
+    if (!did_important_mesh_update) {
+        for (auto& [ pos, chunk ] : chunks) {
+            if (chunk.update_mesh_unimportant) {
+                chunk.update_mesh_important = false;
+                chunk.update_mesh_unimportant = false;
+                game::update_mesh(chunk, building_vertices);
+                break;
+            }
         }
     }
 }

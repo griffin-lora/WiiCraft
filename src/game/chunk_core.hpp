@@ -73,13 +73,13 @@ namespace game {
 
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 
-    void add_chunk_mesh_update(chunk& chunk, math::vector3u8 block_position);
+    void add_important_chunk_mesh_update(chunk& chunk, math::vector3u8 block_position);
     template<block::face face>
-    void add_chunk_mesh_update_to_neighbor(chunk& chunk) {
+    void add_important_chunk_mesh_update_to_neighbor(chunk& chunk) {
         auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
         if (nb_chunk_opt.has_value()) {
             auto& nb_chunk = nb_chunk_opt->get();
-            nb_chunk.update_mesh = true;
+            nb_chunk.update_mesh_important = true;
         }
     }
 
