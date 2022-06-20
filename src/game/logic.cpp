@@ -118,7 +118,7 @@ void game::update_from_input(
         if (buttons_down & WPAD_BUTTON_B) {
             auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);
             if (backtracked_raycast.has_value()) {
-                backtracked_raycast->bl = { .tp = block::type::WOOD_PLANKS };
+                backtracked_raycast->bl = { .tp = block::type::STONE_SLAB };
                 backtracked_raycast->ch.modified = true;
                 add_important_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
             }

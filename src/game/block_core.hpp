@@ -47,5 +47,6 @@ namespace game {
         return pos;
     }
 
+    bool is_block_visible(block::type type);
     bool is_block_solid(block::type type);
 };
