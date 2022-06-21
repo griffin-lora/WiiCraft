@@ -23,10 +23,10 @@ inline bool game::is_block_semitransparent(block::type type) {
     }
 }
 
-#define EVAL_IS_BLOCK_FACE_VISIBLE_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::is_face_visible<face>(check_type);
+#define EVAL_IS_BLOCK_FACE_VISIBLE_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::is_face_visible<face>(neighbor_type);
 
 template<block::face face>
-inline bool game::is_block_face_visible(block::type type, block::type check_type) {
+inline bool game::is_block_face_visible(block::type type, block::type neighbor_type) {
     switch (type) {
         default: return false;
         EVAL_MACRO_ON_BLOCK_TYPES(EVAL_IS_BLOCK_FACE_VISIBLE_CASE)

@@ -39,7 +39,7 @@ namespace game {
     template<typename T>
     struct cube_block_functionality {
         template<block::face face>
-        static constexpr bool is_face_visible(block::type tp) { return is_block_semitransparent(tp); }
+        static constexpr bool is_face_visible(block::type nb_tp) { return is_block_semitransparent(nb_tp); }
 
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_semitransparent() { return false; }
@@ -128,7 +128,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::STONE_SLAB> {
         template<block::face face>
-        static constexpr bool is_face_visible(block::type tp) { return is_block_semitransparent(tp) && tp != block::type::STONE_SLAB; }
+        static constexpr bool is_face_visible(block::type nb_tp) { return is_block_semitransparent(nb_tp) && nb_tp != block::type::STONE_SLAB; }
 
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_semitransparent() { return true; }
