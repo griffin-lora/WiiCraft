@@ -14,12 +14,12 @@ inline bool game::is_block_visible(block::type type) {
     }
 }
 
-#define EVAL_IS_BLOCK_TRANSPARENT_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::is_transparent();
+#define EVAL_IS_BLOCK_SEMITRANSPARENT_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::is_semitransparent();
 
-inline bool game::is_block_transparent(block::type type) {
+inline bool game::is_block_semitransparent(block::type type) {
     switch (type) {
         default: return false;
-        EVAL_MACRO_ON_BLOCK_TYPES(EVAL_IS_BLOCK_TRANSPARENT_CASE)
+        EVAL_MACRO_ON_BLOCK_TYPES(EVAL_IS_BLOCK_SEMITRANSPARENT_CASE)
     }
 }
 

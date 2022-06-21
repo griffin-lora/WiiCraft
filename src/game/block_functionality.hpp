@@ -11,7 +11,7 @@ namespace game {
         static constexpr bool is_face_visible(block::type) { return false; }
 
         static constexpr bool is_visible() { return false; }
-        static constexpr bool is_transparent() { return true; }
+        static constexpr bool is_semitransparent() { return true; }
 
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { return 0; }
@@ -39,10 +39,10 @@ namespace game {
     template<typename T>
     struct cube_block_functionality {
         template<block::face face>
-        static constexpr bool is_face_visible(block::type tp) { return is_block_transparent(tp); }
+        static constexpr bool is_face_visible(block::type tp) { return is_block_semitransparent(tp); }
 
         static constexpr bool is_visible() { return true; }
-        static constexpr bool is_transparent() { return false; }
+        static constexpr bool is_semitransparent() { return false; }
         
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { return 4; }
@@ -128,10 +128,10 @@ namespace game {
     template<>
     struct block_functionality<block::type::STONE_SLAB> {
         template<block::face face>
-        static constexpr bool is_face_visible(block::type tp) { return is_block_transparent(tp) && tp != block::type::STONE_SLAB; }
+        static constexpr bool is_face_visible(block::type tp) { return is_block_semitransparent(tp) && tp != block::type::STONE_SLAB; }
 
         static constexpr bool is_visible() { return true; }
-        static constexpr bool is_transparent() { return true; }
+        static constexpr bool is_semitransparent() { return true; }
         
         template<block::face face>
         static constexpr std::size_t get_face_vertex_count() { if constexpr (face != block::face::TOP) return 4; return 0; }
