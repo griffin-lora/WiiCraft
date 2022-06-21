@@ -39,7 +39,13 @@ namespace game {
     template<typename T>
     struct cube_block_functionality {
         template<block::face face>
-        static constexpr bool is_face_visible(block::type nb_tp) { return is_block_semitransparent(nb_tp); }
+        static constexpr bool is_face_visible(block::type nb_tp) {
+            if constexpr (face == block::face::TOP) {
+                return is_block_semitransparent(nb_tp) && nb_tp != block::type::STONE_SLAB;
+            } else {
+                return is_block_semitransparent(nb_tp);
+            }
+        }
 
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_semitransparent() { return false; }
@@ -128,7 +134,13 @@ namespace game {
     template<>
     struct block_functionality<block::type::STONE_SLAB> {
         template<block::face face>
-        static constexpr bool is_face_visible(block::type nb_tp) { return is_block_semitransparent(nb_tp) && nb_tp != block::type::STONE_SLAB; }
+        static constexpr bool is_face_visible(block::type nb_tp) {
+            if constexpr (face == block::face::BOTTOM) {
+                return is_block_semitransparent(nb_tp);
+            } else {
+                return is_block_semitransparent(nb_tp) && nb_tp != block::type::STONE_SLAB; 
+            }
+        }
 
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_semitransparent() { return true; }
@@ -151,15 +163,7 @@ namespace game {
                 uv_pos *= block_size;
                 auto uv_pos_offset = get_uv_position_offset(uv_pos, block_size);
 
-                call_face_func_for<face, void>(
-                    []() {},
-                    []() {},
-                    []() {},
-                    add_cube_bottom_vertices<Vf>,
-                    []() {},
-                    []() {},
-                    vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset
-                );
+                add_cube_bottom_vertices(vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset);
             } else if constexpr (face != block::face::TOP) {
                 math::vector2u8 uv_pos = { 5, 0 };
                 uv_pos *= block_size;
