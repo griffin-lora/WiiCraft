@@ -39,7 +39,7 @@ namespace game {
     template<typename T>
     struct cube_block_functionality {
         template<block::face face>
-        static inline bool is_face_visible(block::type tp) { return is_block_solid(tp); }
+        static constexpr bool is_face_visible(block::type tp) { return is_block_solid(tp); }
 
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_solid() { return true; }
@@ -128,7 +128,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::STONE_SLAB> {
         template<block::face face>
-        static inline bool is_face_visible(block::type tp) { return is_block_solid(tp) || tp == block::type::STONE_SLAB; }
+        static constexpr bool is_face_visible(block::type tp) { return is_block_solid(tp) || tp == block::type::STONE_SLAB; }
 
         static constexpr bool is_visible() { return true; }
         static constexpr bool is_solid() { return false; }

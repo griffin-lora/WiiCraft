@@ -3,7 +3,8 @@
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
 #include "chunk_math.hpp"
-#include "is_block_face_visible.hpp"
+#include "block_core.hpp"
+#include "block_core.inl"
 #include "dbg.hpp"
 #include <cstdio>
 

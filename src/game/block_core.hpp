@@ -16,6 +16,9 @@ namespace game {
         return pos;
     }
 
-    bool is_block_visible(block::type type);
-    bool is_block_solid(block::type type);
+    inline bool is_block_visible(block::type type);
+    inline bool is_block_solid(block::type type);
+
+    template<block::face face>
+    inline bool is_block_face_visible(block::type type, block::type check_type);
 };
