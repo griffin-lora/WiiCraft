@@ -74,7 +74,7 @@ static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::
                 auto index = get_index_from_position(back_block_pos);
                 auto& block = chunk.blocks[index];
 
-                if (block.tp == block::type::AIR) {
+                if (!does_world_position_collide_with_block(pos, block.tp, world_block_pos)) {
                     return raycast{
                         .pos = pos,
                         .ch_pos = back_chunk_pos,
