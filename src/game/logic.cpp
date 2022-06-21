@@ -38,7 +38,7 @@ std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) 
         auto index = get_index_from_position(raycast_block_pos);
         auto& block = current_chunk->get().blocks[index];
 
-        if (block.tp != block::type::AIR) {
+        if (does_world_position_collide_with_block(raycast_pos, block.tp, floor_float_position<glm::vec3>(raycast_pos))) {
             return raycast{
                 .pos = raycast_pos,
                 .ch_pos = *current_chunk_pos,

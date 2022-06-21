@@ -1,6 +1,8 @@
 #pragma once
 #include "block.hpp"
 #include "util.hpp"
+#include "math/box.hpp"
+#include <vector>
 
 namespace game {
     template<block::face face, typename T>
@@ -16,11 +18,8 @@ namespace game {
         return pos;
     }
 
-    bool is_block_visible(block::type type);
-    
     inline bool is_block_fully_transparent(block::type type);
     inline bool is_block_upper_half_transparent(block::type type);
 
-    template<block::face face>
-    inline bool is_block_face_visible(block::type type, block::type check_type);
+    bool does_world_position_collide_with_block(const glm::vec3& world_position, block::type type, const glm::vec3& world_block_position);
 };

@@ -3,6 +3,8 @@
 #include "util.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "block_core.hpp"
+#include "math/box.hpp"
+#include <array>
 
 namespace game {
     template<block::type type>
@@ -24,6 +26,8 @@ namespace game {
 
         template<typename Vf>
         static constexpr void add_general_vertices(Vf&, math::vector3u8) { }
+
+        static constexpr std::array<math::box, 0> get_boxes() { return {}; }
     };
 
     constexpr u8 block_size = 4;
@@ -75,6 +79,14 @@ namespace game {
 
         template<typename Vf>
         static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_pos) { }
+
+        static constexpr std::array<math::box, 1> get_boxes() { return {
+            math::box
+            {
+                .lesser_corner = { 0.0f, 0.0f, 0.0f },
+                .greater_corner = { 1.0f, 1.0f, 0.0f }
+            }
+        }; }
     };
 
     
@@ -135,6 +147,14 @@ namespace game {
 
             add_cube_top_vertices(vf, local_pos, local_pos_offset, uv_pos, uv_pos_offset);
         }
+
+        static constexpr std::array<math::box, 1> get_boxes() { return {
+            math::box
+            {
+                .lesser_corner = { 0.0f, 0.0f, 0.0f },
+                .greater_corner = { 1.0f, 0.5f, 0.0f }
+            }
+        }; }
     };
 
     template<>
