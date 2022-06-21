@@ -35,29 +35,11 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, math::vector
 }
 
 template<typename Bf, block::face face, typename Vf>
-inline static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, math::vector3s32 pos) {
+static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, math::vector3s32 pos) {
     if (should_add_vertices_for_face<Bf, face>(chunk, pos)) {
         Bf::template add_face_vertices<face>(vf, block_pos);
     }
 }
-
-template<typename Bf, typename Vf>
-static void handle_block_functionality(chunk& chunk, Vf& vf, math::vector3u8 block_pos) {
-    math::vector3u8 pos = block_pos;
-    if (Bf::is_visible()) {
-        add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, pos);
-        add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, pos);
-        add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, pos);
-        add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, pos);
-        add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, pos);
-        add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, pos);
-        Bf::add_general_vertices(vf, block_pos);
-    }
-}
-
-#define EVAL_HANDLE_BLOCK_FUNCTIONALITY_CASE(tp) case block::type::tp: \
-    handle_block_functionality<block_functionality<block::type::tp>>(chunk, vf, block_pos); \
-    break; 
 
 void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
     auto vert_it = building_verts.begin();
@@ -72,7 +54,19 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         auto type = block.tp;
         switch (type) {
             default: return;
-            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_HANDLE_BLOCK_FUNCTIONALITY_CASE)
+            EVAL_BLOCK_FUNCTIONALITY_CASES(X(
+                if (Bf::is_visible()) {
+                    math::vector3u8 pos = block_pos;
+                    add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, pos);
+                    add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, pos);
+                    add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, pos);
+                    add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, pos);
+                    add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, pos);
+                    add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, pos);
+                    Bf::add_general_vertices(vf, block_pos);
+                }
+                break;
+            ))
         }
         std::size_t vertex_count = vert_it - building_verts.begin();
         if (vertex_count > chunk::MAX_VERTEX_COUNT) {

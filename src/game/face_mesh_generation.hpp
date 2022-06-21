@@ -3,22 +3,22 @@
 #include "block_functionality.hpp"
 
 namespace game {
-    #define EVAL_GET_FACE_VERTEX_COUNT_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::get_face_vertex_count<face>();
-
     template<block::face face>
     std::size_t get_face_vertex_count(block::type type) {
         switch (type) {
             default: return 0;
-            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_GET_FACE_VERTEX_COUNT_CASE)
+            EVAL_BLOCK_FUNCTIONALITY_CASES(
+                return Bf::get_face_vertex_count<face>();
+            )
         }
     }
-
-    #define EVAL_GET_GENERAL_VERTEX_COUNT_CASE(tp) case block::type::tp: return block_functionality<block::type::tp>::get_general_vertex_count();
 
     inline std::size_t get_general_vertex_count(block::type type) {
         switch (type) {
             default: return 0;
-            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_GET_GENERAL_VERTEX_COUNT_CASE)
+            EVAL_BLOCK_FUNCTIONALITY_CASES(
+                return Bf::get_general_vertex_count();
+            )
         }
     }
 
@@ -26,23 +26,23 @@ namespace game {
      * vf(u8 x, u8 y, u8 z, u8 u, u8 v)
      */
 
-    #define EVAL_ADD_FACE_VERTICES_CASE(tp) case block::type::tp: block_functionality<block::type::tp>::add_face_vertices<face, Vf>(vf, local_position); break;
-
     template<block::face face, typename Vf>
     void add_face_vertices(Vf& vf, math::vector3u8 local_position, block::type type) {
         switch (type) {
             default: break;
-            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_ADD_FACE_VERTICES_CASE)
+            EVAL_BLOCK_FUNCTIONALITY_CASES(X(
+                Bf::add_face_vertices<face, Vf>(vf, local_position); break;
+            ))
         }
     }
-
-    #define EVAL_ADD_GENERAL_VERTICES_CASE(tp) case block::type::tp: block_functionality<block::type::tp>::add_general_vertices<Vf>(vf, local_position); break;
 
     template<typename Vf>
     void add_general_vertices(Vf& vf, math::vector3u8 local_position, block::type type) {
         switch (type) {
             default: break;
-            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_ADD_GENERAL_VERTICES_CASE)
+            EVAL_BLOCK_FUNCTIONALITY_CASES(X(
+                Bf::add_general_vertices<Vf>(vf, local_position); break;
+            ))
         }
     }
 
