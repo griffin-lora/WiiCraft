@@ -6,6 +6,6 @@ namespace math {
         glm::vec3 lesser_corner;
         glm::vec3 greater_corner;
 
-        bool is_inside(const glm::vec3& pos);
+        bool is_inside(const glm::vec3& pos) const;
     };
 }

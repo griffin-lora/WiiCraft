@@ -84,7 +84,7 @@ namespace game {
             math::box
             {
                 .lesser_corner = { 0.0f, 0.0f, 0.0f },
-                .greater_corner = { 1.0f, 1.0f, 0.0f }
+                .greater_corner = { 1.0f, 1.0f, 1.0f }
             }
         }; }
     };
@@ -152,7 +152,7 @@ namespace game {
             math::box
             {
                 .lesser_corner = { 0.0f, 0.0f, 0.0f },
-                .greater_corner = { 1.0f, 0.5f, 0.0f }
+                .greater_corner = { 1.0f, 0.5f, 1.0f }
             }
         }; }
     };
