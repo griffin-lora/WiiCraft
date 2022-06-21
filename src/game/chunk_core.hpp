@@ -31,7 +31,7 @@ namespace game {
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 
     template<typename F>
-    void iterate_over_chunk_positions(F func) {
+    inline void iterate_over_chunk_positions(F func) {
         for (u8 x = 0; x < chunk::SIZE; x++) {
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 for (u8 z = 0; z < chunk::SIZE; z++) {
@@ -42,7 +42,7 @@ namespace game {
     }
 
     template<typename B, typename F>
-    void iterate_over_chunk_blocks_and_positions(B& blocks, F func) {
+    inline void iterate_over_chunk_blocks_and_positions(B& blocks, F func) {
         for (u8 x = 0; x < chunk::SIZE; x++) {
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 for (u8 z = 0; z < chunk::SIZE; z++) {
@@ -54,7 +54,7 @@ namespace game {
     }
 
     template<typename T, typename B, typename F>
-    void iterate_over_chunk_positions_and_blocks(B& blocks, F func) {
+    inline void iterate_over_chunk_positions_and_blocks(B& blocks, F func) {
         for (T x = 0; x < (T)chunk::SIZE; x++) {
             for (T y = 0; y < (T)chunk::SIZE; y++) {
                 for (T z = 0; z < (T)chunk::SIZE; z++) {
