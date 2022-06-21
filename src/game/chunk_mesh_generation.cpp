@@ -12,8 +12,8 @@
 
 using namespace game;
 
-template<block::face face>
-static bool should_add_vertices_for_face(const chunk& chunk, math::vector3s32 local_pos, block::type type) {
+template<typename Bf, block::face face>
+inline static bool should_add_vertices_for_face(const chunk& chunk, math::vector3s32 local_pos) {
     if (is_block_position_at_face_edge<face>(local_pos)) {
         // We are at the edge of the block, so we should check the neighbor chunk.
         auto nb = get_neighbor<face>(chunk.nh);
@@ -22,7 +22,7 @@ static bool should_add_vertices_for_face(const chunk& chunk, math::vector3s32 lo
             face_block_pos = get_local_block_position_in_s32(face_block_pos);
             
             auto& block = nb->get().blocks[get_index_from_position(face_block_pos)];
-            return is_block_face_visible<face>(type, block.tp);
+            return Bf::template is_face_visible<face>(block.tp);
         }
 
         return false;
@@ -30,16 +30,34 @@ static bool should_add_vertices_for_face(const chunk& chunk, math::vector3s32 lo
         math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
         
         auto& block = chunk.blocks[get_index_from_position(face_block_pos)];
-        return is_block_face_visible<face>(type, block.tp);
+        return Bf::template is_face_visible<face>(block.tp);
     }
 }
 
-template<block::face face, typename Vf>
-static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3s32 local_pos, block::type type) {
-    if (should_add_vertices_for_face<face>(chunk, local_pos, type)) {
-        add_face_vertices<face>(vf, local_pos, type);
+template<typename Bf, block::face face, typename Vf>
+static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, math::vector3s32 pos) {
+    if (should_add_vertices_for_face<Bf, face>(chunk, pos)) {
+        Bf::template add_face_vertices<face>(vf, block_pos);
     }
 }
+
+template<typename Bf, typename Vf>
+static void handle_block_functionality(chunk& chunk, Vf& vf, math::vector3u8 block_pos) {
+    math::vector3u8 pos = block_pos;
+    if (Bf::is_visible()) {
+        add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, pos);
+        add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, pos);
+        add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, pos);
+        add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, pos);
+        add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, pos);
+        add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, pos);
+        Bf::add_general_vertices(vf, block_pos);
+    }
+}
+
+#define EVAL_HANDLE_BLOCK_FUNCTIONALITY_CASE(tp) case block::type::tp: \
+    handle_block_functionality<block_functionality<block::type::tp>>(chunk, vf, block_pos); \
+    break; 
 
 void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
     auto vert_it = building_verts.begin();
@@ -50,16 +68,11 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         };
     };
 
-    iterate_over_chunk_positions_and_blocks<s32>(chunk.blocks, [&chunk, &building_verts, &vert_it, &vf](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks<u8>(chunk.blocks, [&chunk, &building_verts, &vert_it, &vf](auto block_pos, auto& block) {
         auto type = block.tp;
-        if (is_block_visible(type)) {
-            add_face_vertices_if_needed<block::face::FRONT>(chunk, vf, pos, type);
-            add_face_vertices_if_needed<block::face::BACK>(chunk, vf, pos, type);
-            add_face_vertices_if_needed<block::face::TOP>(chunk, vf, pos, type);
-            add_face_vertices_if_needed<block::face::BOTTOM>(chunk, vf, pos, type);
-            add_face_vertices_if_needed<block::face::RIGHT>(chunk, vf, pos, type);
-            add_face_vertices_if_needed<block::face::LEFT>(chunk, vf, pos, type);
-            add_general_vertices(vf, pos, type);
+        switch (type) {
+            default: return;
+            EVAL_MACRO_ON_BLOCK_TYPES(EVAL_HANDLE_BLOCK_FUNCTIONALITY_CASE)
         }
         std::size_t vertex_count = vert_it - building_verts.begin();
         if (vertex_count > chunk::MAX_VERTEX_COUNT) {
