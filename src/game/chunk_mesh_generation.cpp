@@ -5,53 +5,40 @@
 #include "chunk_math.hpp"
 #include "block_core.hpp"
 #include "block_core.inl"
+#include "chunk_core.hpp"
+#include "chunk_math.hpp"
 #include "dbg.hpp"
 #include <cstdio>
 
 using namespace game;
 
 template<block::face face>
-static bool should_render_face(const chunk& chunk, math::vector3u8 pos, block::type type) {
-    if (get_face_vertex_count<face>(type) == 0) {
-        return false;
-    }
-    auto check_pos = get_face_offset_position<face>(pos);
-    if (check_pos.x >= chunk::SIZE || check_pos.y >= chunk::SIZE || check_pos.z >= chunk::SIZE) {
-        // Since the position is outside of the chunk, we need to check the neighbor chunk
-        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
-
-        if (nb_chunk_opt.has_value()) {
-            auto& nb_chunk = nb_chunk_opt->get();
-
-            auto nb_check_pos = get_local_block_position(get_face_offset_position<face, math::vector3s32>(pos));
-
-            auto index = get_index_from_position(nb_check_pos);
-
-            auto& block = nb_chunk.blocks[index];
-            if (is_block_face_visible<face>(type, block.tp)) {
-                return false;
-            }
-        } else {
-            // Don't render chunk faces if there is no neighbor chunk
-            return false;
+static bool should_add_vertices_for_face(const chunk& chunk, math::vector3s32 local_pos, block::type type) {
+    if (is_block_position_at_face_edge<face>(local_pos)) {
+        // We are at the edge of the block, so we should check the neighbor chunk.
+        auto nb = get_neighbor<face>(chunk.nh);
+        if (nb.has_value()) {
+            math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
+            face_block_pos = get_local_block_position_in_s32(face_block_pos);
+            
+            auto& block = nb->get().blocks[get_index_from_position(face_block_pos)];
+            return is_block_face_visible<face>(type, block.tp);
         }
-        return true;
-    }
-    auto check_block_type = chunk.blocks[get_index_from_position(check_pos)].tp;
-    if (is_block_face_visible<face>(type, check_block_type)) {
+
         return false;
     } else {
-        return true;
+        math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
+        
+        auto& block = chunk.blocks[get_index_from_position(face_block_pos)];
+        return is_block_face_visible<face>(type, block.tp);
     }
 }
 
 template<block::face face, typename Vf>
-static bool add_needed_face_vertices(const chunk& chunk, Vf& vf, math::vector3u8 pos, block::type type) {
-    if (should_render_face<face>(chunk, pos, type)) {
-        add_face_vertices<face>(vf, pos, type);
-        return true;
+static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3s32 local_pos, block::type type) {
+    if (should_add_vertices_for_face<face>(chunk, local_pos, type)) {
+        add_face_vertices<face>(vf, local_pos, type);
     }
-    return false;
 }
 
 void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
@@ -63,25 +50,16 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         };
     };
 
-    iterate_over_chunk_positions_and_blocks(chunk.blocks, [&chunk, &building_verts, &vert_it, &vf](auto pos, auto& block) {
+    iterate_over_chunk_positions_and_blocks<s32>(chunk.blocks, [&chunk, &building_verts, &vert_it, &vf](auto pos, auto& block) {
         auto type = block.tp;
         if (is_block_visible(type)) {
-            if (get_general_vertex_count(type) != 0) {
-                add_needed_face_vertices<block::face::FRONT>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::BACK>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::TOP>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::BOTTOM>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::RIGHT>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::LEFT>(chunk, vf, pos, type);
-                add_general_vertices(vf, pos, type);
-            } else {
-                add_needed_face_vertices<block::face::FRONT>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::BACK>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::TOP>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::BOTTOM>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::RIGHT>(chunk, vf, pos, type);
-                add_needed_face_vertices<block::face::LEFT>(chunk, vf, pos, type);
-            }
+            add_face_vertices_if_needed<block::face::FRONT>(chunk, vf, pos, type);
+            add_face_vertices_if_needed<block::face::BACK>(chunk, vf, pos, type);
+            add_face_vertices_if_needed<block::face::TOP>(chunk, vf, pos, type);
+            add_face_vertices_if_needed<block::face::BOTTOM>(chunk, vf, pos, type);
+            add_face_vertices_if_needed<block::face::RIGHT>(chunk, vf, pos, type);
+            add_face_vertices_if_needed<block::face::LEFT>(chunk, vf, pos, type);
+            add_general_vertices(vf, pos, type);
         }
         std::size_t vertex_count = vert_it - building_verts.begin();
         if (vertex_count > chunk::MAX_VERTEX_COUNT) {

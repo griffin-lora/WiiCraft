@@ -56,19 +56,6 @@ void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32&
 }
 
 template<block::face face>
-static constexpr bool is_block_position_at_face_edge(math::vector3u8 pos) {
-    constexpr auto edge_coord = (chunk::SIZE - 1);
-    return call_face_func_for<face, bool>(
-        [&]() { return pos.x == edge_coord; },
-        [&]() { return pos.x == 0; },
-        [&]() { return pos.y == edge_coord; },
-        [&]() { return pos.y == 0; },
-        [&]() { return pos.z == edge_coord; },
-        [&]() { return pos.z == 0; }
-    );
-}
-
-template<block::face face>
 static void add_needed_important_chunk_mesh_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
     if (is_block_position_at_face_edge<face>(pos)) {
         add_important_chunk_mesh_update_to_neighbor<face>(chunk);

@@ -33,6 +33,16 @@ namespace game {
         };
     }
 
+    // Weird hack
+    template<typename T>
+    inline math::vector3s32 get_local_block_position_in_s32(const T& world_position) {
+        return {
+            math::mod((s32)world_position.x, chunk::SIZE),
+            math::mod((s32)world_position.y, chunk::SIZE),
+            math::mod((s32)world_position.z, chunk::SIZE)
+        };
+    }
+
     inline math::vector3u8 get_local_block_position(const glm::vec3& world_position) {
         return {
             math::mod((u8)std::floor(world_position.x), (u8)chunk::SIZE),

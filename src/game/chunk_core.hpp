@@ -53,16 +53,29 @@ namespace game {
         }
     }
 
-    template<typename B, typename F>
+    template<typename T, typename B, typename F>
     void iterate_over_chunk_positions_and_blocks(B& blocks, F func) {
-        for (u8 x = 0; x < chunk::SIZE; x++) {
-            for (u8 y = 0; y < chunk::SIZE; y++) {
-                for (u8 z = 0; z < chunk::SIZE; z++) {
-                    math::vector3u8 pos = {x, y, z};
+        for (T x = 0; x < (T)chunk::SIZE; x++) {
+            for (T y = 0; y < (T)chunk::SIZE; y++) {
+                for (T z = 0; z < (T)chunk::SIZE; z++) {
+                    glm::vec<3, T, glm::defaultp> pos = {x, y, z};
                     func(pos, blocks[get_index_from_position(pos)]);
                 }
             }
         }
+    }
+
+    template<block::face face, typename T>
+    constexpr bool is_block_position_at_face_edge(T pos) {
+        constexpr auto edge_coord = (chunk::SIZE - 1);
+        return call_face_func_for<face, bool>(
+            [&]() { return pos.x == edge_coord; },
+            [&]() { return pos.x == 0; },
+            [&]() { return pos.y == edge_coord; },
+            [&]() { return pos.y == 0; },
+            [&]() { return pos.z == edge_coord; },
+            [&]() { return pos.z == 0; }
+        );
     }
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos);
