@@ -17,6 +17,8 @@ namespace game {
     }
 
     inline bool is_block_visible(block::type type);
+    
+    inline bool is_block_fully_transparent(block::type type);
     inline bool is_block_upper_half_transparent(block::type type);
 
     template<block::face face>
