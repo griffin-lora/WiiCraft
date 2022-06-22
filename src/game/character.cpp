@@ -47,10 +47,12 @@ void character::apply_physics(f32 gravity, chunk::map& chunks) {
         auto raycast = get_raycast({ position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
         if (raycast.has_value()) {
             position.y = (std::floor(raycast->pos.y)) + 2.0f;
-            velocity.y = 0;
+            velocity.y = 0.0f;
         } else {
             velocity.y -= gravity;
         }
+    } else {
+        velocity.y = 0.0f;
     }
 
     position += velocity * (1.0f/60.0f);
