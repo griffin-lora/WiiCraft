@@ -23,6 +23,7 @@
 #include "game/cursor.hpp"
 #include "game/skybox.hpp"
 #include "game/character.hpp"
+#include "common.hpp"
 
 constexpr f32 cam_move_speed = 9.0f;
 constexpr f32 cam_rotation_speed = 0.15f;
@@ -108,7 +109,7 @@ int main(int argc, char** argv) {
     GX_SetCurrentMtx(GX_PNMTX3);
 
 	for (;;) {
-		auto raycast = game::get_raycast(cam.position, cam.look, 255, chunks);
+		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
 		bl_sel.handle_raycast(view, raycast);
 
 		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);

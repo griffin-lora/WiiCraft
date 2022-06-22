@@ -3,7 +3,6 @@
 #include "camera.hpp"
 #include "chunk.hpp"
 #include "stored_chunk.hpp"
-#include "common.hpp"
 
 namespace game {
     void manage_chunks_around_camera(

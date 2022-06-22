@@ -1,6 +1,8 @@
 #include "character.hpp"
 #include "logic.hpp"
 #include "input.hpp"
+#include "chunk_core.hpp"
+#include "common.hpp"
 
 using namespace game;
 
@@ -40,19 +42,22 @@ void character::move(f32 movement_speed, const camera& cam, const glm::vec3& inp
 }
 
 void character::apply_physics(f32 gravity, chunk::map& chunks) {
-    auto raycast = get_raycast({ position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
-    if (raycast.has_value()) {
-        position.y = (std::floor(raycast->pos.y)) + 2.0f;
-        velocity.y = 0;
-    } else {
-        velocity.y -= gravity;
+    auto block = get_block_from_world_position(chunks, position);
+    if (block.has_value() && block->get().tp == block::type::AIR) {
+        auto raycast = get_raycast({ position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
+        if (raycast.has_value()) {
+            position.y = (std::floor(raycast->pos.y)) + 2.0f;
+            velocity.y = 0;
+        } else {
+            velocity.y -= gravity;
+        }
     }
 
     position += velocity * (1.0f/60.0f);
 }
 
 void character::update_camera(camera& cam) const {
-    cam.position = { position.x, position.y + 1.0f, position.z };
+    cam.position = { position.x, position.y + 0.5f, position.z };
 
     cam.update_view = true;
 }

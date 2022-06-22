@@ -10,12 +10,12 @@ using namespace game;
 // Yes I know I should be using DDA algorithm but I couldnt FUCKING GET IT TO WORK IN 3D
 constexpr f32 raycast_step_scalar = 0.01f;
 
-std::optional<raycast> game::get_raycast(const glm::vec3& origin, const glm::vec3& dir, u8 step_count, chunk::map& chunks) {
+std::optional<raycast> game::get_raycast(const glm::vec3& origin, const glm::vec3& dir, u16 step_count, chunk::map& chunks) {
     glm::vec3 raycast_pos = origin;
     glm::vec3 dir_vec = dir * raycast_step_scalar;
     std::optional<math::vector3s32> current_chunk_pos = {};
     chunk::opt_ref current_chunk = {};
-    for (u8 i = 0; i < step_count; i++) {
+    for (u16 i = 0; i < step_count; i++) {
         auto raycast_chunk_pos = get_chunk_position_from_world_position(raycast_pos);
 
         if (current_chunk_pos.has_value()) {

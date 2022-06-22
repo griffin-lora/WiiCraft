@@ -17,7 +17,7 @@ namespace game {
         block& bl;
     };
 
-    std::optional<raycast> get_raycast(const glm::vec3& origin, const glm::vec3& dir, u8 step_count, chunk::map& chunks);
+    std::optional<raycast> get_raycast(const glm::vec3& origin, const glm::vec3& dir, u16 step_count, chunk::map& chunks);
 
     void update_from_input(
         f32 cam_movement_speed,

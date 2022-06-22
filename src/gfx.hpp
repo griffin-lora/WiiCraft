@@ -1,9 +1,10 @@
 #pragma once
-#include "common.hpp"
 #include <gccore.h>
 #include <array>
 #include <tuple>
 #include "math.hpp"
+
+using error_code = int;
 
 namespace gfx {
 

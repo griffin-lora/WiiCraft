@@ -7,10 +7,11 @@
 #include "block.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
+#include "common.hpp"
 
 namespace game {
     struct chunk {
-        using map = std::unordered_map<math::vector3s32, chunk>;
+        using map = std::unordered_map<math::vector3s32, chunk, hash_vector3s32>;
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
         using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
 
