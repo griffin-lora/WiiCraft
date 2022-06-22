@@ -95,7 +95,6 @@ static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::
 }
 
 void game::update_from_input(
-    f32 cam_movement_speed,
     f32 cam_rotation_speed,
     u16 v_width,
     u16 v_height,
@@ -126,7 +125,7 @@ void game::update_from_input(
         }
     }
 
-    character.handle_input(cam_movement_speed, cam, buttons_down);
+    character.handle_input(cam, buttons_down);
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 

@@ -20,7 +20,6 @@ namespace game {
     std::optional<raycast> get_raycast(const glm::vec3& origin, const glm::vec3& dir, u16 step_count, chunk::map& chunks);
 
     void update_from_input(
-        f32 cam_movement_speed,
         f32 cam_rotation_speed,
         u16 v_width,
         u16 v_height,

@@ -25,9 +25,7 @@
 #include "game/character.hpp"
 #include "common.hpp"
 
-constexpr f32 cam_move_speed = 9.0f;
 constexpr f32 cam_rotation_speed = 0.15f;
-constexpr f32 gravity = 0.6f;
 
 constexpr s32 chunk_generation_radius = 3;
 
@@ -112,8 +110,8 @@ int main(int argc, char** argv) {
 		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
 		bl_sel.handle_raycast(view, raycast);
 
-		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
-		character.apply_physics(gravity, chunks);
+		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
+		character.apply_physics(chunks);
 		character.update_camera(cam);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
