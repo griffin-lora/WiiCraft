@@ -118,12 +118,17 @@ namespace game {
         static constexpr void add_face_vertices(Vf& vf, math::vector3u8 local_pos) {
             local_pos *= block_size;
 
-            auto local_pos_offset = get_local_pos_offset(local_pos, { block_size, half_block_size, block_size });
             if constexpr (face == block::face::BOTTOM) {
                 math::vector2u8 uv_pos = T::template get_uv_pos<face>();
                 uv_pos *= block_size;
 
-                add_cube_bottom_vertices(vf, local_pos, local_pos_offset, uv_pos, get_uv_position_offset(uv_pos, { block_size, block_size }));
+                add_cube_bottom_vertices(
+                    vf,
+                    local_pos,
+                    get_local_pos_offset(local_pos, { block_size, half_block_size, block_size }),
+                    uv_pos,
+                    get_uv_position_offset(uv_pos, { block_size, block_size })
+                );
             } else if constexpr (face != block::face::TOP) {
                 math::vector2u8 uv_pos = T::template get_uv_pos<face>();
                 uv_pos *= block_size;
@@ -135,7 +140,7 @@ namespace game {
                     []() {},
                     add_cube_right_vertices<Vf>,
                     add_cube_left_vertices<Vf>,
-                    vf, local_pos, local_pos_offset, uv_pos, get_uv_position_offset(uv_pos, { block_size, half_block_size })
+                    vf, local_pos, get_local_pos_offset(local_pos, { block_size, half_block_size, block_size }), uv_pos, get_uv_position_offset(uv_pos, { block_size, half_block_size })
                 );
             }
         }
