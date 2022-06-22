@@ -22,10 +22,11 @@
 #include "game/block_selection.hpp"
 #include "game/cursor.hpp"
 #include "game/skybox.hpp"
+#include "game/character.hpp"
 
-constexpr f32 cam_move_speed = 0.15f;
+constexpr f32 cam_move_speed = 9.0f;
 constexpr f32 cam_rotation_speed = 0.15f;
-constexpr f32 gravity = 0.01f;
+constexpr f32 gravity = 0.6f;
 
 constexpr s32 chunk_generation_radius = 3;
 
@@ -64,16 +65,21 @@ int main(int argc, char** argv) {
 	math::matrix view;
 	math::matrix44 perspective_3d;
 
+	game::character character = {
+		.position = { 0.0f, 0.0f, 0.0f },
+		.velocity = { 0.0f, 0.0f, 0.0f }
+	};
+
 	game::camera cam = {
 		.position = {0.0f, 30.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.look = {0.0f, 0.0f, 1.0f},
-		.velocity = { 0.0f, 0.0f, 0.0f},
 		.fov = 90.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
+	character.update_camera(cam);
 	std::optional<math::vector3s32> last_cam_chunk_pos;
 	math::normalize(cam.look);
 
@@ -105,8 +111,9 @@ int main(int argc, char** argv) {
 		auto raycast = game::get_raycast(cam.position, cam.look, 255, chunks);
 		bl_sel.handle_raycast(view, raycast);
 
-		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, chunks, cursor, raycast);
-		game::apply_physics(gravity, cam, chunks);
+		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
+		character.apply_physics(gravity, chunks);
+		character.update_camera(cam);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
 

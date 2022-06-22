@@ -1,29 +1,11 @@
 #include "camera.hpp"
 #include <algorithm>
-#include "logic.hpp"
 
 using namespace game;
 
 void game::update_view(const camera& cam, math::matrix view) {
     auto look_at = cam.position + cam.look;
     guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
-}
-
-void game::move_camera(camera& cam, const glm::vec3& input_vector, f32 move_speed) {
-    glm::mat3 move = {
-        { cam.look.x, 0, cam.look.z },
-        { 0, 1, 0 },
-        { -cam.look.z, 0, cam.look.x }
-    };
-    math::normalize(move[0]);
-    math::normalize(move[1]);
-    math::normalize(move[2]);
-
-    glm::vec3 move_vector = move * input_vector;
-
-    move_vector *= move_speed;
-
-    cam.position += move_vector;
 }
 
 void game::rotate_camera(camera& cam, const glm::vec2& input_vector, f32 rotate_speed) {
@@ -55,19 +37,4 @@ void game::reset_update_params(camera& cam) {
     cam.update_view = false;
     cam.update_look = false;
     cam.update_perspective = false;
-}
-
-void game::apply_physics(f32 gravity, camera& cam, chunk::map& chunks) {
-    auto raycast = get_raycast({ cam.position.x, cam.position.y - 0.4f, cam.position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
-    if (raycast.has_value()) {
-        cam.position.y = (std::floor(raycast->pos.y)) + 2.0f;
-        cam.velocity.y = 0;
-    } else {
-        cam.velocity.y -= gravity;
-    }
-
-    cam.position += cam.velocity;
-    if (math::is_non_zero(cam.velocity)) {
-        cam.update_view = true;
-    }
 }

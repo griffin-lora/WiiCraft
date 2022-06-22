@@ -99,6 +99,7 @@ void game::update_from_input(
     f32 cam_rotation_speed,
     u16 v_width,
     u16 v_height,
+    character& character,
     camera& cam,
     chunk::map& chunks,
     cursor& cursor,
@@ -125,20 +126,7 @@ void game::update_from_input(
         }
     }
 
-    auto joystick_input_vector = input::get_joystick_input_vector();
-
-    if (math::is_non_zero(joystick_input_vector)) {
-        if (std::abs(joystick_input_vector.x) < 6.0f) {
-            joystick_input_vector.x = 0.0f;
-        }
-        if (std::abs(joystick_input_vector.y) < 6.0f) {
-            joystick_input_vector.y = 0.0f;
-        }
-        glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
-        move_camera(cam, input_vector, cam_movement_speed);
-        
-        cam.update_view = true;
-    }
+    character.handle_input(cam_movement_speed, cam, buttons_down);
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 
