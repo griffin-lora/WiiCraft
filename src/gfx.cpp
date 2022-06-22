@@ -47,7 +47,9 @@ console_state::console_state() {
 	// This positions the cursor on row 2, column 0
 	// we can use variables for this with format codes too
 	// e.g. printf ("\x1b[%d;%dH", row, column );
+	#ifndef PC_PORT
 	std::printf("\x1b[2;0H");
+	#endif
 }
 
 constexpr std::size_t DEFAULT_FIFO_SIZE = 256*1024;
@@ -122,9 +124,11 @@ draw_state::draw_state(color4 bkg) {
 }
 
 std::tuple<bool, error_code> gfx::load_from_file(texture& tex, const char* path) {
+	#ifndef PC_PORT
 	if (access(path, R_OK) != 0) {
 		return { false, errno };
 	}
+	#endif
 	TPLFile tpl_file;
 	TPL_OpenTPLFromFile(&tpl_file, path);
 	TPL_GetTexture(&tpl_file, 0, &tex);
