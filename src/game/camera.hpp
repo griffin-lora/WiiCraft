@@ -1,5 +1,6 @@
 #pragma once
 #include "math.hpp"
+#include "chunk.hpp"
 
 namespace game {
     struct camera {
@@ -8,6 +9,9 @@ namespace game {
         glm::vec3 look;
         f32 yaw = 0.0f;
         f32 pitch = 0.0f;
+
+        glm::vec3 velocity = { 0.0f, 0.0f, 0.0f };
+
         f32 fov;
         f32 aspect;
         f32 near_clipping_plane_distance;
@@ -41,4 +45,6 @@ namespace game {
 
     void update_needed(math::matrix view, math::matrix44 perspective, camera& cam);
     void reset_update_params(camera& cam);
+
+    void apply_physics(f32 gravity, camera& cam, chunk::map& chunks);
 };

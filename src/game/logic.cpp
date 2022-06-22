@@ -10,12 +10,12 @@ using namespace game;
 // Yes I know I should be using DDA algorithm but I couldnt FUCKING GET IT TO WORK IN 3D
 constexpr f32 raycast_step_scalar = 0.01f;
 
-std::optional<raycast> game::get_raycast(const camera& cam, chunk::map& chunks) {
-    glm::vec3 raycast_pos = cam.position;
-    glm::vec3 dir_vec = cam.look * raycast_step_scalar;
+std::optional<raycast> game::get_raycast(const glm::vec3& origin, const glm::vec3& dir, u8 step_count, chunk::map& chunks) {
+    glm::vec3 raycast_pos = origin;
+    glm::vec3 dir_vec = dir * raycast_step_scalar;
     std::optional<math::vector3s32> current_chunk_pos = {};
     chunk::opt_ref current_chunk = {};
-    for (u8 i = 0; i < 256; i++) {
+    for (u8 i = 0; i < step_count; i++) {
         auto raycast_chunk_pos = get_chunk_position_from_world_position(raycast_pos);
 
         if (current_chunk_pos.has_value()) {
@@ -126,16 +126,15 @@ void game::update_from_input(
     }
 
     auto joystick_input_vector = input::get_joystick_input_vector();
-    auto plus_minus_input_scalar = input::get_plus_minus_input_scalar(buttons_held);
 
-    if (math::is_non_zero(joystick_input_vector) || plus_minus_input_scalar != 0) {
+    if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
             joystick_input_vector.x = 0.0f;
         }
         if (std::abs(joystick_input_vector.y) < 6.0f) {
             joystick_input_vector.y = 0.0f;
         }
-        glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, plus_minus_input_scalar, joystick_input_vector.x / 96.0f };
+        glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
         move_camera(cam, input_vector, cam_movement_speed);
         
         cam.update_view = true;

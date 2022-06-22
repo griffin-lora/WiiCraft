@@ -25,6 +25,7 @@
 
 constexpr f32 cam_move_speed = 0.15f;
 constexpr f32 cam_rotation_speed = 0.15f;
+constexpr f32 gravity = 0.01f;
 
 constexpr s32 chunk_generation_radius = 3;
 
@@ -64,9 +65,10 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::camera cam = {
-		.position = {0.0f, 3.0f, -10.0f},
+		.position = {0.0f, 30.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.look = {0.0f, 0.0f, 1.0f},
+		.velocity = { 0.0f, 0.0f, 0.0f},
 		.fov = 90.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
@@ -100,10 +102,11 @@ int main(int argc, char** argv) {
     GX_SetCurrentMtx(GX_PNMTX3);
 
 	for (;;) {
-		auto raycast = game::get_raycast(cam, chunks);
+		auto raycast = game::get_raycast(cam.position, cam.look, 255, chunks);
 		bl_sel.handle_raycast(view, raycast);
 
 		game::update_from_input(cam_move_speed, cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, cam, chunks, cursor, raycast);
+		game::apply_physics(gravity, cam, chunks);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);
 
