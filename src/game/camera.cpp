@@ -58,7 +58,7 @@ void game::reset_update_params(camera& cam) {
 }
 
 void game::apply_physics(f32 gravity, camera& cam, chunk::map& chunks) {
-    auto raycast = get_raycast({ cam.position.x, cam.position.y - 1.2f, cam.position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
+    auto raycast = get_raycast({ cam.position.x, cam.position.y - 0.4f, cam.position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
     if (raycast.has_value()) {
         cam.position.y = (std::floor(raycast->pos.y)) + 2.0f;
         cam.velocity.y = 0;
