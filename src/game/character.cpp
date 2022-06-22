@@ -39,17 +39,19 @@ void character::apply_movement(const camera& cam, glm::vec3 input_vector) {
     math::normalize(movement_matrix[2]);
 
     input_vector = movement_matrix * input_vector;
-    math::normalize(input_vector);
 
     auto accel_vector = input_vector * movement_accel;
 
     glm::vec3 move_vector = { velocity.x, 0.0f, velocity.z };
     move_vector += accel_vector * (1/60.0f);
 
-    auto len = glm::length(move_vector);
-    if (len > max_movement_speed) {
-        move_vector /= len;
-        move_vector *= max_movement_speed;
+    if (math::is_non_zero(move_vector) & math::is_non_zero(input_vector)) {
+        auto len = glm::length(move_vector);
+        auto max = max_movement_speed * glm::length(input_vector);
+        if (len > max) {
+            move_vector /= len;
+            move_vector *= max;
+        }
     }
     velocity = { move_vector.x, velocity.y, move_vector.z };
 }
