@@ -21,8 +21,12 @@ void character::handle_input(const camera& cam, u32 buttons_down) {
         if (std::abs(joystick_input_vector.y) < 6.0f) {
             joystick_input_vector.y = 0.0f;
         }
-        glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
-        apply_movement(cam, input_vector);
+        if (joystick_input_vector.x == 0.0f && joystick_input_vector.y == 0.0f) {
+            apply_no_movement();
+        } else {
+            glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
+            apply_movement(cam, input_vector);
+        }
     } else {
         apply_no_movement();
     }
