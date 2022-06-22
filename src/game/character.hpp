@@ -8,7 +8,7 @@ namespace game {
         glm::vec3 position;
         glm::vec3 velocity;
 
-        void handle_input(const camera& cam, u32 buttons_down);
+        void handle_input(const camera& cam);
 
         void apply_movement(const camera& cam, glm::vec3 input_vector);
         void apply_no_movement();

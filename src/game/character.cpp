@@ -11,7 +11,7 @@ constexpr f32 max_movement_speed = 9.0f;
 constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 0.6f;
 
-void character::handle_input(const camera& cam, u32 buttons_down) {
+void character::handle_input(const camera& cam) {
     auto joystick_input_vector = input::get_joystick_input_vector();
 
     if (math::is_non_zero(joystick_input_vector)) {
