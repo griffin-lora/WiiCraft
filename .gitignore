@@ -5,4 +5,5 @@ lib
 *.dol
 *.iso
 *.o
+callgrind.*
 usb.sh
