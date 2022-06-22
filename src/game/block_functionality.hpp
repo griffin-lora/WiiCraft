@@ -28,6 +28,8 @@ namespace game {
         static constexpr void add_general_vertices(Vf&, math::vector3u8) { }
 
         static constexpr std::array<math::box, 0> get_boxes() { return {}; }
+
+        static constexpr f32 get_height() { return 0.0f; }
     };
 
     constexpr u8 block_size = 4;
@@ -87,6 +89,8 @@ namespace game {
                 .greater_corner = { 1.0f, 1.0f, 1.0f }
             }
         }; }
+
+        static constexpr f32 get_height() { return 1.0f; }
     };
 
     
@@ -155,6 +159,8 @@ namespace game {
                 .greater_corner = { 1.0f, 0.5f, 1.0f }
             }
         }; }
+
+        static constexpr f32 get_height() { return 0.5f; }
     };
 
     template<>

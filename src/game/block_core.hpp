@@ -20,6 +20,7 @@ namespace game {
 
     inline bool is_block_fully_transparent(block::type type);
     inline bool is_block_upper_half_transparent(block::type type);
+    inline f32 get_block_height(block::type type);
 
     bool does_world_position_collide_with_block(const glm::vec3& world_position, block::type type, const glm::vec3& world_block_position);
 };
