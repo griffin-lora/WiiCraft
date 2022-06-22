@@ -17,7 +17,11 @@ console_state::console_state() {
 	rmode = VIDEO_GetPreferredMode(NULL);
 
 	// Allocate memory for the display in the uncached region
+	#ifndef PC_PORT
 	xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+	#else
+	xfb = (void*)0x0;
+	#endif
 
 	// Initialise the console, required for printf
 	console_init(xfb,20,20,rmode->fbWidth,rmode->xfbHeight,rmode->fbWidth*VI_DISPLAY_PIX_SZ);
