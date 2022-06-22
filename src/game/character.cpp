@@ -14,7 +14,11 @@ constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 0.6f;
 
 void character::handle_input(const camera& cam) {
+    #ifndef PC_PORT
     auto joystick_input_vector = input::get_joystick_input_vector();
+    #else
+    glm::vec2 joystick_input_vector = { 96.0f, 0.0f };
+    #endif
 
     if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
