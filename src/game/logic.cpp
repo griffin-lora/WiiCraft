@@ -118,9 +118,24 @@ void game::update_from_input(
         if (buttons_down & WPAD_BUTTON_B) {
             auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);
             if (backtracked_raycast.has_value()) {
-                backtracked_raycast->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTTOM } };
-                backtracked_raycast->ch.modified = true;
-                add_important_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
+                auto place_double_slab = [&]() {
+                    if (raycast->bl.tp == block::type::STONE_SLAB && raycast->bl.st.slab != block::slab_state::BOTH) {
+                        auto raycast_world_block_pos = floor_float_position<math::vector3s32>(raycast->pos);
+                        auto backtracked_world_block_pos = floor_float_position<math::vector3s32>(backtracked_raycast->pos);
+                        return (backtracked_world_block_pos.y - raycast_world_block_pos.y) == 1;
+                    }
+                    return false;
+                }();
+
+                if (place_double_slab) {
+                    raycast->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTH } };
+                    raycast->ch.modified = true;
+                    add_important_chunk_mesh_update(raycast->ch, raycast->bl_pos);
+                } else {
+                    backtracked_raycast->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTTOM } };
+                    backtracked_raycast->ch.modified = true;
+                    add_important_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
+                }
             }
         }
     }

@@ -137,57 +137,50 @@ namespace game {
             math::vector2u8 uv_pos = T::template get_uv_pos<face>();
             uv_pos *= block_size;
 
-            switch (st.slab) {
-                case block::slab_state::BOTTOM: {
-                    auto local_pos_offset = get_local_pos_offset(local_pos, { block_size, half_block_size, block_size });
-                    if constexpr (face == block::face::BOTTOM) {
-                        add_cube_bottom_vertices(
-                            vf,
-                            local_pos,
-                            local_pos_offset,
-                            uv_pos,
-                            get_uv_position_offset(uv_pos, { block_size, block_size })
-                        );
-                    } else if constexpr (face != block::face::TOP) {
-                        math::vector2u8 uv_pos = T::template get_uv_pos<face>();
-                        uv_pos *= block_size;
-                        
-                        call_face_func_for<face, void>(
-                            add_cube_front_vertices<Vf>,
-                            add_cube_back_vertices<Vf>,
-                            []() {},
-                            []() {},
-                            add_cube_right_vertices<Vf>,
-                            add_cube_left_vertices<Vf>,
-                            vf,
-                            local_pos,
-                            local_pos_offset,
-                            uv_pos,
-                            get_uv_position_offset(uv_pos, { block_size, half_block_size })
-                        );
-                    }
-                    return;
-                }
-                case block::slab_state::TOP: {
-                    return;
-                }
-                case block::slab_state::BOTH: {
+            if (st.slab != block::slab_state::BOTH) {
+                auto local_pos_offset = get_local_pos_offset(local_pos, { block_size, half_block_size, block_size });
+                if constexpr (face == block::face::BOTTOM) {
+                    add_cube_bottom_vertices(
+                        vf,
+                        local_pos,
+                        local_pos_offset,
+                        uv_pos,
+                        get_uv_position_offset(uv_pos, { block_size, block_size })
+                    );
+                } else if constexpr (face != block::face::TOP) {
+                    math::vector2u8 uv_pos = T::template get_uv_pos<face>();
+                    uv_pos *= block_size;
+                    
                     call_face_func_for<face, void>(
                         add_cube_front_vertices<Vf>,
                         add_cube_back_vertices<Vf>,
-                        add_cube_top_vertices<Vf>,
-                        add_cube_bottom_vertices<Vf>,
+                        []() {},
+                        []() {},
                         add_cube_right_vertices<Vf>,
                         add_cube_left_vertices<Vf>,
-                        vf, local_pos, get_local_pos_offset(local_pos, { block_size, block_size, block_size }), uv_pos, get_uv_position_offset(uv_pos, { block_size, block_size })
+                        vf,
+                        local_pos,
+                        local_pos_offset,
+                        uv_pos,
+                        get_uv_position_offset(uv_pos, { block_size, half_block_size })
                     );
                 }
+            } else {
+                call_face_func_for<face, void>(
+                    add_cube_front_vertices<Vf>,
+                    add_cube_back_vertices<Vf>,
+                    add_cube_top_vertices<Vf>,
+                    add_cube_bottom_vertices<Vf>,
+                    add_cube_right_vertices<Vf>,
+                    add_cube_left_vertices<Vf>,
+                    vf, local_pos, get_local_pos_offset(local_pos, { block_size, block_size, block_size }), uv_pos, get_uv_position_offset(uv_pos, { block_size, block_size })
+                );
             }
         }
 
         template<typename Vf>
         static constexpr void add_general_vertices(Vf& vf, math::vector3u8 local_pos, const block::state& st) {
-            if (st.slab == block::slab_state::BOTTOM) {
+            if (st.slab != block::slab_state::BOTH) {
                 local_pos *= block_size;
                 auto local_pos_offset = get_local_pos_offset(local_pos, { block_size, half_block_size, block_size });
 
