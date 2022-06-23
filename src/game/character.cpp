@@ -74,21 +74,71 @@ void character::apply_no_movement() {
     }
 }
 
+template<typename Fc, typename Fn>
+void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, Fc collision_func, Fn no_collision_func) {
+    auto raycast = get_raycast(origin, dir, 64, chunks);
+    if (raycast.has_value()) {
+        auto world_block_pos = floor_float_position<glm::vec3>(raycast->pos);
+        auto box = get_box_that_collides_with_world_position(raycast->pos, raycast->bl.tp, world_block_pos);
+        if (box.has_value()) {
+            collision_func(world_block_pos, *box);
+        } else {
+            no_collision_func();
+        }
+    } else {
+        no_collision_func();
+    }
+}
+
 void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
-        auto raycast = get_raycast({ position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
-        if (raycast.has_value()) {
-            auto world_block_pos = floor_float_position<glm::vec3>(raycast->pos);
-            auto box = get_box_that_collides_with_world_position(raycast->pos, raycast->bl.tp, world_block_pos);
-            if (box.has_value()) {
-                position.y = world_block_pos.y + box->greater_corner.y + 1.0f;
+        apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f },
+            [this](auto& world_block_pos, auto& box) {
+                position.y = world_block_pos.y + box.greater_corner.y + 1.0f;
                 velocity.y = 0.0f;
-            } else {
+            },
+            [this]() {
                 velocity.y -= gravity;
             }
-        } else {
-            velocity.y -= gravity;
+        );
+
+        if (velocity.x > 0.0f) {
+            apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 1.0f, 0.0f, 0.0f },
+                [this](auto& world_block_pos, auto& box) {
+                    position.x = world_block_pos.x - box.greater_corner.x + 0.5f;
+                    velocity.x = 0.0f;
+                },
+                []() {}
+            );
+        }
+        if (velocity.x < 0.0f) {
+            apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { -1.0f, 0.0f, 0.0f },
+                [this](auto& world_block_pos, auto& box) {
+                    position.x = world_block_pos.x + box.greater_corner.x + 0.5f;
+                    velocity.x = 0.0f;
+                },
+                []() {}
+            );
+        }
+
+        if (velocity.z > 0.0f) {
+            apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, 0.0f, 1.0f },
+                [this](auto& world_block_pos, auto& box) {
+                    position.z = world_block_pos.z - box.greater_corner.z + 0.5f;
+                    velocity.z = 0.0f;
+                },
+                []() {}
+            );
+        }
+        if (velocity.z < 0.0f) {
+            apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, 0.0f, -1.0f },
+                [this](auto& world_block_pos, auto& box) {
+                    position.z = world_block_pos.z + box.greater_corner.z + 0.5f;
+                    velocity.z = 0.0f;
+                },
+                []() {}
+            );
         }
     } else {
         velocity.y = 0.0f;
