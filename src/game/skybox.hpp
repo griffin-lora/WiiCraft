@@ -12,6 +12,6 @@ namespace game {
         skybox(const math::matrix view, const camera& cam);
         void update(const math::matrix view, const camera& cam);
         void update_if_needed(const math::matrix view, const camera& cam);
-        void draw(const gfx::texture& texture) const;
+        void draw() const;
     };
 }

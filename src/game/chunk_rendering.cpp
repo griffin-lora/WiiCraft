@@ -37,9 +37,8 @@ void game::draw_chunk(const chunk& chunk) {
     chunk.disp_list.call();
 }
 
-void game::draw_chunks(const gfx::texture& chunk_tex, const math::matrix view, const camera& cam, chunk::map& chunks) {
+void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
 	game::init_chunk_drawing();
-	gfx::load(chunk_tex);
 	if (cam.update_view) {
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.update_model_view(view);

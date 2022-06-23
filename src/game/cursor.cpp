@@ -42,7 +42,7 @@ static void init_drawing() {
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 
 	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
-	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
 
 	//
 
@@ -57,10 +57,9 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void cursor::draw(const gfx::texture& texture) const {
+void cursor::draw() const {
     init_drawing();
 
-    gfx::load(texture);
 	tf.load(GX_PNMTX3);
 
     disp_list.call();

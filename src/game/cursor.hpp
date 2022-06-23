@@ -11,6 +11,6 @@ namespace game {
 
         cursor();
 
-        void draw(const gfx::texture& texture) const;
+        void draw() const;
     };
 };

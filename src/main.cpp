@@ -58,6 +58,11 @@ int main(int argc, char** argv) {
 	gfx::set_filtering_mode(chunk_tex, GX_NEAR, GX_NEAR);
 	gfx::set_filtering_mode(icons_tex, GX_NEAR, GX_NEAR);
 
+
+	gfx::load(chunk_tex, GX_TEXMAP0);
+	gfx::load(icons_tex, GX_TEXMAP1);
+	gfx::load(skybox_tex, GX_TEXMAP2);
+
 	math::matrix44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
 	
@@ -123,13 +128,13 @@ int main(int argc, char** argv) {
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
-		skybox.draw(skybox_tex);
-		game::draw_chunks(chunk_tex, view, cam, chunks);
+		skybox.draw();
+		game::draw_chunks(view, cam, chunks);
 		bl_sel.update_if_needed(view, cam);
 		bl_sel.draw(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		cursor.draw(icons_tex);
+		cursor.draw();
 
 		game::reset_update_params(cam);
 
