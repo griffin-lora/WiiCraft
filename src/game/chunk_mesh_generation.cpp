@@ -13,7 +13,7 @@
 using namespace game;
 
 template<typename Bf, block::face face>
-inline static bool should_add_vertices_for_face(const chunk& chunk, math::vector3s32 local_pos) {
+inline static bool should_add_vertices_for_face(const chunk& chunk, const math::vector3s32& local_pos) {
     if (is_block_position_at_face_edge<face>(local_pos)) {
         // We are at the edge of the block, so we should check the neighbor chunk.
         auto nb = get_neighbor<face>(chunk.nh);
@@ -35,7 +35,7 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, math::vector
 }
 
 template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, math::vector3s32 pos) {
+static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, const math::vector3s32& pos) {
     if (should_add_vertices_for_face<Bf, face>(chunk, pos)) {
         Bf::template add_face_vertices<face>(vf, block_pos);
     }
@@ -50,31 +50,38 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         };
     };
 
-    iterate_over_chunk_positions_and_blocks<u8>(chunk.blocks, [&chunk, &building_verts, &vert_it, &vf](auto block_pos, auto& block) {
-        auto type = block.tp;
-        switch (type) {
-            default: return;
-            EVAL_BLOCK_FUNCTIONALITY_CASES(X(
-                if (Bf::is_visible()) {
-                    math::vector3u8 pos = block_pos;
-                    add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, pos);
-                    add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, pos);
-                    add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, pos);
-                    add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, pos);
-                    add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, pos);
-                    add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, pos);
-                    Bf::add_general_vertices(vf, block_pos);
+    for (u8 x = 0; x < (u8)chunk::SIZE; x++) {
+        for (u8 y = 0; y < (u8)chunk::SIZE; y++) {
+            for (u8 z = 0; z < (u8)chunk::SIZE; z++) {
+                math::vector3u8 block_pos = {x, y, z};
+                auto& block = chunk.blocks[get_index_from_position(block_pos)];
+
+                auto type = block.tp;
+                switch (type) {
+                    default: return;
+                    EVAL_BLOCK_FUNCTIONALITY_CASES(X(
+                        if (Bf::is_visible()) {
+                            math::vector3u8 pos = block_pos;
+                            add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, pos);
+                            add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, pos);
+                            add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, pos);
+                            add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, pos);
+                            add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, pos);
+                            add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, pos);
+                            Bf::add_general_vertices(vf, block_pos);
+                        }
+                        break;
+                    ))
                 }
-                break;
-            ))
+                std::size_t vertex_count = vert_it - building_verts.begin();
+                if (vertex_count > chunk::MAX_VERTEX_COUNT) {
+                    dbg::error([vertex_count]() {
+                        printf("Chunk vertex count is too high: %d\n", vertex_count);
+                    });
+                }
+            }
         }
-        std::size_t vertex_count = vert_it - building_verts.begin();
-        if (vertex_count > chunk::MAX_VERTEX_COUNT) {
-            dbg::error([vertex_count]() {
-                printf("Chunk vertex count is too high: %d\n", vertex_count);
-            });
-        }
-    });
+    }
 
     std::size_t vertex_count = vert_it - building_verts.begin();
 
