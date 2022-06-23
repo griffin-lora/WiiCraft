@@ -96,18 +96,17 @@ namespace game {
     struct slab_block_functionality {
         template<block::face face>
         static constexpr bool is_face_visible(const block::state& st, const block& neighbor) {
-            if (st.slab == block::slab_state::BOTTOM) {
+            if constexpr (face == block::face::TOP) {
                 return is_block_bottom_half_transparent(neighbor);
-            } else if (st.slab == block::slab_state::TOP) {
+            } else if constexpr (face == block::face::BOTTOM) {
                 return is_block_top_half_transparent(neighbor);
             } else {
-                if constexpr (face == block::face::TOP) {
-                    return is_block_bottom_half_transparent(neighbor);
-                } else if constexpr (face == block::face::BOTTOM) {
-                    return is_block_top_half_transparent(neighbor);
-                } else {
-                    return is_block_bottom_half_transparent(neighbor) || is_block_top_half_transparent(neighbor);
+                switch (st.slab) {
+                    case block::slab_state::BOTTOM: return is_block_bottom_half_transparent(neighbor);
+                    case block::slab_state::TOP: return is_block_top_half_transparent(neighbor);
+                    default: break;
                 }
+                return is_block_bottom_half_transparent(neighbor) || is_block_top_half_transparent(neighbor);
             }
         }
 
