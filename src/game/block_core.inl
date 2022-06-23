@@ -21,12 +21,3 @@ inline bool game::is_block_upper_half_transparent(block::type type) {
         )
     }
 }
-
-inline f32 game::get_block_height(block::type type) {
-    switch (type) {
-        default: return 0.0f;
-        EVAL_BLOCK_FUNCTIONALITY_CASES(
-            return Bf::get_height();
-        )
-    }
-}

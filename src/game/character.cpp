@@ -79,8 +79,14 @@ void character::apply_physics(chunk::map& chunks) {
     if (block.has_value() && block->get().tp == block::type::AIR) {
         auto raycast = get_raycast({ position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f }, 64, chunks);
         if (raycast.has_value()) {
-            position.y = (std::floor(raycast->pos.y)) + 1.0f + get_block_height(raycast->bl.tp);
-            velocity.y = 0.0f;
+            auto world_block_pos = floor_float_position<glm::vec3>(raycast->pos);
+            auto box = get_box_that_collides_with_world_position(raycast->pos, raycast->bl.tp, world_block_pos);
+            if (box.has_value()) {
+                position.y = world_block_pos.y + box->greater_corner.y + 1.0f;
+                velocity.y = 0.0f;
+            } else {
+                velocity.y -= gravity;
+            }
         } else {
             velocity.y -= gravity;
         }
