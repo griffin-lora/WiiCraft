@@ -93,6 +93,9 @@ int main(int argc, char** argv) {
 	game::update_perspective(cam, perspective_3d);
 
 	bool first_frame = true;
+	#ifdef PC_PORT
+	u16 frame_count = 0;
+	#endif
 
 	game::chunk::map chunks;
 	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
@@ -155,5 +158,11 @@ int main(int argc, char** argv) {
 		VIDEO_Flush();
 		VIDEO_WaitVSync();
 		draw.fb_index ^= 1;
+		
+		#ifdef PC_PORT
+		if (++frame_count == 1200) {
+			std::exit(0);
+		}
+		#endif
 	}
 }
