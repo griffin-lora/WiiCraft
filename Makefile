@@ -25,10 +25,10 @@ INCLUDES	:=  src lib
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	= -g -O3 -Wall $(MACHDEP) $(INCLUDE)
+CFLAGS	= -O3 -Wall $(MACHDEP) $(INCLUDE)
 CXXFLAGS	=	$(CFLAGS)
 
-LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
+LDFLAGS	=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
