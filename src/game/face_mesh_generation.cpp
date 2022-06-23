@@ -2,13 +2,13 @@
 
 using namespace game;
 
-std::size_t game::get_block_vertex_count(block::type type) {
+std::size_t game::get_block_vertex_count(const block& block) {
     return
-        get_face_vertex_count<block::face::FRONT>(type) +
-        get_face_vertex_count<block::face::BACK>(type) +
-        get_face_vertex_count<block::face::TOP>(type) +
-        get_face_vertex_count<block::face::BOTTOM>(type) +
-        get_face_vertex_count<block::face::RIGHT>(type) +
-        get_face_vertex_count<block::face::LEFT>(type) + 
-        get_general_vertex_count(type);
+        get_face_vertex_count<block::face::FRONT>(block) +
+        get_face_vertex_count<block::face::BACK>(block) +
+        get_face_vertex_count<block::face::TOP>(block) +
+        get_face_vertex_count<block::face::BOTTOM>(block) +
+        get_face_vertex_count<block::face::RIGHT>(block) +
+        get_face_vertex_count<block::face::LEFT>(block) + 
+        get_general_vertex_count(block);
 }

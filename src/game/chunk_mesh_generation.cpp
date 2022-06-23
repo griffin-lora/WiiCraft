@@ -13,7 +13,7 @@
 using namespace game;
 
 template<typename Bf, block::face face>
-inline static bool should_add_vertices_for_face(const chunk& chunk, const math::vector3s32& local_pos) {
+inline static bool should_add_vertices_for_face(const chunk& chunk, const block::state& block_state, const math::vector3s32& local_pos) {
     if (is_block_position_at_face_edge<face>(local_pos)) {
         // We are at the edge of the block, so we should check the neighbor chunk.
         auto nb = get_neighbor<face>(chunk.nh);
@@ -22,7 +22,7 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, const math::
             face_block_pos = get_local_block_position_in_s32(face_block_pos);
             
             auto& block = nb->get().blocks[get_index_from_position(face_block_pos)];
-            return Bf::template is_face_visible<face>(block.tp);
+            return Bf::template is_face_visible<face>(block_state, block);
         }
 
         return false;
@@ -30,14 +30,14 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, const math::
         math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
         
         auto& block = chunk.blocks[get_index_from_position(face_block_pos)];
-        return Bf::template is_face_visible<face>(block.tp);
+        return Bf::template is_face_visible<face>(block_state, block);
     }
 }
 
 template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, const math::vector3s32& pos) {
-    if (should_add_vertices_for_face<Bf, face>(chunk, pos)) {
-        Bf::template add_face_vertices<face>(vf, block_pos);
+static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, const block::state& block_state, const math::vector3s32& pos) {
+    if (should_add_vertices_for_face<Bf, face>(chunk, block_state, pos)) {
+        Bf::template add_face_vertices<face>(vf, block_pos, block_state);
     }
 }
 
@@ -56,19 +56,18 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
                 math::vector3u8 block_pos = {x, y, z};
                 auto& block = chunk.blocks[get_index_from_position(block_pos)];
 
-                auto type = block.tp;
-                switch (type) {
+                switch (block.tp) {
                     default: return;
                     EVAL_BLOCK_FUNCTIONALITY_CASES(X(
-                        if (Bf::is_visible()) {
+                        if (Bf::is_visible(block.st)) {
                             math::vector3u8 pos = block_pos;
-                            add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, pos);
-                            add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, pos);
-                            add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, pos);
-                            add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, pos);
-                            add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, pos);
-                            add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, pos);
-                            Bf::add_general_vertices(vf, block_pos);
+                            add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, block.st, pos);
+                            add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, block.st, pos);
+                            add_face_vertices_if_needed<Bf, block::face::TOP>(chunk, vf, block_pos, block.st, pos);
+                            add_face_vertices_if_needed<Bf, block::face::BOTTOM>(chunk, vf, block_pos, block.st, pos);
+                            add_face_vertices_if_needed<Bf, block::face::RIGHT>(chunk, vf, block_pos, block.st, pos);
+                            add_face_vertices_if_needed<Bf, block::face::LEFT>(chunk, vf, block_pos, block.st, pos);
+                            Bf::add_general_vertices(vf, block_pos, block.st);
                         }
                         break;
                     ))

@@ -19,9 +19,9 @@ namespace game {
         return pos;
     }
 
-    inline bool is_block_fully_transparent(block::type type);
-    inline bool is_block_upper_half_transparent(block::type type);
+    inline bool is_block_bottom_half_transparent(const block& block);
+    inline bool is_block_top_half_transparent(const block& block);
 
-    bool does_world_position_collide_with_block(const glm::vec3& world_position, block::type type, const glm::vec3& world_block_position);
-    std::optional<math::box> get_box_that_collides_with_world_position(const glm::vec3& world_position, block::type type, const glm::vec3& world_block_position);
+    bool does_world_position_collide_with_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
+    std::optional<math::box> get_box_that_collides_with_world_position(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
 };

@@ -38,7 +38,7 @@ std::optional<raycast> game::get_raycast(const glm::vec3& origin, const glm::vec
         auto index = get_index_from_position(raycast_block_pos);
         auto& block = current_chunk->get().blocks[index];
 
-        if (does_world_position_collide_with_block(raycast_pos, block.tp, floor_float_position<glm::vec3>(raycast_pos))) {
+        if (does_world_position_collide_with_block(raycast_pos, block, floor_float_position<glm::vec3>(raycast_pos))) {
             return raycast{
                 .pos = raycast_pos,
                 .ch_pos = *current_chunk_pos,
@@ -74,7 +74,7 @@ static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::
                 auto index = get_index_from_position(back_block_pos);
                 auto& block = chunk.blocks[index];
 
-                if (!does_world_position_collide_with_block(pos, block.tp, world_block_pos)) {
+                if (!does_world_position_collide_with_block(pos, block, world_block_pos)) {
                     return raycast{
                         .pos = pos,
                         .ch_pos = back_chunk_pos,
@@ -118,7 +118,7 @@ void game::update_from_input(
         if (buttons_down & WPAD_BUTTON_B) {
             auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);
             if (backtracked_raycast.has_value()) {
-                backtracked_raycast->bl = { .tp = block::type::STONE_SLAB };
+                backtracked_raycast->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTTOM } };
                 backtracked_raycast->ch.modified = true;
                 add_important_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
             }

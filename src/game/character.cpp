@@ -84,7 +84,7 @@ void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, con
     auto raycast = get_raycast(origin, dir, 64, chunks);
     if (raycast.has_value()) {
         auto world_block_pos = floor_float_position<glm::vec3>(raycast->pos);
-        auto box = get_box_that_collides_with_world_position(raycast->pos, raycast->bl.tp, world_block_pos);
+        auto box = get_box_that_collides_with_world_position(raycast->pos, raycast->bl, world_block_pos);
         if (box.has_value()) {
             collision_func(world_block_pos, *box);
         } else {

@@ -47,5 +47,17 @@ namespace game {
             bool right;
             bool left;
         };
+
+        enum class slab_state : u8 {
+            BOTTOM,
+            TOP,
+            BOTH
+        };
+
+        union state {
+            slab_state slab;
+        };
+
+        state st;
     };
 };

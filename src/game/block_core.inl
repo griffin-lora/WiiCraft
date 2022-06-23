@@ -4,20 +4,20 @@
 
 using namespace game;
 
-inline bool game::is_block_fully_transparent(block::type type) {
-    switch (type) {
+inline bool game::is_block_bottom_half_transparent(const block& block) {
+    switch (block.tp) {
         default: return false;
         EVAL_BLOCK_FUNCTIONALITY_CASES(
-            return Bf::is_fully_transparent();
+            return Bf::is_bottom_half_transparent(block.st);
         )
     }
 }
 
-inline bool game::is_block_upper_half_transparent(block::type type) {
-    switch (type) {
+inline bool game::is_block_top_half_transparent(const block& block) {
+    switch (block.tp) {
         default: return false;
         EVAL_BLOCK_FUNCTIONALITY_CASES(
-            return Bf::is_upper_half_transparent();
+            return Bf::is_top_half_transparent(block.st);
         )
     }
 }
