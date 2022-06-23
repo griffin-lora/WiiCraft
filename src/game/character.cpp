@@ -99,6 +99,7 @@ void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
         glm::vec3 low_origin = { position.x, position.y - 0.4f, position.z };
+        glm::vec3 high_origin = { position.x, position.y + 0.4f, position.z };
         if (velocity.y <= 0.0f) {
             apply_collision(chunks, low_origin, { 0.0f, -1.0f, 0.0f },
                 [this](auto& world_block_pos, auto& box) {
@@ -113,6 +114,16 @@ void character::apply_physics(chunk::map& chunks) {
             );
         } else {
             velocity.y -= gravity;
+        }
+
+        if (velocity.y >= 0.0f) {
+            apply_collision(chunks, high_origin, { 0.0f, 1.0f, 0.0f },
+                [this](auto& world_block_pos, auto& box) {
+                    position.y = world_block_pos.y - box.greater_corner.y;
+                    velocity.y = 0.0f;
+                },
+                []() {}
+            );
         }
 
         if (velocity.x >= 0.0f) {
