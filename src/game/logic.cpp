@@ -125,7 +125,7 @@ void game::update_from_input(
         }
     }
 
-    character.handle_input(cam);
+    character.handle_input(cam, buttons_down);
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 

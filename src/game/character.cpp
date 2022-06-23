@@ -12,13 +12,18 @@ constexpr f32 movement_accel = 40.0f;
 constexpr f32 max_movement_speed = 9.0f;
 constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 0.6f;
+constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam) {
+void character::handle_input(const camera& cam, u32 buttons_down) {
     #ifndef PC_PORT
     auto joystick_input_vector = input::get_joystick_input_vector();
     #else
     glm::vec2 joystick_input_vector = { 96.0f, 0.0f };
     #endif
+
+    if (buttons_down & WPAD_BUTTON_1 && grounded) {
+        velocity.y = jump_velocity;
+    }
 
     if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
@@ -93,17 +98,23 @@ void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, con
 void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
-        apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f },
-            [this](auto& world_block_pos, auto& box) {
-                position.y = world_block_pos.y + box.greater_corner.y + 1.0f;
-                velocity.y = 0.0f;
-            },
-            [this]() {
-                velocity.y -= gravity;
-            }
-        );
+        if (velocity.y <= 0.0f) {
+            apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, -1.0f, 0.0f },
+                [this](auto& world_block_pos, auto& box) {
+                    grounded = true;
+                    position.y = world_block_pos.y + box.greater_corner.y + 1.0f;
+                    velocity.y = 0.0f;
+                },
+                [this]() {
+                    grounded = false;
+                    velocity.y -= gravity;
+                }
+            );
+        } else {
+            velocity.y -= gravity;
+        }
 
-        if (velocity.x > 0.0f) {
+        if (velocity.x >= 0.0f) {
             apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 1.0f, 0.0f, 0.0f },
                 [this](auto& world_block_pos, auto& box) {
                     position.x = world_block_pos.x - box.greater_corner.x + 0.5f;
@@ -112,7 +123,7 @@ void character::apply_physics(chunk::map& chunks) {
                 []() {}
             );
         }
-        if (velocity.x < 0.0f) {
+        if (velocity.x <= 0.0f) {
             apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { -1.0f, 0.0f, 0.0f },
                 [this](auto& world_block_pos, auto& box) {
                     position.x = world_block_pos.x + box.greater_corner.x + 0.5f;
@@ -122,7 +133,7 @@ void character::apply_physics(chunk::map& chunks) {
             );
         }
 
-        if (velocity.z > 0.0f) {
+        if (velocity.z >= 0.0f) {
             apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, 0.0f, 1.0f },
                 [this](auto& world_block_pos, auto& box) {
                     position.z = world_block_pos.z - box.greater_corner.z + 0.5f;
@@ -131,7 +142,7 @@ void character::apply_physics(chunk::map& chunks) {
                 []() {}
             );
         }
-        if (velocity.z < 0.0f) {
+        if (velocity.z <= 0.0f) {
             apply_collision(chunks, { position.x, position.y - 0.4f, position.z }, { 0.0f, 0.0f, -1.0f },
                 [this](auto& world_block_pos, auto& box) {
                     position.z = world_block_pos.z + box.greater_corner.z + 0.5f;
