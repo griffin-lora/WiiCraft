@@ -214,13 +214,15 @@ namespace game {
                         .greater_corner = { 1.0f, 1.0f, 1.0f }
                     }
                 };
-                case block::slab_state::BOTH: return {
-                    math::box{
-                        .lesser_corner = { 0.0f, 0.0f, 0.0f },
-                        .greater_corner = { 1.0f, 1.0f, 1.0f }
-                    }
-                };
+                default: break;
             }
+
+            return {
+                math::box{
+                    .lesser_corner = { 0.0f, 0.0f, 0.0f },
+                    .greater_corner = { 1.0f, 1.0f, 1.0f }
+                }
+            };
         }
     };
 
