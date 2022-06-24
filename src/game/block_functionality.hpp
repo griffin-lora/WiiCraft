@@ -1,8 +1,8 @@
 #pragma once
 #include "block.hpp"
-#include "util.hpp"
-#include "face_mesh_generation_core.hpp"
 #include "block_core.hpp"
+#include "face_mesh_generation_core.hpp"
+#include "util.hpp"
 #include "math/box.hpp"
 #include <array>
 

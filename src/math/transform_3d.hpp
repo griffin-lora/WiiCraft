@@ -11,7 +11,7 @@ namespace math {
             transform_3d(const transform_3d&) = delete;
             transform_3d& operator=(const transform_3d&) = delete;
 
-            transform_3d(transform_3d&& other);
+            transform_3d(transform_3d&& other) noexcept;
 
             void set_position(const matrix view, f32 x, f32 y, f32 z);
             inline void update_model_view(const matrix view) {

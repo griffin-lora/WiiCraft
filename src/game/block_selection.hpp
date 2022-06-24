@@ -1,9 +1,9 @@
 #pragma once
-#include <optional>
 #include "math.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
 #include "logic.hpp"
+#include <optional>
 
 namespace game {
     struct block_selection {
@@ -17,6 +17,6 @@ namespace game {
         void handle_raycast(const math::matrix view, const std::optional<raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, const block& block);
+            void update_mesh(const math::matrix view, const raycast& raycast);
     };
-};
+}

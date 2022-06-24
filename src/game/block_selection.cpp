@@ -35,10 +35,10 @@ void block_selection::draw(const std::optional<raycast>& raycast) const {
     }
 }
 
-void block_selection::update_mesh(const math::matrix view, const math::vector3s32& ch_pos, math::vector3u8 bl_pos, const block& block) {
-    tf.set_position(view, ch_pos.x * game::chunk::SIZE, ch_pos.y * game::chunk::SIZE, ch_pos.z * game::chunk::SIZE);
+void block_selection::update_mesh(const math::matrix view, const raycast& raycast) {
+    tf.set_position(view, raycast.ch_pos.x * game::chunk::SIZE, raycast.ch_pos.y * game::chunk::SIZE, raycast.ch_pos.z * game::chunk::SIZE);
 
-    auto vertex_count = game::get_block_vertex_count(block);
+    auto vertex_count = game::get_block_vertex_count(raycast.bl);
     std::size_t disp_list_size = (
         4 + // GX_Begin
         vertex_count * 3 + // GX_Position3u8
@@ -48,13 +48,13 @@ void block_selection::update_mesh(const math::matrix view, const math::vector3s3
 
     disp_list.resize(disp_list_size);
 
-    disp_list.write_into([&bl_pos, &block, vertex_count]() {
+    disp_list.write_into([&raycast, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
         auto vf = [](u8 x, u8 y, u8 z, u8, u8) {
             GX_Position3u8(x, y, z);
             GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
         };
-        game::add_block_vertices(vf, bl_pos, block);
+        game::add_block_vertices(vf, raycast.bl_pos, raycast.bl);
         GX_End();
     });
 }
@@ -63,7 +63,7 @@ void block_selection::handle_raycast(const math::matrix view, const std::optiona
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->bl_pos != last_block_pos) {
-            update_mesh(view, raycast->ch_pos, raycast->bl_pos, raycast->bl);
+            update_mesh(view, *raycast);
         }
 
         last_block_pos = raycast->bl_pos;

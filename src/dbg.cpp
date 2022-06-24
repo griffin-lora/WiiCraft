@@ -1,7 +1,7 @@
 #include "dbg.hpp"
-#include <wiiuse/wpad.h>
-#include <gccore.h>
 #include <cstdlib>
+#include <gccore.h>
+#include <wiiuse/wpad.h>
 
 using namespace dbg;
 

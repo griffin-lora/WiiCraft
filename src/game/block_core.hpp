@@ -1,7 +1,7 @@
 #pragma once
 #include "block.hpp"
-#include "util.hpp"
 #include "math/box.hpp"
+#include "util.hpp"
 #include <optional>
 #include <vector>
 
@@ -24,4 +24,4 @@ namespace game {
 
     bool does_world_position_collide_with_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
     std::optional<math::box> get_box_that_collides_with_world_position(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
-};
+}

@@ -9,4 +9,4 @@ namespace game {
 
         ext::data_array<block> blocks;
     };
-};
+}

@@ -48,4 +48,4 @@ namespace game {
             tf.set_position(view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
         }
     };
-};
+}

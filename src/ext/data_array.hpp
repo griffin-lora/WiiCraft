@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include <malloc.h>
+#include <vector>
 
 namespace ext {
     // This is a custom container that stores a POD array.
@@ -11,8 +11,8 @@ namespace ext {
         std::size_t m_size = 0;
         public:
             inline data_array() = default;
-            inline data_array(std::size_t size) : m_data((T*)malloc(size * sizeof(T))), m_size(size) {}
-            inline data_array(data_array&& other) : m_data(other.m_data), m_size(other.m_size) {
+            inline explicit data_array(std::size_t size) : m_data((T*)malloc(size * sizeof(T))), m_size(size) {}
+            inline data_array(data_array&& other) noexcept : m_data(other.m_data), m_size(other.m_size) {
                 other.m_data = nullptr;
                 other.m_size = 0;
             }
@@ -26,7 +26,7 @@ namespace ext {
             data_array(const data_array& other) = delete;
             data_array& operator=(const data_array& other) = delete;
 
-            inline data_array& operator=(data_array&& other) {
+            inline data_array& operator=(data_array&& other) noexcept {
                 if (m_data != nullptr) {
                     free(m_data);
                 }

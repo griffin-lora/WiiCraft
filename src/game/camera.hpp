@@ -42,4 +42,4 @@ namespace game {
 
     void update_needed(math::matrix view, math::matrix44 perspective, camera& cam);
     void reset_update_params(camera& cam);
-};
+}

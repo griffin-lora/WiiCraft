@@ -13,4 +13,4 @@ namespace game {
 
         void draw() const;
     };
-};
+}

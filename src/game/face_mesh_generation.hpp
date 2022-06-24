@@ -57,4 +57,4 @@ namespace game {
         add_face_vertices<block::face::LEFT, Vf>(vf, local_position, block);
         add_general_vertices<Vf>(vf, local_position, block);
     }
-};
+}

@@ -29,4 +29,4 @@ namespace game {
         cursor& cursor,
         std::optional<raycast>& raycast
     );
-};
+}

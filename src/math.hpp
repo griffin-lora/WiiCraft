@@ -63,4 +63,4 @@ namespace math {
         T ret = a % b;
         return ret >= 0 ? ret : ret + b;
     }
-};
+}

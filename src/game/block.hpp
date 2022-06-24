@@ -60,4 +60,4 @@ namespace game {
 
         state st;
     };
-};
+}

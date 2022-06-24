@@ -10,7 +10,7 @@ namespace math {
             transform_2d(const transform_2d&) = delete;
             transform_2d& operator=(const transform_2d&) = delete;
 
-            transform_2d(transform_2d&& other);
+            transform_2d(transform_2d&& other) noexcept;
 
             void set_position(f32 x, f32 y);
 

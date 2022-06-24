@@ -2,7 +2,7 @@
 
 using namespace math;
 
-transform_3d::transform_3d(transform_3d&& other) {
+transform_3d::transform_3d(transform_3d&& other) noexcept {
     for (u8 i = 0; i < 3; i++) {
         for (u8 j = 0; j < 4; j++) {
             model[i][j] = other.model[i][j];

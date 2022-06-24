@@ -14,4 +14,4 @@ namespace game {
     void add_cube_right_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo);
     template<typename Vf>
     void add_cube_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo);
-};
+}

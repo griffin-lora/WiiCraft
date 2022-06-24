@@ -15,4 +15,4 @@ namespace game {
         stored_chunk::map& stored_chunks,
         std::vector<math::vector3s32>& inserted_chunk_positions
     );
-};
+}

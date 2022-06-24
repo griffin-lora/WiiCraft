@@ -28,4 +28,4 @@ namespace dbg {
         non_copyable(non_copyable&&) {}
         non_copyable& operator=(non_copyable&&) { return *this; }
     };
-};
+}
