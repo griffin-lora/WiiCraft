@@ -23,7 +23,7 @@ namespace gfx {
         std::array<void*, 2> frame_buffers{{ NULL, NULL }};
         void* gpfifo;
 
-        draw_state(color4 bkg);
+        explicit draw_state(color4 bkg);
     };
 
     template<typename F>

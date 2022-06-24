@@ -24,8 +24,8 @@ void game::manage_chunks_around_camera(
         // Remove chunks outside of the sphere of radius chunk_erasure_radius
         for (auto it = chunks.begin(); it != chunks.end();) {
             auto pos = it->first;
-            auto& chunk = it->second;
             if (math::squared_length(pos - cam_chunk_pos) > (chunk_erasure_radius * chunk_erasure_radius)) {
+                auto& chunk = it->second;
                 if (chunk.modified) {
                     // If the chunk is modified the chunk in the stored_chunks map
                     stored_chunks.insert(std::make_pair<math::vector3s32, game::stored_chunk>(std::move(pos), { .blocks = std::move(chunk.blocks) }));
