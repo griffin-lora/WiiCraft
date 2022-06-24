@@ -22,7 +22,7 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, const block:
             face_block_pos = get_local_block_position_in_s32(face_block_pos);
             
             auto& block = nb->get().blocks[get_index_from_position(face_block_pos)];
-            return Bf::template is_face_visible<face>(block_state, block);
+            return Bf::template is_face_visible_with_neighbor<face>(block_state, block);
         }
 
         return false;
@@ -30,12 +30,12 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, const block:
     math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
     
     auto& block = chunk.blocks[get_index_from_position(face_block_pos)];
-    return Bf::template is_face_visible<face>(block_state, block);
+    return Bf::template is_face_visible_with_neighbor<face>(block_state, block);
 }
 
 template<typename Bf, block::face face, typename Vf>
 static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, const block::state& block_state, const math::vector3s32& pos) {
-    if (Bf::template get_face_vertex_count<face>(block_state) != 0 && should_add_vertices_for_face<Bf, face>(chunk, block_state, pos)) {
+    if (Bf::template get_face_traits<face>(block_state).vertex_count != 0 && should_add_vertices_for_face<Bf, face>(chunk, block_state, pos)) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
     }
 }
@@ -58,7 +58,7 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
                 switch (block.tp) {
                     default: return;
                     EVAL_BLOCK_FUNCTIONALITY_CASES(X(
-                        if (Bf::is_visible(block.st)) {
+                        if (Bf::get_block_traits(block.st).visible) {
                             math::vector3u8 pos = block_pos;
                             add_face_vertices_if_needed<Bf, block::face::FRONT>(chunk, vf, block_pos, block.st, pos);
                             add_face_vertices_if_needed<Bf, block::face::BACK>(chunk, vf, block_pos, block.st, pos);

@@ -19,8 +19,38 @@ namespace game {
         return pos;
     }
 
-    inline bool is_block_bottom_half_transparent(const block& block);
-    inline bool is_block_top_half_transparent(const block& block);
+    template<block::face face>
+    struct invert_face;
+
+    template<>
+    struct invert_face<block::face::FRONT> {
+        static constexpr block::face value = block::face::BACK;
+    };
+
+    template<>
+    struct invert_face<block::face::BACK> {
+        static constexpr block::face value = block::face::FRONT;
+    };
+
+    template<>
+    struct invert_face<block::face::TOP> {
+        static constexpr block::face value = block::face::BOTTOM;
+    };
+
+    template<>
+    struct invert_face<block::face::BOTTOM> {
+        static constexpr block::face value = block::face::TOP;
+    };
+
+    template<>
+    struct invert_face<block::face::RIGHT> {
+        static constexpr block::face value = block::face::LEFT;
+    };
+
+    template<>
+    struct invert_face<block::face::LEFT> {
+        static constexpr block::face value = block::face::RIGHT;
+    };
 
     bool does_world_position_collide_with_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
     std::optional<math::box> get_box_that_collides_with_world_position(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
