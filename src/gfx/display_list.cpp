@@ -1,6 +1,6 @@
 #include "display_list.hpp"
-#include <malloc.h>
 #include <cstring>
+#include <malloc.h>
 
 using namespace gfx;
 
@@ -10,7 +10,7 @@ display_list::~display_list() {
     }
 }
 
-display_list::display_list(display_list&& other) : m_data(other.m_data), m_size(other.m_size) {
+display_list::display_list(display_list&& other) noexcept : m_data(other.m_data), m_size(other.m_size) {
     other.m_data = nullptr;
     other.m_size = 0;    
 }

@@ -1,8 +1,8 @@
 #pragma once
+#include "logic.hpp"
 #include "math.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
-#include "logic.hpp"
 #include <optional>
 
 namespace game {

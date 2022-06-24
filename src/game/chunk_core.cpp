@@ -1,8 +1,8 @@
 #include "chunk_core.hpp"
+#include "chunk_math.hpp"
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "glm/gtc/noise.hpp"
-#include "chunk_math.hpp"
 
 using namespace game;
 

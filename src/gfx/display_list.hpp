@@ -13,7 +13,7 @@ namespace gfx {
             display_list(const display_list&) = delete;
             display_list& operator=(const display_list&) = delete;
 
-            display_list(display_list&& other);
+            display_list(display_list&& other) noexcept;
 
             void resize(std::size_t size);
 

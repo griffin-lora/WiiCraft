@@ -1,10 +1,10 @@
 #include "character.hpp"
-#include "logic.hpp"
-#include "input.hpp"
-#include "chunk_core.hpp"
-#include "common.hpp"
 #include "block_core.hpp"
 #include "block_core.inl"
+#include "chunk_core.hpp"
+#include "common.hpp"
+#include "input.hpp"
+#include "logic.hpp"
 
 using namespace game;
 

@@ -24,17 +24,6 @@ namespace game {
     void update_look(camera& cam);
 
     void rotate_camera(camera& cam, const glm::vec2& input_vector, f32 rotate_speed);
-    
-    template<typename T>
-    T get_camera_look_axis_aligned_vector(const camera& cam) {
-        if (std::abs(cam.look.x) > std::abs(cam.look.y) && std::abs(cam.look.x) > std::abs(cam.look.z)) {
-            return { cam.look.x, 0, 0 };
-        } else if (std::abs(cam.look.y) > std::abs(cam.look.x) && std::abs(cam.look.y) > std::abs(cam.look.z)) {
-            return { 0, cam.look.y, 0 };
-        } else {
-            return { 0, 0, cam.look.z };
-        }
-    }
 
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);

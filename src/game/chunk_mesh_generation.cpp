@@ -1,13 +1,13 @@
 #include "chunk_mesh_generation.hpp"
-#include "face_mesh_generation.hpp"
-#include "face_mesh_generation_core.hpp"
-#include "face_mesh_generation_core.inl"
-#include "chunk_math.hpp"
 #include "block_core.hpp"
 #include "block_core.inl"
+#include "chunk_math.hpp"
 #include "chunk_core.hpp"
 #include "chunk_math.hpp"
 #include "dbg.hpp"
+#include "face_mesh_generation.hpp"
+#include "face_mesh_generation_core.hpp"
+#include "face_mesh_generation_core.inl"
 #include <cstdio>
 
 using namespace game;
@@ -26,12 +26,11 @@ inline static bool should_add_vertices_for_face(const chunk& chunk, const block:
         }
 
         return false;
-    } else {
-        math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
-        
-        auto& block = chunk.blocks[get_index_from_position(face_block_pos)];
-        return Bf::template is_face_visible<face>(block_state, block);
     }
+    math::vector3s32 face_block_pos = get_face_offset_position<face>(local_pos);
+    
+    auto& block = chunk.blocks[get_index_from_position(face_block_pos)];
+    return Bf::template is_face_visible<face>(block_state, block);
 }
 
 template<typename Bf, block::face face, typename Vf>

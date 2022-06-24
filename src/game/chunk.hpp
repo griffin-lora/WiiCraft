@@ -1,13 +1,13 @@
 #pragma once
+#include "block.hpp"
+#include "common.hpp"
+#include "math.hpp"
+#include "ext/data_array.hpp"
+#include "gfx/display_list.hpp"
+#include "math/transform_3d.hpp"
 #include <unordered_map>
 #include <optional>
 #include <functional>
-#include "math.hpp"
-#include "ext/data_array.hpp"
-#include "block.hpp"
-#include "gfx/display_list.hpp"
-#include "math/transform_3d.hpp"
-#include "common.hpp"
 
 namespace game {
     struct chunk {
