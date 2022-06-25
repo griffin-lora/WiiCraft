@@ -13,6 +13,6 @@ namespace game {
         std::optional<math::vector3s32>& last_cam_chunk_pos,
         chunk::map& chunks,
         stored_chunk::map& stored_chunks,
-        std::vector<math::vector3s32>& inserted_chunk_positions
+        std::vector<math::vector3s32>& chunk_positions_state
     );
 }
