@@ -1,6 +1,7 @@
 #pragma once
 #include "logic.hpp"
 #include "math.hpp"
+#include "ext/data_array.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
 #include <optional>
@@ -14,9 +15,9 @@ namespace game {
 
         void update_if_needed(const math::matrix view, const camera& cam);
         void draw(const std::optional<raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, const std::optional<raycast>& raycast);
+        void handle_raycast(const math::matrix view, ext::data_array<chunk::vertex>& building_vertices, const std::optional<raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, const raycast& raycast);
+            void update_mesh(const math::matrix view, ext::data_array<chunk::vertex>& building_vertices, const raycast& raycast);
     };
 }

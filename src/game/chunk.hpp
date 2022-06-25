@@ -17,7 +17,7 @@ namespace game {
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
-        static constexpr std::size_t MAX_VERTEX_COUNT = 0xFFFF;
+        static constexpr std::size_t MAX_VERTEX_COUNT = 0xefff;
 
         struct vertex {
             math::vector3u8 pos;

@@ -35,10 +35,19 @@ void block_selection::draw(const std::optional<raycast>& raycast) const {
     }
 }
 
-void block_selection::update_mesh(const math::matrix view, const raycast& raycast) {
-    tf.set_position(view, raycast.ch_pos.x * game::chunk::SIZE, raycast.ch_pos.y * game::chunk::SIZE, raycast.ch_pos.z * game::chunk::SIZE);
+void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::vertex>& building_verts, const raycast& raycast) {
+    tf.set_position(view, raycast.ch_pos.x * chunk::SIZE, raycast.ch_pos.y * chunk::SIZE, raycast.ch_pos.z * chunk::SIZE);
 
-    auto vertex_count = game::get_block_vertex_count(raycast.bl);
+    auto vert_it = building_verts.begin();
+
+    auto vf = [&vert_it](u8 x, u8 y, u8 z, u8, u8) {
+        *vert_it++ = {
+            .pos = { x, y, z }
+        };
+    };
+    add_block_vertices(vf, raycast.bl_pos, raycast.bl);
+
+    auto vertex_count = vert_it - building_verts.begin();
     std::size_t disp_list_size = (
         4 + // GX_Begin
         vertex_count * 3 + // GX_Position3u8
@@ -48,22 +57,23 @@ void block_selection::update_mesh(const math::matrix view, const raycast& raycas
 
     disp_list.resize(disp_list_size);
 
-    disp_list.write_into([&raycast, vertex_count]() {
+    disp_list.write_into([&building_verts, &vert_it, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
-        auto vf = [](u8 x, u8 y, u8 z, u8, u8) {
-            GX_Position3u8(x, y, z);
+
+        for (auto it = building_verts.begin(); it != vert_it; ++it) {
+            GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
             GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
-        };
-        game::add_block_vertices(vf, raycast.bl_pos, raycast.bl);
+        }
+        
         GX_End();
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, const std::optional<raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, ext::data_array<chunk::vertex>& building_verts, const std::optional<raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->bl_pos != last_block_pos) {
-            update_mesh(view, *raycast);
+            update_mesh(view, building_verts, *raycast);
         }
 
         last_block_pos = raycast->bl_pos;

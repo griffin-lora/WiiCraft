@@ -6,7 +6,6 @@ namespace game {
     /** Vf stands for a vertex function type
      * vf(u8 x, u8 y, u8 z, u8 u, u8 v)
      */
-    std::size_t get_block_vertex_count(const block& block);
     template<typename Vf>
     void add_block_vertices(Vf& vf, math::vector3u8 block_pos, const block& block) {
         switch (block.tp) {

@@ -35,7 +35,7 @@ namespace game {
 
         BF_FUNC block_traits get_block_traits(bl_st) { return {
             .visible = true,
-            .general_vertex_count = 0
+            .general_visible = false
         }; }
 
         template<typename Vf>
@@ -43,8 +43,8 @@ namespace game {
 
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st) { return {
-            .partially_transparent = false,
-            .vertex_count = 4
+            .visible = true,
+            .partially_transparent = false
         }; }
 
         template<block::face face>
@@ -86,7 +86,7 @@ namespace game {
 
         BF_FUNC block_traits get_block_traits(bl_st st) { return {
             .visible = true,
-            .general_vertex_count = (st.slab != block::slab_state::BOTH ? 4u : 0u)
+            .general_visible = (st.slab != block::slab_state::BOTH)
         }; }
 
         template<typename Vf>
@@ -100,13 +100,13 @@ namespace game {
 
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st st) { return {
-            .partially_transparent = false,
-            .vertex_count = [&st]() -> std::size_t {
+            .visible = [&st]() {
                 if constexpr (face == block::face::TOP || face == block::face::BOTTOM) {
-                    return st.slab != state::BOTH ? 0 : 4;
+                    return st.slab == state::BOTH;
                 }
-                return 4;
-            }()
+                return true;
+            }(),
+            .partially_transparent = false
         }; }
 
         template<block::face face>

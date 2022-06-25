@@ -98,8 +98,8 @@ int main(int argc, char** argv) {
 	#endif
 
 	game::chunk::map chunks;
-	// This is a variable whose lifetime is bound to the update_mesh function normally. However, since it takes up quite a bit of memory, it is stored here.
-	ext::data_array<game::chunk::vertex> building_vertices(game::chunk::MAX_VERTEX_COUNT + 0x30);
+	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
+	ext::data_array<game::chunk::vertex> building_vertices(game::chunk::MAX_VERTEX_COUNT + 0x100);
 	game::stored_chunk::map stored_chunks;
 
 	input::state inp;
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
 	for (;;) {
 		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
-		bl_sel.handle_raycast(view, raycast);
+		bl_sel.handle_raycast(view, building_vertices, raycast);
 
 		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
 		character.apply_velocity();

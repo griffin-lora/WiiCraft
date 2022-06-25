@@ -4,11 +4,11 @@
 namespace game {
     struct block_traits {
         bool visible = false;
-        std::size_t general_vertex_count = 0;
+        bool general_visible = false;
     };
 
     struct face_traits {
+        bool visible = false;
         bool partially_transparent = true;
-        std::size_t vertex_count = 0;
     };
 };

@@ -35,7 +35,7 @@ static bool should_add_vertices_for_face(const chunk& chunk, const block::state&
 
 template<typename Bf, block::face face, typename Vf>
 static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector3u8 block_pos, const block::state& block_state, const math::vector3s32& pos) {
-    if (Bf::template get_face_traits<face>(block_state).vertex_count != 0 && should_add_vertices_for_face<Bf, face>(chunk, block_state, pos)) {
+    if (Bf::template get_face_traits<face>(block_state).visible && should_add_vertices_for_face<Bf, face>(chunk, block_state, pos)) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
     }
 }
