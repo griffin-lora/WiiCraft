@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::character character = {
-		.position = { 0.0f, 10.0f, 0.0f },
+		.position = { 0.0f, 2.0f, 0.0f },
 		.velocity = { 0.0f, 0.0f, 0.0f }
 	};
 
