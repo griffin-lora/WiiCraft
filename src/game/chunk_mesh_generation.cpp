@@ -13,7 +13,7 @@
 using namespace game;
 
 template<typename Bf, block::face face>
-inline static bool should_add_vertices_for_face(const chunk& chunk, const block::state& block_state, const math::vector3s32& local_pos) {
+static bool should_add_vertices_for_face(const chunk& chunk, const block::state& block_state, const math::vector3s32& local_pos) {
     if (is_block_position_at_face_edge<face>(local_pos)) {
         // We are at the edge of the block, so we should check the neighbor chunk.
         auto nb = get_neighbor<face>(chunk.nh);
