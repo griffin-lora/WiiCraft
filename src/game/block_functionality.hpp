@@ -115,4 +115,36 @@ namespace game {
             );
         }
     };
+
+    template<>
+    struct block_functionality<block::type::GRASS> : public cube_block_functionality<block_functionality<block::type::GRASS>> {
+        template<block::face face>
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            using v2u8 = math::vector2u8;
+            return call_face_func_for<face, v2u8>(
+                []() { return v2u8{3, 0}; },
+                []() { return v2u8{3, 0}; },
+                []() { return v2u8{0, 0}; },
+                []() { return v2u8{2, 0}; },
+                []() { return v2u8{3, 0}; },
+                []() { return v2u8{3, 0}; }
+            );
+        }
+    };
+
+    template<>
+    struct block_functionality<block::type::DIRT> : public cube_block_functionality<block_functionality<block::type::DIRT>> {
+        template<block::face face>
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            return { 2, 0 };
+        }
+    };
+
+    template<>
+    struct block_functionality<block::type::STONE> : public cube_block_functionality<block_functionality<block::type::STONE>> {
+        template<block::face face>
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            return { 1, 0 };
+        }
+    };
 }

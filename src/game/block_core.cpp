@@ -24,9 +24,8 @@ std::optional<math::box> game::get_box_that_collides_with_world_position(const g
             auto it = std::find_if(boxes.begin(), boxes.end(), [&offset_into_block_pos](auto& box) { return box.is_inside(offset_into_block_pos); });
             if (it != boxes.end()) {
                 return *it;
-            } else {
-                return {};
             }
+            return {};
         )
     }
 }

@@ -56,7 +56,7 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
                 auto& block = chunk.blocks[get_index_from_position(block_pos)];
 
                 switch (block.tp) {
-                    default: return;
+                    default: break;
                     EVAL_BLOCK_FUNCTIONALITY_CASES(X(
                         if (Bf::get_block_traits(block.st).visible) {
                             math::vector3u8 pos = block_pos;

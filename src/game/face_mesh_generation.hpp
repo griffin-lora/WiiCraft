@@ -10,7 +10,7 @@ namespace game {
     template<typename Vf>
     void add_block_vertices(Vf& vf, math::vector3u8 block_pos, const block& block) {
         switch (block.tp) {
-            default: return;
+            default: break;
             EVAL_BLOCK_FUNCTIONALITY_CASES(
                 Bf::add_face_vertices<block::face::FRONT>(vf, block_pos, block.st);
                 Bf::add_face_vertices<block::face::BACK>(vf, block_pos, block.st);
@@ -19,6 +19,7 @@ namespace game {
                 Bf::add_face_vertices<block::face::RIGHT>(vf, block_pos, block.st);
                 Bf::add_face_vertices<block::face::LEFT>(vf, block_pos, block.st);
                 Bf::add_general_vertices(vf, block_pos, block.st);
+                break;
             )
         }
     }
