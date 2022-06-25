@@ -2,6 +2,7 @@
 #include "block.hpp"
 #include "math/box.hpp"
 #include "util.hpp"
+#include "traits.hpp"
 #include <optional>
 #include <vector>
 
@@ -51,6 +52,11 @@ namespace game {
     struct invert_face<block::face::LEFT> {
         static constexpr block::face value = block::face::RIGHT;
     };
+
+    inline block_traits get_block_traits(const block& block);
+
+    template<block::face face>
+    inline face_traits get_neighbor_face_traits(const block& block);
 
     bool does_world_position_collide_with_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
     std::optional<math::box> get_box_that_collides_with_world_position(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);

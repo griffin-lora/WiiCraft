@@ -2,7 +2,7 @@
 #include "face_mesh_generation_core.hpp"
 
 template<typename Vf>
-void game::add_cube_front_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_front_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +x
     vf(lo.x,lo.y, l.z, u.x,u.y);	// Top Left of the quad (bottom)
     
@@ -14,7 +14,7 @@ void game::add_cube_front_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo
 }
 
 template<typename Vf>
-void game::add_cube_back_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_back_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -x
     vf( l.x, lo.y, l.z, u.x,u.y);	// Top Left of the quad (top)
 
@@ -27,7 +27,7 @@ void game::add_cube_back_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo,
 }
 
 template<typename Vf>
-void game::add_cube_top_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_top_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +y
     vf(l.x,lo.y,lo.z, u.x,u.y);	// Bottom Left Of The Quad (Back)
 
@@ -40,7 +40,7 @@ void game::add_cube_top_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, 
 }
 
 template<typename Vf>
-void game::add_cube_bottom_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_bottom_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -y
     vf(l.x, l.y, lo.z, u.x, u.y);		// Top Right Of The Quad (Front)
 
@@ -52,7 +52,7 @@ void game::add_cube_bottom_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 l
 }
 
 template<typename Vf>
-void game::add_cube_right_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_right_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // +z
     vf(lo.x, l.y,lo.z, u.x,uo.y);	// Top Right Of The Quad (Right)
 
@@ -64,7 +64,7 @@ void game::add_cube_right_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo
 }
 
 template<typename Vf>
-void game::add_cube_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
     // -z
     vf(lo.x, l.y, l.z, u.x,uo.y);	// Top Right Of The Quad (Left)
 
