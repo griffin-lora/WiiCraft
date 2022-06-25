@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
 		bl_sel.handle_raycast(view, raycast);
 
 		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
-		character.apply_physics(chunks);
+		character.apply_velocity();
 		character.update_camera(cam);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, inserted_chunk_positions);

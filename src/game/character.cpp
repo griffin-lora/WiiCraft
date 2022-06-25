@@ -166,7 +166,9 @@ void character::apply_physics(chunk::map& chunks) {
     } else {
         velocity.y = 0.0f;
     }
+}
 
+void character::apply_velocity() {
     position += velocity * (1.0f/60.0f);
 }
 

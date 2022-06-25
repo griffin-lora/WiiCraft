@@ -14,8 +14,9 @@ namespace game {
 
         void apply_movement(const camera& cam, glm::vec3 input_vector);
         void apply_no_movement();
-
+        
         void apply_physics(chunk::map& chunks);
+        void apply_velocity();
 
         void update_camera(camera& cam) const;
 
