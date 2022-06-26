@@ -43,7 +43,9 @@ namespace game {
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st) { return {
             .visible = true,
-            .partially_transparent = false
+            .partially_transparent = false,
+            .bottom_half_transparent = false,
+            .top_half_transparent = false,
         }; }
 
         template<block::face face>
@@ -112,11 +114,21 @@ namespace game {
                     case state::BOTTOM: if constexpr (face == block::face::BOTTOM) return false; return true;
                     case state::TOP: if constexpr (face == block::face::TOP) return false; return true;
                 }
-            }()
+            }(),
+            .bottom_half_transparent = (st.slab == state::TOP),
+            .top_half_transparent = (st.slab == state::BOTTOM)
         }; }
 
         template<block::face face>
-        BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block& block) { return get_neighbor_face_traits<face>(block).partially_transparent; }
+        BF_FUNC bool is_face_visible_with_neighbor(bl_st st, const block& block) {
+            auto traits = get_neighbor_face_traits<face>(block);
+            switch (st.slab) {
+                case state::BOTTOM: if constexpr (face != block::face::BOTTOM) return traits.bottom_half_transparent; break;
+                case state::TOP: if constexpr (face != block::face::TOP) return traits.top_half_transparent; break;
+                default: break;
+            }
+            return traits.partially_transparent;
+        }
 
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
@@ -147,12 +159,12 @@ namespace game {
         template<block::face face>
         BF_FUNC draw_positions get_offset_draw_positions(const draw_positions& d_positions, bl_st st) {
             return {
-                .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, (st.slab == state::BOTTOM ? half_block_draw_size : block_draw_size), block_draw_size },
+                .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, (st.slab == state::BOTH ? block_draw_size : half_block_draw_size), block_draw_size },
                 .uv_draw_pos = [&d_positions, &st]() -> math::vector2u8 {
                     if constexpr (face == block::face::TOP || face == block::face::BOTTOM) {
                         return d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size };
                     }
-                    return d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, (st.slab != state::BOTH ? half_block_draw_size : block_draw_size) };
+                    return d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, (st.slab == state::BOTH ? block_draw_size : half_block_draw_size) };
                 }()
             };
         }

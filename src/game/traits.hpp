@@ -9,5 +9,7 @@ namespace game {
     struct face_traits {
         bool visible = false;
         bool partially_transparent = true;
+        bool bottom_half_transparent = true;
+        bool top_half_transparent = true;
     };
 };
