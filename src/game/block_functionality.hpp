@@ -106,7 +106,13 @@ namespace game {
                     case state::TOP: if constexpr (face == block::face::BOTTOM) return false; return true;
                 }
             }(),
-            .partially_transparent = true
+            .partially_transparent = [&st]() {
+                switch (st.slab) {
+                    default: return false;
+                    case state::BOTTOM: if constexpr (face == block::face::BOTTOM) return false; return true;
+                    case state::TOP: if constexpr (face == block::face::TOP) return false; return true;
+                }
+            }()
         }; }
 
         template<block::face face>
