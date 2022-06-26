@@ -20,8 +20,8 @@ namespace game {
         };
     }
     template<typename T>
-    inline math::vector3s32 get_chunk_position_from_world_position(const T& world_position) {
-        return floor_float_position<math::vector3s32>(world_position / (f32)chunk::SIZE);
+    inline math::vector3s32 get_chunk_position_from_world_position(const glm::vec<3, T, glm::defaultp>& world_position) {
+        return floor_float_position<math::vector3s32>(world_position / (T)chunk::SIZE);
     }
 
     template<typename T>

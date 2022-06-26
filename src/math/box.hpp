@@ -8,4 +8,6 @@ namespace math {
 
         bool is_inside(const glm::vec3& pos) const;
     };
+
+    bool do_boxes_collide(const box& bigger_box, const box& smaller_box);
 }

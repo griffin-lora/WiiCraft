@@ -93,76 +93,41 @@ void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, con
     } else {
         no_collision_func();
     }
-}
+} 
 
 void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
-        glm::vec3 low_origin = { position.x, position.y - 0.4f, position.z };
-        glm::vec3 high_origin = { position.x, position.y + 0.4f, position.z };
-        if (velocity.y <= 0.0f) {
-            apply_collision(chunks, low_origin, { 0.0f, -1.0f, 0.0f },
-                [this](auto& world_block_pos, auto& box) {
-                    grounded = true;
-                    position.y = world_block_pos.y + box.greater_corner.y + 1.0f;
-                    velocity.y = 0.0f;
-                },
-                [this]() {
-                    grounded = false;
-                    velocity.y -= gravity;
+        math::box character_box = {
+            .lesser_corner = { -0.5f, -1.0f, -0.5f },
+            .greater_corner = { 0.5f, 1.0f, 0.5f },
+        };
+        character_box.lesser_corner += position;
+        character_box.greater_corner += position;
+
+        auto floored_lesser_corner = floor_float_position<math::vector3s32>(character_box.lesser_corner);
+        auto floored_greater_corner = floor_float_position<math::vector3s32>(character_box.greater_corner);
+
+        for (s32 x = floored_lesser_corner.x; x <= floored_greater_corner.x; x++) {
+            for (s32 y = floored_lesser_corner.y; y <= floored_greater_corner.y; y++) {
+                for (s32 z = floored_lesser_corner.z; z <= floored_greater_corner.z; z++) {
+                    math::vector3s32 world_block_pos = { x, y, z };
+                    auto chunk_pos = get_chunk_position_from_world_position(world_block_pos);
+                    if (chunks.count(chunk_pos)) {
+                        auto& chunk = chunks.at(chunk_pos);
+
+                        auto& block = chunk.blocks[get_index_from_position(get_local_block_position(world_block_pos))];
+
+                        auto collided_block_boxes = get_block_boxes_that_collides_with_world_box(character_box, block, world_block_pos);
+                        if (collided_block_boxes.size() > 0) {
+                            velocity.y = 0.0f;
+                            return;
+                        }
+                    }
                 }
-            );
-        } else {
-            velocity.y -= gravity;
+            }
         }
-
-        if (velocity.y >= 0.0f) {
-            apply_collision(chunks, high_origin, { 0.0f, 1.0f, 0.0f },
-                [this](auto& world_block_pos, auto& box) {
-                    position.y = world_block_pos.y - box.greater_corner.y;
-                    velocity.y = 0.0f;
-                },
-                []() {}
-            );
-        }
-
-        if (velocity.x >= 0.0f) {
-            apply_collision(chunks, low_origin, { 1.0f, 0.0f, 0.0f },
-                [this](auto& world_block_pos, auto& box) {
-                    position.x = world_block_pos.x - box.greater_corner.x + 0.5f;
-                    velocity.x = 0.0f;
-                },
-                []() {}
-            );
-        }
-        if (velocity.x <= 0.0f) {
-            apply_collision(chunks, low_origin, { -1.0f, 0.0f, 0.0f },
-                [this](auto& world_block_pos, auto& box) {
-                    position.x = world_block_pos.x + box.greater_corner.x + 0.5f;
-                    velocity.x = 0.0f;
-                },
-                []() {}
-            );
-        }
-
-        if (velocity.z >= 0.0f) {
-            apply_collision(chunks, low_origin, { 0.0f, 0.0f, 1.0f },
-                [this](auto& world_block_pos, auto& box) {
-                    position.z = world_block_pos.z - box.greater_corner.z + 0.5f;
-                    velocity.z = 0.0f;
-                },
-                []() {}
-            );
-        }
-        if (velocity.z <= 0.0f) {
-            apply_collision(chunks, low_origin, { 0.0f, 0.0f, -1.0f },
-                [this](auto& world_block_pos, auto& box) {
-                    position.z = world_block_pos.z + box.greater_corner.z + 0.5f;
-                    velocity.z = 0.0f;
-                },
-                []() {}
-            );
-        }
+        velocity.y -= gravity;
     } else {
         velocity.y = 0.0f;
     }

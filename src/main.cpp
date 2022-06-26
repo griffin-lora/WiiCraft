@@ -25,11 +25,11 @@
 #include "game/character.hpp"
 #include "common.hpp"
 
-constexpr f32 cam_rotation_speed = 0.15f;
+static constexpr f32 cam_rotation_speed = 0.15f;
 
-constexpr s32 chunk_generation_radius = 3;
+static constexpr s32 chunk_generation_radius = 3;
 
-constexpr s32 chunk_erasure_radius = 4;
+static constexpr s32 chunk_erasure_radius = 4;
 
 int main(int argc, char** argv) {
 
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::character character = {
-		.position = { 0.0f, 1.0f, 0.0f },
+		.position = { 0.0f, 20.0f, 0.0f },
 		.velocity = { 0.0f, 0.0f, 0.0f }
 	};
 
@@ -120,6 +120,7 @@ int main(int argc, char** argv) {
 		bl_sel.handle_raycast(view, building_vertices, raycast);
 
 		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
+		character.apply_physics(chunks);
 		character.apply_velocity();
 		character.update_camera(cam);
 
