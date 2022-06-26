@@ -6,6 +6,8 @@
 #include "input.hpp"
 #include "logic.hpp"
 
+#include <cstdio>
+
 using namespace game;
 
 constexpr f32 movement_accel = 40.0f;
@@ -18,7 +20,7 @@ void character::handle_input(const camera& cam, u32 buttons_down) {
     #ifndef PC_PORT
     auto joystick_input_vector = input::get_joystick_input_vector();
     #else
-    glm::vec2 joystick_input_vector = { 96.0f, 0.0f };
+    glm::vec2 joystick_input_vector = { 96.0f, 48.0f };
     #endif
 
     if (buttons_down & WPAD_BUTTON_1 && grounded) {
@@ -93,32 +95,28 @@ void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, con
     } else {
         no_collision_func();
     }
-} 
+}
 
 void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
         math::box character_box = {
-            .lesser_corner = { -0.5f, -1.0f, -0.5f },
-            .greater_corner = { 0.5f, 1.0f, 0.5f },
+            .lesser_corner = { -0.35f, -1.0f, -0.35f },
+            .greater_corner = { 0.35f, 1.0f, 0.35f },
         };
         character_box.lesser_corner += position;
         character_box.greater_corner += position;
 
-        auto floored_lesser_corner = floor_float_position<math::vector3s32>(character_box.lesser_corner);
-        auto floored_greater_corner = floor_float_position<math::vector3s32>(character_box.greater_corner);
-
-        for (s32 x = floored_lesser_corner.x; x <= floored_greater_corner.x; x++) {
-            for (s32 y = floored_lesser_corner.y; y <= floored_greater_corner.y; y++) {
-                for (s32 z = floored_lesser_corner.z; z <= floored_greater_corner.z; z++) {
-                    math::vector3s32 world_block_pos = { x, y, z };
-                    auto chunk_pos = get_chunk_position_from_world_position(world_block_pos);
-                    if (chunks.count(chunk_pos)) {
-                        auto& chunk = chunks.at(chunk_pos);
-
-                        auto& block = chunk.blocks[get_index_from_position(get_local_block_position(world_block_pos))];
-
-                        auto collided_block_boxes = get_block_boxes_that_collides_with_world_box(character_box, block, world_block_pos);
+        auto floored_lesser_corner = floor_float_position<glm::vec3>(character_box.lesser_corner);
+        auto floored_greater_corner = floor_float_position<glm::vec3>(character_box.greater_corner);
+        
+        for (f32 x = floored_lesser_corner.x; x <= floored_greater_corner.x; x++) {
+            for (f32 y = floored_lesser_corner.y; y <= floored_greater_corner.y; y++) {
+                for (f32 z = floored_lesser_corner.z; z <= floored_greater_corner.z; z++) {
+                    glm::vec3 world_block_pos = { x, y, z };
+                    auto block = get_block_from_world_position(chunks, world_block_pos);
+                    if (block.has_value()) {
+                        auto collided_block_boxes = get_block_boxes_that_collides_with_world_box(character_box, *block, world_block_pos);
                         if (collided_block_boxes.size() > 0) {
                             velocity.y = 0.0f;
                             return;

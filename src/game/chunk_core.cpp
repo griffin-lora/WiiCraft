@@ -43,7 +43,7 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
 
             auto plains_height = get_plains_height(noise_pos, 0.0f);
 
-            s32 y_pos = (plains_height * 16);
+            s32 y_pos = x;
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);
