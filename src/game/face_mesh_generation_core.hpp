@@ -42,7 +42,7 @@ namespace game {
             .uv_draw_pos = Bf::template get_uv_position<face>(st) * block_draw_size
         };
         d_positions = Bf::get_draw_positions(d_positions, st);
-        draw_positions offset_d_positions = Bf::get_offset_draw_positions(d_positions, st);
+        draw_positions offset_d_positions = Bf::template get_offset_draw_positions<face>(d_positions, st);
         add_flat_face_vertices<face>(
             vf,
             d_positions.block_draw_pos,

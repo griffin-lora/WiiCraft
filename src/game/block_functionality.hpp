@@ -69,7 +69,8 @@ namespace game {
         }
 
         BF_FUNC draw_positions get_draw_positions(const draw_positions& draw_positions, bl_st) { return draw_positions; }
-
+        
+        template<block::face face>
         BF_FUNC draw_positions get_offset_draw_positions(const draw_positions& draw_positions, bl_st) {
             return {
                 .block_draw_pos = draw_positions.block_draw_pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size },
@@ -137,10 +138,16 @@ namespace game {
             } : d_positions);
         }
 
+        template<block::face face>
         BF_FUNC draw_positions get_offset_draw_positions(const draw_positions& d_positions, bl_st st) {
             return {
                 .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, (st.slab == state::BOTTOM ? half_block_draw_size : block_draw_size), block_draw_size },
-                .uv_draw_pos = d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, (st.slab != state::BOTH ? half_block_draw_size : block_draw_size) }
+                .uv_draw_pos = [&d_positions, &st]() -> math::vector2u8 {
+                    if constexpr (face == block::face::TOP || face == block::face::BOTTOM) {
+                        return d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size };
+                    }
+                    return d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, (st.slab != state::BOTH ? half_block_draw_size : block_draw_size) };
+                }()
             };
         }
     };
