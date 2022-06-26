@@ -34,8 +34,7 @@ namespace game {
         using self = cube_block_functionality<Bf>;
 
         BF_FUNC block_traits get_block_traits(bl_st) { return {
-            .visible = true,
-            .general_visible = false
+            .visible = true
         }; }
 
         template<typename Vf>
@@ -85,28 +84,28 @@ namespace game {
         using state = block::slab_state;
 
         BF_FUNC block_traits get_block_traits(bl_st st) { return {
-            .visible = true,
-            .general_visible = (st.slab != block::slab_state::BOTH)
+            .visible = true
         }; }
 
         template<typename Vf>
         BF_FUNC void add_general_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
             switch (st.slab) {
                 default: break;
-                case state::BOTTOM: add_flat_face_vertices_from_block_position<block::face::TOP, self>(vf, block_pos, st);
-                case state::TOP: add_flat_face_vertices_from_block_position<block::face::BOTTOM, self>(vf, block_pos, st);
+                case state::BOTTOM: add_flat_face_vertices_from_block_position<block::face::TOP, self>(vf, block_pos, st); break;
+                case state::TOP: add_flat_face_vertices_from_block_position<block::face::BOTTOM, self>(vf, block_pos, st); break;
             }
         }
 
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st st) { return {
             .visible = [&st]() {
-                if constexpr (face == block::face::TOP || face == block::face::BOTTOM) {
-                    return st.slab == state::BOTH;
+                switch (st.slab) {
+                    default: return true;
+                    case state::BOTTOM: if constexpr (face == block::face::TOP) return false; return true;
+                    case state::TOP: if constexpr (face == block::face::BOTTOM) return false; return true;
                 }
-                return true;
             }(),
-            .partially_transparent = false
+            .partially_transparent = true
         }; }
 
         template<block::face face>
@@ -121,7 +120,7 @@ namespace game {
             return {
                 math::box{
                     .lesser_corner = { 0.0f, (st.slab == state::TOP ? 0.5f : 0.0f), 0.0f },
-                    .greater_corner = { 1.0f, (st.slab == state::BOTTOM ? 0.5f : 0.0f), 1.0f }
+                    .greater_corner = { 1.0f, (st.slab == state::BOTTOM ? 0.5f : 1.0f), 1.0f }
                 }
             };
         }
