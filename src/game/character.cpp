@@ -100,6 +100,11 @@ void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, con
 void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
+        std::vector<f32> x_collisions;
+        std::vector<f32> pos_y_collisions;
+        std::vector<f32> neg_y_collisions;
+        std::vector<f32> z_collisions;
+
         math::box character_box = {
             .lesser_corner = { -0.35f, -1.0f, -0.35f },
             .greater_corner = { 0.35f, 1.0f, 0.35f },
@@ -107,26 +112,45 @@ void character::apply_physics(chunk::map& chunks) {
         character_box.lesser_corner += position;
         character_box.greater_corner += position;
 
-        auto floored_lesser_corner = floor_float_position<glm::vec3>(character_box.lesser_corner);
-        auto floored_greater_corner = floor_float_position<glm::vec3>(character_box.greater_corner);
+        auto floored_position = floor_float_position<glm::vec3>(position);
+        auto check_area_lesser_corner = floored_position - glm::vec3{ 2, 2, 2 };
+        auto check_area_greater_corner = floored_position + glm::vec3{ 2, 2, 2 };
         
-        for (f32 x = floored_lesser_corner.x; x <= floored_greater_corner.x; x++) {
-            for (f32 y = floored_lesser_corner.y; y <= floored_greater_corner.y; y++) {
-                for (f32 z = floored_lesser_corner.z; z <= floored_greater_corner.z; z++) {
+        // Loop through tangible blocks around the character
+        for (f32 x = check_area_lesser_corner.x; x <= check_area_greater_corner.x; x++) {
+            for (f32 y = check_area_lesser_corner.y; y <= check_area_greater_corner.y; y++) {
+                for (f32 z = check_area_lesser_corner.z; z <= check_area_greater_corner.z; z++) {
                     glm::vec3 world_block_pos = { x, y, z };
-                    auto block = get_block_from_world_position(chunks, world_block_pos);
+                    const auto block = get_block_from_world_position(chunks, world_block_pos);
                     if (block.has_value()) {
-                        auto collided_block_boxes = get_block_boxes_that_collides_with_world_box(character_box, *block, world_block_pos);
-                        if (collided_block_boxes.size() > 0) {
-                            velocity.y = 0.0f;
-                            return;
+                        const auto collided_block_boxes = get_block_boxes_that_collides_with_world_box(character_box, *block, world_block_pos);
+                        for (auto& box : collided_block_boxes) {
+                            // Move box positions to positions relative to the character
+                            auto relative_lesser_corner = (box.lesser_corner + world_block_pos) - position;
+                            auto relative_greater_corner = (box.greater_corner + world_block_pos) - position;
+                            
+                            (relative_lesser_corner.y > 0 ? pos_y_collisions : neg_y_collisions).push_back(relative_lesser_corner.y);
+                            (relative_greater_corner.y > 0 ? pos_y_collisions : neg_y_collisions).push_back(relative_greater_corner.y);
                         }
                     }
                 }
             }
         }
-        velocity.y -= gravity;
+
+
+        // Find the collisions that occurred closest to the character
+        if (neg_y_collisions.size() > 0) {
+            auto max = std::max_element(neg_y_collisions.begin(), neg_y_collisions.end());
+            auto axis = *max + position.y;
+            
+            std::printf("%f, %f\n", position.y, axis);
+            position.y = axis + 1.0f;
+            velocity.y = 0.0f;
+        } else {
+            velocity.y -= gravity;
+        }
     } else {
+        // We have clipped inside of a block so cancel gravity
         velocity.y = 0.0f;
     }
 }
