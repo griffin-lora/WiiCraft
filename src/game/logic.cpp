@@ -20,14 +20,14 @@ std::optional<raycast> game::get_raycast(const glm::vec3& origin, const glm::vec
 
         if (current_chunk_pos.has_value()) {
             if (raycast_chunk_pos != current_chunk_pos) {
-                if (!chunks.count(raycast_chunk_pos)) {
+                if (!chunks.contains(raycast_chunk_pos)) {
                     break;
                 }
                 current_chunk_pos = raycast_chunk_pos;
                 current_chunk = chunks.at(raycast_chunk_pos);
             }
         } else {
-            if (!chunks.count(raycast_chunk_pos)) {
+            if (!chunks.contains(raycast_chunk_pos)) {
                 break;
             }
             current_chunk_pos = raycast_chunk_pos;
@@ -66,7 +66,7 @@ static std::optional<raycast> get_backtracked_raycast(const camera& cam, chunk::
         if (world_block_pos != inp_raycast_world_block_pos) {
             auto back_chunk_pos = get_chunk_position_from_world_position(pos);
     
-            if (chunks.count(back_chunk_pos)) {
+            if (chunks.contains(back_chunk_pos)) {
                 auto& chunk = chunks.at(back_chunk_pos);
 
                 auto back_block_pos = get_local_block_position(pos);

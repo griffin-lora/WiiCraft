@@ -46,7 +46,7 @@ void game::manage_chunks_around_camera(
         // Generate chunks around the sphere of radius chunk_generation_radius
         game::iterate_positions_in_sphere(chunk_generation_radius, [view, &chunks, &chunk_positions_state, &cam_chunk_pos](auto& offset) {
             auto chunk_pos = cam_chunk_pos + offset;
-            if (!chunks.count(chunk_pos)) {
+            if (!chunks.contains(chunk_pos)) {
                 chunk_positions_state.push_back(chunk_pos);
                 // Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
                 chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), { view, chunk_pos }));
@@ -56,7 +56,7 @@ void game::manage_chunks_around_camera(
         for (auto pos : chunk_positions_state) {
             auto& chunk = chunks.at(pos);
 
-            if (stored_chunks.count(pos)) {
+            if (stored_chunks.contains(pos)) {
                 auto& stored_chunk = stored_chunks.at(pos);
                 chunk.blocks = std::move(stored_chunk.blocks);
                 stored_chunks.erase(pos);

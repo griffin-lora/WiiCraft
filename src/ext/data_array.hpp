@@ -6,7 +6,7 @@ namespace ext {
     // This is a custom container that stores a POD array.
     template<typename T>
     class data_array {
-        static_assert(std::is_pod_v<T>, "T must be a POD type.");
+        static_assert(std::is_trivial_v<T>, "T must be a POD type.");
         T* m_data = nullptr;
         std::size_t m_size = 0;
         public:
