@@ -143,7 +143,6 @@ void character::apply_physics(chunk::map& chunks) {
             auto max = std::max_element(neg_y_collisions.begin(), neg_y_collisions.end());
             auto axis = *max + position.y;
             
-            std::printf("%f, %f\n", position.y, axis);
             position.y = axis + 1.0f;
             velocity.y = 0.0f;
         } else {
