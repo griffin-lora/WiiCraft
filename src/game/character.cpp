@@ -139,7 +139,7 @@ void character::apply_physics(chunk::map& chunks) {
 
 
         // Find the collisions that occurred closest to the character
-        if (velocity.y < 0 && neg_y_collisions.size() > 0) {
+        if (velocity.y <= 0 && neg_y_collisions.size() > 0) {
             auto max = std::max_element(neg_y_collisions.begin(), neg_y_collisions.end());
             auto axis = *max + position.y;
             
