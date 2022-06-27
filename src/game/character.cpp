@@ -100,11 +100,6 @@ void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, con
 void character::apply_physics(chunk::map& chunks) {
     auto block = get_block_from_world_position(chunks, position);
     if (block.has_value() && block->get().tp == block::type::AIR) {
-        std::vector<f32> x_collisions;
-        std::vector<f32> pos_y_collisions;
-        std::vector<f32> neg_y_collisions;
-        std::vector<f32> z_collisions;
-
         math::box character_box = {
             .lesser_corner = { -0.35f, -1.0f, -0.35f },
             .greater_corner = { 0.35f, 1.0f, 0.35f },
@@ -129,8 +124,12 @@ void character::apply_physics(chunk::map& chunks) {
                             auto relative_lesser_corner = (box.lesser_corner + world_block_pos) - position;
                             auto relative_greater_corner = (box.greater_corner + world_block_pos) - position;
                             
+                            (relative_lesser_corner.x > 0 ? pos_x_collisions : neg_x_collisions).push_back(relative_lesser_corner.x);
+                            (relative_greater_corner.x > 0 ? pos_x_collisions : neg_x_collisions).push_back(relative_greater_corner.x);
                             (relative_lesser_corner.y > 0 ? pos_y_collisions : neg_y_collisions).push_back(relative_lesser_corner.y);
                             (relative_greater_corner.y > 0 ? pos_y_collisions : neg_y_collisions).push_back(relative_greater_corner.y);
+                            (relative_lesser_corner.z > 0 ? pos_z_collisions : neg_z_collisions).push_back(relative_lesser_corner.z);
+                            (relative_greater_corner.z > 0 ? pos_z_collisions : neg_z_collisions).push_back(relative_greater_corner.z);
                         }
                     }
                 }
@@ -150,11 +149,24 @@ void character::apply_physics(chunk::map& chunks) {
             velocity.y -= gravity;
             grounded = false;
         }
+
+        // if (velocity.x >= 0 && neg_x_collisions.size() > 0) {
+        //     auto max = std::max_element(neg_x_collisions.begin(), neg_x_collisions.end());
+        //     auto axis = *max + position.x;
+            
+        //     position.x = axis + 1.0f;
+        // }
     } else {
         // We have clipped inside of a block so cancel gravity
         velocity.y = 0.0f;
         grounded = true;
     }
+    pos_x_collisions.clear();
+    neg_x_collisions.clear();
+    pos_y_collisions.clear();
+    neg_y_collisions.clear();
+    pos_z_collisions.clear();
+    neg_z_collisions.clear();
 }
 
 void character::apply_velocity() {
