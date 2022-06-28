@@ -49,16 +49,20 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
                 auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);
                 auto index = game::get_index_from_position(math::vector3u8{x, y, z});
 
+                auto& block = chunk.blocks[index];
+
                 if (world_y < y_pos) {
                     if (world_y < (y_pos - 2)) {
-                        chunk.blocks[index] = { .tp = block::type::STONE };
+                        block = { .tp = block::type::STONE };
                     } else {
-                        chunk.blocks[index] = { .tp = block::type::DIRT };
+                        block = { .tp = block::type::DIRT };
                     }
                 } else if (world_y == y_pos) {
-                    chunk.blocks[index] = { .tp = block::type::GRASS };
+                    block = { .tp = block::type::GRASS };
+                } else if (world_y == (y_pos + 1) && world_y == 2) {
+                    block = { .tp = block::type::TALL_GRASS };
                 } else {
-                    chunk.blocks[index] = { .tp = block::type::AIR };
+                    block = { .tp = block::type::AIR };
                 }
             }
         }

@@ -3,6 +3,11 @@
 #include "util.hpp"
 
 namespace game {
+    struct draw_positions {
+        math::vector3u8 block_draw_pos;
+        math::vector2u8 uv_draw_pos;
+    };
+
     template<typename Vf>
     void add_flat_front_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo);
     template<typename Vf>
@@ -16,6 +21,9 @@ namespace game {
     template<typename Vf>
     void add_flat_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo);
 
+    template<typename Vf>
+    void add_cross_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+
     template<block::face face, typename Vf>
     constexpr void add_flat_face_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
         call_face_func_for<face, void>(
@@ -28,11 +36,6 @@ namespace game {
             vf, l, lo, u, uo
         );
     }
-
-    struct draw_positions {
-        math::vector3u8 block_draw_pos;
-        math::vector2u8 uv_draw_pos;
-    };
 
     template<block::face face, typename Bf, typename Vf>
     constexpr void add_flat_face_vertices_from_block_position(Vf& vf, math::vector3u8 block_pos, bl_st st) {

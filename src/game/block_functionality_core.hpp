@@ -169,6 +169,40 @@ namespace game {
             };
         }
     };
+    
+    template<typename Bf>
+    struct cross_block_functionality {
+        BF_FUNC block_traits get_block_traits(bl_st) { return {
+            .visible = true
+        }; }
+
+        template<typename Vf>
+        BF_FUNC void add_general_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
+            draw_positions d_positions = {
+                .block_draw_pos = block_pos * block_draw_size,
+                .uv_draw_pos = Bf::get_uv_position(st) * block_draw_size
+            };
+
+            draw_positions offset_d_positions = {
+                .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size },
+                .uv_draw_pos = d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
+            };
+            add_cross_vertices(vf, d_positions, offset_d_positions);
+        }
+
+        template<block::face face>
+        BF_FUNC face_traits get_face_traits(bl_st) { return {
+            .visible = true
+        }; }
+
+        template<block::face face>
+        BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block&) { return false; }
+
+        template<block::face face, typename Vf>
+        BF_FUNC void add_face_vertices(Vf&, math::vector3u8, bl_st) {}
+
+        BF_FUNC std::array<math::box, 0> get_boxes(bl_st) { return {}; }
+    };
 
     template<>
     struct block_functionality<block::type::DEBUG> : public cube_block_functionality<block_functionality<block::type::DEBUG>> {
@@ -223,6 +257,13 @@ namespace game {
         template<block::face face>
         BF_FUNC math::vector2u8 get_uv_position(bl_st) {
             return { 1, 0 };
+        }
+    };
+
+    template<>
+    struct block_functionality<block::type::TALL_GRASS> : public cross_block_functionality<block_functionality<block::type::TALL_GRASS>> {
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            return { 7, 2 };
         }
     };
 }

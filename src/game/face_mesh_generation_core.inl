@@ -75,3 +75,31 @@ void game::add_flat_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo,
     vf(l.x,l.y, l.z, uo.x,uo.y);	// Bottom Right Of The Quad (Left)
     
 }
+
+template<typename Vf>
+void game::add_cross_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+
+    vf(l.x, l.y, l.z, u.x, uo.y);
+    vf(lo.x, l.y, lo.z, uo.x, uo.y);
+    vf(lo.x, lo.y, lo.z, uo.x, u.y);
+    vf(l.x, lo.y, l.z, u.x, u.y);
+    
+    vf(l.x, l.y, l.z, u.x, uo.y);
+    vf(l.x, lo.y, l.z, u.x, u.y);
+    vf(lo.x, lo.y, lo.z, uo.x, u.y);
+    vf(lo.x, l.y, lo.z, uo.x, uo.y);
+
+    vf(lo.x, l.y, l.z, u.x, uo.y);
+    vf(l.x, l.y, lo.z, uo.x, uo.y);
+    vf(l.x, lo.y, lo.z, uo.x, u.y);
+    vf(lo.x, lo.y, l.z, u.x, u.y);
+
+    vf(lo.x, l.y, l.z, u.x, uo.y);
+    vf(lo.x, lo.y, l.z, u.x, u.y);
+    vf(l.x, lo.y, lo.z, uo.x, u.y);
+    vf(l.x, l.y, lo.z, uo.x, uo.y);
+}

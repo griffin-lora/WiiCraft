@@ -41,7 +41,7 @@ static void init_drawing() {
 	// args: texcoord slot 0-7, matrix type, source to generate texture coordinates from, matrix to use
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 
-	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
+	GX_SetTevOp(GX_TEVSTAGE0, GX_REPLACE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
 
 	//
