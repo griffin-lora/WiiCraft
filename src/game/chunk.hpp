@@ -29,7 +29,8 @@ namespace game {
             math::vector2u8 uv;
         };
 
-        gfx::display_list disp_list;
+        gfx::display_list standard_disp_list;
+        gfx::display_list foliage_disp_list;
         bool update_mesh_important = false;
         bool update_mesh_unimportant = false;
         struct neighborhood {

@@ -96,18 +96,14 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         }
     }
 
-    std::size_t total_vert_count = vf.vert_it - building_verts.begin();
-
-    std::size_t disp_list_size = (
-		4 + // GX_Begin
-		total_vert_count * 3 + // GX_Position3u8
-		total_vert_count * 2 + // GX_TexCoord2u8
+    chunk.standard_disp_list.resize(
+        4 + // GX_Begin
+		vf.standard_vert_count * 3 + // GX_Position3u8
+		vf.standard_vert_count * 2 + // GX_TexCoord2u8
 		1 // GX_End
-	);
+    );
 
-    chunk.disp_list.resize(disp_list_size);
-
-    chunk.disp_list.write_into([&building_verts, &vf]() {
+    chunk.standard_disp_list.write_into([&building_verts, &vf]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vf.standard_vert_count);
 
         for (auto it = building_verts.begin(); it != vf.vert_it; ++it) {
@@ -118,7 +114,16 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
         }
         
         GX_End();
+    });
 
+    chunk.foliage_disp_list.resize(
+        4 + // GX_Begin
+		vf.foliage_vert_count * 3 + // GX_Position3u8
+		vf.foliage_vert_count * 2 + // GX_TexCoord2u8
+		1 // GX_End
+    );
+
+    chunk.foliage_disp_list.write_into([&building_verts, &vf]() {
         // TODO: Possibly optimize this by having the above iteration overwrite the previous vertices with foliage vertices so that we can iterate over less vertices.
         GX_Begin(GX_QUADS, GX_VTXFMT0, vf.foliage_vert_count);
 
