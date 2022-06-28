@@ -20,6 +20,11 @@ namespace game {
         static constexpr std::size_t MAX_VERTEX_COUNT = 0xefff;
 
         struct vertex {
+            enum class type : u8 {
+                STANDARD,
+                FOLIAGE
+            };
+            type tp;
             math::vector3u8 pos;
             math::vector2u8 uv;
         };

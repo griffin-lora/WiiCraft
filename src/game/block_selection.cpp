@@ -38,16 +38,27 @@ void block_selection::draw(const std::optional<raycast>& raycast) const {
 void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::vertex>& building_verts, const raycast& raycast) {
     tf.set_position(view, raycast.ch_pos.x * chunk::SIZE, raycast.ch_pos.y * chunk::SIZE, raycast.ch_pos.z * chunk::SIZE);
 
-    auto vert_it = building_verts.begin();
+    struct {
+        ext::data_array<game::chunk::vertex>::iterator vert_it;
 
-    auto vf = [&vert_it](u8 x, u8 y, u8 z, u8, u8) {
-        *vert_it++ = {
-            .pos = { x, y, z }
-        };
+        inline void add(u8 x, u8 y, u8 z, u8, u8) {
+            *vert_it++ = {
+                .pos = { x, y, z }
+            };
+        }
+
+        inline void add_foliage(u8 x, u8 y, u8 z, u8, u8) {
+            *vert_it++ = {
+                .pos = { x, y, z }
+            };
+        }
+    } vf = {
+        .vert_it = building_verts.begin()
     };
+
     add_block_vertices(vf, raycast.bl_pos, raycast.bl);
 
-    auto vertex_count = vert_it - building_verts.begin();
+    auto vertex_count = vf.vert_it - building_verts.begin();
     std::size_t disp_list_size = (
         4 + // GX_Begin
         vertex_count * 3 + // GX_Position3u8
@@ -57,10 +68,10 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
 
     disp_list.resize(disp_list_size);
 
-    disp_list.write_into([&building_verts, &vert_it, vertex_count]() {
+    disp_list.write_into([&building_verts, &vf, vertex_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
-        for (auto it = building_verts.begin(); it != vert_it; ++it) {
+        for (auto it = building_verts.begin(); it != vf.vert_it; ++it) {
             GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
             GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
         }

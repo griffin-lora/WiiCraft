@@ -22,7 +22,7 @@ namespace game {
     void add_flat_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo);
 
     template<typename Vf>
-    void add_cross_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    void add_foliage_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
 
     template<block::face face, typename Vf>
     constexpr void add_flat_face_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {

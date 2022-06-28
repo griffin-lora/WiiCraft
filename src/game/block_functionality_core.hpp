@@ -171,7 +171,7 @@ namespace game {
     };
     
     template<typename Bf>
-    struct cross_block_functionality {
+    struct foliage_block_functionality {
         BF_FUNC block_traits get_block_traits(bl_st) { return {
             .visible = true
         }; }
@@ -187,7 +187,7 @@ namespace game {
                 .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size },
                 .uv_draw_pos = d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
             };
-            add_cross_vertices(vf, d_positions, offset_d_positions);
+            add_foliage_vertices(vf, d_positions, offset_d_positions);
         }
 
         template<block::face face>
@@ -201,7 +201,14 @@ namespace game {
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf&, math::vector3u8, bl_st) {}
 
-        BF_FUNC std::array<math::box, 0> get_boxes(bl_st) { return {}; }
+        BF_FUNC std::array<math::box, 1> get_boxes(bl_st) {
+            return {
+                math::box{
+                    .lesser_corner = { 0.0f, 0.0f, 0.0f },
+                    .greater_corner = { 1.0f, 1.0f, 1.0f }
+                }
+            };
+        }
     };
 
     template<>
@@ -261,7 +268,7 @@ namespace game {
     };
 
     template<>
-    struct block_functionality<block::type::TALL_GRASS> : public cross_block_functionality<block_functionality<block::type::TALL_GRASS>> {
+    struct block_functionality<block::type::TALL_GRASS> : public foliage_block_functionality<block_functionality<block::type::TALL_GRASS>> {
         BF_FUNC math::vector2u8 get_uv_position(bl_st) {
             return { 7, 2 };
         }
