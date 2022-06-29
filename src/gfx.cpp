@@ -99,7 +99,6 @@ draw_state::draw_state(color4 bkg) {
 		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
 	}
 
-	GX_SetCullMode(GX_CULL_BACK);
 	GX_CopyDisp(frame_buffers[fb_index],GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 

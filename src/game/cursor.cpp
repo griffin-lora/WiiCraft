@@ -55,6 +55,8 @@ static void init_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_U8, 0);
 	// Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
+	
+	GX_SetCullMode(GX_CULL_BACK);
 }
 
 void cursor::draw() const {

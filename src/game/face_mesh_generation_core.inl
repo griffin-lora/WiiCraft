@@ -87,19 +87,9 @@ void game::add_foliage_vertices(Vf& vf, const draw_positions& d_positions, const
     vf.add_foliage(lo.x, l.y, lo.z, uo.x, uo.y);
     vf.add_foliage(lo.x, lo.y, lo.z, uo.x, u.y);
     vf.add_foliage(l.x, lo.y, l.z, u.x, u.y);
-    
-    vf.add_foliage(l.x, l.y, l.z, u.x, uo.y);
-    vf.add_foliage(l.x, lo.y, l.z, u.x, u.y);
-    vf.add_foliage(lo.x, lo.y, lo.z, uo.x, u.y);
-    vf.add_foliage(lo.x, l.y, lo.z, uo.x, uo.y);
 
     vf.add_foliage(lo.x, l.y, l.z, u.x, uo.y);
     vf.add_foliage(l.x, l.y, lo.z, uo.x, uo.y);
     vf.add_foliage(l.x, lo.y, lo.z, uo.x, u.y);
     vf.add_foliage(lo.x, lo.y, l.z, u.x, u.y);
-
-    vf.add_foliage(lo.x, l.y, l.z, u.x, uo.y);
-    vf.add_foliage(lo.x, lo.y, l.z, u.x, u.y);
-    vf.add_foliage(l.x, lo.y, lo.z, uo.x, u.y);
-    vf.add_foliage(l.x, l.y, lo.z, uo.x, uo.y);
 }

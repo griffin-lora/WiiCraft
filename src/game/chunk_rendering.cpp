@@ -32,6 +32,7 @@ void game::init_chunk_drawing() {
 
 void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
 	game::init_chunk_drawing();
+	GX_SetCullMode(GX_CULL_BACK);
 	if (cam.update_view) {
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.update_model_view(view);
@@ -46,6 +47,8 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		}
 	}
 
+
+	GX_SetCullMode(GX_CULL_NONE);
 	for (const auto& [ pos, chunk ] : chunks) {
 		chunk.tf.load(GX_PNMTX3);
 		chunk.foliage_disp_list.call();

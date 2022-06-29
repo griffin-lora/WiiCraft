@@ -19,6 +19,9 @@ static void init_drawing() {
 
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    // TODO: Properly seperate the standard and foliage meshes to avoid this
+	GX_SetCullMode(GX_CULL_NONE);
 }
 
 void block_selection::update_if_needed(const math::matrix view, const camera& cam) {
