@@ -2,7 +2,12 @@
 #include "face_mesh_generation_core.hpp"
 
 template<typename Vf>
-void game::add_flat_front_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_front_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+
     // +x
     vf.add(lo.x,lo.y, l.z, u.x,u.y);	// Top Left of the quad (bottom)
     
@@ -14,7 +19,12 @@ void game::add_flat_front_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo
 }
 
 template<typename Vf>
-void game::add_flat_back_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_back_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+
     // -x
     vf.add( l.x, lo.y, l.z, u.x,u.y);	// Top Left of the quad (top)
 
@@ -27,7 +37,12 @@ void game::add_flat_back_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo,
 }
 
 template<typename Vf>
-void game::add_flat_top_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_top_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+    
     // +y
     vf.add(l.x,lo.y,lo.z, u.x,u.y);	// Bottom Left Of The Quad (Back)
 
@@ -40,7 +55,12 @@ void game::add_flat_top_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, 
 }
 
 template<typename Vf>
-void game::add_flat_bottom_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_bottom_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+
     // -y
     vf.add(l.x, l.y, lo.z, u.x, u.y);		// Top Right Of The Quad (Front)
 
@@ -52,7 +72,12 @@ void game::add_flat_bottom_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 l
 }
 
 template<typename Vf>
-void game::add_flat_right_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_right_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+
     // +z
     vf.add(lo.x, l.y,lo.z, u.x,uo.y);	// Top Right Of The Quad (Right)
 
@@ -64,7 +89,12 @@ void game::add_flat_right_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo
 }
 
 template<typename Vf>
-void game::add_flat_left_vertices(Vf& vf, math::vector3u8 l, math::vector3u8 lo, math::vector2u8 u, math::vector2u8 uo) {
+void game::add_flat_left_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
+    auto l = d_positions.block_draw_pos;
+    auto lo = offset_d_positions.block_draw_pos;
+    auto u = d_positions.uv_draw_pos;
+    auto uo = offset_d_positions.uv_draw_pos;
+    
     // -z
     vf.add(lo.x, l.y, l.z, u.x,uo.y);	// Top Right Of The Quad (Left)
 
