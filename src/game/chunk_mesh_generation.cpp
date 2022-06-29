@@ -8,6 +8,8 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
+#include "mesh_generation.hpp"
+#include "mesh_generation.inl"
 #include <cstdio>
 
 using namespace game;
@@ -41,27 +43,7 @@ static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector
 }
 
 void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quads) {
-    struct {
-        ext::data_array<chunk::quad>::iterator quad_it;
-        std::size_t standard_quad_count;
-        std::size_t foliage_quad_count;
-
-        inline void add_standard(const chunk::quad::vertices& vertices) {
-            standard_quad_count++;
-            *quad_it++ = {
-                .tp = chunk::quad::type::STANDARD,
-                .verts = vertices
-            };
-        }
-
-        inline void add_foliage(const chunk::quad::vertices& vertices) {
-            foliage_quad_count++;
-            *quad_it++ = {
-                .tp = chunk::quad::type::FOLIAGE,
-                .verts = vertices
-            };
-        }
-    } vf = {
+    standard_vertex_function vf = {
         .quad_it = building_quads.begin()
     };
 
@@ -94,58 +76,15 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quad
         }
     }
 
-    constexpr auto draw_vert = [](auto& vert) {
+    write_into_display_lists(building_quads, vf, chunk.standard_disp_list, chunk.foliage_disp_list, [](auto vert_count) {
+        return (
+            4 + // GX_Begin
+            vert_count * 3 + // GX_Position3u8
+            vert_count * 2 + // GX_TexCoord2u8
+		    1 // GX_End
+        );
+    }, [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
         GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    };
-
-    std::size_t standard_vert_count = vf.standard_quad_count * 4;
-    std::size_t foliage_vert_count = vf.foliage_quad_count * 4;
-
-    chunk.standard_disp_list.resize(
-        4 + // GX_Begin
-		standard_vert_count * 3 + // GX_Position3u8
-		standard_vert_count * 2 + // GX_TexCoord2u8
-		1 // GX_End
-    );
-
-    chunk.standard_disp_list.write_into([&building_quads, &vf, &draw_vert, standard_vert_count]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, standard_vert_count);
-
-        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
-            if (it->tp == chunk::quad::type::STANDARD) {
-                auto& verts = it->verts;
-                draw_vert(verts.vert0);
-                draw_vert(verts.vert1);
-                draw_vert(verts.vert2);
-                draw_vert(verts.vert3);
-            }
-        }
-        
-        GX_End();
-    });
-
-    chunk.foliage_disp_list.resize(
-        4 + // GX_Begin
-		foliage_vert_count * 3 + // GX_Position3u8
-		foliage_vert_count * 2 + // GX_TexCoord2u8
-		1 // GX_End
-    );
-
-    chunk.foliage_disp_list.write_into([&building_quads, &vf, &draw_vert, foliage_vert_count]() {
-        // TODO: Possibly optimize this by having the above iteration overwrite the previous vertices with foliage vertices so that we can iterate over less vertices.
-        GX_Begin(GX_QUADS, GX_VTXFMT0, foliage_vert_count);
-
-        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
-            if (it->tp == chunk::quad::type::FOLIAGE) {
-                auto& verts = it->verts;
-                draw_vert(verts.vert0);
-                draw_vert(verts.vert1);
-                draw_vert(verts.vert2);
-                draw_vert(verts.vert3);
-            }
-        }
-        
-        GX_End();
     });
 }

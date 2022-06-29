@@ -2,6 +2,8 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
+#include "mesh_generation.hpp"
+#include "mesh_generation.inl"
 
 using namespace game;
 
@@ -34,53 +36,31 @@ void block_selection::draw(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
         tf.load(GX_PNMTX3);
-	    disp_list.call();
+	    standard_disp_list.call();
+	    foliage_disp_list.call();
     }
 }
 
 void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const raycast& raycast) {
-    // tf.set_position(view, raycast.ch_pos.x * chunk::SIZE, raycast.ch_pos.y * chunk::SIZE, raycast.ch_pos.z * chunk::SIZE);
+    tf.set_position(view, raycast.ch_pos.x * chunk::SIZE, raycast.ch_pos.y * chunk::SIZE, raycast.ch_pos.z * chunk::SIZE);
 
-    // struct {
-    //     ext::data_array<chunk::quad>::iterator quad_it;
+    standard_vertex_function vf = {
+        .quad_it = building_quads.begin()
+    };
 
-    //     inline void add(u8 x, u8 y, u8 z, u8, u8) {
-    //         *vert_it++ = {
-    //             .pos = { x, y, z }
-    //         };
-    //     }
+    add_block_vertices(vf, raycast.bl_pos, raycast.bl);
 
-    //     inline void add_foliage(u8 x, u8 y, u8 z, u8, u8) {
-    //         *vert_it++ = {
-    //             .pos = { x, y, z }
-    //         };
-    //     }
-    // } vf = {
-    //     .vert_it = building_verts.begin()
-    // };
-
-    // add_block_vertices(vf, raycast.bl_pos, raycast.bl);
-
-    // auto vertex_count = vf.vert_it - building_verts.begin();
-    // std::size_t disp_list_size = (
-    //     4 + // GX_Begin
-    //     vertex_count * 3 + // GX_Position3u8
-    //     vertex_count * 4 + // GX_Color4u8
-    //     1 // GX_End
-    // );
-
-    // disp_list.resize(disp_list_size);
-
-    // disp_list.write_into([&building_verts, &vf, vertex_count]() {
-    //     GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
-
-    //     for (auto it = building_verts.begin(); it != vf.vert_it; ++it) {
-    //         GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
-    //         GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
-    //     }
-        
-    //     GX_End();
-    // });
+    write_into_display_lists(building_quads, vf, standard_disp_list, foliage_disp_list, [](auto vert_count) {
+        return (
+            4 + // GX_Begin
+            vert_count * 3 + // GX_Position3u8
+            vert_count * 4 + // GX_Color4u8
+            1 // GX_End
+        );
+    }, [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
+    });
 }
 
 void block_selection::handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<raycast>& raycast) {

@@ -10,7 +10,8 @@ namespace game {
     struct block_selection {
         std::optional<math::vector3u8> last_block_pos;
 
-	    gfx::display_list disp_list;
+	    gfx::display_list standard_disp_list;
+	    gfx::display_list foliage_disp_list;
         math::transform_3d tf;
 
         void update_if_needed(const math::matrix view, const camera& cam);
