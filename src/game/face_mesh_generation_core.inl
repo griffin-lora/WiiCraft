@@ -108,13 +108,17 @@ void game::add_foliage_vertices(Vf& vf, const draw_positions& d_positions, const
     auto u = d_positions.uv_draw_pos;
     auto uo = offset_d_positions.uv_draw_pos;
 
-    // vf.add_foliage(l.x, l.y, l.z, u.x, uo.y);
-    // vf.add_foliage(lo.x, l.y, lo.z, uo.x, uo.y);
-    // vf.add_foliage(lo.x, lo.y, lo.z, uo.x, u.y);
-    // vf.add_foliage(l.x, lo.y, l.z, u.x, u.y);
+    vf.add_foliage(chunk::quad::vertices{
+        { { l.x, l.y, l.z }, { u.x, uo.y } },
+        { { lo.x, l.y, lo.z }, { uo.x, uo.y } },
+        { { lo.x, lo.y, lo.z }, { uo.x, u.y } },
+        { { l.x, lo.y, l.z }, { u.x, u.y } },
+    });
 
-    // vf.add_foliage(lo.x, l.y, l.z, u.x, uo.y);
-    // vf.add_foliage(l.x, l.y, lo.z, uo.x, uo.y);
-    // vf.add_foliage(l.x, lo.y, lo.z, uo.x, u.y);
-    // vf.add_foliage(lo.x, lo.y, l.z, u.x, u.y);
+    vf.add_foliage(chunk::quad::vertices{
+        { { lo.x, l.y, l.z }, { u.x, uo.y } },
+        { { l.x, l.y, lo.z }, { uo.x, uo.y } },
+        { { l.x, lo.y, lo.z }, { uo.x, u.y } },
+        { { lo.x, lo.y, l.z }, { u.x, u.y } },
+    });
 }
