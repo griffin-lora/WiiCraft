@@ -6,8 +6,6 @@
 #include "input.hpp"
 #include "logic.hpp"
 
-#include <cstdio>
-
 using namespace game;
 
 constexpr f32 movement_accel = 40.0f;

@@ -8,6 +8,7 @@ namespace math {
     using vector3u8 = glm::vec<3, u8, glm::defaultp>;
     using vector3s8 = glm::vec<3, s8, glm::defaultp>;
     using vector2u8 = glm::vec<2, u8, glm::defaultp>;
+    using vector2s32 = glm::vec<2, s32, glm::defaultp>;
     using vector3s32 = glm::vec<3, s32, glm::defaultp>;
     using matrix = Mtx;
     using matrix44 = Mtx44;
@@ -63,4 +64,6 @@ namespace math {
         T ret = a % b;
         return ret >= 0 ? ret : ret + b;
     }
+
+    f32 get_noise_at(const glm::vec2& pos);
 }

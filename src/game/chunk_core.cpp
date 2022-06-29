@@ -5,13 +5,14 @@
 #include "glm/gtc/noise.hpp"
 
 using namespace game;
+using math::get_noise_at;
 
 static f32 get_biome_value(glm::vec2 position) {
     position /= 256.0f;
 
     return (
-        (glm::simplex(position)) +
-        (glm::simplex(position * 3.0f) * 0.5f)
+        (get_noise_at(position)) +
+        (get_noise_at(position * 3.0f) * 0.5f)
     );
 }
 
@@ -19,8 +20,8 @@ static f32 get_plains_height(glm::vec2 position, f32 biome_value) {
     position /= 32.0f;
 
     return (1.0f - biome_value) * (
-        (glm::simplex(position) * 0.1f) +
-        (glm::simplex(position * 3.0f) * 0.04f)
+        (get_noise_at(position) * 0.1f) +
+        (get_noise_at(position * 3.0f) * 0.04f)
     );
 }
 
@@ -28,9 +29,9 @@ static f32 get_hills_height(glm::vec2 position, f32 biome_value) {
     position /= 64.0f;
 
     return biome_value * (
-        (glm::simplex(position) * 0.4f) +
-        (glm::simplex(position * 3.0f) * 0.2f) +
-        (glm::simplex(position * 6.0f) * 0.1f)
+        (get_noise_at(position) * 0.4f) +
+        (get_noise_at(position * 3.0f) * 0.2f) +
+        (get_noise_at(position * 6.0f) * 0.1f)
     );
 }
 
@@ -43,7 +44,7 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
 
             auto plains_height = get_plains_height(noise_pos, 0.0f);
 
-            s32 y_pos = (plains_height * 16);
+            s32 y_pos = (plains_height * 12) + 1;
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
                 auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);
@@ -59,8 +60,6 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
                     }
                 } else if (world_y == y_pos) {
                     block = { .tp = block::type::GRASS };
-                } else if (world_y == (y_pos + 1) && world_y == 2) {
-                    block = { .tp = block::type::TALL_GRASS };
                 } else {
                     block = { .tp = block::type::AIR };
                 }

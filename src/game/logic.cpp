@@ -3,7 +3,6 @@
 #include "cursor.hpp"
 #include "input.hpp"
 #include "dbg.hpp"
-#include <cstdio>
 
 using namespace game;
 
