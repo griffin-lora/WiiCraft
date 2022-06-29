@@ -17,16 +17,27 @@ namespace game {
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
-        static constexpr std::size_t MAX_VERTEX_COUNT = 0xefff;
+        static constexpr std::size_t MAX_QUAD_COUNT = 0x3eff;
 
         struct vertex {
+            math::vector3u8 pos;
+            math::vector2u8 uv;
+        };
+
+        struct quad {
             enum class type : u8 {
                 STANDARD,
                 FOLIAGE
             };
             type tp;
-            math::vector3u8 pos;
-            math::vector2u8 uv;
+
+            struct vertices {
+                vertex vert0;
+                vertex vert1;
+                vertex vert2;
+                vertex vert3;
+            };
+            vertices verts;
         };
 
         gfx::display_list standard_disp_list;

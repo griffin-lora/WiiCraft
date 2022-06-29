@@ -92,7 +92,7 @@ namespace game {
         }
     }
 
-    void update_chunks(chunk::map& chunks, ext::data_array<chunk::vertex>& building_vertices);
+    void update_chunks(chunk::map& chunks, ext::data_array<chunk::quad>& building_quads);
 
     template<typename T>
     std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {

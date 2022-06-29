@@ -15,9 +15,9 @@ namespace game {
 
         void update_if_needed(const math::matrix view, const camera& cam);
         void draw(const std::optional<raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, ext::data_array<chunk::vertex>& building_vertices, const std::optional<raycast>& raycast);
+        void handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, ext::data_array<chunk::vertex>& building_vertices, const raycast& raycast);
+            void update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const raycast& raycast);
     };
 }

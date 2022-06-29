@@ -40,31 +40,29 @@ static void add_face_vertices_if_needed(const chunk& chunk, Vf& vf, math::vector
     }
 }
 
-void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_verts) {
+void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quads) {
     struct {
-        ext::data_array<game::chunk::vertex>::iterator vert_it;
-        std::size_t standard_vert_count;
-        std::size_t foliage_vert_count;
+        ext::data_array<chunk::quad>::iterator quad_it;
+        std::size_t standard_quad_count;
+        std::size_t foliage_quad_count;
 
-        inline void add(u8 x, u8 y, u8 z, u8 u, u8 v) {
-            standard_vert_count++;
-            *vert_it++ = {
-                .tp = chunk::vertex::type::STANDARD,
-                .pos = { x, y, z },
-                .uv = { u, v }
+        inline void add_standard(const chunk::quad::vertices& vertices) {
+            standard_quad_count++;
+            *quad_it++ = {
+                .tp = chunk::quad::type::STANDARD,
+                .verts = vertices
             };
         }
 
-        inline void add_foliage(u8 x, u8 y, u8 z, u8 u, u8 v) {
-            foliage_vert_count++;
-            *vert_it++ = {
-                .tp = chunk::vertex::type::FOLIAGE,
-                .pos = { x, y, z },
-                .uv = { u, v }
+        inline void add_foliage(const chunk::quad::vertices& vertices) {
+            foliage_quad_count++;
+            *quad_it++ = {
+                .tp = chunk::quad::type::FOLIAGE,
+                .verts = vertices
             };
         }
     } vf = {
-        .vert_it = building_verts.begin()
+        .quad_it = building_quads.begin()
     };
 
     for (u8 x = 0; x < (u8)chunk::SIZE; x++) {
@@ -86,30 +84,41 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
                     }
                 });
 
-                std::size_t total_vert_count = vf.vert_it - building_verts.begin();
-                if (total_vert_count > chunk::MAX_VERTEX_COUNT) {
-                    dbg::error([total_vert_count]() {
-                        printf("Chunk vertex count is too high: %d\n", total_vert_count);
+                std::size_t total_quad_count = vf.quad_it - building_quads.begin();
+                if (total_quad_count > chunk::MAX_QUAD_COUNT) {
+                    dbg::error([total_quad_count]() {
+                        printf("Chunk quad count is too high: %d\n", total_quad_count);
                     });
                 }
             }
         }
     }
 
+    constexpr auto draw_vert = [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+    };
+
+    std::size_t standard_vert_count = vf.standard_quad_count * 4;
+    std::size_t foliage_vert_count = vf.foliage_quad_count * 4;
+
     chunk.standard_disp_list.resize(
         4 + // GX_Begin
-		vf.standard_vert_count * 3 + // GX_Position3u8
-		vf.standard_vert_count * 2 + // GX_TexCoord2u8
+		standard_vert_count * 3 + // GX_Position3u8
+		standard_vert_count * 2 + // GX_TexCoord2u8
 		1 // GX_End
     );
 
-    chunk.standard_disp_list.write_into([&building_verts, &vf]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vf.standard_vert_count);
+    chunk.standard_disp_list.write_into([&building_quads, &vf, &draw_vert, standard_vert_count]() {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, standard_vert_count);
 
-        for (auto it = building_verts.begin(); it != vf.vert_it; ++it) {
-            if (it->tp == chunk::vertex::type::STANDARD) {
-                GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
-                GX_TexCoord2u8(it->uv.x, it->uv.y);
+        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
+            if (it->tp == chunk::quad::type::STANDARD) {
+                auto& verts = it->verts;
+                draw_vert(verts.vert0);
+                draw_vert(verts.vert1);
+                draw_vert(verts.vert2);
+                draw_vert(verts.vert3);
             }
         }
         
@@ -118,19 +127,22 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::vertex>& building_ve
 
     chunk.foliage_disp_list.resize(
         4 + // GX_Begin
-		vf.foliage_vert_count * 3 + // GX_Position3u8
-		vf.foliage_vert_count * 2 + // GX_TexCoord2u8
+		foliage_vert_count * 3 + // GX_Position3u8
+		foliage_vert_count * 2 + // GX_TexCoord2u8
 		1 // GX_End
     );
 
-    chunk.foliage_disp_list.write_into([&building_verts, &vf]() {
+    chunk.foliage_disp_list.write_into([&building_quads, &vf, &draw_vert, foliage_vert_count]() {
         // TODO: Possibly optimize this by having the above iteration overwrite the previous vertices with foliage vertices so that we can iterate over less vertices.
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vf.foliage_vert_count);
+        GX_Begin(GX_QUADS, GX_VTXFMT0, foliage_vert_count);
 
-        for (auto it = building_verts.begin(); it != vf.vert_it; ++it) {
-            if (it->tp == chunk::vertex::type::FOLIAGE) {
-                GX_Position3u8(it->pos.x, it->pos.y, it->pos.z);
-                GX_TexCoord2u8(it->uv.x, it->uv.y);
+        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
+            if (it->tp == chunk::quad::type::FOLIAGE) {
+                auto& verts = it->verts;
+                draw_vert(verts.vert0);
+                draw_vert(verts.vert1);
+                draw_vert(verts.vert2);
+                draw_vert(verts.vert3);
             }
         }
         

@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 
 	game::chunk::map chunks;
 	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
-	ext::data_array<game::chunk::vertex> building_vertices(game::chunk::MAX_VERTEX_COUNT + 0x100);
+	ext::data_array<game::chunk::quad> building_quads(game::chunk::MAX_QUAD_COUNT + 0x100);
 	game::stored_chunk::map stored_chunks;
 
 	input::state inp;
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
 	for (;;) {
 		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
-		bl_sel.handle_raycast(view, building_vertices, raycast);
+		bl_sel.handle_raycast(view, building_quads, raycast);
 
 		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
 		character.apply_physics(chunks);
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(chunks, building_vertices);
+		game::update_chunks(chunks, building_quads);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
