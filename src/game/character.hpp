@@ -10,13 +10,6 @@ namespace game {
 
         bool grounded = false;
 
-        std::vector<f32> pos_x_collisions;
-        std::vector<f32> neg_x_collisions;
-        std::vector<f32> pos_y_collisions;
-        std::vector<f32> neg_y_collisions;
-        std::vector<f32> pos_z_collisions;
-        std::vector<f32> neg_z_collisions;
-
         void handle_input(const camera& cam, u32 buttons_down);
 
         void apply_movement(const camera& cam, glm::vec3 input_vector);
