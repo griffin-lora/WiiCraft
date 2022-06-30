@@ -127,7 +127,7 @@ void character::apply_physics(chunk::map& chunks) {
                         if (y_offset >= 0 && velocity.y <= 0) {
                             floor_collision = true;
 
-                            position.y += y_offset;
+                            position.y = greater_corner_world_pos.y + 1.0f;
                             velocity.y = 0.0f;
                             grounded = true;
                         }
