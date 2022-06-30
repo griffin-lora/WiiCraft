@@ -8,8 +8,7 @@ bool box::is_inside(const glm::vec3& pos) const {
 
 bool math::do_boxes_collide(const box& box_a, const box& box_b) {
     return
-        box_a.is_inside(box_b.lesser_corner) ||
-        box_a.is_inside(box_b.greater_corner) ||
-        box_b.is_inside(box_a.lesser_corner) ||
-        box_b.is_inside(box_a.greater_corner);
+        (box_a.lesser_corner.x <= box_b.greater_corner.x && box_a.greater_corner.x >= box_b.lesser_corner.x) &&
+        (box_a.lesser_corner.y <= box_b.greater_corner.y && box_a.greater_corner.y >= box_b.lesser_corner.y) &&
+        (box_a.lesser_corner.z <= box_b.greater_corner.z && box_a.greater_corner.z >= box_b.lesser_corner.z);
 }
