@@ -30,8 +30,8 @@ void game::init_chunk_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 6);
 }
 
-void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
-	game::init_chunk_drawing();
+void game::draw_chunks_first(const math::matrix view, const camera& cam, chunk::map& chunks) {
+	init_chunk_drawing();
 	GX_SetCullMode(GX_CULL_BACK);
 	if (cam.update_view) {
 		for (auto& [ pos, chunk ] : chunks) {
@@ -46,8 +46,10 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.standard_disp_list.call();
 		}
 	}
+}
 
-
+void game::draw_chunks_second(const chunk::map& chunks) {
+	init_chunk_drawing();
 	GX_SetCullMode(GX_CULL_NONE);
 	for (const auto& [ pos, chunk ] : chunks) {
 		chunk.tf.load(GX_PNMTX3);

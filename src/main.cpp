@@ -134,9 +134,11 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
 		skybox.draw();
-		game::draw_chunks(view, cam, chunks);
+		game::draw_chunks_first(view, cam, chunks);
 		bl_sel.update_if_needed(view, cam);
-		bl_sel.draw(raycast);
+		bl_sel.draw_first(raycast);
+		game::draw_chunks_second(chunks);
+		bl_sel.draw_second(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		cursor.draw();

@@ -29,15 +29,22 @@ void block_selection::update_if_needed(const math::matrix view, const camera& ca
     }
 }
 
-void block_selection::draw(const std::optional<raycast>& raycast) const {
+void block_selection::draw_first(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
         tf.load(GX_PNMTX3);
 
         GX_SetCullMode(GX_CULL_BACK);
 	    standard_disp_list.call();
+    }
+}
 
-	    GX_SetCullMode(GX_CULL_NONE);
+void block_selection::draw_second(const std::optional<raycast>& raycast) const {
+    if (raycast.has_value()) {
+        init_drawing();
+        tf.load(GX_PNMTX3);
+
+        GX_SetCullMode(GX_CULL_NONE);
 	    foliage_disp_list.call();
     }
 }

@@ -6,5 +6,6 @@
 namespace game {
     void init_chunk_drawing();
 
-    void draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks);
+    void draw_chunks_first(const math::matrix view, const camera& cam, chunk::map& chunks);
+    void draw_chunks_second(const chunk::map& chunks);
 }

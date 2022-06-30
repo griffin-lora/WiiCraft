@@ -15,7 +15,8 @@ namespace game {
         math::transform_3d tf;
 
         void update_if_needed(const math::matrix view, const camera& cam);
-        void draw(const std::optional<raycast>& raycast) const;
+        void draw_first(const std::optional<raycast>& raycast) const;
+        void draw_second(const std::optional<raycast>& raycast) const;
         void handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<raycast>& raycast);
 
         private:
