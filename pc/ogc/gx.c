@@ -50,3 +50,6 @@ void GX_SetAlphaUpdate(u8 enable) {}
 void GX_SetColorUpdate(u8 enable) {}
 void GX_SetZMode(u8 enable, u8 func, u8 update_enable) {}
 void GX_DrawDone(void) {}
+
+void GX_SetAlphaCompare(u8 comp0, u8 ref0, u8 aop, u8 comp1, u8 ref1) {}
+void GX_SetZCompLoc(u8 before_tex) {}
