@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 	input::state inp;
 
 	// This is a variable whose lifetime is bound to the manage_chunks_around_camera function normally. However, reallocation is expensive, it is stored here.
-	std::vector<math::vector3s32> chunk_positions_state;
+	std::vector<math::vector3s32> chunk_positions_to_erase;
 
 	game::skybox skybox{view, cam};
 	
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 		character.apply_velocity();
 		character.update_camera(cam);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_state);
+		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase);
 
 
 		game::update_needed(view, perspective_3d, cam);
