@@ -115,6 +115,11 @@ int main(int argc, char** argv) {
 
     GX_SetCurrentMtx(GX_PNMTX3);
 
+	gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
+	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+	GX_SetAlphaUpdate(GX_TRUE);
+	GX_SetColorUpdate(GX_TRUE);
+
 	for (;;) {
 		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
 		bl_sel.handle_raycast(view, building_quads, raycast);
@@ -144,11 +149,6 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::reset_update_params(cam);
-
-		gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
-		GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
-		GX_SetAlphaUpdate(GX_TRUE);
-		GX_SetColorUpdate(GX_TRUE);
 
 		gfx::copy_framebuffer(draw.frame_buffers[draw.fb_index], true);
 

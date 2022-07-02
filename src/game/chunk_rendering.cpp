@@ -17,6 +17,9 @@ void game::init_chunk_drawing() {
 	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
+	GX_SetAlphaCompare(GX_GEQUAL, 0x20, GX_AOP_AND, GX_ALWAYS, 0); // I don't know why this works but it does, see https://github.com/devwizard64/metapro/blob/bda8d24556ba160a339ade631469dffe2a1cf752/src/gdp/set_rm.gekko.c
+	GX_SetZCompLoc(GX_FALSE);
+
 	//
 
 	GX_ClearVtxDesc();

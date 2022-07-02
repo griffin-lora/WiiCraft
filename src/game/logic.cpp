@@ -127,11 +127,11 @@ void game::update_from_input(
                 }();
 
                 if (place_double_slab) {
-                    raycast->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTH } };
+                    raycast->bl = { .tp = block::type::TALL_GRASS, .st = { .slab = block::slab_state::BOTH } };
                     raycast->ch.modified = true;
                     add_important_chunk_mesh_update(raycast->ch, raycast->bl_pos);
                 } else {
-                    backtracked_raycast->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTTOM } };
+                    backtracked_raycast->bl = { .tp = block::type::TALL_GRASS, .st = { .slab = block::slab_state::BOTTOM } };
                     backtracked_raycast->ch.modified = true;
                     add_important_chunk_mesh_update(backtracked_raycast->ch, backtracked_raycast->bl_pos);
                 }
