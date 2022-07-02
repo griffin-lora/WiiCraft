@@ -32,6 +32,13 @@ void block_selection::update_if_needed(const math::matrix view, const camera& ca
 void block_selection::draw_first(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
+
+        GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+        GX_SetAlphaUpdate(GX_FALSE);
+        GX_SetZCompLoc(GX_TRUE);
+        GX_SetCullMode(GX_CULL_BACK);
+
         tf.load(GX_PNMTX3);
 
         GX_SetCullMode(GX_CULL_BACK);
@@ -42,6 +49,13 @@ void block_selection::draw_first(const std::optional<raycast>& raycast) const {
 void block_selection::draw_second(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
+
+        GX_SetAlphaCompare(GX_GEQUAL, 0x20, GX_AOP_AND, GX_ALWAYS, 0); // I don't know why this works but it does, see https://github.com/devwizard64/metapro/blob/bda8d24556ba160a339ade631469dffe2a1cf752/src/gdp/set_rm.gekko.c
+
+        GX_SetAlphaUpdate(GX_TRUE);
+        GX_SetZCompLoc(GX_FALSE);
+        GX_SetCullMode(GX_CULL_NONE);
+
         tf.load(GX_PNMTX3);
 
         GX_SetCullMode(GX_CULL_NONE);

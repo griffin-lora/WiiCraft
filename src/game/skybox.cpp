@@ -147,7 +147,11 @@ static void init_drawing() {
 	// Since the fractional size of the fixed point number is 3, it is equivalent to 1 unit = 2 pixels
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
 
-	GX_SetCullMode(GX_CULL_BACK);
+    GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+	GX_SetAlphaUpdate(GX_FALSE);
+    GX_SetZCompLoc(GX_TRUE);
+    GX_SetCullMode(GX_CULL_BACK);
 }
 
 void skybox::draw() const {
