@@ -26,7 +26,8 @@ namespace game {
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf&, math::vector3u8, bl_st) {}
 
-        BF_FUNC std::array<math::box, 0> get_boxes(bl_st) { return {}; }
+        BF_FUNC std::array<math::box, 0> get_selection_boxes(bl_st) { return {}; }
+        BF_FUNC std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
     };
 
     template<typename Bf>
@@ -56,7 +57,7 @@ namespace game {
             add_flat_face_vertices_from_block_position<face, self>(vf, block_pos, st);
         }
 
-        BF_FUNC std::array<math::box, 1> get_boxes(bl_st) {
+        BF_FUNC std::array<math::box, 1> get_boxes() {
             return {
                 math::box{
                     .lesser_corner = { 0.0f, 0.0f, 0.0f },
@@ -64,6 +65,9 @@ namespace game {
                 }
             };
         }
+
+        BF_FUNC auto get_selection_boxes(bl_st) { return get_boxes(); }
+        BF_FUNC auto get_collision_boxes(bl_st) { return get_boxes(); }
 
         template<block::face face>
         BF_FUNC math::vector2u8 get_uv_position(bl_st st) {
@@ -144,6 +148,9 @@ namespace game {
             };
         }
 
+        BF_FUNC auto get_selection_boxes(bl_st st) { return get_boxes(st); }
+        BF_FUNC auto get_collision_boxes(bl_st st) { return get_boxes(st); }
+
         template<block::face face>
         BF_FUNC math::vector2u8 get_uv_position(bl_st st) {
             return Bf::template get_uv_position<face>(st);
@@ -201,14 +208,15 @@ namespace game {
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf&, math::vector3u8, bl_st) {}
 
-        BF_FUNC std::array<math::box, 1> get_boxes(bl_st) {
+        BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) {
             return {
                 math::box{
-                    .lesser_corner = { 0.0f, 0.0f, 0.0f },
-                    .greater_corner = { 1.0f, 1.0f, 1.0f }
+                    .lesser_corner = { 0.2f, 0.0f, 0.2f },
+                    .greater_corner = { 0.8f, 0.8f, 0.8f }
                 }
             };
         }
+        BF_FUNC std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
     };
 
     template<>

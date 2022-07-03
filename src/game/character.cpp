@@ -81,22 +81,6 @@ void character::apply_no_movement() {
     }
 }
 
-template<typename Fc, typename Fn>
-void character::apply_collision(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, Fc collision_func, Fn no_collision_func) {
-    auto raycast = get_raycast(origin, dir, 64, chunks);
-    if (raycast.has_value()) {
-        const auto world_block_pos = floor_float_position<glm::vec3>(raycast->pos);
-        const auto box = get_box_that_collides_with_world_position(raycast->pos, raycast->bl, world_block_pos);
-        if (box.has_value()) {
-            collision_func(world_block_pos, *box);
-        } else {
-            no_collision_func();
-        }
-    } else {
-        no_collision_func();
-    }
-}
-
 void character::apply_physics(chunk::map& chunks) {
     math::box character_box = {
         .lesser_corner = { -0.35f, -1.0f, -0.35f },
@@ -118,7 +102,7 @@ void character::apply_physics(chunk::map& chunks) {
                 glm::vec3 world_block_pos = { x, y, z };
                 const auto block = get_block_from_world_position(chunks, world_block_pos);
                 if (block.has_value()) {
-                    const auto collided_block_boxes = get_block_boxes_that_collides_with_world_box(character_box, *block, world_block_pos);
+                    const auto collided_block_boxes = get_block_boxes_that_collide_with_world_box(character_box, *block, world_block_pos);
                     for (const auto& box : collided_block_boxes) {
                         glm::vec3 lesser_corner_world_pos = box.lesser_corner + world_block_pos;
                         glm::vec3 greater_corner_world_pos = box.greater_corner + world_block_pos;

@@ -58,7 +58,6 @@ namespace game {
     template<block::face face>
     inline face_traits get_neighbor_face_traits(const block& block);
 
-    bool does_world_position_collide_with_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
-    std::vector<math::box> get_block_boxes_that_collides_with_world_box(const math::box& world_box, const block& block, const glm::vec3& world_block_position);
-    std::optional<math::box> get_box_that_collides_with_world_position(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
+    bool does_world_position_select_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
+    std::vector<math::box> get_block_boxes_that_collide_with_world_box(const math::box& world_box, const block& block, const glm::vec3& world_block_position);
 }
