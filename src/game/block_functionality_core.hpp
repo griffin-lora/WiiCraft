@@ -289,4 +289,53 @@ namespace game {
             return { 7, 2 };
         }
     };
+
+    template<>
+    struct block_functionality<block::type::WATER> {
+        using self = block_functionality<block::type::WATER>;
+
+        BF_FUNC block_traits get_block_traits(bl_st) { return {
+            .visible = true
+        }; }
+
+        template<typename Vf>
+        BF_FUNC void add_general_vertices(Vf&, math::vector3u8, bl_st) {}
+
+        template<block::face face>
+        BF_FUNC face_traits get_face_traits(bl_st) { return {
+            .visible = true
+        }; }
+
+        template<block::face face>
+        BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block& bl) { return bl.tp != block::type::WATER && get_neighbor_face_traits<face>(bl).partially_transparent; }
+
+        template<block::face face, typename Vf>
+        BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
+            add_flat_face_vertices_from_block_position<face, self>(vf, block_pos, st);
+        }
+
+        BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) { return {
+            math::box{
+                .lesser_corner = { 0.0f, 0.0f, 0.0f },
+                .greater_corner = { 1.0f, 1.0f, 1.0f }
+            }
+        }; }
+
+        BF_FUNC std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
+
+        template<block::face face>
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            return { 13, 12 };
+        }
+
+        BF_FUNC draw_positions get_draw_positions(const draw_positions& draw_positions, bl_st) { return draw_positions; }
+        
+        template<block::face face>
+        BF_FUNC draw_positions get_offset_draw_positions(const draw_positions& draw_positions, bl_st) {
+            return {
+                .block_draw_pos = draw_positions.block_draw_pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size },
+                .uv_draw_pos = draw_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
+            };
+        }
+    };
 }

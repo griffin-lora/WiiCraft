@@ -51,30 +51,34 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
             f32 world_z = game::get_world_coord_from_local_position(z, chunk_pos.z);
             glm::vec2 noise_pos = { world_x, world_z };
 
-            auto plains_height = get_plains_height(noise_pos, 0.0f);
+            auto plains_height = get_noise_at(noise_pos / 32.0f);
             
             auto tallgrass_value = get_tallgrass_value(noise_pos);
 
-            s32 y_pos = (plains_height * 12) + 1;
+            s32 generated_height = (plains_height * 12) + 1;
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
-                auto world_y = game::get_world_coord_from_local_position(y, chunk_pos.y);
+                auto world_height = game::get_world_coord_from_local_position(y, chunk_pos.y);
                 auto index = game::get_index_from_position(math::vector3u8{x, y, z});
 
                 auto& block = chunk.blocks[index];
 
-                if (world_y < y_pos) {
-                    if (world_y < (y_pos - 2)) {
+                if (world_height < generated_height) {
+                    if (world_height < (generated_height - 2)) {
                         block = { .tp = block::type::STONE };
                     } else {
                         block = { .tp = block::type::DIRT };
                     }
-                } else if (world_y == y_pos) {
+                } else if (world_height == generated_height) {
                     block = { .tp = block::type::GRASS };
-                } else if (world_y == (y_pos + 1) && tallgrass_value > 0.97f) {
-                    block = { .tp = block::type::TALL_GRASS };
                 } else {
-                    block = { .tp = block::type::AIR };
+                    if (world_height < 5) {
+                        block = { .tp = block::type::WATER };
+                    } else if (world_height == (generated_height + 1) && tallgrass_value > 0.97f) {
+                        block = { .tp = block::type::TALL_GRASS };
+                    } else {
+                        block = { .tp = block::type::AIR };
+                    }
                 }
             }
         }
