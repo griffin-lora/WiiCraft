@@ -54,7 +54,7 @@ namespace game {
 
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self>(vf, block_pos, st);
+            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_standard>(vf, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_boxes() {
@@ -98,8 +98,8 @@ namespace game {
         BF_FUNC void add_general_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
             switch (st.slab) {
                 default: break;
-                case state::BOTTOM: add_flat_face_vertices_from_block_position<block::face::TOP, self>(vf, block_pos, st); break;
-                case state::TOP: add_flat_face_vertices_from_block_position<block::face::BOTTOM, self>(vf, block_pos, st); break;
+                case state::BOTTOM: add_flat_face_vertices_from_block_position<block::face::TOP, self, Vf, &Vf::add_standard>(vf, block_pos, st); break;
+                case state::TOP: add_flat_face_vertices_from_block_position<block::face::BOTTOM, self, Vf, &Vf::add_standard>(vf, block_pos, st); break;
             }
         }
 
@@ -136,7 +136,7 @@ namespace game {
 
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self>(vf, block_pos, st);
+            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_standard>(vf, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_boxes(bl_st st) {
@@ -194,7 +194,7 @@ namespace game {
                 .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size },
                 .uv_draw_pos = d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
             };
-            add_foliage_vertices(vf, d_positions, offset_d_positions);
+            add_foliage_vertices<Vf, &Vf::add_foliage>(vf, d_positions, offset_d_positions);
         }
 
         template<block::face face>
@@ -311,7 +311,7 @@ namespace game {
 
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self>(vf, block_pos, st);
+            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_standard>(vf, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) { return {

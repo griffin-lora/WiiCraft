@@ -1,6 +1,7 @@
 #pragma once
 #include "math.hpp"
 #include "util.hpp"
+#include "chunk.hpp"
 
 namespace game {
     struct draw_positions {
@@ -8,36 +9,33 @@ namespace game {
         math::vector2u8 uv_draw_pos;
     };
 
-    template<typename Vf>
-    void add_flat_front_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
-    template<typename Vf>
-    void add_flat_back_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
-    template<typename Vf>
-    void add_flat_top_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
-    template<typename Vf>
-    void add_flat_bottom_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
-    template<typename Vf>
-    void add_flat_right_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
-    template<typename Vf>
-    void add_flat_left_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    using const_quad_verts_ref = const chunk::quad::vertices&;
 
-    template<typename Vf>
-    void add_foliage_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    #define ADD_FACE_TEMPLATE template<typename Vf, void (Vf::*Av)(game::const_quad_verts_ref)>
 
-    template<block::face face, typename Vf>
+    ADD_FACE_TEMPLATE void add_flat_front_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    ADD_FACE_TEMPLATE void add_flat_back_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    ADD_FACE_TEMPLATE void add_flat_top_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    ADD_FACE_TEMPLATE void add_flat_bottom_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    ADD_FACE_TEMPLATE void add_flat_right_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+    ADD_FACE_TEMPLATE void add_flat_left_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+
+    ADD_FACE_TEMPLATE void add_foliage_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions);
+
+    template<block::face face, typename Vf, void (Vf::*Av)(const_quad_verts_ref)>
     constexpr void add_flat_face_vertices(Vf& vf, const draw_positions& d_positions, const draw_positions& offset_d_positions) {
         call_face_func_for<face, void>(
-            add_flat_front_vertices<Vf>,
-            add_flat_back_vertices<Vf>,
-            add_flat_top_vertices<Vf>,
-            add_flat_bottom_vertices<Vf>,
-            add_flat_right_vertices<Vf>,
-            add_flat_left_vertices<Vf>,
+            add_flat_front_vertices<Vf, Av>,
+            add_flat_back_vertices<Vf, Av>,
+            add_flat_top_vertices<Vf, Av>,
+            add_flat_bottom_vertices<Vf, Av>,
+            add_flat_right_vertices<Vf, Av>,
+            add_flat_left_vertices<Vf, Av>,
             vf, d_positions, offset_d_positions
         );
     }
 
-    template<block::face face, typename Bf, typename Vf>
+    template<block::face face, typename Bf, typename Vf, void (Vf::*Av)(const_quad_verts_ref)>
     constexpr void add_flat_face_vertices_from_block_position(Vf& vf, math::vector3u8 block_pos, bl_st st) {
         // Get information about where the vertices will be positioned
         draw_positions d_positions = {
@@ -46,7 +44,7 @@ namespace game {
         };
         d_positions = Bf::get_draw_positions(d_positions, st);
         draw_positions offset_d_positions = Bf::template get_offset_draw_positions<face>(d_positions, st);
-        add_flat_face_vertices<face>(
+        add_flat_face_vertices<face, Vf, Av>(
             vf,
             d_positions,
             offset_d_positions
