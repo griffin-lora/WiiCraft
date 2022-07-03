@@ -23,6 +23,7 @@
 #include "game/cursor.hpp"
 #include "game/skybox.hpp"
 #include "game/character.hpp"
+#include "game/rendering.hpp"
 #include "common.hpp"
 
 static constexpr f32 cam_rotation_speed = 0.15f;
@@ -118,6 +119,7 @@ int main(int argc, char** argv) {
 	gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
 	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 	GX_SetColorUpdate(GX_TRUE);
+	GX_SetAlphaUpdate(GX_TRUE);
 
 	for (;;) {
 		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
@@ -138,11 +140,17 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
 		skybox.draw();
+		
+		game::init_standard_rendering();
 		game::draw_chunks_standard(view, cam, chunks);
 		bl_sel.update_if_needed(view, cam);
 		bl_sel.draw_standard(raycast);
+
+		game::init_foliage_rendering();
 		game::draw_chunks_foliage(chunks);
 		bl_sel.draw_foliage(raycast);
+
+		game::init_water_rendering();
 		game::draw_chunks_water(chunks);
 		bl_sel.draw_water(raycast);
 		
