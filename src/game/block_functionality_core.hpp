@@ -260,6 +260,14 @@ namespace game {
     };
 
     template<>
+    struct block_functionality<block::type::WOOD_PLANKS> : public cube_block_functionality<block_functionality<block::type::WOOD_PLANKS>> {
+        template<block::face face>
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            return { 4, 0 };
+        }
+    };
+
+    template<>
     struct block_functionality<block::type::STONE_SLAB> : public slab_block_functionality<block_functionality<block::type::STONE_SLAB>> {
         template<block::face face>
         BF_FUNC math::vector2u8 get_uv_position(bl_st) {
