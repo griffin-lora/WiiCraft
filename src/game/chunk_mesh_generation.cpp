@@ -53,6 +53,8 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quad
                 math::vector3u8 block_pos = {x, y, z};
                 auto& block = chunk.blocks[get_index_from_position(block_pos)];
 
+                // TODO: Possibly go back to using a macro here since it is faster
+                
                 call_with_block_functionality(block.tp, [&]<typename Bf>() {
                     if (Bf::get_block_traits(block.st).visible) {
                         math::vector3u8 pos = block_pos;

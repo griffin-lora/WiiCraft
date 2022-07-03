@@ -35,6 +35,15 @@ static f32 get_hills_height(glm::vec2 position, f32 biome_value) {
     );
 }
 
+static f32 get_tallgrass_value(glm::vec2 position) {
+    position /= 2.0f;
+
+    return (
+        (get_noise_at(position) * 0.5f) + 
+        (get_noise_at(position * 2.0f) * 1.0f)
+    );
+}
+
 void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 z = 0; z < chunk::SIZE; z++) {
@@ -43,6 +52,8 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
             glm::vec2 noise_pos = { world_x, world_z };
 
             auto plains_height = get_plains_height(noise_pos, 0.0f);
+            
+            auto tallgrass_value = get_tallgrass_value(noise_pos);
 
             s32 y_pos = (plains_height * 12) + 1;
 
@@ -60,6 +71,8 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
                     }
                 } else if (world_y == y_pos) {
                     block = { .tp = block::type::GRASS };
+                } else if (world_y == (y_pos + 1) && tallgrass_value > 0.97f) {
+                    block = { .tp = block::type::TALL_GRASS };
                 } else {
                     block = { .tp = block::type::AIR };
                 }
