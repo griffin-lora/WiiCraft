@@ -29,7 +29,7 @@ void block_selection::update_if_needed(const math::matrix view, const camera& ca
     }
 }
 
-void block_selection::draw_first(const std::optional<raycast>& raycast) const {
+void block_selection::draw_standard(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
 
@@ -41,12 +41,11 @@ void block_selection::draw_first(const std::optional<raycast>& raycast) const {
 
         tf.load(GX_PNMTX3);
 
-        GX_SetCullMode(GX_CULL_BACK);
 	    standard_disp_list.call();
     }
 }
 
-void block_selection::draw_second(const std::optional<raycast>& raycast) const {
+void block_selection::draw_foliage(const std::optional<raycast>& raycast) const {
     if (raycast.has_value()) {
         init_drawing();
 
@@ -58,8 +57,23 @@ void block_selection::draw_second(const std::optional<raycast>& raycast) const {
 
         tf.load(GX_PNMTX3);
 
-        GX_SetCullMode(GX_CULL_NONE);
 	    foliage_disp_list.call();
+    }
+}
+
+void block_selection::draw_water(const std::optional<raycast>& raycast) const {
+    if (raycast.has_value()) {
+        init_drawing();
+
+        GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+        GX_SetAlphaUpdate(GX_TRUE);
+        GX_SetZCompLoc(GX_TRUE);
+        GX_SetCullMode(GX_CULL_BACK);
+
+        tf.load(GX_PNMTX3);
+
+	    water_disp_list.call();
     }
 }
 
@@ -72,7 +86,7 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
 
     add_block_vertices(vf, raycast.bl_pos, raycast.bl);
 
-    write_into_display_lists(building_quads, vf, standard_disp_list, foliage_disp_list, [](auto vert_count) {
+    write_into_display_lists(building_quads, vf, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (
             4 + // GX_Begin
             vert_count * 3 + // GX_Position3u8

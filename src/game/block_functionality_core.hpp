@@ -311,7 +311,7 @@ namespace game {
 
         template<block::face face, typename Vf>
         BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_standard>(vf, block_pos, st);
+            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_water>(vf, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) { return {

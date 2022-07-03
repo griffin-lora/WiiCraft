@@ -4,10 +4,12 @@ template<typename Lf, typename Df>
 void game::write_into_display_lists(const ext::data_array<chunk::quad>& building_quads, const standard_vertex_function& vf,
     gfx::display_list& standard_disp_list,
     gfx::display_list& foliage_disp_list,
+    gfx::display_list& water_disp_list,
     Lf get_display_list_size, Df draw_vert
 ) {
     std::size_t standard_vert_count = vf.standard_quad_count * 4;
     std::size_t foliage_vert_count = vf.foliage_quad_count * 4;
+    std::size_t water_vert_count = vf.water_quad_count * 4;
 
     standard_disp_list.resize(get_display_list_size(standard_vert_count));
 
@@ -35,6 +37,24 @@ void game::write_into_display_lists(const ext::data_array<chunk::quad>& building
 
         for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
             if (it->tp == chunk::quad::type::FOLIAGE) {
+                auto& verts = it->verts;
+                draw_vert(verts.vert0);
+                draw_vert(verts.vert1);
+                draw_vert(verts.vert2);
+                draw_vert(verts.vert3);
+            }
+        }
+        
+        GX_End();
+    });
+
+    water_disp_list.resize(get_display_list_size(water_vert_count));
+
+    water_disp_list.write_into([&building_quads, &vf, &draw_vert, water_vert_count]() {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, water_vert_count);
+
+        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
+            if (it->tp == chunk::quad::type::WATER) {
                 auto& verts = it->verts;
                 draw_vert(verts.vert0);
                 draw_vert(verts.vert1);

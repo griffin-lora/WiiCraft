@@ -30,7 +30,7 @@ void game::init_chunk_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 6);
 }
 
-void game::draw_chunks_first(const math::matrix view, const camera& cam, chunk::map& chunks) {
+void game::draw_chunks_standard(const math::matrix view, const camera& cam, chunk::map& chunks) {
 	init_chunk_drawing();
 
 	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
@@ -54,7 +54,7 @@ void game::draw_chunks_first(const math::matrix view, const camera& cam, chunk::
 	}
 }
 
-void game::draw_chunks_second(const chunk::map& chunks) {
+void game::draw_chunks_foliage(const chunk::map& chunks) {
 	init_chunk_drawing();
 
 	GX_SetAlphaCompare(GX_GEQUAL, 0x20, GX_AOP_AND, GX_ALWAYS, 0); // I don't know why this works but it does, see https://github.com/devwizard64/metapro/blob/bda8d24556ba160a339ade631469dffe2a1cf752/src/gdp/set_rm.gekko.c
@@ -65,5 +65,19 @@ void game::draw_chunks_second(const chunk::map& chunks) {
 	for (const auto& [ pos, chunk ] : chunks) {
 		chunk.tf.load(GX_PNMTX3);
 		chunk.foliage_disp_list.call();
+	}
+}
+
+void game::draw_chunks_water(const chunk::map& chunks) {
+	init_chunk_drawing();
+
+	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+	GX_SetAlphaUpdate(GX_TRUE);
+	GX_SetZCompLoc(GX_TRUE);
+	GX_SetCullMode(GX_CULL_BACK);
+	for (const auto& [ pos, chunk ] : chunks) {
+		chunk.tf.load(GX_PNMTX3);
+		chunk.water_disp_list.call();
 	}
 }

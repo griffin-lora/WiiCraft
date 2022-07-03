@@ -78,7 +78,7 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quad
         }
     }
 
-    write_into_display_lists(building_quads, vf, chunk.standard_disp_list, chunk.foliage_disp_list, [](auto vert_count) {
+    write_into_display_lists(building_quads, vf, chunk.standard_disp_list, chunk.foliage_disp_list, chunk.water_disp_list, [](auto vert_count) {
         return (
             4 + // GX_Begin
             vert_count * 3 + // GX_Position3u8

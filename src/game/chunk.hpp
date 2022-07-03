@@ -27,7 +27,8 @@ namespace game {
         struct quad {
             enum class type : u8 {
                 STANDARD,
-                FOLIAGE
+                FOLIAGE,
+                WATER
             };
             type tp;
 
@@ -42,6 +43,7 @@ namespace game {
 
         gfx::display_list standard_disp_list;
         gfx::display_list foliage_disp_list;
+        gfx::display_list water_disp_list;
         bool update_mesh_important = false;
         bool update_mesh_unimportant = false;
         struct neighborhood {
