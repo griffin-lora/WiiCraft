@@ -70,6 +70,7 @@ void game::manage_chunks_around_camera(
             game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
 
             chunk.update_mesh_important = true;
+            chunk.update_mesh_unimportant = false;
             chunk.update_neighborhood = false;
             return true;
         }
