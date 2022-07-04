@@ -52,11 +52,12 @@ void game::manage_chunks_around_camera(
         if (!chunks.contains(chunk_pos)) {
             auto pos = chunk_pos;
             // Compiler was complaining that chunk_pos wasn't an rvalue so I casted it. Just don't use it after this.
-            chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), { view, pos }));
+            auto [ it, success ] = chunks.insert(std::make_pair<math::vector3s32, game::chunk>(std::move(chunk_pos), { view, pos }));
 
-            auto& chunk = chunks.at(pos);
-            if (stored_chunks.contains(pos)) {
-                auto& stored_chunk = stored_chunks.at(pos);
+            auto& chunk = it->second;
+            auto stored_chunk_it = stored_chunks.find(pos);
+            if (stored_chunk_it != stored_chunks.end()) {
+                auto& stored_chunk = stored_chunk_it->second;
                 chunk.blocks = std::move(stored_chunk.blocks);
                 stored_chunks.erase(pos);
             } else {

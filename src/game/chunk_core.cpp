@@ -88,8 +88,9 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
 template<block::face face>
 static chunk::opt_ref get_neighbor_from_map(chunk::map& chunks, const math::vector3s32& pos) {
     math::vector3s32 offset_pos = get_face_offset_position<face>(pos);
-    if (chunks.contains(offset_pos)) {
-        return chunks.at(offset_pos);
+    auto it = chunks.find(offset_pos);
+    if (it != chunks.end()) {
+        return it->second;
     } else {
         return {};
     }

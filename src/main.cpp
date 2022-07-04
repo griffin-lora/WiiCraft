@@ -71,12 +71,12 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::character character = {
-		.position = { 0.0f, 20.0f, 0.0f },
+		.position = { 0.0f, 0.0f, 0.0f },
 		.velocity = { 0.0f, 0.0f, 0.0f }
 	};
 
 	game::camera cam = {
-		.position = {0.0f, 30.0f, -10.0f},
+		.position = {0.0f, 0.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.look = {0.0f, 0.0f, 1.0f},
 		.fov = 90.0f,

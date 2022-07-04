@@ -97,8 +97,9 @@ namespace game {
     template<typename T>
     std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {
         auto chunk_pos = get_chunk_position_from_world_position(position);
-        if (chunks.contains(chunk_pos)) {
-            auto& chunk = chunks.at(chunk_pos);
+        auto it = chunks.find(chunk_pos);
+        if (it != chunks.end()) {
+            auto& chunk = it->second;
 
             auto block_pos = get_local_block_position(position);
             auto index = get_index_from_position(block_pos);
