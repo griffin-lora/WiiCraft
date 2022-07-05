@@ -10,5 +10,6 @@ namespace game {
         world_location location;
     };
 
-    std::optional<block_raycast> get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& end);
+    template<typename F>
+    std::optional<block_raycast> get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& end, F get_boxes);
 };

@@ -6,7 +6,8 @@
 
 using namespace game;
 
-std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& end) {
+template<typename F>
+std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& end, F get_boxes) {
     auto dir = glm::normalize(end - origin);
 
     for (f32 x = origin.x; x <= end.x; x++) {
@@ -17,7 +18,7 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
                 auto world_loc = get_world_location_at_world_position(chunks, world_block_pos);
                 if (world_loc.has_value()) {
                     return get_with_block_functionality<std::optional<block_raycast>>(world_loc->bl.tp, [&]<typename Bf>() -> std::optional<block_raycast> {
-                        auto boxes = Bf::get_selection_boxes(world_loc->bl.st);
+                        auto boxes = get_boxes.template operator()<Bf>(world_loc->bl.st);
                         for (auto& box : boxes) {
                             box.lesser_corner += world_block_pos;
                             box.greater_corner += world_block_pos;
