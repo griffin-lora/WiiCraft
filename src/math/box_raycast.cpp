@@ -18,7 +18,6 @@ std::optional<box_raycast> math::get_box_raycast(const glm::vec3& origin, const 
     if (t_near.y > t_far.y) { std::swap(t_near.y, t_far.y); }
     if (t_near.z > t_far.z) { std::swap(t_near.z, t_far.z); }
 
-    // Maybe remove this
     if (
         t_near.x > t_far.y || t_near.x > t_far.z ||
         t_near.y > t_far.x || t_near.y > t_far.z ||
@@ -34,7 +33,11 @@ std::optional<box_raycast> math::get_box_raycast(const glm::vec3& origin, const 
 
     return box_raycast{
         .intersection_position = intersection_position,
-        .normal = { 0, 0, 0 },
+        .normal = [&direction_inverse, &t_near]() -> glm::vec3 {
+            if (t_near.x >= t_near.y && t_near.x >= t_near.z) { return { direction_inverse.x < 0 ? 1 : -1, 0, 0 }; }
+            else if (t_near.y >= t_near.x && t_near.y >= t_near.z) { return { 0, direction_inverse.y < 0 ? 1 : -1, 0 }; }
+            else { return { 0, 0, direction_inverse.z < 0 ? 1 : -1 }; }
+        }(),
         .near_hit_time = t_hit_near
     };
 }
