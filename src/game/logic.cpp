@@ -113,9 +113,9 @@ void game::update_from_input(
 
     if (raycast.has_value()) {
         if (buttons_down & WPAD_BUTTON_A) {
-            raycast->location.bl = { .tp = block::type::AIR };
-            raycast->location.ch.modified = true;
-            add_important_chunk_mesh_update(raycast->location.ch, raycast->location.bl_pos);
+            *raycast->location.bl = { .tp = block::type::AIR };
+            raycast->location.ch->modified = true;
+            add_important_chunk_mesh_update(*raycast->location.ch, raycast->location.bl_pos);
         }
         // if (buttons_down & WPAD_BUTTON_B) {
         //     auto backtracked_raycast = get_backtracked_raycast(cam, chunks, *raycast);

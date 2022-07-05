@@ -112,9 +112,9 @@ namespace game {
 
     struct world_location {
         math::vector3s32 ch_pos;
-        chunk& ch;
+        chunk* ch;
         math::vector3u8 bl_pos;
-        block& bl;
+        block* bl;
     };
 
     template<typename T>
@@ -130,9 +130,9 @@ namespace game {
             auto& block = chunk.blocks[index];
             return world_location{
                 .ch_pos = chunk_pos,
-                .ch = chunk,
+                .ch = &chunk,
                 .bl_pos = block_pos,
-                .bl = block
+                .bl = &block
             };
         }
         return {};

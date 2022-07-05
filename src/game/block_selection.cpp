@@ -66,7 +66,7 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
         .quad_it = building_quads.begin()
     };
 
-    add_block_vertices(vf, raycast.location.bl_pos, raycast.location.bl);
+    add_block_vertices(vf, raycast.location.bl_pos, *raycast.location.bl);
 
     write_into_display_lists(building_quads, vf, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (

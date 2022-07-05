@@ -24,6 +24,8 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
         std::swap(floored_origin.z, floored_end.z);
     }
 
+    std::optional<block_raycast> closest_raycast;
+
     for (f32 x = floored_origin.x; x <= floored_end.x; x++) {
         for (f32 y = floored_origin.y; y <= floored_end.y; y++) {
             for (f32 z = floored_origin.z; z <= floored_end.z; z++) {
@@ -31,32 +33,38 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
                 
                 auto world_loc = get_world_location_at_world_position(chunks, world_block_pos);
                 if (world_loc.has_value()) {
-                    auto raycast = get_with_block_functionality<std::optional<block_raycast>>(world_loc->bl.tp, [&]<typename Bf>() -> std::optional<block_raycast> {
+                    auto box_raycast = get_with_block_functionality<std::optional<math::box_raycast>>(world_loc->bl->tp, [&]<typename Bf>() -> std::optional<math::box_raycast> {
 
-                        auto boxes = get_boxes.template operator()<Bf>(world_loc->bl.st);
+                        auto boxes = get_boxes.template operator()<Bf>(world_loc->bl->st);
                         for (auto& box : boxes) {
                             box.lesser_corner += world_block_pos;
                             box.greater_corner += world_block_pos;
 
-                            auto box_raycast = math::get_box_raycast(origin, dir, box);
-                            if (box_raycast.has_value()) {
-                                return block_raycast{
-                                    .box_raycast = *box_raycast,
-                                    .location = *world_loc
-                                };
-                            }
+                            return math::get_box_raycast(origin, dir, box);
 
                         }
 
                         return {};
                     });
-                    if (raycast.has_value()) {
-                        return raycast;
+                    if (box_raycast.has_value()) {
+                        if (closest_raycast.has_value()) {
+                            if (glm::length(closest_raycast->box_raycast.intersection_position - origin) > glm::length(box_raycast->intersection_position - origin)) {
+                                closest_raycast = block_raycast{
+                                    .box_raycast = *box_raycast,
+                                    .location = *world_loc
+                                };
+                            }
+                        } else {
+                            closest_raycast = block_raycast{
+                                .box_raycast = *box_raycast,
+                                .location = *world_loc
+                            };
+                        }
                     }
                 }
 
             }
         }
     }
-    return {};
+    return closest_raycast;
 }
