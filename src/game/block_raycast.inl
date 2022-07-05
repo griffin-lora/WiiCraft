@@ -6,31 +6,29 @@
 
 using namespace game;
 
-template<typename F>
-std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, f32 length, F get_boxes) {
-    auto end = origin + (dir * length);
+template<typename F1, typename F2>
+std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box) {
     auto dir_inv = 1.0f / dir;
 
-    auto floored_origin = floor_float_position<glm::vec3>(origin);
+    auto floored_begin = floor_float_position<glm::vec3>(begin);
     auto floored_end = floor_float_position<glm::vec3>(end);
 
-    // Swap floored_origin and floored_end to make sure that floored_origin is always before floored_end
-    if (floored_origin.x > floored_end.x) {
-        std::swap(floored_origin.x, floored_end.x);
+    // Swap floored_begin and floored_end to make sure that floored_begin is always before floored_end
+    if (floored_begin.x > floored_end.x) {
+        std::swap(floored_begin.x, floored_end.x);
     }
-    if (floored_origin.y > floored_end.y) {
-        std::swap(floored_origin.y, floored_end.y);
+    if (floored_begin.y > floored_end.y) {
+        std::swap(floored_begin.y, floored_end.y);
     }
-    if (floored_origin.z > floored_end.z) {
-        std::swap(floored_origin.z, floored_end.z);
+    if (floored_begin.z > floored_end.z) {
+        std::swap(floored_begin.z, floored_end.z);
     }
 
     std::optional<block_raycast> closest_raycast;
-    f32 closest_length_squared = 0.0f;
 
-    for (f32 x = floored_origin.x; x <= floored_end.x; x++) {
-        for (f32 y = floored_origin.y; y <= floored_end.y; y++) {
-            for (f32 z = floored_origin.z; z <= floored_end.z; z++) {
+    for (f32 x = floored_begin.x; x <= floored_end.x; x++) {
+        for (f32 y = floored_begin.y; y <= floored_end.y; y++) {
+            for (f32 z = floored_begin.z; z <= floored_end.z; z++) {
                 glm::vec3 world_block_pos = { x, y, z };
                 
                 auto world_loc = get_world_location_at_world_position(chunks, world_block_pos);
@@ -39,6 +37,7 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
 
                         auto boxes = get_boxes.template operator()<Bf>(world_loc->bl->st);
                         for (auto& box : boxes) {
+                            transform_box(box);
                             box.lesser_corner += world_block_pos;
                             box.greater_corner += world_block_pos;
 
@@ -49,14 +48,12 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
                     });
                     if (box_raycast.has_value()) {
                         if (closest_raycast.has_value()) {
-                            f32 check_length_squared = math::length_squared(box_raycast->intersection_position - origin);
-                            if (closest_length_squared > check_length_squared) {
+                            if (box_raycast->near_hit_time < closest_raycast->box_raycast.near_hit_time) {
                                 closest_raycast = block_raycast{
                                     .box_raycast = *box_raycast,
                                     .location = *world_loc,
                                     .world_block_position = world_block_pos
                                 };
-                                closest_length_squared = check_length_squared;
                             }
                         } else {
                             closest_raycast = block_raycast{
@@ -64,7 +61,6 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
                                 .location = *world_loc,
                                 .world_block_position = world_block_pos
                             };
-                            closest_length_squared = math::length_squared(box_raycast->intersection_position - origin);
                         }
                     }
                 }

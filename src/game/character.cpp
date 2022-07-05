@@ -1,6 +1,8 @@
 #include "character.hpp"
 #include "block_core.hpp"
 #include "block_core.inl"
+#include "block_raycast.hpp"
+#include "block_raycast.inl"
 #include "chunk_core.hpp"
 #include "common.hpp"
 #include "input.hpp"
@@ -20,7 +22,7 @@ void character::handle_input(const camera& cam, u32 buttons_down) {
     #ifndef PC_PORT
     auto joystick_input_vector = input::get_joystick_input_vector();
     #else
-    glm::vec2 joystick_input_vector = { 96.0f, 48.0f };
+    glm::vec2 joystick_input_vector = { 96.0f, 0.0f };
     #endif
 
     if ((buttons_down & WPAD_BUTTON_1) && grounded) {
@@ -81,43 +83,60 @@ void character::apply_no_movement() {
     }
 }
 
-void character::apply_physics(chunk::map& chunks) {
-    math::box character_box = {
-        position + glm::vec3{ -0.35f, -1.0f, -0.35f },
-        position + glm::vec3{ 0.35f, 1.0f, 0.35f },
-    };
+static constexpr glm::vec3 half_size = { 0.35f, 1.0f, 0.35f };
 
-    auto floored_position = floor_float_position<glm::vec3>(position);
-    auto check_area_lesser_corner = floored_position - glm::vec3{ 2, 2, 2 };
-    auto check_area_greater_corner = floored_position + glm::vec3{ 2, 2, 2 };
+void character::apply_physics(chunk::map& chunks) {
+    auto direction = velocity * (1.0f/60.0f);
+
+    auto begin = position - half_size;
+    auto end = position + half_size;
+
+    auto next_position = position + direction;
+
+    auto next_begin = next_position - half_size;
+    auto next_end = next_position + half_size;
+
+    if (next_begin.x < begin.x) {
+        begin.x = next_begin.x;
+    }
+    if (next_begin.y < begin.y) {
+        begin.y = next_begin.y;
+    }
+    if (next_begin.z < begin.z) {
+        begin.z = next_begin.z;
+    }
+    if (next_end.x > end.x) {
+        end.x = next_end.x;
+    }
+    if (next_end.y > end.y) {
+        end.y = next_end.y;
+    }
+    if (next_end.z > end.z) {
+        end.z = next_end.z;
+    }
+
+    auto raycast = game::get_block_raycast(chunks, position, direction, begin, end, []<typename Bf>(game::bl_st st) {
+        return Bf::get_collision_boxes(st);
+    }, [](auto& box) {
+        box.lesser_corner -= half_size;
+        box.greater_corner += half_size;
+    });
 
     bool floor_collision = false;
-    
-    // Loop through tangible blocks around the character
-    for (f32 x = check_area_lesser_corner.x; x <= check_area_greater_corner.x; x++) {
-        for (f32 y = check_area_lesser_corner.y; y <= check_area_greater_corner.y; y++) {
-            for (f32 z = check_area_lesser_corner.z; z <= check_area_greater_corner.z; z++) {
-                glm::vec3 world_block_pos = { x, y, z };
-                const auto block = get_block_from_world_position(chunks, world_block_pos);
-                if (block.has_value()) {
-                    const auto collided_block_boxes = get_block_boxes_that_collide_with_world_box(character_box, *block, world_block_pos);
-                    for (const auto& box : collided_block_boxes) {
-                        glm::vec3 lesser_corner_world_pos = box.lesser_corner + world_block_pos;
-                        glm::vec3 greater_corner_world_pos = box.greater_corner + world_block_pos;
 
-                        f32 y_offset = greater_corner_world_pos.y - character_box.lesser_corner.y;
-                        if (y_offset >= 0 && velocity.y <= 0) {
-                            floor_collision = true;
-
-                            position.y = greater_corner_world_pos.y + 1.0f;
-                            velocity.y = 0.0f;
-                            grounded = true;
-                        }
-                    }
-                }
-            }
+    if (raycast.has_value()) {
+        if (raycast->box_raycast.normal.y == 1.0f) {
+            floor_collision = true;
         }
+        glm::vec3 inverse_normal = { raycast->box_raycast.normal.x != 0 ? 0 : 1, raycast->box_raycast.normal.y != 0 ? 0 : 1, raycast->box_raycast.normal.z != 0 ? 0 : 1 };
+        std::printf("Hit: %f, %f, %f\n", raycast->box_raycast.normal.x, raycast->box_raycast.normal.y, raycast->box_raycast.normal.z);
+
+        position = (position * inverse_normal) + (raycast->box_raycast.intersection_position * raycast->box_raycast.normal);
+        velocity *= inverse_normal;
+    } else {
+        printf("No hit\n");
     }
+
     if (!floor_collision) {
         velocity.y -= gravity;
         grounded = false;

@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::character character = {
-		.position = { 0.0f, 0.0f, 0.0f },
+		.position = { 0.0f, 30.0f, 0.0f },
 		.velocity = { 0.0f, 0.0f, 0.0f }
 	};
 
@@ -124,9 +124,9 @@ int main(int argc, char** argv) {
 	GX_SetAlphaUpdate(GX_TRUE);
 
 	for (;;) {
-		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look, 10.0f, []<typename Bf>(game::bl_st st) {
+		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look, cam.position, cam.position + (cam.look * 10.0f), []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
-		});
+		}, [](auto&) {});
 		bl_sel.handle_raycast(view, building_quads, raycast);
 
 		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
