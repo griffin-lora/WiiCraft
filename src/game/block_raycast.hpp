@@ -11,5 +11,5 @@ namespace game {
     };
 
     template<typename F>
-    std::optional<block_raycast> get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& end, F get_boxes);
+    std::optional<block_raycast> get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& direction, f32 length, F get_boxes);
 };

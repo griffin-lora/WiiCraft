@@ -7,8 +7,8 @@
 using namespace game;
 
 template<typename F>
-std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& end, F get_boxes) {
-    auto dir = glm::normalize(end - origin);
+std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, f32 length, F get_boxes) {
+    auto end = origin + (dir * length);
     auto dir_inv = 1.0f / dir;
 
     auto floored_origin = floor_float_position<glm::vec3>(origin);

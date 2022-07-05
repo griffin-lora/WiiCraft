@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 	GX_SetAlphaUpdate(GX_TRUE);
 
 	for (;;) {
-		auto raycast = game::get_block_raycast(chunks, cam.position, cam.position + (cam.look * 10.0f), []<typename Bf>(game::bl_st st) {
+		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look, 10.0f, []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
 		});
 		bl_sel.handle_raycast(view, building_quads, raycast);
