@@ -10,16 +10,6 @@
 #include <tuple>
 
 namespace game {
-    struct raycast {
-        glm::vec3 pos;
-        math::vector3s32 ch_pos;
-        chunk& ch;
-        math::vector3u8 bl_pos;
-        block& bl;
-    };
-
-    std::optional<raycast> get_raycast(const glm::vec3& origin, const glm::vec3& dir, u16 step_count, chunk::map& chunks);
-
     void update_from_input(
         f32 cam_rotation_speed,
         u16 v_width,
