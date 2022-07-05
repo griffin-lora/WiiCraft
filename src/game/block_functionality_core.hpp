@@ -60,8 +60,8 @@ namespace game {
         BF_FUNC std::array<math::box, 1> get_boxes() {
             return {
                 math::box{
-                    .lesser_corner = { 0.0f, 0.0f, 0.0f },
-                    .greater_corner = { 1.0f, 1.0f, 1.0f }
+                    { 0.0f, 0.0f, 0.0f },
+                    { 1.0f, 1.0f, 1.0f }
                 }
             };
         }
@@ -142,8 +142,8 @@ namespace game {
         BF_FUNC std::array<math::box, 1> get_boxes(bl_st st) {
             return {
                 math::box{
-                    .lesser_corner = { 0.0f, (st.slab == state::TOP ? 0.5f : 0.0f), 0.0f },
-                    .greater_corner = { 1.0f, (st.slab == state::BOTTOM ? 0.5f : 1.0f), 1.0f }
+                    { 0.0f, (st.slab == state::TOP ? 0.5f : 0.0f), 0.0f },
+                    { 1.0f, (st.slab == state::BOTTOM ? 0.5f : 1.0f), 1.0f }
                 }
             };
         }
@@ -211,8 +211,8 @@ namespace game {
         BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) {
             return {
                 math::box{
-                    .lesser_corner = { 0.2f, 0.0f, 0.2f },
-                    .greater_corner = { 0.8f, 0.8f, 0.8f }
+                    { 0.2f, 0.0f, 0.2f },
+                    { 0.8f, 0.8f, 0.8f }
                 }
             };
         }
@@ -316,8 +316,8 @@ namespace game {
 
         BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) { return {
             math::box{
-                .lesser_corner = { 0.0f, 0.0f, 0.0f },
-                .greater_corner = { 1.0f, 1.0f, 1.0f }
+                { 0.0f, 0.0f, 0.0f },
+                { 1.0f, 1.0f, 1.0f }
             }
         }; }
 

@@ -16,8 +16,8 @@ bool game::does_world_position_select_block(const glm::vec3& world_pos, const bl
 std::vector<math::box> game::get_block_boxes_that_collide_with_world_box(const math::box& world_box, const block& block, const glm::vec3& world_block_pos) {
     std::vector<math::box> collided_block_boxes;
     math::box box_offset_into_block_pos = {
-        .lesser_corner = world_box.lesser_corner - world_block_pos,
-        .greater_corner = world_box.greater_corner - world_block_pos
+        world_box.lesser_corner - world_block_pos,
+        world_box.greater_corner - world_block_pos
     };
 
     call_with_block_functionality(block.tp, [&block, &collided_block_boxes, &box_offset_into_block_pos]<typename Bf>() {

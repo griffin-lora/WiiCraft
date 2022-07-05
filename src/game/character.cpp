@@ -83,11 +83,9 @@ void character::apply_no_movement() {
 
 void character::apply_physics(chunk::map& chunks) {
     math::box character_box = {
-        .lesser_corner = { -0.35f, -1.0f, -0.35f },
-        .greater_corner = { 0.35f, 1.0f, 0.35f },
+        position + glm::vec3{ -0.35f, -1.0f, -0.35f },
+        position + glm::vec3{ 0.35f, 1.0f, 0.35f },
     };
-    character_box.lesser_corner += position;
-    character_box.greater_corner += position;
 
     auto floored_position = floor_float_position<glm::vec3>(position);
     auto check_area_lesser_corner = floored_position - glm::vec3{ 2, 2, 2 };
