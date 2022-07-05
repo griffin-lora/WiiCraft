@@ -26,6 +26,7 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
     }
 
     std::optional<block_raycast> closest_raycast;
+    f32 closest_length_squared = 0.0f;
 
     for (f32 x = floored_origin.x; x <= floored_end.x; x++) {
         for (f32 y = floored_origin.y; y <= floored_end.y; y++) {
@@ -48,17 +49,20 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
                     });
                     if (box_raycast.has_value()) {
                         if (closest_raycast.has_value()) {
-                            if (glm::length(closest_raycast->box_raycast.intersection_position - origin) > glm::length(box_raycast->intersection_position - origin)) {
+                            f32 check_length_squared = math::length_squared(box_raycast->intersection_position - origin);
+                            if (closest_length_squared > check_length_squared) {
                                 closest_raycast = block_raycast{
                                     .box_raycast = *box_raycast,
                                     .location = *world_loc
                                 };
+                                closest_length_squared = check_length_squared;
                             }
                         } else {
                             closest_raycast = block_raycast{
                                 .box_raycast = *box_raycast,
                                 .location = *world_loc
                             };
+                            closest_length_squared = math::length_squared(box_raycast->intersection_position - origin);
                         }
                     }
                 }

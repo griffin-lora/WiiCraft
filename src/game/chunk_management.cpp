@@ -23,7 +23,7 @@ void game::manage_chunks_around_camera(
     if (!last_cam_chunk_pos.has_value() || cam_chunk_pos != last_cam_chunk_pos) {
         // Remove chunks outside of the sphere of radius chunk_erasure_radius
         for (auto& [ pos, chunk ] : chunks) {
-            if (math::squared_length(pos - cam_chunk_pos) > (chunk_erasure_radius * chunk_erasure_radius)) {
+            if (math::length_squared(pos - cam_chunk_pos) > (chunk_erasure_radius * chunk_erasure_radius)) {
                 if (chunk.modified) {
                     // If the chunk is modified the chunk in the stored_chunks map
                     auto stored_pos = pos;

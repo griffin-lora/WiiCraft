@@ -24,7 +24,7 @@ namespace math {
     }
 
     template<typename T, glm::qualifier Q>
-    inline T squared_length(const glm::vec<3, T, Q>& v) {
+    inline T length_squared(const glm::vec<3, T, Q>& v) {
         return v.x * v.x + v.y * v.y + v.z * v.z;
     }
 
