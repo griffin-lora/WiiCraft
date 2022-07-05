@@ -46,8 +46,8 @@ glm::vec2 input::get_joystick_input_vector() {
     return { 0.0f, 0.0f };
 }
 
-float input::get_plus_minus_input_scalar(u32 buttons_held) {
-    float scalar = 0.0f;
+f32 input::get_plus_minus_input_scalar(u32 buttons_held) {
+    f32 scalar = 0.0f;
     if (buttons_held & WPAD_BUTTON_PLUS) {
         scalar += 1.0f;
     }
