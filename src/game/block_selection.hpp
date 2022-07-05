@@ -1,4 +1,5 @@
 #pragma once
+#include "block_raycast.hpp"
 #include "logic.hpp"
 #include "math.hpp"
 #include "ext/data_array.hpp"
@@ -16,12 +17,12 @@ namespace game {
         math::transform_3d tf;
 
         void update_if_needed(const math::matrix view, const camera& cam);
-        void draw_standard(const std::optional<raycast>& raycast) const;
-        void draw_foliage(const std::optional<raycast>& raycast) const;
-        void draw_water(const std::optional<raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<raycast>& raycast);
+        void draw_standard(const std::optional<block_raycast>& raycast) const;
+        void draw_foliage(const std::optional<block_raycast>& raycast) const;
+        void draw_water(const std::optional<block_raycast>& raycast) const;
+        void handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<block_raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const raycast& raycast);
+            void update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const block_raycast& raycast);
     };
 }

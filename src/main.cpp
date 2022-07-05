@@ -13,6 +13,8 @@
 #include "input.hpp"
 #include <map>
 #include <numeric>
+#include "game/block_raycast.hpp"
+#include "game/block_raycast.inl"
 #include "game/camera.hpp"
 #include "game/chunk_core.hpp"
 #include "game/chunk_management.hpp"
@@ -122,7 +124,7 @@ int main(int argc, char** argv) {
 	GX_SetAlphaUpdate(GX_TRUE);
 
 	for (;;) {
-		auto raycast = game::get_raycast(cam.position, cam.look, 1024, chunks);
+		auto raycast = game::get_block_raycast(chunks, cam.position, cam.position + (cam.look * 20.0f));
 		bl_sel.handle_raycast(view, building_quads, raycast);
 
 		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);

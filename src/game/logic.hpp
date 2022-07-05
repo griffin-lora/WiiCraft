@@ -1,4 +1,5 @@
 #pragma once
+#include "block_raycast.hpp"
 #include "character.hpp"
 #include "camera.hpp"
 #include "chunk.hpp"
@@ -27,6 +28,6 @@ namespace game {
         camera& cam,
         chunk::map& chunks,
         cursor& cursor,
-        std::optional<raycast>& raycast
+        std::optional<block_raycast>& raycast
     );
 }

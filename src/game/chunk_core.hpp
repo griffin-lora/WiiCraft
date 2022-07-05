@@ -109,4 +109,32 @@ namespace game {
         }
         return {};
     }
+
+    struct world_location {
+        math::vector3s32 ch_pos;
+        chunk& ch;
+        math::vector3u8 bl_pos;
+        block& bl;
+    };
+
+    template<typename T>
+    std::optional<world_location> get_world_location_at_world_position(chunk::map& chunks, const T& position) {
+        auto chunk_pos = get_chunk_position_from_world_position(position);
+        auto it = chunks.find(chunk_pos);
+        if (it != chunks.end()) {
+            auto& chunk = it->second;
+
+            auto block_pos = get_local_block_position(position);
+            auto index = get_index_from_position(block_pos);
+
+            auto& block = chunk.blocks[index];
+            return world_location{
+                .ch_pos = chunk_pos,
+                .ch = chunk,
+                .bl_pos = block_pos,
+                .bl = block
+            };
+        }
+        return {};
+    }
 }
