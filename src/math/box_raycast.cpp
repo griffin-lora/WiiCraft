@@ -7,11 +7,9 @@ using namespace math;
 // Shamelessly stolen from: https://github.com/OneLoneCoder/olcPixelGameEngine/blob/master/Videos/OneLoneCoder_PGE_Rectangles.cpp
 // I literally have almost no idea what this does.
 
-std::optional<box_raycast> math::get_box_raycast(const glm::vec3& origin, const glm::vec3& direction, const box& box) {
-    glm::vec3 inv_dir = 1.0f / direction;
-
-    auto t_near = (box.lesser_corner - origin) * inv_dir;
-    auto t_far = (box.greater_corner - origin) * inv_dir;
+std::optional<box_raycast> math::get_box_raycast(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& direction_inverse, const box& box) {
+    auto t_near = (box.lesser_corner - origin) * direction_inverse;
+    auto t_far = (box.greater_corner - origin) * direction_inverse;
 
     if (std::isnan(t_far.y) || std::isnan(t_far.x)) { return {}; }
     if (std::isnan(t_near.y) || std::isnan(t_near.x)) { return {}; }

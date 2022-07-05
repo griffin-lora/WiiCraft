@@ -9,5 +9,5 @@ namespace math {
         f32 near_hit_time;
     };
 
-    std::optional<box_raycast> get_box_raycast(const glm::vec3& origin, const glm::vec3& direction, const box& box);
+    std::optional<box_raycast> get_box_raycast(const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& direction_inverse, const box& box);
 };
