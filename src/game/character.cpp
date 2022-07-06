@@ -7,6 +7,7 @@
 #include "common.hpp"
 #include "input.hpp"
 #include "logic.hpp"
+#include "dbg.hpp"
 
 #include <cstdio>
 
@@ -84,36 +85,14 @@ void character::apply_no_movement() {
 }
 
 static constexpr glm::vec3 half_size = { 0.35f, 1.0f, 0.35f };
+static constexpr glm::vec3 full_size = half_size * 2.0f;
 
 void character::apply_physics(chunk::map& chunks) {
     auto direction = velocity * (1.0f/60.0f);
 
-    auto begin = position - half_size;
-    auto end = position + half_size;
-
-    auto next_position = position + direction;
-
-    auto next_begin = next_position - half_size;
-    auto next_end = next_position + half_size;
-
-    if (next_begin.x < begin.x) {
-        begin.x = next_begin.x;
-    }
-    if (next_begin.y < begin.y) {
-        begin.y = next_begin.y;
-    }
-    if (next_begin.z < begin.z) {
-        begin.z = next_begin.z;
-    }
-    if (next_end.x > end.x) {
-        end.x = next_end.x;
-    }
-    if (next_end.y > end.y) {
-        end.y = next_end.y;
-    }
-    if (next_end.z > end.z) {
-        end.z = next_end.z;
-    }
+    // replace this with specific offsets
+    auto begin = position - glm::vec3{ 4.0f, 4.0f, 4.0f };
+    auto end = position + glm::vec3{ 4.0f, 4.0f, 4.0f };
 
     auto raycast = game::get_block_raycast(chunks, position, direction, begin, end, []<typename Bf>(game::bl_st st) {
         return Bf::get_collision_boxes(st);
@@ -124,17 +103,15 @@ void character::apply_physics(chunk::map& chunks) {
 
     bool floor_collision = false;
 
-    if (raycast.has_value()) {
+    if (raycast.has_value() && math::is_non_zero(raycast->box_raycast.normal) && math::is_non_zero(velocity)) {
         if (raycast->box_raycast.normal.y == 1.0f) {
             floor_collision = true;
         }
-        glm::vec3 inverse_normal = { raycast->box_raycast.normal.x != 0 ? 0 : 1, raycast->box_raycast.normal.y != 0 ? 0 : 1, raycast->box_raycast.normal.z != 0 ? 0 : 1 };
-        std::printf("Hit: %f, %f, %f\n", raycast->box_raycast.normal.x, raycast->box_raycast.normal.y, raycast->box_raycast.normal.z);
+        glm::vec3 absolute_normal = glm::abs(raycast->box_raycast.normal);
+        glm::vec3 inverse_normal = { absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 };
 
-        position = (position * inverse_normal) + (raycast->box_raycast.intersection_position * raycast->box_raycast.normal);
+        position = (raycast->box_raycast.intersection_position * absolute_normal) + (position * inverse_normal);
         velocity *= inverse_normal;
-    } else {
-        printf("No hit\n");
     }
 
     if (!floor_collision) {

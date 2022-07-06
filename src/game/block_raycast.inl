@@ -46,7 +46,7 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
 
                         return {};
                     });
-                    if (box_raycast.has_value()) {
+                    if (box_raycast.has_value() && box_raycast->near_hit_time < 1.0f) {
                         if (closest_raycast.has_value()) {
                             if (box_raycast->near_hit_time < closest_raycast->box_raycast.near_hit_time) {
                                 closest_raycast = block_raycast{
