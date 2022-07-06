@@ -88,6 +88,8 @@ static constexpr glm::vec3 half_size = { 0.35f, 1.0f, 0.35f };
 static constexpr glm::vec3 full_size = half_size * 2.0f;
 
 void character::apply_physics(chunk::map& chunks) {
+    velocity.y -= gravity;
+
     auto direction = velocity * (1.0f/60.0f);
 
     // replace this with specific offsets
@@ -101,23 +103,18 @@ void character::apply_physics(chunk::map& chunks) {
         box.greater_corner += half_size;
     });
 
-    bool floor_collision = false;
 
     if (raycast.has_value() && math::is_non_zero(raycast->box_raycast.normal) && math::is_non_zero(velocity)) {
         if (raycast->box_raycast.normal.y == 1.0f) {
-            floor_collision = true;
+            grounded = true;
+        } else {
+            grounded = false;
         }
         glm::vec3 absolute_normal = glm::abs(raycast->box_raycast.normal);
         glm::vec3 inverse_normal = { absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 };
 
-        position = (raycast->box_raycast.intersection_position * absolute_normal) + (position * inverse_normal);
         velocity *= inverse_normal;
-    }
 
-    if (!floor_collision) {
-        velocity.y -= gravity;
-        grounded = false;
-    }
 }
 
 void character::apply_velocity() {
