@@ -114,7 +114,7 @@ void character::apply_physics(chunk::map& chunks) {
         glm::vec3 inverse_normal = { absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 };
 
         velocity *= inverse_normal;
-
+    }
 }
 
 void character::apply_velocity() {
