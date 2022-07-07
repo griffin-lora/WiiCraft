@@ -21,7 +21,6 @@ namespace game {
         void update_camera(camera& cam) const;
 
         private:
-            template<typename Fc, typename Fn>
-            void apply_collision(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, Fc collision_func, Fn no_collision_func);
+            bool apply_collision(chunk::map& chunks);
     };
 }
