@@ -96,24 +96,24 @@ void character::apply_physics(chunk::map& chunks) {
     auto begin = position - glm::vec3{ 4.0f, 4.0f, 4.0f };
     auto end = position + glm::vec3{ 4.0f, 4.0f, 4.0f };
 
-    auto raycast = game::get_block_raycast(chunks, position, direction, begin, end, []<typename Bf>(game::bl_st st) {
+    auto raycasts = get_block_raycasts(chunks, position, direction, begin, end, []<typename Bf>(game::bl_st st) {
         return Bf::get_collision_boxes(st);
     }, [](auto& box) {
         box.lesser_corner -= half_size;
         box.greater_corner += half_size;
     });
 
+    grounded = false;
+    for (block_raycast& raycast : raycasts) {
+        if (math::is_non_zero(raycast.box_raycast.normal)) {
+            if (raycast.box_raycast.normal.y == 1.0f) {
+                grounded = true;
+            }
+            glm::vec3 absolute_normal = glm::abs(raycast.box_raycast.normal);
+            glm::vec3 inverse_normal = { absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 };
 
-    if (raycast.has_value() && math::is_non_zero(raycast->box_raycast.normal) && math::is_non_zero(velocity)) {
-        if (raycast->box_raycast.normal.y == 1.0f) {
-            grounded = true;
-        } else {
-            grounded = false;
+            velocity *= inverse_normal;
         }
-        glm::vec3 absolute_normal = glm::abs(raycast->box_raycast.normal);
-        glm::vec3 inverse_normal = { absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 };
-
-        velocity *= inverse_normal;
     }
 }
 
