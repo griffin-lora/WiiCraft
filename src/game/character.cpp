@@ -84,7 +84,7 @@ void character::apply_no_movement() {
     }
 }
 
-static constexpr glm::vec3 half_size = { 0.35f, 1.0f, 0.35f };
+static constexpr glm::vec3 half_size = { 0.35f, 0.9f, 0.35f };
 static constexpr glm::vec3 full_size = half_size * 2.0f;
 
 bool character::apply_collision(chunk::map& chunks) {
@@ -133,10 +133,9 @@ bool character::apply_collision(chunk::map& chunks) {
             glm::vec3 absolute_normal = glm::abs(normal);
             glm::vec3 inverse_normal = { absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 };
 
-            // position = (raycast->box_raycast.intersection_position * absolute_normal) + (position * inverse_normal);
             velocity *= inverse_normal;
+            return true;
         }
-        return true;
     }
     return false;
 }
