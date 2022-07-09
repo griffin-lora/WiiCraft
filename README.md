@@ -13,6 +13,6 @@ A Minecraft clone for the Wii
 #### Building
 
  - Run make in the repository root
- - Run ./textures.sh to generate textures
- - If you're running on Dolphin, run ./image.sh to generate the SD card image (\*nix systems only)
+ - Run make textures to generate textures
+ - If you're running on Dolphin, run make image to generate the SD card image (\*nix systems only)
 
