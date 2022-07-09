@@ -94,22 +94,6 @@ namespace game {
 
     void update_chunks(chunk::map& chunks, ext::data_array<chunk::quad>& building_quads);
 
-    template<typename T>
-    std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {
-        auto chunk_pos = get_chunk_position_from_world_position(position);
-        auto it = chunks.find(chunk_pos);
-        if (it != chunks.end()) {
-            auto& chunk = it->second;
-
-            auto block_pos = get_local_block_position(position);
-            auto index = get_index_from_position(block_pos);
-
-            auto& block = chunk.blocks[index];
-            return std::reference_wrapper{ block };
-        }
-        return {};
-    }
-
     struct world_location {
         math::vector3s32 ch_pos;
         chunk* ch;
@@ -136,5 +120,24 @@ namespace game {
             };
         }
         return {};
+    }
+
+    template<typename T>
+    std::optional<const world_location> get_world_location_at_world_position(const chunk::map& chunks, const T& position) {
+        return get_world_location_at_world_position(const_cast<chunk::map&>(chunks), position);
+    }
+
+    template<typename T>
+    std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {
+        auto loc = get_world_location_at_world_position(chunks, position);
+        if (loc.has_value()) {
+            return *loc->bl;
+        }
+        return {};
+    }
+
+    template<typename T>
+    std::optional<std::reference_wrapper<const block>> get_block_from_world_position(const chunk::map& chunks, const T& position) {
+        return get_block_from_world_position(const_cast<chunk::map&>(chunks), position);
     }
 }

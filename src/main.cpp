@@ -26,6 +26,7 @@
 #include "game/skybox.hpp"
 #include "game/character.hpp"
 #include "game/rendering.hpp"
+#include "game/water_overlay.hpp"
 #include "common.hpp"
 
 static constexpr f32 cam_rotation_speed = 0.15f;
@@ -112,6 +113,7 @@ int main(int argc, char** argv) {
 
 	game::skybox skybox{view, cam};
 	
+	game::water_overlay water_overlay;
 	game::cursor cursor;
 
 	game::block_selection bl_sel;
@@ -159,6 +161,8 @@ int main(int argc, char** argv) {
 		bl_sel.draw_water(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
+		init_ui_rendering();
+		water_overlay.draw(cam, chunks);
 		cursor.draw();
 
 		game::reset_update_params(cam);
