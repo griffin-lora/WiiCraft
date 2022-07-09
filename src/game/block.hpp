@@ -56,6 +56,10 @@ namespace game {
         };
 
         state st;
+
+        inline bool operator!=(const block& other) const {
+            return tp != other.tp || st.slab != other.st.slab;
+        }
     };
 
     constexpr u8 block_draw_size = 4;

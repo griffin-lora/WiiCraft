@@ -84,10 +84,11 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
 void block_selection::handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<block_raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
-        if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos) {
+        if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos || *raycast->location.bl != *last_block) {
             update_mesh(view, building_quads, *raycast);
         }
 
         last_block_pos = raycast->location.bl_pos;
+        last_block = *raycast->location.bl;
     }
 }
