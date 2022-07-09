@@ -110,10 +110,22 @@ run: $(BUILD)
 	dolphin-emu-nogui -e $(OUTPUT).elf
 
 textures:
-	./textures.sh
+	@rm -rf ./build/data/textures
+	@mkdir -p ./build/data/textures
+	@for file in ./textures/* ; do \
+			gxtexconv -i "$$file" -o ./build/data/textures/"$$(basename $${file%.*})".tpl; \
+			rm ./build/data/textures/"$$(basename $${file%.*})".h; \
+	done
 
 image:
-	./image.sh
+	@mkdir -p ./build/image
+	@if ! [ -f image.iso ]; then \
+		if command -v mksdcard &> /dev/null; then \
+			mksdcard 50M image.iso; \
+		else \
+			/sbin/mkfs.vfat -F 32 -C image.iso 50000; \
+		fi \
+	fi
 
 usb:
 	./usb.sh
