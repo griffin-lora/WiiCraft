@@ -279,7 +279,15 @@ namespace game {
     struct block_functionality<block::type::STONE_SLAB> : public slab_block_functionality<block_functionality<block::type::STONE_SLAB>> {
         template<block::face face>
         BF_FUNC math::vector2u8 get_uv_position(bl_st) {
-            return { 1, 0 };
+            using v2u8 = math::vector2u8;
+            return call_face_func_for<face, v2u8>(
+                []() { return v2u8{5, 0}; },
+                []() { return v2u8{5, 0}; },
+                []() { return v2u8{6, 0}; },
+                []() { return v2u8{6, 0}; },
+                []() { return v2u8{5, 0}; },
+                []() { return v2u8{5, 0}; }
+            );
         }
     };
 
