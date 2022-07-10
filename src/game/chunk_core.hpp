@@ -123,12 +123,12 @@ namespace game {
     }
 
     template<typename T>
-    std::optional<const world_location> get_world_location_at_world_position(const chunk::map& chunks, const T& position) {
+    inline std::optional<const world_location> get_world_location_at_world_position(const chunk::map& chunks, const T& position) {
         return get_world_location_at_world_position(const_cast<chunk::map&>(chunks), position);
     }
 
     template<typename T>
-    std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {
+    inline std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {
         auto loc = get_world_location_at_world_position(chunks, position);
         if (loc.has_value()) {
             return *loc->bl;
@@ -137,7 +137,7 @@ namespace game {
     }
 
     template<typename T>
-    std::optional<std::reference_wrapper<const block>> get_block_from_world_position(const chunk::map& chunks, const T& position) {
+    inline std::optional<std::reference_wrapper<const block>> get_block_from_world_position(const chunk::map& chunks, const T& position) {
         return get_block_from_world_position(const_cast<chunk::map&>(chunks), position);
     }
 }
