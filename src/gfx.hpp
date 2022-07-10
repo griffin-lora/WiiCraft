@@ -18,9 +18,9 @@ namespace gfx {
     };
 
     struct draw_state {
+        std::array<void*, 2> frame_buffers{{ NULL, NULL }};
         GXRModeObj* rmode = nullptr;
         u32 fb_index = 0;
-        std::array<void*, 2> frame_buffers{{ NULL, NULL }};
         void* gpfifo;
 
         explicit draw_state(color4 bkg);

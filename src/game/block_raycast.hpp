@@ -7,8 +7,8 @@
 
 namespace game {
     struct block_raycast {
-        math::box_raycast box_raycast;
         world_location location;
+        math::box_raycast box_raycast;
         glm::vec3 world_block_position;
     };
 

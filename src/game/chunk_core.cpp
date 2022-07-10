@@ -44,7 +44,9 @@ static f32 get_tallgrass_value(glm::vec2 position) {
     );
 }
 
+
 void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+    auto blocks = chunk.blocks.data();
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 z = 0; z < chunk::SIZE; z++) {
             f32 world_x = game::get_world_coord_from_local_position(x, chunk_pos.x);
@@ -61,7 +63,7 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
                 auto world_height = game::get_world_coord_from_local_position(y, chunk_pos.y);
                 auto index = game::get_index_from_position(math::vector3u8{x, y, z});
 
-                auto& block = chunk.blocks[index];
+                auto& block = blocks[index];
 
                 if (world_height < generated_height) {
                     if (world_height < (generated_height - 2)) {

@@ -60,15 +60,15 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
             if (closest_raycast.has_value()) {
                 if (box_raycast->near_hit_time < closest_raycast->box_raycast.near_hit_time) {
                     closest_raycast = block_raycast{
-                        .box_raycast = *box_raycast,
                         .location = *world_loc,
+                        .box_raycast = *box_raycast,
                         .world_block_position = world_block_pos
                     };
                 }
             } else {
                 closest_raycast = block_raycast{
-                    .box_raycast = *box_raycast,
                     .location = *world_loc,
+                    .box_raycast = *box_raycast,
                     .world_block_position = world_block_pos
                 };
             }
