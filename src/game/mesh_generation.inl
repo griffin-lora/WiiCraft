@@ -7,52 +7,28 @@ void game::write_into_display_lists(const standard_quad_iterators& begin, const 
     gfx::display_list& water_disp_list,
     F1 get_display_list_size, F2 write_vert
 ) {
-    std::size_t standard_vert_count = (vf.it.standard - begin.standard) * 4;
-    std::size_t foliage_vert_count = (vf.it.foliage - begin.foliage) * 4;
-    std::size_t water_vert_count = (vf.it.water - begin.water) * 4;
+    using const_quad_it = ext::data_array<chunk::quad>::const_iterator;
 
-    standard_disp_list.resize(get_display_list_size(standard_vert_count));
+    auto write_into_disp_list = [&get_display_list_size, &write_vert](const_quad_it begin, const_quad_it end, gfx::display_list& disp_list) {
+        std::size_t vert_count = (end - begin) * 4;
 
-    standard_disp_list.write_into([&begin, &vf, &write_vert, standard_vert_count]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, standard_vert_count);
+        disp_list.resize(get_display_list_size(vert_count));
 
-        for (auto it = begin.standard; it != vf.it.standard; ++it) {
-            write_vert(it->vert0);
-            write_vert(it->vert1);
-            write_vert(it->vert2);
-            write_vert(it->vert3);
-        }
-        
-        GX_End();
-    });
+        disp_list.write_into([&begin, &end, &write_vert, vert_count]() {
+            GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
 
-    foliage_disp_list.resize(get_display_list_size(foliage_vert_count));
+            for (auto it = begin; it != end; ++it) {
+                write_vert(it->vert0);
+                write_vert(it->vert1);
+                write_vert(it->vert2);
+                write_vert(it->vert3);
+            }
+            
+            GX_End();
+        });
+    };
 
-    foliage_disp_list.write_into([&begin, &vf, &write_vert, foliage_vert_count]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, foliage_vert_count);
-
-        for (auto it = begin.foliage; it != vf.it.foliage; ++it) {
-            write_vert(it->vert0);
-            write_vert(it->vert1);
-            write_vert(it->vert2);
-            write_vert(it->vert3);
-        }
-        
-        GX_End();
-    });
-
-    water_disp_list.resize(get_display_list_size(water_vert_count));
-
-    water_disp_list.write_into([&begin, &vf, &write_vert, water_vert_count]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, water_vert_count);
-
-        for (auto it = begin.water; it != vf.it.water; ++it) {
-            write_vert(it->vert0);
-            write_vert(it->vert1);
-            write_vert(it->vert2);
-            write_vert(it->vert3);
-        }
-        
-        GX_End();
-    });
+    write_into_disp_list(begin.standard, vf.it.standard, standard_disp_list);
+    write_into_disp_list(begin.foliage, vf.it.foliage, foliage_disp_list);
+    write_into_disp_list(begin.water, vf.it.water, water_disp_list);
 }
