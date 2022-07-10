@@ -44,9 +44,15 @@ static f32 get_tallgrass_value(glm::vec2 position) {
     );
 }
 
+static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+    for (auto& block : chunk.blocks) {
+        block = { .tp = block::type::AIR };
+    }
+}
 
-void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     auto blocks = chunk.blocks.data();
+
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 z = 0; z < chunk::SIZE; z++) {
             f32 world_x = game::get_world_coord_from_local_position(x, chunk_pos.x);
@@ -84,6 +90,22 @@ void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
                 }
             }
         }
+    }
+}
+
+static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+    for (auto& block : chunk.blocks) {
+        block = { .tp = block::type::STONE };
+    }
+}
+
+void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+    if (chunk_pos.y > 0) {
+        generate_high_blocks(chunk, chunk_pos);
+    } else if (chunk_pos.y < 0) {
+        generate_low_blocks(chunk, chunk_pos);
+    } else {
+        generate_middle_blocks(chunk, chunk_pos);
     }
 }
 
