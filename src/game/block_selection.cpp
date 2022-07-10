@@ -2,7 +2,6 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
-#include "mesh_generation.hpp"
 #include "mesh_generation.inl"
 
 using namespace game;
@@ -59,16 +58,16 @@ void block_selection::draw_water(const std::optional<block_raycast>& raycast) co
     }
 }
 
-void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const block_raycast& raycast) {
+void block_selection::update_mesh(const math::matrix view, standard_quad_building_arrays& building_arrays, const block_raycast& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
 
     standard_vertex_function vf = {
-        .quad_it = building_quads.begin()
+        .it = { building_arrays }
     };
 
     add_block_vertices(vf, raycast.location.bl_pos, *raycast.location.bl);
 
-    write_into_display_lists(building_quads, vf, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
+    write_into_display_lists({ building_arrays }, vf, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (
             4 + // GX_Begin
             vert_count * 3 + // GX_Position3u8
@@ -81,11 +80,11 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_quads, const std::optional<block_raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, standard_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos || *raycast->location.bl != *last_block) {
-            update_mesh(view, building_quads, *raycast);
+            update_mesh(view, building_arrays, *raycast);
         }
 
         last_block_pos = raycast->location.bl_pos;

@@ -9,7 +9,7 @@ namespace game {
         math::vector2u8 uv_draw_pos;
     };
 
-    using const_quad_verts_ref = const chunk::quad::vertices&;
+    using const_quad_verts_ref = const chunk::quad&;
 
     #define ADD_FACE_TEMPLATE template<typename Vf, void (Vf::*Av)(game::const_quad_verts_ref)>
 

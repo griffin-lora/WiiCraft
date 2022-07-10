@@ -2,6 +2,7 @@
 #include "chunk.hpp"
 #include "block_core.hpp"
 #include "chunk_math.hpp"
+#include "mesh_generation.hpp"
 
 namespace game {
     template<block::face face>
@@ -92,7 +93,7 @@ namespace game {
         }
     }
 
-    void update_chunks(chunk::map& chunks, ext::data_array<chunk::quad>& building_quads);
+    void update_chunks(chunk::map& chunks, standard_quad_building_arrays& building_arrays);
 
     struct world_location {
         math::vector3s32 ch_pos;

@@ -42,13 +42,15 @@ static void add_face_vertices_if_needed(const block* blocks, const chunk::neighb
     }
 }
 
-void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quads) {
+void game::update_mesh(chunk& chunk, standard_quad_building_arrays& building_arrays) {
     auto blocks = chunk.blocks.data();
     auto& nh = chunk.nh;
 
     standard_vertex_function vf = {
-        .quad_it = building_quads.begin()
+        .it = { building_arrays }
     };
+
+    standard_quad_iterators begin = { building_arrays };
 
     for (u8 x = 0; x < (u8)chunk::SIZE; x++) {
         for (u8 y = 0; y < (u8)chunk::SIZE; y++) {
@@ -72,17 +74,20 @@ void game::update_mesh(chunk& chunk, ext::data_array<chunk::quad>& building_quad
                     }
                 });
 
-                std::size_t total_quad_count = vf.quad_it - building_quads.begin();
-                if (total_quad_count > chunk::MAX_QUAD_COUNT) {
-                    dbg::error([total_quad_count]() {
-                        printf("Chunk quad count is too high: %d\n", total_quad_count);
+                if (
+                    (vf.it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
+                    (vf.it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
+                    (vf.it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+                ) {
+                    dbg::error([]() {
+                        printf("Chunk quad count is too high\n");
                     });
                 }
             }
         }
     }
 
-    write_into_display_lists(building_quads, vf, chunk.standard_disp_list, chunk.foliage_disp_list, chunk.water_disp_list, [](auto vert_count) {
+    write_into_display_lists(begin, vf, chunk.standard_disp_list, chunk.foliage_disp_list, chunk.water_disp_list, [](auto vert_count) {
         return (
             4 + // GX_Begin
             vert_count * 3 + // GX_Position3u8

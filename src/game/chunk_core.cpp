@@ -164,7 +164,7 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
 }
 
-void game::update_chunks(chunk::map& chunks, ext::data_array<chunk::quad>& building_quads) {
+void game::update_chunks(chunk::map& chunks, standard_quad_building_arrays& building_arrays) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
@@ -178,7 +178,7 @@ void game::update_chunks(chunk::map& chunks, ext::data_array<chunk::quad>& build
             did_important_mesh_update = true;
             chunk.update_mesh_important = false;
             chunk.update_mesh_unimportant = false;
-            game::update_mesh(chunk, building_quads);
+            game::update_mesh(chunk, building_arrays);
         }
     }
 
@@ -187,7 +187,7 @@ void game::update_chunks(chunk::map& chunks, ext::data_array<chunk::quad>& build
             if (chunk.update_mesh_unimportant) {
                 chunk.update_mesh_important = false;
                 chunk.update_mesh_unimportant = false;
-                game::update_mesh(chunk, building_quads);
+                game::update_mesh(chunk, building_arrays);
                 break;
             }
         }

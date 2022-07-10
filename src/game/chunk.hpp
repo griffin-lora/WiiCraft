@@ -17,7 +17,10 @@ namespace game {
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
-        static constexpr std::size_t MAX_QUAD_COUNT = 0x3eff;
+        
+        static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x3eff;
+        static constexpr s32 MAX_FOLIAGE_QUAD_COUNT = 0x1000;
+        static constexpr s32 MAX_WATER_QUAD_COUNT = 0x1000;
 
         struct vertex {
             math::vector3u8 pos;
@@ -25,20 +28,10 @@ namespace game {
         };
 
         struct quad {
-            enum class type : u8 {
-                STANDARD,
-                FOLIAGE,
-                WATER
-            };
-            type tp;
-
-            struct vertices {
-                vertex vert0;
-                vertex vert1;
-                vertex vert2;
-                vertex vert3;
-            };
-            vertices verts;
+            vertex vert0;
+            vertex vert1;
+            vertex vert2;
+            vertex vert3;
         };
 
         struct neighborhood {
