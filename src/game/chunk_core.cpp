@@ -3,6 +3,7 @@
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "glm/gtc/noise.hpp"
+#include <algorithm>
 
 using namespace game;
 using math::get_noise_at;
@@ -45,9 +46,7 @@ static f32 get_tallgrass_value(glm::vec2 position) {
 }
 
 static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    for (auto& block : chunk.blocks) {
-        block = { .tp = block::type::AIR };
-    }
+    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::AIR });
 }
 
 static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
@@ -94,9 +93,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 }
 
 static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    for (auto& block : chunk.blocks) {
-        block = { .tp = block::type::STONE };
-    }
+    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::STONE });
 }
 
 void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {

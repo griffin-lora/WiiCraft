@@ -16,13 +16,15 @@ void game::write_into_display_lists(const ext::data_array<chunk::quad>& building
     standard_disp_list.write_into([&building_quads, &vf, &draw_vert, standard_vert_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, standard_vert_count);
 
-        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
+        std::size_t drawn_quads = 0;
+        for (auto it = building_quads.begin(); drawn_quads < vf.standard_quad_count && it != vf.quad_it; ++it) {
             if (it->tp == chunk::quad::type::STANDARD) {
                 auto& verts = it->verts;
                 draw_vert(verts.vert0);
                 draw_vert(verts.vert1);
                 draw_vert(verts.vert2);
                 draw_vert(verts.vert3);
+                drawn_quads++;
             }
         }
         
@@ -35,13 +37,15 @@ void game::write_into_display_lists(const ext::data_array<chunk::quad>& building
         // TODO: Possibly optimize this by having the above iteration overwrite the previous vertices with foliage vertices so that we can iterate over less vertices.
         GX_Begin(GX_QUADS, GX_VTXFMT0, foliage_vert_count);
 
-        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
+        std::size_t drawn_quads = 0;
+        for (auto it = building_quads.begin(); drawn_quads < vf.foliage_quad_count && it != vf.quad_it; ++it) {
             if (it->tp == chunk::quad::type::FOLIAGE) {
                 auto& verts = it->verts;
                 draw_vert(verts.vert0);
                 draw_vert(verts.vert1);
                 draw_vert(verts.vert2);
                 draw_vert(verts.vert3);
+                drawn_quads++;
             }
         }
         
@@ -53,13 +57,15 @@ void game::write_into_display_lists(const ext::data_array<chunk::quad>& building
     water_disp_list.write_into([&building_quads, &vf, &draw_vert, water_vert_count]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, water_vert_count);
 
-        for (auto it = building_quads.begin(); it != vf.quad_it; ++it) {
+        std::size_t drawn_quads = 0;
+        for (auto it = building_quads.begin(); drawn_quads < vf.water_quad_count && it != vf.quad_it; ++it) {
             if (it->tp == chunk::quad::type::WATER) {
                 auto& verts = it->verts;
                 draw_vert(verts.vert0);
                 draw_vert(verts.vert1);
                 draw_vert(verts.vert2);
                 draw_vert(verts.vert3);
+                drawn_quads++;
             }
         }
         
