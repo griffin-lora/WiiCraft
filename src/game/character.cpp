@@ -141,11 +141,13 @@ bool character::apply_collision(chunk::map& chunks) {
 }
 
 void character::apply_physics(chunk::map& chunks) {
+    #ifndef PC_PORT
     velocity.y -= gravity;
 
     grounded = false;
 
     while (apply_collision(chunks));
+    #endif
 }
 
 void character::apply_velocity() {

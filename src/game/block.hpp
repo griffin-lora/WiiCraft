@@ -65,5 +65,6 @@ namespace game {
     constexpr u8 block_draw_size = 4;
     constexpr u8 half_block_draw_size = 2;
 
-    using bl_st = const block::state&;
+    // TODO: change this when the sizeof the type is changed
+    using bl_st = block::state;
 }

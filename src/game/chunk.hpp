@@ -41,11 +41,6 @@ namespace game {
             vertices verts;
         };
 
-        gfx::display_list standard_disp_list;
-        gfx::display_list foliage_disp_list;
-        gfx::display_list water_disp_list;
-        bool update_mesh_important = false;
-        bool update_mesh_unimportant = false;
         struct neighborhood {
             opt_ref front;
             opt_ref back;
@@ -55,11 +50,19 @@ namespace game {
             opt_ref left;
         };
 
-        neighborhood nh;
-        bool update_neighborhood = false;
         ext::data_array<block> blocks;
+        neighborhood nh;
+
+        gfx::display_list standard_disp_list;
+        gfx::display_list foliage_disp_list;
+        gfx::display_list water_disp_list;
 
         math::transform_3d tf;
+
+        bool update_mesh_important = false;
+        bool update_mesh_unimportant = false;
+
+        bool update_neighborhood = false;
 
         bool modified = false;
         
