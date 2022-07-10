@@ -140,4 +140,18 @@ namespace game {
     inline std::optional<std::reference_wrapper<const block>> get_block_from_world_position(const chunk::map& chunks, const T& position) {
         return get_block_from_world_position(const_cast<chunk::map&>(chunks), position);
     }
+
+    template<typename T>
+    inline std::optional<std::reference_wrapper<chunk>> get_chunk_from_world_position(chunk::map& chunks, const T& position) {
+        auto loc = get_world_location_at_world_position(chunks, position);
+        if (loc.has_value()) {
+            return *loc->ch;
+        }
+        return {};
+    }
+
+    template<typename T>
+    inline std::optional<std::reference_wrapper<const chunk>> get_chunk_from_world_position(const chunk::map& chunks, const T& position) {
+        return get_chunk_from_world_position(const_cast<chunk::map&>(chunks), position);
+    }
 }
