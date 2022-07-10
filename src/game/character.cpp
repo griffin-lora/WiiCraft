@@ -153,7 +153,7 @@ void character::apply_velocity() {
 }
 
 void character::update_camera(camera& cam) const {
-    cam.position = { position.x, position.y + 0.5f, position.z };
+    cam.position = { position.x, position.y + 0.9f, position.z };
 
     cam.update_view = true;
 }
