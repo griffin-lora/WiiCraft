@@ -74,12 +74,12 @@ namespace game {
                 u16 right;
                 u16 left;
 
-                bool front_insular;
-                bool back_insular;
-                bool top_insular;
-                bool bottom_insular;
-                bool right_insular;
-                bool left_insular;
+                bool is_front_edge;
+                bool is_back_edge;
+                bool is_top_edge;
+                bool is_bottom_edge;
+                bool is_right_edge;
+                bool is_left_edge;
             };
 
             neighborhood nh;

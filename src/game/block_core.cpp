@@ -2,6 +2,7 @@
 #include "block_functionality.hpp"
 #include "chunk.hpp"
 #include "chunk_math.hpp"
+#include "chunk_core.hpp"
 #include <algorithm>
 
 using namespace game;
@@ -34,6 +35,25 @@ std::vector<math::box> game::get_block_boxes_that_collide_with_world_box(const m
     return collided_block_boxes;
 }
 
+// TODO: dont use output parameters
+template<block::face face>
+static void set_block_lookup_neighbor(math::vector3u8 block_pos, u16& out_face_index, bool& out_is_face_edge) {
+    if (is_block_position_at_face_edge<face>(block_pos)) {
+        math::vector3s32 face_block_pos = get_face_offset_position<face>(block_pos);
+        face_block_pos = get_local_block_position_in_s32(face_block_pos);
+
+        out_face_index = get_index_from_position(face_block_pos);
+        out_is_face_edge = true;
+        return;
+    }
+
+    auto face_block_pos = get_face_offset_position<face>(block_pos);
+
+    out_face_index = get_index_from_position(face_block_pos);
+    out_is_face_edge = false;
+    return;
+}
+
 void game::fill_block_lookups(block::lookups& lookups) {
     auto lookups_array = lookups.data();
     for (u8 x = 0; x < chunk::SIZE; x++) {
@@ -41,9 +61,16 @@ void game::fill_block_lookups(block::lookups& lookups) {
             for (u8 z = 0; z < chunk::SIZE; z++) {
                 math::vector3u8 block_pos = { x, y, z };
                 std::size_t index = get_index_from_position(block_pos);
-                lookups_array[index] = {
+                auto& lookup = lookups_array[index];
+                lookup = {
                     .position = block_pos
                 };
+                set_block_lookup_neighbor<block::face::FRONT>(block_pos, lookup.nh.front, lookup.nh.is_front_edge);
+                set_block_lookup_neighbor<block::face::BACK>(block_pos, lookup.nh.back, lookup.nh.is_back_edge);
+                set_block_lookup_neighbor<block::face::TOP>(block_pos, lookup.nh.top, lookup.nh.is_top_edge);
+                set_block_lookup_neighbor<block::face::BOTTOM>(block_pos, lookup.nh.bottom, lookup.nh.is_bottom_edge);
+                set_block_lookup_neighbor<block::face::RIGHT>(block_pos, lookup.nh.right, lookup.nh.is_right_edge);
+                set_block_lookup_neighbor<block::face::LEFT>(block_pos, lookup.nh.left, lookup.nh.is_left_edge);
             }
         }
     }
