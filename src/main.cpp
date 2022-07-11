@@ -103,8 +103,8 @@ int main(int argc, char** argv) {
 
 	game::chunk::map chunks;
 	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
-	game::block::lookups block_lookups(game::chunk::BLOCKS_COUNT);
-	game::fill_block_lookups(block_lookups);
+	game::block::neighborhood_lookups block_nh_lookups(game::chunk::BLOCKS_COUNT);
+	game::fill_block_neighborhood_lookups(block_nh_lookups);
 
 	game::standard_quad_building_arrays quad_building_arrays;
 	game::stored_chunk::map stored_chunks;
@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(block_lookups, quad_building_arrays, chunks);
+		game::update_chunks(block_nh_lookups, quad_building_arrays, chunks);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);

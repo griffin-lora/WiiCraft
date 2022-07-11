@@ -164,7 +164,7 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
 }
 
-void game::update_chunks(const block::lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {
+void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;

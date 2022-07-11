@@ -54,7 +54,7 @@ static void set_block_lookup_neighbor(math::vector3u8 block_pos, u16& out_face_i
     return;
 }
 
-void game::fill_block_lookups(block::lookups& lookups) {
+void game::fill_block_neighborhood_lookups(block::neighborhood_lookups& lookups) {
     auto lookups_array = lookups.data();
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 y = 0; y < chunk::SIZE; y++) {
@@ -65,12 +65,12 @@ void game::fill_block_lookups(block::lookups& lookups) {
                 lookup = {
                     .position = block_pos
                 };
-                set_block_lookup_neighbor<block::face::FRONT>(block_pos, lookup.nh.front, lookup.nh.is_front_edge);
-                set_block_lookup_neighbor<block::face::BACK>(block_pos, lookup.nh.back, lookup.nh.is_back_edge);
-                set_block_lookup_neighbor<block::face::TOP>(block_pos, lookup.nh.top, lookup.nh.is_top_edge);
-                set_block_lookup_neighbor<block::face::BOTTOM>(block_pos, lookup.nh.bottom, lookup.nh.is_bottom_edge);
-                set_block_lookup_neighbor<block::face::RIGHT>(block_pos, lookup.nh.right, lookup.nh.is_right_edge);
-                set_block_lookup_neighbor<block::face::LEFT>(block_pos, lookup.nh.left, lookup.nh.is_left_edge);
+                set_block_lookup_neighbor<block::face::FRONT>(block_pos, lookup.front_index, lookup.is_front_edge);
+                set_block_lookup_neighbor<block::face::BACK>(block_pos, lookup.back_index, lookup.is_back_edge);
+                set_block_lookup_neighbor<block::face::TOP>(block_pos, lookup.top_index, lookup.is_top_edge);
+                set_block_lookup_neighbor<block::face::BOTTOM>(block_pos, lookup.bottom_index, lookup.is_bottom_edge);
+                set_block_lookup_neighbor<block::face::RIGHT>(block_pos, lookup.right_index, lookup.is_right_edge);
+                set_block_lookup_neighbor<block::face::LEFT>(block_pos, lookup.left_index, lookup.is_left_edge);
             }
         }
     }
