@@ -42,7 +42,7 @@ static void add_face_vertices_if_needed(const block* blocks, const chunk::neighb
     }
 }
 
-void game::update_mesh(chunk& chunk, standard_quad_building_arrays& building_arrays) {
+void game::update_mesh(const ext::data_array<chunk::block_position_index_pair>& position_index_pairs, standard_quad_building_arrays& building_arrays, chunk& chunk) {
     auto blocks = chunk.blocks.data();
     auto& nh = chunk.nh;
 
@@ -52,38 +52,31 @@ void game::update_mesh(chunk& chunk, standard_quad_building_arrays& building_arr
 
     standard_quad_iterators begin = { building_arrays };
 
-    for (u8 x = 0; x < (u8)chunk::SIZE; x++) {
-        for (u8 y = 0; y < (u8)chunk::SIZE; y++) {
-            for (u8 z = 0; z < (u8)chunk::SIZE; z++) {
-                math::vector3u8 block_pos = {x, y, z};
-                auto& block = blocks[get_index_from_position(block_pos)];
+    for (auto& [ block_pos, index ] : position_index_pairs) {
+        auto& block = blocks[index];
 
-                // TODO: Possibly go back to using a macro here since it is faster
-                
-                call_with_block_functionality(block.tp, [&]<typename Bf>() {
-                    if (Bf::get_block_traits(block.st).visible) {
-                        math::vector3u8 pos = block_pos;
-                        #define ADD_FACE_VERTICES_IF_NEEDED_PARAMS blocks, nh, block.st, block_pos, vf, pos
-                        add_face_vertices_if_needed<Bf, block::face::FRONT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                        add_face_vertices_if_needed<Bf, block::face::BACK>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                        add_face_vertices_if_needed<Bf, block::face::TOP>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                        add_face_vertices_if_needed<Bf, block::face::BOTTOM>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                        add_face_vertices_if_needed<Bf, block::face::RIGHT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                        add_face_vertices_if_needed<Bf, block::face::LEFT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                        Bf::add_general_vertices(vf, block_pos, block.st);
-                    }
-                });
-
-                if (
-                    (vf.it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
-                    (vf.it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
-                    (vf.it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
-                ) {
-                    dbg::error([]() {
-                        printf("Chunk quad count is too high\n");
-                    });
-                }
+        call_with_block_functionality(block.tp, [&]<typename Bf>() {
+            if (Bf::get_block_traits(block.st).visible) {
+                math::vector3u8 pos = block_pos;
+                #define ADD_FACE_VERTICES_IF_NEEDED_PARAMS blocks, nh, block.st, block_pos, vf, pos
+                add_face_vertices_if_needed<Bf, block::face::FRONT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
+                add_face_vertices_if_needed<Bf, block::face::BACK>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
+                add_face_vertices_if_needed<Bf, block::face::TOP>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
+                add_face_vertices_if_needed<Bf, block::face::BOTTOM>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
+                add_face_vertices_if_needed<Bf, block::face::RIGHT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
+                add_face_vertices_if_needed<Bf, block::face::LEFT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
+                Bf::add_general_vertices(vf, block_pos, block.st);
             }
+        });
+
+        if (
+            (vf.it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
+            (vf.it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
+            (vf.it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+        ) {
+            dbg::error([]() {
+                printf("Chunk quad count is too high\n");
+            });
         }
     }
 

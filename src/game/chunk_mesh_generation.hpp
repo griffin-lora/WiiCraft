@@ -3,5 +3,5 @@
 #include "mesh_generation.hpp"
 
 namespace game {
-    void update_mesh(chunk& chunk, standard_quad_building_arrays& building_arrays);
+    void update_mesh(const ext::data_array<chunk::block_position_index_pair>& position_index_pairs, standard_quad_building_arrays& building_arrays, chunk& chunk);
 }

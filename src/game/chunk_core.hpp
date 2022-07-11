@@ -42,30 +42,6 @@ namespace game {
         }
     }
 
-    template<typename B, typename F>
-    inline void iterate_over_chunk_blocks_and_positions(B& blocks, F func) {
-        for (u8 x = 0; x < chunk::SIZE; x++) {
-            for (u8 y = 0; y < chunk::SIZE; y++) {
-                for (u8 z = 0; z < chunk::SIZE; z++) {
-                    math::vector3u8 pos = {x, y, z};
-                    func(blocks[get_index_from_position(pos)], pos);
-                }
-            }
-        }
-    }
-
-    template<typename T, typename B, typename F>
-    inline void iterate_over_chunk_positions_and_blocks(B& blocks, F func) {
-        for (T x = 0; x < (T)chunk::SIZE; x++) {
-            for (T y = 0; y < (T)chunk::SIZE; y++) {
-                for (T z = 0; z < (T)chunk::SIZE; z++) {
-                    glm::vec<3, T, glm::defaultp> pos = {x, y, z};
-                    func(pos, blocks[get_index_from_position(pos)]);
-                }
-            }
-        }
-    }
-
     template<block::face face, typename T>
     constexpr bool is_block_position_at_face_edge(T pos) {
         constexpr auto edge_coord = (chunk::SIZE - 1);
@@ -93,7 +69,9 @@ namespace game {
         }
     }
 
-    void update_chunks(chunk::map& chunks, standard_quad_building_arrays& building_arrays);
+    void update_chunks(const ext::data_array<chunk::block_position_index_pair>& position_index_pairs, standard_quad_building_arrays& building_arrays, chunk::map& chunks);
+
+    void fill_block_position_index_pairs(ext::data_array<chunk::block_position_index_pair>& position_index_pairs);
 
     struct world_location {
         math::vector3s32 ch_pos;

@@ -54,8 +54,8 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
     for (u8 x = 0; x < chunk::SIZE; x++) {
         for (u8 z = 0; z < chunk::SIZE; z++) {
-            f32 world_x = game::get_world_coord_from_local_position(x, chunk_pos.x);
-            f32 world_z = game::get_world_coord_from_local_position(z, chunk_pos.z);
+            f32 world_x = game::get_world_coord_from_block_position(x, chunk_pos.x);
+            f32 world_z = game::get_world_coord_from_block_position(z, chunk_pos.z);
             glm::vec2 noise_pos = { world_x, world_z };
 
             auto plains_height = get_noise_at(noise_pos / 32.0f);
@@ -65,7 +65,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
             s32 generated_height = (plains_height * 12) + 1;
 
             for (u8 y = 0; y < chunk::SIZE; y++) {
-                auto world_height = game::get_world_coord_from_local_position(y, chunk_pos.y);
+                auto world_height = game::get_world_coord_from_block_position(y, chunk_pos.y);
                 auto index = game::get_index_from_position(math::vector3u8{x, y, z});
 
                 auto& block = blocks[index];
@@ -164,7 +164,7 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
 }
 
-void game::update_chunks(chunk::map& chunks, standard_quad_building_arrays& building_arrays) {
+void game::update_chunks(const ext::data_array<chunk::block_position_index_pair>& position_index_pairs, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
@@ -178,7 +178,7 @@ void game::update_chunks(chunk::map& chunks, standard_quad_building_arrays& buil
             did_important_mesh_update = true;
             chunk.update_mesh_important = false;
             chunk.update_mesh_unimportant = false;
-            game::update_mesh(chunk, building_arrays);
+            game::update_mesh(position_index_pairs, building_arrays, chunk);
         }
     }
 
@@ -187,8 +187,22 @@ void game::update_chunks(chunk::map& chunks, standard_quad_building_arrays& buil
             if (chunk.update_mesh_unimportant) {
                 chunk.update_mesh_important = false;
                 chunk.update_mesh_unimportant = false;
-                game::update_mesh(chunk, building_arrays);
+                game::update_mesh(position_index_pairs, building_arrays, chunk);
                 break;
+            }
+        }
+    }
+}
+
+void game::fill_block_position_index_pairs(ext::data_array<chunk::block_position_index_pair>& position_index_pairs) {
+    std::size_t i = 0;
+    for (u8 x = 0; x < chunk::SIZE; x++) {
+        for (u8 y = 0; y < chunk::SIZE; y++) {
+            for (u8 z = 0; z < chunk::SIZE; z++) {
+                position_index_pairs[i++] = {
+                    .position = { x, y, z },
+                    .index = get_index_from_position(math::vector3u8{ x, y, z })
+                };
             }
         }
     }

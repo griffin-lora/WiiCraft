@@ -5,11 +5,11 @@
 namespace game {
     math::vector3u8 get_position_from_index(std::size_t index);
     template<typename T>
-    inline std::size_t get_index_from_position(T position) {
+    inline u16 get_index_from_position(T position) {
         return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
     }
-    inline s32 get_world_coord_from_local_position(s32 local_coord, s32 chunk_coord) {
-        return ((chunk_coord * chunk::SIZE) + local_coord);
+    inline s32 get_world_coord_from_block_position(s32 block_coord, s32 chunk_coord) {
+        return ((chunk_coord * chunk::SIZE) + block_coord);
     }
     template<typename O, typename T>
     inline O floor_float_position(const T& position) {
