@@ -27,32 +27,42 @@ static constexpr std::pair<u16, bool> get_block_lookup_neighbor(const block::loo
 }
 
 template<typename Bf, block::face face>
-static bool should_add_vertices_for_face(const block* blocks, const chunk::neighborhood& chunk_nh, const block::lookup::neighborhood& block_nh, bl_st block_state, const math::vector3s32& local_pos) {
-    auto [ index, is_face_edge ] = get_block_lookup_neighbor<face>(block_nh);
-    if (is_face_edge) {
-        // We are at the edge of the block, so we should check the neighbor chunk.
-        auto nb_chunk = get_neighbor<face>(chunk_nh);
-        if (nb_chunk.has_value()) {
-            auto& block = nb_chunk->get().blocks[index];
-            return Bf::template is_face_visible_with_neighbor<face>(block_state, block);
+static bool should_add_vertices_for_face(const block* blocks, const block* nb_blocks, u16 index, bool is_at_edge, bl_st block_state) {
+    if (is_at_edge) { // We are at the edge of the chunk, so we should check the neighbor chunk.
+        if (nb_blocks != nullptr) {
+            return Bf::template is_face_visible_with_neighbor<face>(block_state, nb_blocks[index]);
         }
 
         return false;
     }
-    auto& block = blocks[index];
-    return Bf::template is_face_visible_with_neighbor<face>(block_state, block);
+    return Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[index]);
 }
 
 template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const block* blocks, const chunk::neighborhood& chunk_nh, const block::lookup::neighborhood& block_nh, bl_st block_state, const math::vector3s32& pos, Vf& vf, math::vector3u8 block_pos) {
-    if (Bf::template get_face_traits<face>(block_state).visible && should_add_vertices_for_face<Bf, face>(blocks, chunk_nh, block_nh, block_state, pos)) {
+static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, u16 block_nb_index, bool block_nb_is_at_face_edge, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
+    if (Bf::template get_face_traits<face>(block_state).visible && should_add_vertices_for_face<Bf, face>(blocks, nb_blocks, block_nb_index, block_nb_is_at_face_edge, block_state)) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
     }
 }
 
 void game::update_mesh(const block::lookups& lookups, standard_quad_building_arrays& building_arrays, chunk& chunk) {
-    auto blocks = chunk.blocks.data();
-    auto& chunk_nh = chunk.nh;
+    const auto blocks = chunk.blocks.data();
+    
+    const auto& chunk_nh = chunk.nh;
+
+    auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
+        if (nb_chunk.has_value()) {
+            return nb_chunk->get().blocks.data();
+        }
+        return nullptr;
+    };
+
+    auto front_nb_blocks = get_nb_blocks(chunk_nh.front);
+    auto back_nb_blocks = get_nb_blocks(chunk_nh.back);
+    auto top_nb_blocks = get_nb_blocks(chunk_nh.top);
+    auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
+    auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
+    auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
 
     standard_vertex_function vf = {
         .it = { building_arrays }
@@ -66,16 +76,19 @@ void game::update_mesh(const block::lookups& lookups, standard_quad_building_arr
 
         call_with_block_functionality(block.tp, [&]<typename Bf>() {
             if (Bf::get_block_traits(block.st).visible) {
+                auto block_pos = it->position;
                 auto& block_nh = it->nh;
-                math::vector3s32 pos = it->position;
-                #define ADD_FACE_VERTICES_IF_NEEDED_PARAMS blocks, chunk_nh, block_nh, block.st, pos, vf, it->position
-                add_face_vertices_if_needed<Bf, block::face::FRONT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                add_face_vertices_if_needed<Bf, block::face::BACK>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                add_face_vertices_if_needed<Bf, block::face::TOP>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                add_face_vertices_if_needed<Bf, block::face::BOTTOM>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                add_face_vertices_if_needed<Bf, block::face::RIGHT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                add_face_vertices_if_needed<Bf, block::face::LEFT>(ADD_FACE_VERTICES_IF_NEEDED_PARAMS);
-                Bf::add_general_vertices(vf, it->position, block.st);
+
+                #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, block_nh.lowercase, block_nh.is_##lowercase##_edge, block.st, vf, block_pos);
+
+                EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front)
+                EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back)
+                EVAL_CALL_FACE_VERTICES_IF_NEEDED(TOP, top)
+                EVAL_CALL_FACE_VERTICES_IF_NEEDED(BOTTOM, bottom)
+                EVAL_CALL_FACE_VERTICES_IF_NEEDED(RIGHT, right)
+                EVAL_CALL_FACE_VERTICES_IF_NEEDED(LEFT, left)
+
+                Bf::add_general_vertices(vf, block_pos, block.st);
             }
         });
 
