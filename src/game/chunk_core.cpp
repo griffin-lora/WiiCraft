@@ -164,7 +164,7 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
 }
 
-void game::update_chunks(const ext::data_array<chunk::block_position_index_pair>& position_index_pairs, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {
+void game::update_chunks(const block::lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
@@ -178,7 +178,7 @@ void game::update_chunks(const ext::data_array<chunk::block_position_index_pair>
             did_important_mesh_update = true;
             chunk.update_mesh_important = false;
             chunk.update_mesh_unimportant = false;
-            game::update_mesh(position_index_pairs, building_arrays, chunk);
+            game::update_mesh(lookups, building_arrays, chunk);
         }
     }
 
@@ -187,22 +187,8 @@ void game::update_chunks(const ext::data_array<chunk::block_position_index_pair>
             if (chunk.update_mesh_unimportant) {
                 chunk.update_mesh_important = false;
                 chunk.update_mesh_unimportant = false;
-                game::update_mesh(position_index_pairs, building_arrays, chunk);
+                game::update_mesh(lookups, building_arrays, chunk);
                 break;
-            }
-        }
-    }
-}
-
-void game::fill_block_position_index_pairs(ext::data_array<chunk::block_position_index_pair>& position_index_pairs) {
-    std::size_t i = 0;
-    for (u8 x = 0; x < chunk::SIZE; x++) {
-        for (u8 y = 0; y < chunk::SIZE; y++) {
-            for (u8 z = 0; z < chunk::SIZE; z++) {
-                position_index_pairs[i++] = {
-                    .position = { x, y, z },
-                    .index = get_index_from_position(math::vector3u8{ x, y, z })
-                };
             }
         }
     }

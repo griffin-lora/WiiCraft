@@ -33,11 +33,6 @@ namespace game {
             vertex vert2;
             vertex vert3;
         };
-
-        struct block_position_index_pair {
-            math::vector3u8 position;
-            u16 index;
-        };
         
         struct neighborhood {
             opt_ref front;

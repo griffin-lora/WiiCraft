@@ -1,5 +1,7 @@
 #pragma once
 #include <gctypes.h>
+#include "math.hpp"
+#include "ext/data_array.hpp"
 #include <utility>
 
 /**
@@ -60,6 +62,30 @@ namespace game {
         inline bool operator!=(const block& other) const {
             return tp != other.tp || st.slab != other.st.slab;
         }
+
+        struct lookup {
+            math::vector3u8 position;
+
+            struct neighborhood {
+                u16 front;
+                u16 back;
+                u16 top;
+                u16 bottom;
+                u16 right;
+                u16 left;
+
+                bool front_insular;
+                bool back_insular;
+                bool top_insular;
+                bool bottom_insular;
+                bool right_insular;
+                bool left_insular;
+            };
+
+            neighborhood nh;
+        };
+
+        using lookups = ext::data_array<lookup>;
     };
 
     constexpr u8 block_draw_size = 4;

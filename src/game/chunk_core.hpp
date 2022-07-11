@@ -69,9 +69,7 @@ namespace game {
         }
     }
 
-    void update_chunks(const ext::data_array<chunk::block_position_index_pair>& position_index_pairs, standard_quad_building_arrays& building_arrays, chunk::map& chunks);
-
-    void fill_block_position_index_pairs(ext::data_array<chunk::block_position_index_pair>& position_index_pairs);
+    void update_chunks(const block::lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks);
 
     struct world_location {
         math::vector3s32 ch_pos;

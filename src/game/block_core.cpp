@@ -1,5 +1,7 @@
 #include "block_core.hpp"
 #include "block_functionality.hpp"
+#include "chunk.hpp"
+#include "chunk_math.hpp"
 #include <algorithm>
 
 using namespace game;
@@ -30,4 +32,19 @@ std::vector<math::box> game::get_block_boxes_that_collide_with_world_box(const m
     });
 
     return collided_block_boxes;
+}
+
+void game::fill_block_lookups(block::lookups& lookups) {
+    auto lookups_array = lookups.data();
+    for (u8 x = 0; x < chunk::SIZE; x++) {
+        for (u8 y = 0; y < chunk::SIZE; y++) {
+            for (u8 z = 0; z < chunk::SIZE; z++) {
+                math::vector3u8 block_pos = { x, y, z };
+                std::size_t index = get_index_from_position(block_pos);
+                lookups_array[index] = {
+                    .position = block_pos
+                };
+            }
+        }
+    }
 }
