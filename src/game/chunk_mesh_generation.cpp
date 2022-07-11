@@ -46,6 +46,8 @@ static void add_face_vertices_if_needed(const block* blocks, const block* nb_blo
 }
 
 void game::update_mesh(const block::lookups& lookups, standard_quad_building_arrays& building_arrays, chunk& chunk) {
+    const auto lookups_array = lookups.data();
+
     const auto blocks = chunk.blocks.data();
     
     const auto& chunk_nh = chunk.nh;
@@ -70,14 +72,15 @@ void game::update_mesh(const block::lookups& lookups, standard_quad_building_arr
 
     standard_quad_iterators begin = { building_arrays };
 
-    for (auto it = lookups.begin(); it != lookups.end(); it++) {
-        u16 index = it - lookups.begin();
-        auto& block = blocks[index];
+    for (std::size_t i = 0; i < chunk::BLOCKS_COUNT; i++) {
+        auto& block = blocks[i];
 
         call_with_block_functionality(block.tp, [&]<typename Bf>() {
             if (Bf::get_block_traits(block.st).visible) {
-                auto block_pos = it->position;
-                auto& block_nh = it->nh;
+                auto& lookup = lookups_array[i];
+
+                auto block_pos = lookup.position;
+                auto& block_nh = lookup.nh;
 
                 #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, block_nh.lowercase, block_nh.is_##lowercase##_edge, block.st, vf, block_pos);
 
