@@ -2,6 +2,7 @@
 #include <gctypes.h>
 #include "math.hpp"
 #include "ext/data_array.hpp"
+#include "common.hpp"
 #include <utility>
 
 /**
@@ -82,6 +83,14 @@ namespace game {
         };
 
         using neighborhood_lookups = ext::data_array<neighborhood_lookup>;
+
+        struct column_lookup {
+            math::vector2u8 position;
+
+            std::array<u16, CHUNK_SIZE> indices;
+        };
+
+        using column_lookups = ext::data_array<column_lookup>;
     };
 
     constexpr u8 block_draw_size = 4;

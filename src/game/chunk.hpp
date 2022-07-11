@@ -15,7 +15,8 @@ namespace game {
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
         using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
 
-        static constexpr s32 SIZE = 32;
+        static constexpr s32 SIZE = CHUNK_SIZE;
+        static constexpr s32 CROSS_SECTION_SIZE = SIZE * SIZE;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         
         static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x3eff;

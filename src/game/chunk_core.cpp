@@ -49,43 +49,44 @@ static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos
     std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::AIR });
 }
 
-static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+static void generate_middle_blocks(const block::column_lookups& lookups, chunk& chunk, const math::vector3s32& chunk_pos) {
+    auto lookups_array = lookups.data();
     auto blocks = chunk.blocks.data();
 
-    for (u8 x = 0; x < chunk::SIZE; x++) {
-        for (u8 z = 0; z < chunk::SIZE; z++) {
-            f32 world_x = game::get_world_coord_from_block_position(x, chunk_pos.x);
-            f32 world_z = game::get_world_coord_from_block_position(z, chunk_pos.z);
-            glm::vec2 noise_pos = { world_x, world_z };
+    for (std::size_t i = 0; i < chunk::CROSS_SECTION_SIZE; i++) {
+        auto& lookup = lookups_array[i];
 
-            auto plains_height = get_noise_at(noise_pos / 32.0f);
-            
-            auto tallgrass_value = get_tallgrass_value(noise_pos);
+        f32 world_x = game::get_world_coord_from_block_position(lookup.position.x, chunk_pos.x);
+        f32 world_z = game::get_world_coord_from_block_position(lookup.position.y /* really z position */, chunk_pos.z);
 
-            s32 generated_height = (plains_height * 12) + 1;
+        glm::vec2 noise_pos = { world_x, world_z };
 
-            for (u8 y = 0; y < chunk::SIZE; y++) {
-                auto world_height = game::get_world_coord_from_block_position(y, chunk_pos.y);
-                auto index = game::get_index_from_position(math::vector3u8{x, y, z});
+        auto plains_height = get_noise_at(noise_pos / 32.0f);
+        
+        auto tallgrass_value = get_tallgrass_value(noise_pos);
 
-                auto& block = blocks[index];
+        s32 generated_height = (plains_height * 12) + 1;
 
-                if (world_height < generated_height) {
-                    if (world_height < (generated_height - 2)) {
-                        block = { .tp = block::type::STONE };
-                    } else {
-                        block = { .tp = block::type::DIRT };
-                    }
-                } else if (world_height == generated_height) {
-                    block = { .tp = block::type::GRASS };
+        for (u8 y = 0; y < chunk::SIZE; y++) {
+            auto world_height = game::get_world_coord_from_block_position(y, chunk_pos.y);
+
+            auto& block = blocks[lookup.indices[y]];
+
+            if (world_height < generated_height) {
+                if (world_height < (generated_height - 2)) {
+                    block = { .tp = block::type::STONE };
                 } else {
-                    if (world_height < 5) {
-                        block = { .tp = block::type::WATER };
-                    } else if (world_height == (generated_height + 1) && tallgrass_value > 0.97f) {
-                        block = { .tp = block::type::TALL_GRASS };
-                    } else {
-                        block = { .tp = block::type::AIR };
-                    }
+                    block = { .tp = block::type::DIRT };
+                }
+            } else if (world_height == generated_height) {
+                block = { .tp = block::type::GRASS };
+            } else {
+                if (world_height < 5) {
+                    block = { .tp = block::type::WATER };
+                } else if (world_height == (generated_height + 1) && tallgrass_value > 0.97f) {
+                    block = { .tp = block::type::TALL_GRASS };
+                } else {
+                    block = { .tp = block::type::AIR };
                 }
             }
         }
@@ -96,13 +97,13 @@ static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos)
     std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::STONE });
 }
 
-void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+void game::generate_blocks(const block::column_lookups& lookups, chunk& chunk, const math::vector3s32& chunk_pos) {
     if (chunk_pos.y > 0) {
         generate_high_blocks(chunk, chunk_pos);
     } else if (chunk_pos.y < 0) {
         generate_low_blocks(chunk, chunk_pos);
     } else {
-        generate_middle_blocks(chunk, chunk_pos);
+        generate_middle_blocks(lookups, chunk, chunk_pos);
     }
 }
 

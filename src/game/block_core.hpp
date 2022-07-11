@@ -62,4 +62,5 @@ namespace game {
     std::vector<math::box> get_block_boxes_that_collide_with_world_box(const math::box& world_box, const block& block, const glm::vec3& world_block_position);
 
     void fill_block_neighborhood_lookups(block::neighborhood_lookups& lookups);
+    void fill_block_column_lookups(block::column_lookups& lookups);
 }

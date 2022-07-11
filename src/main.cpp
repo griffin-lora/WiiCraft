@@ -105,6 +105,8 @@ int main(int argc, char** argv) {
 	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
 	game::block::neighborhood_lookups block_nh_lookups(game::chunk::BLOCKS_COUNT);
 	game::fill_block_neighborhood_lookups(block_nh_lookups);
+	game::block::column_lookups block_col_lookups(game::chunk::CROSS_SECTION_SIZE);
+	game::fill_block_column_lookups(block_col_lookups);
 
 	game::standard_quad_building_arrays quad_building_arrays;
 	game::stored_chunk::map stored_chunks;
@@ -139,7 +141,7 @@ int main(int argc, char** argv) {
 		character.apply_velocity();
 		character.update_camera(cam);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase);
+		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, block_col_lookups, stored_chunks, chunk_positions_to_erase);
 
 
 		game::update_needed(view, perspective_3d, cam);

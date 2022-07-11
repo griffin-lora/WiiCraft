@@ -55,7 +55,7 @@ namespace game {
         );
     }
 
-    void generate_blocks(chunk& chunk, const math::vector3s32& pos);
+    void generate_blocks(const block::column_lookups& lookups, chunk& chunk, const math::vector3s32& pos);
 
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 

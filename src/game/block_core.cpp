@@ -62,15 +62,31 @@ void game::fill_block_neighborhood_lookups(block::neighborhood_lookups& lookups)
                 math::vector3u8 block_pos = { x, y, z };
                 std::size_t index = get_index_from_position(block_pos);
                 auto& lookup = lookups_array[index];
-                lookup = {
-                    .position = block_pos
-                };
+                lookup.position = block_pos;
                 set_block_lookup_neighbor<block::face::FRONT>(block_pos, lookup.front_index, lookup.is_front_edge);
                 set_block_lookup_neighbor<block::face::BACK>(block_pos, lookup.back_index, lookup.is_back_edge);
                 set_block_lookup_neighbor<block::face::TOP>(block_pos, lookup.top_index, lookup.is_top_edge);
                 set_block_lookup_neighbor<block::face::BOTTOM>(block_pos, lookup.bottom_index, lookup.is_bottom_edge);
                 set_block_lookup_neighbor<block::face::RIGHT>(block_pos, lookup.right_index, lookup.is_right_edge);
                 set_block_lookup_neighbor<block::face::LEFT>(block_pos, lookup.left_index, lookup.is_left_edge);
+            }
+        }
+    }
+}
+
+void game::fill_block_column_lookups(block::column_lookups& lookups) {
+    auto lookups_array = lookups.data();
+    
+    std::size_t i = 0;
+    for (u8 x = 0; x < chunk::SIZE; x++) {
+        for (u8 z = 0; z < chunk::SIZE; z++) {
+            math::vector2u8 column_pos = { x, z };
+
+            auto& lookup = lookups_array[i++];
+            lookup.position = column_pos;
+
+            for (u8 y = 0; y < chunk::SIZE; y++) {
+                lookup.indices[y] = get_index_from_position(math::vector3u8{ x, y, z });
             }
         }
     }

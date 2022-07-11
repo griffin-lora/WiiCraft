@@ -12,6 +12,7 @@ namespace game {
         const camera& cam,
         std::optional<math::vector3s32>& last_cam_chunk_pos,
         chunk::map& chunks,
+        const game::block::column_lookups& col_lookups,
         stored_chunk::map& stored_chunks,
         std::vector<math::vector3s32>& chunk_positions_to_erase
     );
