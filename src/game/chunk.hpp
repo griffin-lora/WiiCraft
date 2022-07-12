@@ -6,6 +6,7 @@
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
 #include <unordered_map>
+#include <unordered_set>
 #include <optional>
 #include <functional>
 
@@ -14,6 +15,8 @@ namespace game {
         using map = std::unordered_map<math::vector3s32, chunk, hash_vector3s32>;
         using opt_ref = std::optional<std::reference_wrapper<chunk>>;
         using const_opt_ref = std::optional<std::reference_wrapper<const chunk>>;
+
+        using pos_set = std::unordered_set<math::vector3s32, hash_vector3s32>;
 
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;

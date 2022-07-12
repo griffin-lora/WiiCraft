@@ -36,9 +36,7 @@ namespace game {
                 for (T z = -radius; z <= radius; z++) {
                     const glm::vec<3, T, glm::defaultp> pos = {x, y, z};
                     if (math::length_squared(pos) <= (radius * radius)) {
-                        if (func(pos)) {
-                            return;
-                        }
+                        func(pos);
                     }
                 }
             }
