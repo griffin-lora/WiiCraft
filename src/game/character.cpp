@@ -16,10 +16,10 @@ using namespace game;
 constexpr f32 movement_accel = 40.0f;
 constexpr f32 max_movement_speed = 9.0f;
 constexpr f32 movement_decel_factor = 0.005f;
-constexpr f32 gravity = 0.6f;
+constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, u32 buttons_down) {
+void character::handle_input(const camera& cam, f32 delta, u32 buttons_down) {
     #ifndef PC_PORT
     auto joystick_input_vector = input::get_joystick_input_vector();
     #else
@@ -38,17 +38,17 @@ void character::handle_input(const camera& cam, u32 buttons_down) {
             joystick_input_vector.y = 0.0f;
         }
         if (joystick_input_vector.x == 0.0f && joystick_input_vector.y == 0.0f) {
-            apply_no_movement();
+            apply_no_movement(delta);
         } else {
             glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
-            apply_movement(cam, input_vector);
+            apply_movement(cam, delta, input_vector);
         }
     } else {
-        apply_no_movement();
+        apply_no_movement(delta);
     }
 }
 
-void character::apply_movement(const camera& cam, glm::vec3 input_vector) {
+void character::apply_movement(const camera& cam, f32 delta, glm::vec3 input_vector) {
     glm::mat3 movement_matrix = {
         { cam.look.x, 0, cam.look.z },
         { 0, 1, 0 },
@@ -63,7 +63,7 @@ void character::apply_movement(const camera& cam, glm::vec3 input_vector) {
     auto accel_vector = input_vector * movement_accel;
 
     glm::vec3 move_vector = { velocity.x, 0.0f, velocity.z };
-    move_vector += accel_vector * (1/60.0f);
+    move_vector += accel_vector * delta;
 
     if (math::is_non_zero(move_vector) & math::is_non_zero(input_vector)) {
         auto len = glm::length(move_vector);
@@ -76,10 +76,10 @@ void character::apply_movement(const camera& cam, glm::vec3 input_vector) {
     velocity = { move_vector.x, velocity.y, move_vector.z };
 }
 
-void character::apply_no_movement() {
+void character::apply_no_movement(f32 delta) {
     glm::vec3 move_vector = { velocity.x, 0.0f, velocity.z };
     if (math::is_non_zero(move_vector)) {
-        move_vector *= movement_decel_factor * 60.0f;
+        move_vector *= movement_decel_factor * delta;
         velocity = { move_vector.x, velocity.y, move_vector.z };
     }
 }
@@ -87,8 +87,8 @@ void character::apply_no_movement() {
 static constexpr glm::vec3 half_size = { 0.35f, 0.9f, 0.35f };
 static constexpr glm::vec3 full_size = half_size * 2.0f;
 
-bool character::apply_collision(chunk::map& chunks) {
-    auto direction = velocity * (1.0f/60.0f);
+bool character::apply_collision(chunk::map& chunks, f32 delta) {
+    auto direction = velocity * delta;
 
     auto begin = position - half_size;
     auto end = position + half_size;
@@ -140,21 +140,21 @@ bool character::apply_collision(chunk::map& chunks) {
     return false;
 }
 
-void character::apply_physics(chunk::map& chunks) {
+void character::apply_physics(chunk::map& chunks, f32 delta) {
     #ifndef PC_PORT
     auto chunk = get_chunk_from_world_position(chunks, position);
     if (chunk.has_value()) {
-        velocity.y -= gravity;
+        velocity.y -= gravity * delta;
 
         grounded = false;
 
-        while (apply_collision(chunks));
+        while (apply_collision(chunks, delta));
     }
     #endif
 }
 
-void character::apply_velocity() {
-    position += velocity * (1.0f/60.0f);
+void character::apply_velocity(f32 delta) {
+    position += velocity * delta;
 }
 
 void character::update_camera(camera& cam) const {

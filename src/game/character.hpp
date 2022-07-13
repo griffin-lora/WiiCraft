@@ -10,17 +10,17 @@ namespace game {
 
         bool grounded = false;
 
-        void handle_input(const camera& cam, u32 buttons_down);
+        void handle_input(const camera& cam, f32 delta, u32 buttons_down);
 
-        void apply_movement(const camera& cam, glm::vec3 input_vector);
-        void apply_no_movement();
+        void apply_movement(const camera& cam, f32 delta, glm::vec3 input_vector);
+        void apply_no_movement(f32 delta);
         
-        void apply_physics(chunk::map& chunks);
-        void apply_velocity();
+        void apply_physics(chunk::map& chunks, f32 delta);
+        void apply_velocity(f32 delta);
 
         void update_camera(camera& cam) const;
 
         private:
-            bool apply_collision(chunk::map& chunks);
+            bool apply_collision(chunk::map& chunks, f32 delta);
     };
 }

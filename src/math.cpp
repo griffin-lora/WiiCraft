@@ -19,7 +19,7 @@ glm::mat3 math::from_euler_angles(f32 yaw, f32 pitch, f32 roll) {
 
 static f32 get_noise_at_grid_position(const math::vector2s32& pos) {
     s32 val = mod((pos.x * 374761393) + (pos.y * 668265263), 1274126177);
-    return (f32)val / 1274126177.0f;
+    return val / 1274126177.0f;
 }
 
 static f32 get_eased(f32 x) {

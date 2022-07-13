@@ -8,9 +8,9 @@ void game::update_view(const camera& cam, math::matrix view) {
     guLookAt(view, (guVector*)&cam.position, (guVector*)&cam.up, (guVector*)&look_at);
 }
 
-void game::rotate_camera(camera& cam, const glm::vec2& input_vector, f32 rotate_speed) {
-    cam.yaw = cam.yaw - (input_vector.x * rotate_speed);
-    cam.pitch = cam.pitch + (input_vector.y * rotate_speed);
+void game::rotate_camera(camera& cam, const glm::vec2& move_vector) {
+    cam.yaw = cam.yaw - move_vector.x;
+    cam.pitch = cam.pitch + move_vector.y;
     cam.pitch = std::clamp(cam.pitch, glm::radians(-89.9f), glm::radians(89.9f));
 }
 

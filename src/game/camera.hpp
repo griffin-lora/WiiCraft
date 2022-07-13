@@ -23,7 +23,7 @@ namespace game {
     void update_view(const camera& cam, math::matrix view);
     void update_look(camera& cam);
 
-    void rotate_camera(camera& cam, const glm::vec2& input_vector, f32 rotate_speed);
+    void rotate_camera(camera& cam, const glm::vec2& input_vector);
 
     inline void update_perspective(const camera& cam, math::matrix44 perspective) {
         guPerspective(perspective, cam.fov, cam.aspect, cam.near_clipping_plane_distance, cam.far_clipping_plane_distance);

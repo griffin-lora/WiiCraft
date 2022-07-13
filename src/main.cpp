@@ -28,8 +28,10 @@
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
 #include "common.hpp"
+#include <ctime>
+#include <sys/time.h>
 
-static constexpr f32 cam_rotation_speed = 0.15f;
+static constexpr f32 cam_rotation_speed = 1.80f;
 
 static constexpr s32 chunk_generation_radius = 3;
 
@@ -130,15 +132,29 @@ int main(int argc, char** argv) {
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
 
+	timeval start;
+	gettimeofday(&start, NULL);
+	auto start_ms = (start.tv_sec * 1000) + (start.tv_usec / 1000);
+
 	for (;;) {
+
+		timeval now;
+        gettimeofday(&now, NULL);
+        auto now_ms = (now.tv_sec * 1000) + (now.tv_usec / 1000);
+
+		auto delta_ms = now_ms - start_ms;
+		f32 delta = delta_ms / 1000.0f;
+
+		start_ms = now_ms;
+
 		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look * 10.0f, cam.position, cam.position + (cam.look * 10.0f), []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
 		}, [](auto&) {});
 		bl_sel.handle_raycast(view, quad_building_arrays, raycast);
 
-		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, raycast);
-		character.apply_physics(chunks);
-		character.apply_velocity();
+		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, delta, raycast);
+		character.apply_physics(chunks, delta);
+		character.apply_velocity(delta);
 		character.update_camera(cam);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh);

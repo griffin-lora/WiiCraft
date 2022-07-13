@@ -14,6 +14,7 @@ void game::update_from_input(
     camera& cam,
     chunk::map& chunks,
     cursor& cursor,
+    f32 delta,
     std::optional<block_raycast>& raycast
 ) {
     input::scan_pads();
@@ -43,15 +44,15 @@ void game::update_from_input(
         }
     }
 
-    character.handle_input(cam, buttons_down);
+    character.handle_input(cam, delta, buttons_down);
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 
     if (math::is_non_zero(pad_input_vector)) {
         math::normalize(pad_input_vector);
-        pad_input_vector *= cam_rotation_speed;
+        pad_input_vector *= (cam_rotation_speed * delta);
 
-        rotate_camera(cam, pad_input_vector, cam_rotation_speed);
+        rotate_camera(cam, pad_input_vector);
         
         cam.update_view = true;
         cam.update_look = true;
