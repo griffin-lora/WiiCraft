@@ -12,42 +12,33 @@ namespace game {
         return ((chunk_coord * chunk::SIZE) + block_coord);
     }
     template<typename O, typename T>
-    inline O floor_float_position(const T& position) {
+    inline glm::vec<3, O, glm::defaultp> floor_float_position(const T& position) {
         return {
-            std::floor(position.x),
-            std::floor(position.y),
-            std::floor(position.z)
+            (O)std::floor(position.x),
+            (O)std::floor(position.y),
+            (O)std::floor(position.z)
         };
     }
     template<typename T>
     inline math::vector3s32 get_chunk_position_from_world_position(const glm::vec<3, T, glm::defaultp>& world_position) {
-        return floor_float_position<math::vector3s32>(world_position / (T)chunk::SIZE);
+        return floor_float_position<s32>(world_position / (T)chunk::SIZE);
     }
 
-    template<typename T>
-    inline math::vector3u8 get_local_block_position(const T& world_position) {
+    template<typename O, typename T>
+    inline glm::vec<3, O, glm::defaultp> get_local_block_position(const T& world_position) {
         return {
-            math::mod((u8)world_position.x, (u8)chunk::SIZE),
-            math::mod((u8)world_position.y, (u8)chunk::SIZE),
-            math::mod((u8)world_position.z, (u8)chunk::SIZE)
+            math::mod((O)world_position.x, (O)chunk::SIZE),
+            math::mod((O)world_position.y, (O)chunk::SIZE),
+            math::mod((O)world_position.z, (O)chunk::SIZE)
         };
     }
-
-    // Weird hack
-    template<typename T>
-    inline math::vector3s32 get_local_block_position_in_s32(const T& world_position) {
+    
+    template<typename O>
+    inline glm::vec<3, O, glm::defaultp> get_local_block_position(const glm::vec3& world_position) {
         return {
-            math::mod((s32)world_position.x, chunk::SIZE),
-            math::mod((s32)world_position.y, chunk::SIZE),
-            math::mod((s32)world_position.z, chunk::SIZE)
-        };
-    }
-
-    inline math::vector3u8 get_local_block_position(const glm::vec3& world_position) {
-        return {
-            math::mod((u8)std::floor(world_position.x), (u8)chunk::SIZE),
-            math::mod((u8)std::floor(world_position.y), (u8)chunk::SIZE),
-            math::mod((u8)std::floor(world_position.z), (u8)chunk::SIZE)
+            math::mod((O)std::floor(world_position.x), (O)chunk::SIZE),
+            math::mod((O)std::floor(world_position.y), (O)chunk::SIZE),
+            math::mod((O)std::floor(world_position.z), (O)chunk::SIZE)
         };
     }
 }

@@ -31,17 +31,6 @@ namespace game {
 
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 
-    template<typename F>
-    inline void iterate_over_chunk_positions(F func) {
-        for (u8 x = 0; x < chunk::SIZE; x++) {
-            for (u8 y = 0; y < chunk::SIZE; y++) {
-                for (u8 z = 0; z < chunk::SIZE; z++) {
-                    func({x, y, z});
-                }
-            }
-        }
-    }
-
     template<block::face face, typename T>
     constexpr bool is_block_position_at_face_edge(T pos) {
         constexpr auto edge_coord = (chunk::SIZE - 1);
@@ -59,7 +48,7 @@ namespace game {
 
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 
-    void add_important_chunk_mesh_update(chunk& chunk, math::vector3u8 block_position);
+    void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
     template<block::face face>
     void add_important_chunk_mesh_update_to_neighbor(chunk& chunk) {
         auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
@@ -73,8 +62,8 @@ namespace game {
 
     struct world_location {
         math::vector3s32 ch_pos;
+        math::vector3s32 bl_pos;
         chunk* ch;
-        math::vector3u8 bl_pos;
         block* bl;
     };
 
@@ -85,14 +74,14 @@ namespace game {
         if (it != chunks.end()) {
             auto& chunk = it->second;
 
-            auto block_pos = get_local_block_position(position);
+            auto block_pos = get_local_block_position<s32>(position);
             auto index = get_index_from_position(block_pos);
 
             auto& block = chunk.blocks[index];
             return world_location{
                 .ch_pos = chunk_pos,
-                .ch = &chunk,
                 .bl_pos = block_pos,
+                .ch = &chunk,
                 .bl = &block
             };
         }

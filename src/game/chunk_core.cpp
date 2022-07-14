@@ -52,8 +52,8 @@ static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos
 static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     auto blocks = chunk.blocks.data();
 
-    for (u8 x = 0; x < chunk::SIZE; x++) {
-        for (u8 z = 0; z < chunk::SIZE; z++) {
+    for (s32 x = 0; x < chunk::SIZE; x++) {
+        for (s32 z = 0; z < chunk::SIZE; z++) {
             f32 world_x = game::get_world_coord_from_block_position(x, chunk_pos.x);
             f32 world_z = game::get_world_coord_from_block_position(z, chunk_pos.z);
             glm::vec2 noise_pos = { world_x, world_z };
@@ -64,9 +64,9 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
             s32 generated_height = (plains_height * 12) + 1;
 
-            for (u8 y = 0; y < chunk::SIZE; y++) {
+            for (s32 y = 0; y < chunk::SIZE; y++) {
                 auto world_height = game::get_world_coord_from_block_position(y, chunk_pos.y);
-                auto index = game::get_index_from_position(math::vector3u8{x, y, z});
+                auto index = game::get_index_from_position(math::vector3s32{x, y, z});
 
                 auto& block = blocks[index];
 
@@ -129,13 +129,13 @@ void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32&
 }
 
 template<block::face face>
-static void add_needed_important_chunk_mesh_update_to_neighbor(chunk& chunk, math::vector3u8 pos) {
+static void add_needed_important_chunk_mesh_update_to_neighbor(chunk& chunk, const math::vector3s32& pos) {
     if (is_block_position_at_face_edge<face>(pos)) {
         add_important_chunk_mesh_update_to_neighbor<face>(chunk);
     }
 }
 
-void game::add_important_chunk_mesh_update(chunk& chunk, math::vector3u8 pos) {
+void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& pos) {
     chunk.update_mesh_important = true;
     add_needed_important_chunk_mesh_update_to_neighbor<block::face::FRONT>(chunk, pos);
     add_needed_important_chunk_mesh_update_to_neighbor<block::face::BACK>(chunk, pos);

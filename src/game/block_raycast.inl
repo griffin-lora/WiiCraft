@@ -8,8 +8,8 @@ template<typename F1, typename F2, typename F3>
 void game::handle_block_raycasts_in_region(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box, F3 handle_box_raycast) {
     auto dir_inv = 1.0f / dir;
 
-    auto floored_begin = floor_float_position<glm::vec3>(begin);
-    auto floored_end = floor_float_position<glm::vec3>(end);
+    auto floored_begin = floor_float_position<f32>(begin);
+    auto floored_end = floor_float_position<f32>(end);
 
     // Swap floored_begin and floored_end to make sure that floored_begin is always before floored_end
     if (floored_begin.x > floored_end.x) {
@@ -74,26 +74,4 @@ std::optional<game::block_raycast> game::get_block_raycast(chunk::map& chunks, c
     });
     
     return closest_raycast;
-}
-
-template<typename F1, typename F2>
-std::vector<game::block_raycast> game::get_block_raycasts(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box) {
-    std::vector<block_raycast> raycasts;
-
-    handle_block_raycasts_in_region(chunks, origin, dir, begin, end, get_boxes, transform_box, [&raycasts](const auto& world_block_pos, auto& world_loc, auto& box_raycast) {
-        if (box_raycast.has_value() && box_raycast->near_hit_time < 1.0f) {
-            raycasts.push_back({
-                .box_raycast = *box_raycast,
-                .location = *world_loc,
-                .world_block_position = world_block_pos
-            });
-        }
-    });
-
-    std::sort(raycasts.begin(), raycasts.end(), [](const auto& a, const auto& b) {
-        return a.box_raycast.near_hit_time < b.box_raycast.near_hit_time;
-    });
-
-
-    return raycasts;
 }

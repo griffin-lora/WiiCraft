@@ -10,6 +10,7 @@ namespace math {
     using vector2u8 = glm::vec<2, u8, glm::defaultp>;
     using vector2u16 = glm::vec<2, u16, glm::defaultp>;
     using vector2s32 = glm::vec<2, s32, glm::defaultp>;
+    using vector3u32 = glm::vec<3, u32, glm::defaultp>;
     using vector3s32 = glm::vec<3, s32, glm::defaultp>;
     using matrix = Mtx;
     using matrix44 = Mtx44;

@@ -10,7 +10,7 @@
 
 namespace game {
     struct block_selection {
-        std::optional<math::vector3u8> last_block_pos;
+        std::optional<math::vector3s32> last_block_pos;
         std::optional<block> last_block;
 
 	    gfx::display_list standard_disp_list;
