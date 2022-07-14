@@ -12,7 +12,10 @@ namespace game {
         math::transform_2d tf;
         gfx::display_list disp_list;
 
-        text(std::string_view str, u16 char_width, u16 char_height);
+        void update(std::string_view str, u16 char_width, u16 char_height);
+        inline text(std::string_view str, u16 char_width, u16 char_height) {
+            update(str, char_width, char_height);
+        }
 
         void draw();
     };

@@ -2,7 +2,7 @@
 
 using namespace game;
 
-text::text(std::string_view str, u16 char_width, u16 char_height) {
+void text::update(std::string_view str, u16 char_width, u16 char_height) {
     std::size_t vertex_count = str.size() * 4;
 
     std::size_t disp_list_size = (
