@@ -93,7 +93,6 @@ void game::manage_chunks_around_camera(
             // Notify old chunks that there is a new neighbor and to update their neighborhood and mesh
             add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
             
-            chunk.update_mesh_important = false;
             chunk.update_mesh_unimportant = true;
             chunk.update_neighborhood = false; // Don't update neighborhood since we just updated it
         }
