@@ -42,14 +42,14 @@ static void set_block_lookup_neighbor(const math::vector3s32& block_pos, u16& ou
         math::vector3s32 face_block_pos = get_face_offset_position<face>(block_pos);
         face_block_pos = get_local_block_position<s32>(face_block_pos);
 
-        out_face_index = get_index_from_position(face_block_pos);
+        out_face_index = get_index_from_position<u16>(face_block_pos);
         out_is_face_edge = true;
         return;
     }
 
     auto face_block_pos = get_face_offset_position<face>(block_pos);
 
-    out_face_index = get_index_from_position(face_block_pos);
+    out_face_index = get_index_from_position<u16>(face_block_pos);
     out_is_face_edge = false;
     return;
 }
@@ -60,7 +60,7 @@ void game::fill_block_neighborhood_lookups(block::neighborhood_lookups& lookups)
         for (s32 y = 0; y < chunk::SIZE; y++) {
             for (s32 z = 0; z < chunk::SIZE; z++) {
                 math::vector3s32 block_pos = { x, y, z };
-                std::size_t index = get_index_from_position(block_pos);
+                auto index = get_index_from_position<std::size_t>(block_pos);
                 auto& lookup = lookups_array[index];
                 lookup = {
                     .position = block_pos

@@ -66,7 +66,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
             for (s32 y = 0; y < chunk::SIZE; y++) {
                 auto world_height = game::get_world_coord_from_block_position(y, chunk_pos.y);
-                auto index = game::get_index_from_position(math::vector3s32{x, y, z});
+                auto index = game::get_index_from_position<std::size_t>(math::vector3s32{x, y, z});
 
                 auto& block = blocks[index];
 

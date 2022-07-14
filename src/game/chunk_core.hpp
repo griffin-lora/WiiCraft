@@ -75,7 +75,7 @@ namespace game {
             auto& chunk = it->second;
 
             auto block_pos = get_local_block_position<s32>(position);
-            auto index = get_index_from_position(block_pos);
+            auto index = get_index_from_position<std::size_t>(block_pos);
 
             auto& block = chunk.blocks[index];
             return world_location{
