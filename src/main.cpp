@@ -55,6 +55,9 @@ int main(int argc, char** argv) {
 	gfx::texture skybox_tex;
 	gfx::safe_load_from_file(skybox_tex, "data/textures/skybox.tpl");
 
+	gfx::texture font_tex;
+	gfx::safe_load_from_file(font_tex, "data/textures/font.tpl");
+
 	input::init(con.rmode->viWidth, con.rmode->viHeight);
 
 	gfx::draw_state draw{ {0xFF, 0xFF, 0xFF, 0xFF} };
@@ -63,11 +66,13 @@ int main(int argc, char** argv) {
 
 	gfx::set_filtering_mode(chunk_tex, GX_NEAR, GX_NEAR);
 	gfx::set_filtering_mode(icons_tex, GX_NEAR, GX_NEAR);
+	gfx::set_filtering_mode(font_tex, GX_NEAR, GX_NEAR);
 
 
 	gfx::load(chunk_tex, GX_TEXMAP0);
 	gfx::load(icons_tex, GX_TEXMAP1);
 	gfx::load(skybox_tex, GX_TEXMAP2);
+	gfx::load(font_tex, GX_TEXMAP3);
 
 	math::matrix44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
@@ -182,9 +187,28 @@ int main(int argc, char** argv) {
 		bl_sel.draw_water(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		init_ui_rendering();
+		game::init_ui_rendering();
 		water_overlay.draw(cam, chunks);
 		cursor.draw();
+
+		math::transform_2d text_tf;
+		text_tf.set_position(10.0f, 10.0f);
+
+		game::init_text_rendering();
+		text_tf.load(GX_PNMTX3);
+
+		GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+
+        GX_Position2u16(0, 0);
+        GX_TexCoord2u8(1, 4);
+        GX_Position2u16(100, 0);
+        GX_TexCoord2u8(2, 4);
+        GX_Position2u16(100, 100);
+        GX_TexCoord2u8(2, 5);
+        GX_Position2u16(0, 100);
+        GX_TexCoord2u8(1, 5);
+
+        GX_End();
 
 		game::reset_update_params(cam);
 
