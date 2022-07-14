@@ -27,7 +27,7 @@
 #include "game/character.hpp"
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
-#include "game/text.hpp"
+#include "game/debug_ui.hpp"
 #include "common.hpp"
 #include <ctime>
 #include <sys/time.h>
@@ -127,12 +127,11 @@ int main(int argc, char** argv) {
 	game::skybox skybox{view, cam};
 	
 	game::water_overlay water_overlay;
+	game::debug_ui debug_ui;
+	debug_ui.fps_text.tf.set_position(10.0f, 10.0f);
 	game::cursor cursor;
 
 	game::block_selection bl_sel;
-
-	game::text test_text = { "Hello World!", 32, 32 };
-	test_text.tf.set_position(10.0f, 10.0f);
 
     GX_SetCurrentMtx(GX_PNMTX3);
 
@@ -143,18 +142,21 @@ int main(int argc, char** argv) {
 
 	timeval start;
 	gettimeofday(&start, NULL);
-	auto start_ms = (start.tv_sec * 1000) + (start.tv_usec / 1000);
+	auto start_us = (start.tv_sec * 1000000) + start.tv_usec;
 
 	for (;;) {
 
 		timeval now;
         gettimeofday(&now, NULL);
-        auto now_ms = (now.tv_sec * 1000) + (now.tv_usec / 1000);
+        auto now_us = (now.tv_sec * 1000000) + now.tv_usec;
 
-		auto delta_ms = now_ms - start_ms;
-		f32 delta = delta_ms / 1000.0f;
+		auto delta_us = now_us - start_us;
+		f32 delta = delta_us / 1000000.0f;
+		f32 fps = 1000000.0f / delta_us;
 
-		start_ms = now_ms;
+		debug_ui.update(std::floor(fps));
+
+		start_us = now_us;
 
 		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look * 10.0f, cam.position, cam.position + (cam.look * 10.0f), []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
@@ -196,7 +198,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		test_text.draw();
+		debug_ui.draw();
 
 		game::reset_update_params(cam);
 

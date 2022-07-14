@@ -1,6 +1,6 @@
 #include "text.hpp"
 
-using namespace game;
+using namespace gfx;
 
 void text::update(std::string_view str, u16 char_width, u16 char_height) {
     std::size_t vertex_count = str.size() * 4;
@@ -42,8 +42,6 @@ void text::update(std::string_view str, u16 char_width, u16 char_height) {
 }
 
 void text::draw() {
-    GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP3, GX_COLOR0A0);
-
     tf.load(GX_PNMTX3);
 
     disp_list.call();
