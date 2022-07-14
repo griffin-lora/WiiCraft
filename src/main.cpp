@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
 	
 	game::water_overlay water_overlay;
 	game::debug_ui debug_ui;
-	debug_ui.fps_text.tf.set_position(10.0f, 10.0f);
+	debug_ui.fps_text.tf.set_position(10.0f, 30.0f);
 	game::cursor cursor;
 
 	game::block_selection bl_sel;
