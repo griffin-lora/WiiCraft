@@ -145,23 +145,31 @@ void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32&
     add_needed_important_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
 }
 
-template<block::face face>
-static void add_chunk_mesh_neighborhood_update_to_neighbor(chunk& chunk) {
-    auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
-    if (nb_chunk_opt.has_value()) {
-        auto& nb_chunk = nb_chunk_opt->get();
-        nb_chunk.update_mesh_unimportant = true;
-        nb_chunk.update_neighborhood = true;
-    }
+template<typename F>
+static void handle_neighborhood(F func, chunk& chunk) {
+    func(get_neighbor<block::face::FRONT>(chunk.nh));
+    func(get_neighbor<block::face::BACK>(chunk.nh));
+    func(get_neighbor<block::face::TOP>(chunk.nh));
+    func(get_neighbor<block::face::BOTTOM>(chunk.nh));
+    func(get_neighbor<block::face::RIGHT>(chunk.nh));
+    func(get_neighbor<block::face::LEFT>(chunk.nh));
 }
 
 void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
-    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::FRONT>(chunk);
-    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::BACK>(chunk);
-    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::TOP>(chunk);
-    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::BOTTOM>(chunk);
-    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::RIGHT>(chunk);
-    add_chunk_mesh_neighborhood_update_to_neighbor<block::face::LEFT>(chunk);
+    handle_neighborhood([](auto nb_chunk) {
+        if (nb_chunk.has_value()) {
+            nb_chunk->get().update_mesh_unimportant = true;
+            nb_chunk->get().update_neighborhood = true;
+        }
+    }, chunk);
+}
+
+void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
+    handle_neighborhood([](auto nb_chunk) {
+        if (nb_chunk.has_value()) {
+            nb_chunk->get().update_neighborhood = true;
+        }
+    }, chunk);
 }
 
 void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {

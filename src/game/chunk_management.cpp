@@ -31,8 +31,8 @@ void game::manage_chunks_around_camera(
                     auto stored_pos = pos;
                     stored_chunks.insert(std::make_pair<math::vector3s32, stored_chunk>(std::move(stored_pos), { .blocks = std::move(chunk.blocks) }));
                 }
-                // Notify neighbor chunks that they need to update their neighborhood to avoid a dangling reference
-                add_chunk_mesh_neighborhood_update_to_neighbors(chunk);
+                // Notify neighbor chunks that they need to update their neighborhood (but not their mesh) to avoid a dangling reference
+                add_chunk_neighborhood_update_to_neighbors(chunk);
                 // Add to the erasure list
                 chunk_positions_to_erase.push_back(pos);
 

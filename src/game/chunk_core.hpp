@@ -46,6 +46,7 @@ namespace game {
 
     void generate_blocks(chunk& chunk, const math::vector3s32& pos);
 
+    void add_chunk_neighborhood_update_to_neighbors(chunk& chunk);
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
