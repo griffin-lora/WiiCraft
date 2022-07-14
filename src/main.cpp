@@ -27,6 +27,7 @@
 #include "game/character.hpp"
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
+#include "game/text.hpp"
 #include "common.hpp"
 #include <ctime>
 #include <sys/time.h>
@@ -130,6 +131,9 @@ int main(int argc, char** argv) {
 
 	game::block_selection bl_sel;
 
+	game::text test_text = { "Hello World!", 32, 32 };
+	test_text.tf.set_position(10.0f, 10.0f);
+
     GX_SetCurrentMtx(GX_PNMTX3);
 
 	gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
@@ -191,24 +195,8 @@ int main(int argc, char** argv) {
 		water_overlay.draw(cam, chunks);
 		cursor.draw();
 
-		math::transform_2d text_tf;
-		text_tf.set_position(10.0f, 10.0f);
-
 		game::init_text_rendering();
-		text_tf.load(GX_PNMTX3);
-
-		GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
-
-        GX_Position2u16(0, 0);
-        GX_TexCoord2u8(1, 4);
-        GX_Position2u16(100, 0);
-        GX_TexCoord2u8(2, 4);
-        GX_Position2u16(100, 100);
-        GX_TexCoord2u8(2, 5);
-        GX_Position2u16(0, 100);
-        GX_TexCoord2u8(1, 5);
-
-        GX_End();
+		test_text.draw();
 
 		game::reset_update_params(cam);
 

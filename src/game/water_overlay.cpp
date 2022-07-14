@@ -10,7 +10,7 @@ water_overlay::water_overlay() {
     
     std::size_t disp_list_size = (
 		4 + // GX_Begin
-		vertex_count * 2 + // GX_Position2u8
+		vertex_count * 4 + // GX_Position2u16
 		vertex_count * 2 + // GX_TexCoord2u8
 		1 // GX_End
 	);
