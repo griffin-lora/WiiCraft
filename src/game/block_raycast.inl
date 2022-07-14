@@ -4,8 +4,6 @@
 #include "chunk_core.hpp"
 #include "util.hpp"
 
-using namespace game;
-
 template<typename F1, typename F2, typename F3>
 void game::handle_block_raycasts_in_region(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box, F3 handle_box_raycast) {
     auto dir_inv = 1.0f / dir;
@@ -52,7 +50,7 @@ void game::handle_block_raycasts_in_region(chunk::map& chunks, const glm::vec3& 
 }
 
 template<typename F1, typename F2>
-std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box) {
+std::optional<game::block_raycast> game::get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box) {
     std::optional<block_raycast> closest_raycast;
 
     handle_block_raycasts_in_region(chunks, origin, dir, begin, end, get_boxes, transform_box, [&closest_raycast](const auto& world_block_pos, auto& world_loc, auto& box_raycast) {
@@ -79,7 +77,7 @@ std::optional<block_raycast> game::get_block_raycast(chunk::map& chunks, const g
 }
 
 template<typename F1, typename F2>
-std::vector<block_raycast> game::get_block_raycasts(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box) {
+std::vector<game::block_raycast> game::get_block_raycasts(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& dir, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box) {
     std::vector<block_raycast> raycasts;
 
     handle_block_raycasts_in_region(chunks, origin, dir, begin, end, get_boxes, transform_box, [&raycasts](const auto& world_block_pos, auto& world_loc, auto& box_raycast) {
