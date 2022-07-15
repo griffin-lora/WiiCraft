@@ -204,6 +204,7 @@ int main(int argc, char** argv) {
 
 		game::reset_update_params(cam);
 
+		// Frame drawing is done at this point.
 		gfx::copy_framebuffer(draw.frame_buffers[draw.fb_index], true);
 
 		gfx::draw_done();

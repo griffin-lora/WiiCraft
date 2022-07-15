@@ -28,7 +28,6 @@ void game::init_ui_rendering() {
 	// Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 	
-	GX_SetAlphaUpdate(GX_FALSE);
     GX_SetZCompLoc(GX_FALSE);
     GX_SetCullMode(GX_CULL_BACK);
 }
