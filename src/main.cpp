@@ -128,7 +128,6 @@ int main(int argc, char** argv) {
 	
 	game::water_overlay water_overlay;
 	game::debug_ui debug_ui;
-	debug_ui.fps_text.tf.set_position(10.0f, 30.0f);
 	game::cursor cursor;
 
 	game::block_selection bl_sel;
@@ -153,8 +152,6 @@ int main(int argc, char** argv) {
 		auto delta_us = now_us - start_us;
 		f32 delta = delta_us / 1000000.0f;
 		f32 fps = 1000000.0f / delta_us;
-
-		debug_ui.update(std::floor(fps));
 
 		start_us = now_us;
 
@@ -181,13 +178,14 @@ int main(int argc, char** argv) {
 		
 		game::init_standard_rendering();
 		game::draw_chunks_standard(view, cam, chunks);
-		bl_sel.update_if_needed(view, cam);
 
 		game::init_foliage_rendering();
 		game::draw_chunks_foliage(chunks);
 
 		game::init_water_rendering();
 		game::draw_chunks_water(chunks);
+		
+		bl_sel.update_if_needed(view, cam);
 
 		game::init_standard_rendering();
 		bl_sel.draw_standard(raycast);
@@ -202,7 +200,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		debug_ui.draw();
+		debug_ui.draw(std::floor(fps));
 
 		game::reset_update_params(cam);
 
