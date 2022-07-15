@@ -182,14 +182,18 @@ int main(int argc, char** argv) {
 		game::init_standard_rendering();
 		game::draw_chunks_standard(view, cam, chunks);
 		bl_sel.update_if_needed(view, cam);
-		bl_sel.draw_standard(raycast);
 
 		game::init_foliage_rendering();
 		game::draw_chunks_foliage(chunks);
-		bl_sel.draw_foliage(raycast);
 
 		game::init_water_rendering();
 		game::draw_chunks_water(chunks);
+
+		game::init_standard_rendering();
+		bl_sel.draw_standard(raycast);
+		game::init_foliage_rendering();
+		bl_sel.draw_foliage(raycast);
+		game::init_water_rendering();
 		bl_sel.draw_water(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
