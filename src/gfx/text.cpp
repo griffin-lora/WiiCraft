@@ -3,7 +3,7 @@
 
 using namespace gfx;
 
-void gfx::write_text_into_display_list(gfx::display_list& disp_list, std::string_view str, u16 char_width, u16 char_height) {
+void gfx::write_text_into_standard_display_list(gfx::display_list& disp_list, std::string_view str, u16 char_width, u16 char_height) {
     std::size_t vertex_count = str.size() * 4;
 
     std::size_t disp_list_size = (

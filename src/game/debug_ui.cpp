@@ -7,7 +7,7 @@ using namespace game;
 
 debug_ui::debug_ui() {
     fps_tf.set_position(10.0f, 30.0f);
-    gfx::write_text_into_display_list(fps_prefix_disp_list, FPS_PREFIX, CHAR_SIZE, CHAR_SIZE);
+    gfx::write_text_into_standard_display_list(fps_prefix_disp_list, FPS_PREFIX, CHAR_SIZE, CHAR_SIZE);
 }
 
 void debug_ui::draw(u32 fps) const {

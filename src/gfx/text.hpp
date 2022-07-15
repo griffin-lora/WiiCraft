@@ -9,7 +9,8 @@ namespace gfx {
         return { (O)index % 16, (O)index / 16 };
     }
 
-    void write_text_into_display_list(gfx::display_list& disp_list, std::string_view str, u16 char_width, u16 char_height);
+    // TODO: make a templated function called write_text_into_display_list
+    void write_text_into_standard_display_list(gfx::display_list& disp_list, std::string_view str, u16 char_width, u16 char_height);
 
     template<typename P>
     constexpr P get_text_width(std::string_view str, P char_width) {
