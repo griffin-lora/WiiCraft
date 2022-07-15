@@ -16,3 +16,8 @@ A Minecraft-like clone for the Nintendo Wii
  - Run make textures to generate textures
  - If you're running on Dolphin, run make image to generate the SD card image (\*nix systems only)
 
+#### Screenshots
+
+![Screenshot taken of WiiCraft](https://i.imgur.com/oiH79Dh.png)
+
+All screenshots taken in Dolphin Emulator
