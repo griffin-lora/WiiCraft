@@ -1,7 +1,6 @@
 #pragma once
 #include "block.hpp"
 #include "math/box.hpp"
-#include "util.hpp"
 #include "traits.hpp"
 #include <optional>
 #include <vector>

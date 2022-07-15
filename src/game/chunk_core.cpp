@@ -128,48 +128,35 @@ void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32&
     };
 }
 
-template<block::face face>
-static void add_needed_important_chunk_mesh_update_to_neighbor(chunk& chunk, const math::vector3s32& pos) {
-    if (is_block_position_at_face_edge<face>(pos)) {
-        add_important_chunk_mesh_update_to_neighbor<face>(chunk);
-    }
-}
-
 void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& pos) {
     chunk.update_mesh_important = true;
-    add_needed_important_chunk_mesh_update_to_neighbor<block::face::FRONT>(chunk, pos);
-    add_needed_important_chunk_mesh_update_to_neighbor<block::face::BACK>(chunk, pos);
-    add_needed_important_chunk_mesh_update_to_neighbor<block::face::TOP>(chunk, pos);
-    add_needed_important_chunk_mesh_update_to_neighbor<block::face::BOTTOM>(chunk, pos);
-    add_needed_important_chunk_mesh_update_to_neighbor<block::face::RIGHT>(chunk, pos);
-    add_needed_important_chunk_mesh_update_to_neighbor<block::face::LEFT>(chunk, pos);
-}
-
-template<typename F>
-static void handle_neighborhood(F func, chunk& chunk) {
-    func(get_neighbor<block::face::FRONT>(chunk.nh));
-    func(get_neighbor<block::face::BACK>(chunk.nh));
-    func(get_neighbor<block::face::TOP>(chunk.nh));
-    func(get_neighbor<block::face::BOTTOM>(chunk.nh));
-    func(get_neighbor<block::face::RIGHT>(chunk.nh));
-    func(get_neighbor<block::face::LEFT>(chunk.nh));
+    call_func_on_each_face<void>([&chunk, &pos]<block::face face>() {
+        if (is_block_position_at_face_edge<face>(pos)) {
+            auto nb_chunk = get_neighbor<face>(chunk.nh);
+            if (nb_chunk.has_value()) {
+                nb_chunk->get().update_mesh_important = true;
+            }
+        }
+    });
 }
 
 void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
-    handle_neighborhood([](auto nb_chunk) {
+    call_func_on_each_face<void>([&chunk]<block::face face>() {
+        auto nb_chunk = get_neighbor<face>(chunk.nh);
         if (nb_chunk.has_value()) {
             nb_chunk->get().update_mesh_unimportant = true;
             nb_chunk->get().update_neighborhood = true;
         }
-    }, chunk);
+    });
 }
 
 void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
-    handle_neighborhood([](auto nb_chunk) {
+    call_func_on_each_face<void>([&chunk]<block::face face>() {
+        auto nb_chunk = get_neighbor<face>(chunk.nh);
         if (nb_chunk.has_value()) {
             nb_chunk->get().update_neighborhood = true;
         }
-    }, chunk);
+    });
 }
 
 void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {

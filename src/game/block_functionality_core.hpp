@@ -4,7 +4,7 @@
 #include "face_mesh_generation_core.hpp"
 #include "math/box.hpp"
 #include "traits.hpp"
-#include "util.hpp"
+#include "block_util.hpp"
 #include <array>
 
 namespace game {

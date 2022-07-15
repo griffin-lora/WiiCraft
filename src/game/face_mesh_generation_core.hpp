@@ -1,6 +1,6 @@
 #pragma once
 #include "math.hpp"
-#include "util.hpp"
+#include "block_util.hpp"
 #include "chunk.hpp"
 
 namespace game {

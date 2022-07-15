@@ -3,6 +3,7 @@
 #include "block_core.hpp"
 #include "chunk_math.hpp"
 #include "mesh_generation.hpp"
+#include "block_util.hpp"
 
 namespace game {
     template<block::face face>
@@ -50,14 +51,6 @@ namespace game {
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
-    template<block::face face>
-    void add_important_chunk_mesh_update_to_neighbor(chunk& chunk) {
-        auto nb_chunk_opt = get_neighbor<face>(chunk.nh);
-        if (nb_chunk_opt.has_value()) {
-            auto& nb_chunk = nb_chunk_opt->get();
-            nb_chunk.update_mesh_important = true;
-        }
-    }
 
     void update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks);
 
