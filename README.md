@@ -1,6 +1,6 @@
-# Minecraft on Wii
+# WiiCraft
 
-A Minecraft clone for the Wii
+A Minecraft-like clone for the Nintendo Wii 
 
 ### Build instructions:
 
