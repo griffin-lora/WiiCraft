@@ -44,6 +44,6 @@ namespace input {
     }
 
     glm::vec2 get_dpad_input_vector(u32 buttons_held);
-    std::optional<glm::vec2> get_pointer_position();
+    std::optional<glm::vec2> get_pointer_position(s32 chan);
     f32 get_plus_minus_input_scalar(u32 buttons_held);
 }

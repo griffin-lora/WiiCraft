@@ -26,9 +26,9 @@ glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {
     return pad_input_vector;
 }
 
-std::optional<glm::vec2> input::get_pointer_position() {
+std::optional<glm::vec2> input::get_pointer_position(s32 chan) {
     ir_t pointer;
-    WPAD_IR(0, &pointer);
+    WPAD_IR(chan, &pointer);
     if (pointer.valid) {
         return glm::vec2{ pointer.x, pointer.y };
     } else {

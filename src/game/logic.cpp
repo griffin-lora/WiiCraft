@@ -76,13 +76,12 @@ void game::update_from_input(
         cam.update_look = true;
     }
 
-    // Removing this for the time being since I have not yet implemented the mechanic where the raycast is eminated from the pointer's position
-
-    // auto pointer_pos = input::get_pointer_position();
-    // if (pointer_pos.has_value()) {
-    //     cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
-    // } else {
+    auto pointer_pos = input::get_pointer_position(0);
+    if (pointer_pos.has_value()) {
+        cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
+        cursor.tf.load(cursor::MAT);
+    } else {
         cursor.tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
         cursor.tf.load(cursor::MAT);
-    // }
+    }
 }
