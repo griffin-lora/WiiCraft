@@ -10,6 +10,8 @@
 
 namespace game {
     struct block_selection {
+        static constexpr u32 MAT = GX_PNMTX4;
+
         std::optional<math::vector3s32> last_block_pos;
         std::optional<block> last_block;
 
@@ -18,10 +20,10 @@ namespace game {
 	    gfx::display_list water_disp_list;
         math::transform_3d tf;
 
+        inline block_selection() { }
+
         void update_if_needed(const math::matrix view, const camera& cam);
-        void draw_standard(const std::optional<block_raycast>& raycast) const;
-        void draw_foliage(const std::optional<block_raycast>& raycast) const;
-        void draw_water(const std::optional<block_raycast>& raycast) const;
+        void draw(const std::optional<block_raycast>& raycast) const;
         void handle_raycast(const math::matrix view, standard_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast);
 
         private:

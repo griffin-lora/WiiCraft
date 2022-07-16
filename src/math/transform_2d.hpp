@@ -14,8 +14,8 @@ namespace math {
 
             void set_position(f32 x, f32 y);
 
-            inline void load(u32 idx) const {
-                GX_LoadPosMtxImm(const_cast<f32(*)[4]>(model_view), idx);
+            inline void load(u32 idx) {
+                GX_LoadPosMtxImm(model_view, idx);
             }
     };
 }

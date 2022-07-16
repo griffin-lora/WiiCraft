@@ -18,6 +18,8 @@ namespace game {
 
         using pos_set = std::unordered_set<math::vector3s32, hash_vector3s32>;
 
+        static constexpr u32 MAT = GX_PNMTX5;
+
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         

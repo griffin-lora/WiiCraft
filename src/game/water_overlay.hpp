@@ -8,6 +8,8 @@
 
 namespace game {
     struct water_overlay {
+        static constexpr u32 MAT = GX_PNMTX1;
+
         math::transform_2d tf;
         gfx::display_list disp_list;
 

@@ -65,5 +65,6 @@ void game::update_from_input(
     //     cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
     // } else {
         cursor.tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
+        cursor.tf.load(cursor::MAT);
     // }
 }

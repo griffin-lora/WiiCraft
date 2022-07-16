@@ -132,8 +132,6 @@ int main(int argc, char** argv) {
 
 	game::block_selection bl_sel;
 
-    GX_SetCurrentMtx(GX_PNMTX3);
-
 	gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
 	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 	GX_SetColorUpdate(GX_TRUE);
@@ -175,6 +173,8 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
 		skybox.draw();
+
+		GX_SetCurrentMtx(game::chunk::MAT);
 		
 		game::init_standard_rendering();
 		game::draw_chunks_standard(view, cam, chunks);
@@ -186,13 +186,7 @@ int main(int argc, char** argv) {
 		game::draw_chunks_water(chunks);
 		
 		bl_sel.update_if_needed(view, cam);
-
-		game::init_standard_rendering();
-		bl_sel.draw_standard(raycast);
-		game::init_foliage_rendering();
-		bl_sel.draw_foliage(raycast);
-		game::init_water_rendering();
-		bl_sel.draw_water(raycast);
+		bl_sel.draw(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();

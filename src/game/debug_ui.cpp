@@ -7,11 +7,12 @@ using namespace game;
 
 debug_ui::debug_ui() {
     fps_tf.set_position(10.0f, 30.0f);
+    fps_tf.load(FPS_MAT);
     gfx::write_text_into_standard_display_list(fps_prefix_disp_list, FPS_PREFIX, CHAR_SIZE, CHAR_SIZE);
 }
 
 void debug_ui::draw(u32 fps) const {
-    fps_tf.load(GX_PNMTX3);
+    GX_SetCurrentMtx(FPS_MAT);
 
     fps_prefix_disp_list.call();
 

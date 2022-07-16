@@ -113,6 +113,7 @@ skybox::skybox(const math::matrix view, const camera& cam) {
 
 void skybox::update(const math::matrix view, const camera& cam) {
     tf.set_position(view, cam.position.x, cam.position.y, cam.position.z);
+    tf.load(MAT);
 }
 
 void skybox::update_if_needed(const math::matrix view, const camera& cam) {
@@ -121,7 +122,7 @@ void skybox::update_if_needed(const math::matrix view, const camera& cam) {
     }
 }
 
-static void init_drawing() {
+void skybox::draw() const {
     // set number of rasterized color channels
 	GX_SetNumChans(1);
 
@@ -151,10 +152,10 @@ static void init_drawing() {
 
     GX_SetZCompLoc(GX_TRUE);
     GX_SetCullMode(GX_CULL_BACK);
-}
 
-void skybox::draw() const {
-    init_drawing();
-    tf.load(GX_PNMTX3);
+    //
+    
+    GX_SetCurrentMtx(MAT);
+
     disp_list.call();
 }

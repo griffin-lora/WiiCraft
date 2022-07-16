@@ -6,6 +6,8 @@
 
 namespace game {
     struct cursor {
+        static constexpr u32 MAT = GX_PNMTX3;
+
         math::transform_2d tf;
         gfx::display_list disp_list;
 

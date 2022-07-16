@@ -33,7 +33,7 @@ cursor::cursor() {
 void cursor::draw() const {
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
     
-	tf.load(GX_PNMTX3);
+	GX_SetCurrentMtx(MAT);
 
     disp_list.call();
 }

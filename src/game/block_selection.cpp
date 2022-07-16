@@ -3,63 +3,49 @@
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
 #include "mesh_generation.inl"
+#include "rendering.hpp"
 
 using namespace game;
-
-static void init_drawing() {
-	GX_SetNumChans(1);
-	GX_SetNumTexGens(0);
-	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-	GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
-
-	//
-
-	GX_ClearVtxDesc();
-	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
-	GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
-}
 
 void block_selection::update_if_needed(const math::matrix view, const camera& cam) {
     if (cam.update_view) {
         tf.update_model_view(view);
+        tf.load(MAT);
     }
 }
 
-void block_selection::draw_standard(const std::optional<block_raycast>& raycast) const {
+void block_selection::draw(const std::optional<block_raycast>& raycast) const {
     if (raycast.has_value()) {
-        init_drawing();
+        GX_SetNumChans(1);
+        GX_SetNumTexGens(0);
+        GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+        GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
 
-        tf.load(GX_PNMTX3);
+        //
 
+        GX_ClearVtxDesc();
+        GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+        GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+
+        GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
+        GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+        GX_SetCurrentMtx(MAT);
+
+        init_standard_rendering();
 	    standard_disp_list.call();
-    }
-}
 
-void block_selection::draw_foliage(const std::optional<block_raycast>& raycast) const {
-    if (raycast.has_value()) {
-        init_drawing();
-
-        tf.load(GX_PNMTX3);
-
+        init_foliage_rendering();
 	    foliage_disp_list.call();
-    }
-}
 
-void block_selection::draw_water(const std::optional<block_raycast>& raycast) const {
-    if (raycast.has_value()) {
-        init_drawing();
-
-        tf.load(GX_PNMTX3);
-
+        init_water_rendering();
 	    water_disp_list.call();
     }
 }
 
 void block_selection::update_mesh(const math::matrix view, standard_quad_building_arrays& building_arrays, const block_raycast& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
+    tf.load(MAT);
 
     standard_vertex_function vf = {
         .it = { building_arrays }

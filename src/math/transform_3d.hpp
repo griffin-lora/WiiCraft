@@ -18,8 +18,8 @@ namespace math {
                 guMtxConcat(const_cast<f32(*)[4]>(view), model, model_view);
             }
 
-            inline void load(u32 idx) const {
-                GX_LoadPosMtxImm(const_cast<f32(*)[4]>(model_view), idx);
+            inline void load(u32 idx) {
+                GX_LoadPosMtxImm(model_view, idx);
             }
     };
 }
