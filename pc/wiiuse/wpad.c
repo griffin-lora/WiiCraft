@@ -8,6 +8,11 @@ s32 WPAD_SetDataFormat(s32 chan, s32 fmt) { return 0; }
 s32 WPAD_ScanPads(void) { return 0; }
 u32 WPAD_ButtonsDown(int chan) { return 0; }
 u32 WPAD_ButtonsHeld(int chan) { return 0; }
+void WPAD_GForce(int chan, struct gforce_t* gforce) {
+    gforce->x = 0.0f;
+    gforce->y = 1.0f;
+    gforce->z = 0.0f;
+}
 
 void WPAD_IR(int chan, struct ir_t *ir) {}
 void WPAD_Expansion(int chan, struct expansion_t *exp) {}
