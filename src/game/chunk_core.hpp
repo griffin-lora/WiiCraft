@@ -53,7 +53,7 @@ namespace game {
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
 
-    void update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_us);
+    void update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time);
 
     struct world_location {
         math::vector3s32 ch_pos;

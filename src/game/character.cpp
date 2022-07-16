@@ -46,7 +46,7 @@ void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gfor
 void character::apply_movement(const camera& cam, f32 delta, bool shaking, glm::vec3 input_vector) {
     if (shaking && !sprinting) {
         sprinting = true;
-        fov_tween_start_us = chrono::get_current_us();
+        fov_tween_start = chrono::get_current_us();
     }
 
     glm::mat3 movement_matrix = {
@@ -79,7 +79,7 @@ void character::apply_movement(const camera& cam, f32 delta, bool shaking, glm::
 void character::apply_no_movement(f32 delta) {
     if (sprinting) {
         sprinting = false;
-        fov_tween_start_us = chrono::get_current_us();
+        fov_tween_start = chrono::get_current_us();
     }
 
     glm::vec3 move_vector = { velocity.x, 0.0f, velocity.z };
@@ -167,10 +167,10 @@ void character::update_camera(camera& cam) const {
 
     cam.update_view = true;
 
-    auto elapsed_us = (chrono::get_current_us() - fov_tween_start_us);
+    auto elapsed = (chrono::get_current_us() - fov_tween_start);
 
-    if (elapsed_us < camera::FOV_TWEEN_US) {
-        auto alpha = math::get_eased(elapsed_us / (f32)camera::FOV_TWEEN_US);
+    if (elapsed < camera::FOV_TWEEN_TIME) {
+        auto alpha = math::get_eased(elapsed / (f32)camera::FOV_TWEEN_TIME);
 
         if (sprinting) {
             cam.fov = math::lerp(camera::BASE_FOV, camera::SPRINT_FOV, alpha);

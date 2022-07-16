@@ -133,37 +133,37 @@ int main(int argc, char** argv) {
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
 
-	chrono::us total_block_gen_us = 0;
-	chrono::us total_mesh_gen_us = 0;
+	chrono::us total_block_gen_time = 0;
+	chrono::us total_mesh_gen_time = 0;
 
-	auto start_us = chrono::get_current_us();
+	auto start = chrono::get_current_us();
 
 	for (;;) {
 
-        auto now_us = chrono::get_current_us();
+        auto now = chrono::get_current_us();
 
-		auto delta_us = now_us - start_us;
-		f32 delta = delta_us / 1000000.0f;
-		f32 fps = 1000000.0f / delta_us;
+		auto delta_time = now - start;
+		f32 frame_delta = delta_time / 1000000.0f;
+		f32 fps = 1000000.0f / delta_time;
 
-		start_us = now_us;
+		start = now;
 
 		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look * 10.0f, cam.position, cam.position + (cam.look * 10.0f), []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
 		}, [](auto&) {});
 		bl_sel.handle_raycast(view, quad_building_arrays, raycast);
 
-		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, delta, raycast);
-		character.apply_physics(chunks, delta);
-		character.apply_velocity(delta);
+		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, frame_delta, raycast);
+		character.apply_physics(chunks, frame_delta);
+		character.apply_velocity(frame_delta);
 		character.update_camera(cam);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_us);
+		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time);
 
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(block_nh_lookups, quad_building_arrays, chunks, total_mesh_gen_us);
+		game::update_chunks(block_nh_lookups, quad_building_arrays, chunks, total_mesh_gen_time);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		debug_ui.draw(std::floor(fps), total_block_gen_us, total_mesh_gen_us);
+		debug_ui.draw(std::floor(fps), total_block_gen_time, total_mesh_gen_time);
 
 		game::reset_update_params(cam);
 
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
 		
 		#ifdef PC_PORT
 		if (++frame_count == 1200) {
-			std::printf("BGT: %ld\nMGT: %ld\n", total_block_gen_us, total_mesh_gen_us);
+			std::printf("BGT: %ld\nMGT: %ld\n", total_block_gen_time, total_mesh_gen_time);
 			std::exit(0);
 		}
 		#endif

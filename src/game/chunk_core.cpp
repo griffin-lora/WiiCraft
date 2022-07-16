@@ -159,7 +159,7 @@ void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
     });
 }
 
-void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_us) {
+void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
@@ -173,9 +173,9 @@ void game::update_chunks(const block::neighborhood_lookups& lookups, standard_qu
             did_important_mesh_update = true;
             chunk.update_mesh_important = false;
             chunk.update_mesh_unimportant = false;
-            auto start_us = chrono::get_current_us();
+            auto start = chrono::get_current_us();
             update_mesh(lookups, building_arrays, chunk);
-            total_mesh_gen_us += chrono::get_current_us() - start_us;
+            total_mesh_gen_time += chrono::get_current_us() - start;
         }
     }
 
@@ -184,9 +184,9 @@ void game::update_chunks(const block::neighborhood_lookups& lookups, standard_qu
             if (chunk.update_mesh_unimportant) {
                 chunk.update_mesh_important = false;
                 chunk.update_mesh_unimportant = false;
-                auto start_us = chrono::get_current_us();
+                auto start = chrono::get_current_us();
                 update_mesh(lookups, building_arrays, chunk);
-                total_mesh_gen_us += chrono::get_current_us() - start_us;
+                total_mesh_gen_time += chrono::get_current_us() - start;
                 break;
             }
         }
