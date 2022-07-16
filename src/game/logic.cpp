@@ -57,10 +57,10 @@ void game::update_from_input(
 
         auto nunchuk_buttons_down = nunchuk.btns;
 
-        character.handle_input(cam, delta, gforce, nunchuk_vector, nunchuk_buttons_down);
+        character.handle_input(cam, delta, gforce, nunchuk_vector, nunchuk_buttons_down, *(const glm::vec3*)&nunchuk.gforce);
     }
     #else
-    character.handle_input(cam, delta, gforce, { 20.0f, 50.0f }, 0);
+    character.handle_input(cam, delta, gforce, { 20.0f, 50.0f }, 0, gforce);
     #endif
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);

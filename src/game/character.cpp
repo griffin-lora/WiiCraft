@@ -18,12 +18,15 @@ constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gforce, glm::vec2 joystick_input_vector, u8 buttons_down) {
+void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gforce, glm::vec2 joystick_input_vector, u8 buttons_down, const glm::vec3& nunchuk_gforce) {
     if ((buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         velocity.y = jump_velocity;
     }
+    
+    constexpr f32 SHAKING_THRESHOLD = 0.7f;
+    constexpr f32 NUNCHUK_SHAKING_THRESHOLD = 0.5f;
 
-    bool shaking = std::abs(gforce.x) > 0.7f || std::abs(gforce.y) > 0.7f;
+    bool shaking = std::abs(gforce.x) > SHAKING_THRESHOLD || std::abs(gforce.y) > SHAKING_THRESHOLD || std::abs(nunchuk_gforce.x) > NUNCHUK_SHAKING_THRESHOLD || std::abs(nunchuk_gforce.y) > NUNCHUK_SHAKING_THRESHOLD;
 
     if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
