@@ -2,6 +2,35 @@
 #include "text.hpp"
 
 template<typename U, typename F, typename P>
+void gfx::write_text_into_display_list(F write_vertex, gfx::display_list& disp_list, std::string_view str, P char_width, P char_height) {
+    std::size_t vertex_count = str.size() * 4;
+
+    std::size_t disp_list_size = (
+        4 + // GX_Begin
+        vertex_count * 4 + // GX_Position2u16
+        vertex_count * 2 + // GX_TexCoord2u8
+        1 // GX_End
+    );
+
+    disp_list.resize(disp_list_size);
+
+    disp_list.write_into([&]() {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
+
+        write_text_vertices<U>(write_vertex, str, char_width, char_height);
+
+        GX_End();
+    });
+}
+
+void gfx::write_text_into_standard_display_list(gfx::display_list& disp_list, std::string_view str, u16 char_width, u16 char_height) {
+    write_text_into_display_list<u8>([](u16 x, u16 y, u8 u, u8 v) {
+        GX_Position2u16(x, y);
+        GX_TexCoord2u8(u, v);
+    }, disp_list, str, char_width, char_height);
+}
+
+template<typename U, typename F, typename P>
 void gfx::write_text_vertices(F write_vertex, std::string_view str, P char_width, P char_height) {
     glm::vec<2, P, glm::defaultp> pos = { 0, 0 };
 

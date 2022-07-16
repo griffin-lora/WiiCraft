@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		debug_ui.draw(std::floor(fps));
+		debug_ui.draw(std::floor(fps), 0, 0);
 
 		game::reset_update_params(cam);
 

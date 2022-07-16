@@ -9,7 +9,9 @@ namespace gfx {
         return { (O)index % 16, (O)index / 16 };
     }
 
-    // TODO: make a templated function called write_text_into_display_list
+    template<typename U, typename F, typename P>
+    void write_text_into_display_list(F write_vertex, gfx::display_list& disp_list, std::string_view str, P char_width, P char_height);
+
     void write_text_into_standard_display_list(gfx::display_list& disp_list, std::string_view str, u16 char_width, u16 char_height);
 
     template<typename P>
