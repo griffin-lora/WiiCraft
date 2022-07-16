@@ -23,7 +23,7 @@ void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gfor
         velocity.y = jump_velocity;
     }
 
-    bool shaking = std::abs(gforce.x) > 0.2f || std::abs(gforce.y) > 0.2f;
+    bool shaking = std::abs(gforce.x) > 0.5f || std::abs(gforce.y) > 0.5f;
 
     if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
