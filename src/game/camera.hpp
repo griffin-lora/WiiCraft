@@ -36,4 +36,6 @@ namespace game {
 
     void update_needed(math::matrix view, math::matrix44 perspective, camera& cam);
     void reset_update_params(camera& cam);
+
+    void update_camera_from_input(f32 cam_rotation_speed, camera& cam, f32 delta, u32 buttons_held);
 }

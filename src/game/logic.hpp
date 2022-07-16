@@ -10,16 +10,5 @@
 #include <tuple>
 
 namespace game {
-    void update_from_input(
-        f32 cam_rotation_speed,
-        u16 v_width,
-        u16 v_height,
-        character& character,
-        camera& cam,
-        chunk::map& chunks,
-        cursor& cursor,
-        chrono::us now,
-        f32 delta,
-        std::optional<block_raycast>& raycast
-    );
+    void update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, std::optional<block_raycast>& raycast);
 }

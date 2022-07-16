@@ -146,12 +146,38 @@ int main(int argc, char** argv) {
 
 		start = now;
 
+		static constexpr s32 CHAN = 0;
+
+		input::scan_pads();
+		u32 buttons_down = input::get_buttons_down(CHAN);
+		if (buttons_down & WPAD_BUTTON_HOME) { std::exit(CHAN); }
+		u32 buttons_held = input::get_buttons_held(CHAN);
+
+		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
+
+		auto pointer_pos = input::get_pointer_position(CHAN);
+		cursor.update_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, pointer_pos);
+
+    	auto gforce = input::get_gforce(CHAN);
+		#ifndef PC_PORT
+		expansion_t exp;
+		if (input::scan_nunchuk(0, exp)) {
+			const auto& nunchuk = exp.nunchuk;
+			auto nunchuk_vector = input::get_nunchuk_vector(nunchuk);
+			auto nunchuk_buttons_down = nunchuk.btns;
+
+			character.handle_input(cam, now, frame_delta, gforce, nunchuk_vector, nunchuk_buttons_down, { nunchuk.gforce.x, nunchuk.gforce.y, nunchuk.gforce.z });
+		}
+		#else
+		character.handle_input(cam, now, frame_delta, gforce, { 20.0f, 50.0f }, 0, gforce);
+		#endif
+
 		auto raycast = game::get_block_raycast(chunks, cam.position, cam.look * 10.0f, cam.position, cam.position + (cam.look * 10.0f), []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
 		}, [](auto&) {});
 		bl_sel.handle_raycast(view, quad_building_arrays, raycast);
 
-		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, now, frame_delta, raycast);
+		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
 		character.apply_physics(chunks, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);

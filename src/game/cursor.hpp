@@ -3,6 +3,7 @@
 #include "gfx/display_list.hpp"
 #include "math/transform_2d.hpp"
 #include "math.hpp"
+#include <optional>
 
 namespace game {
     struct cursor {
@@ -12,6 +13,8 @@ namespace game {
         gfx::display_list disp_list;
 
         cursor();
+
+        void update_from_pointer_position(u16 v_width, u16 v_height, const std::optional<glm::vec2>& pointer_pos);
 
         void draw() const;
     };

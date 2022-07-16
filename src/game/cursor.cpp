@@ -30,6 +30,16 @@ cursor::cursor() {
     });
 }
 
+void cursor::update_from_pointer_position(u16 v_width, u16 v_height, const std::optional<glm::vec2>& pointer_pos) {
+    if (pointer_pos.has_value()) {
+        tf.set_position(pointer_pos->x, pointer_pos->y);
+        tf.load(MAT);
+    } else {
+        tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
+        tf.load(MAT);
+    }
+}
+
 void cursor::draw() const {
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
     

@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "input.hpp"
 #include <algorithm>
 
 using namespace game;
@@ -37,4 +38,18 @@ void game::reset_update_params(camera& cam) {
     cam.update_view = false;
     cam.update_look = false;
     cam.update_perspective = false;
+}
+
+void game::update_camera_from_input(f32 cam_rotation_speed, camera& cam, f32 delta, u32 buttons_held) {
+    auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
+
+    if (math::is_non_zero(pad_input_vector)) {
+        math::normalize(pad_input_vector);
+        pad_input_vector *= (cam_rotation_speed * delta);
+
+        rotate_camera(cam, pad_input_vector);
+        
+        cam.update_view = true;
+        cam.update_look = true;
+    }
 }

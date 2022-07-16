@@ -8,23 +8,8 @@
 
 using namespace game;
 
-void game::update_from_input(
-    f32 cam_rotation_speed,
-    u16 v_width,
-    u16 v_height,
-    character& character,
-    camera& cam,
-    chunk::map& chunks,
-    cursor& cursor,
-    chrono::us now,
-    f32 delta,
-    std::optional<block_raycast>& raycast
-) {
-    input::scan_pads();
-    u32 buttons_held = input::get_buttons_held(0);
-    u32 buttons_down = input::get_buttons_down(0);
-    if (buttons_down & WPAD_BUTTON_HOME) { std::exit(0); }
-
+void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, std::optional<block_raycast>& raycast) {
+    // TODO: Ugly garbage code. Refactor.
     if (raycast.has_value()) {
         if (buttons_down & WPAD_BUTTON_A) {
             *raycast->location.bl = { .tp = block::type::AIR };
@@ -45,43 +30,5 @@ void game::update_from_input(
                 }
             }
         }
-    }
-
-    auto gforce = input::get_gforce(0);
-
-    #ifndef PC_PORT
-    expansion_t exp;
-    if (input::scan_nunchuk(0, exp)) {
-        const auto& nunchuk = exp.nunchuk;
-        
-        auto nunchuk_vector = input::get_nunchuk_vector(nunchuk);
-
-        auto nunchuk_buttons_down = nunchuk.btns;
-
-        character.handle_input(cam, now, delta, gforce, nunchuk_vector, nunchuk_buttons_down, { nunchuk.gforce.x, nunchuk.gforce.y, nunchuk.gforce.z });
-    }
-    #else
-    character.handle_input(cam, now, delta, gforce, { 20.0f, 50.0f }, 0, gforce);
-    #endif
-
-    auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
-
-    if (math::is_non_zero(pad_input_vector)) {
-        math::normalize(pad_input_vector);
-        pad_input_vector *= (cam_rotation_speed * delta);
-
-        rotate_camera(cam, pad_input_vector);
-        
-        cam.update_view = true;
-        cam.update_look = true;
-    }
-
-    auto pointer_pos = input::get_pointer_position(0);
-    if (pointer_pos.has_value()) {
-        cursor.tf.set_position(pointer_pos->x, pointer_pos->y);
-        cursor.tf.load(cursor::MAT);
-    } else {
-        cursor.tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);
-        cursor.tf.load(cursor::MAT);
     }
 }
