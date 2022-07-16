@@ -4,9 +4,6 @@
 #include <optional>
 
 namespace input {
-    struct state {
-    };
-
     void init(u32 width, u32 height);
 
     inline void set_resolution(u32 width, u32 height) {

@@ -113,8 +113,6 @@ int main(int argc, char** argv) {
 	game::standard_quad_building_arrays quad_building_arrays;
 	game::stored_chunk::map stored_chunks;
 
-	input::state inp;
-
 	// This is a variable whose lifetime is bound to the manage_chunks_around_camera function normally. However, reallocation is expensive, it is stored here.
 	std::vector<math::vector3s32> chunk_positions_to_erase;
 	game::chunk::pos_set chunk_positions_to_generate_blocks;
