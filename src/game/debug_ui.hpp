@@ -19,6 +19,6 @@ namespace game {
 
         debug_ui();
 
-        void draw(u32 fps, u32 block_gen_time, u32 mesh_gen_time) const;
+        void draw(u32 fps, s64 block_gen_time, s64 mesh_gen_time) const;
     };
 }

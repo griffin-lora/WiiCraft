@@ -3,6 +3,7 @@
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "glm/gtc/noise.hpp"
+#include "../util.hpp"
 #include <algorithm>
 
 using namespace game;
@@ -159,21 +160,23 @@ void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
     });
 }
 
-void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks) {
+void game::update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, s64& total_mesh_gen_us) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
             update_chunk_neighborhood(chunks, pos, chunk);
         }
     }
-    
+
     bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_mesh_important) {
             did_important_mesh_update = true;
             chunk.update_mesh_important = false;
             chunk.update_mesh_unimportant = false;
+            auto start_us = util::get_current_us();
             update_mesh(lookups, building_arrays, chunk);
+            total_mesh_gen_us += util::get_current_us() - start_us;
         }
     }
 
@@ -182,7 +185,9 @@ void game::update_chunks(const block::neighborhood_lookups& lookups, standard_qu
             if (chunk.update_mesh_unimportant) {
                 chunk.update_mesh_important = false;
                 chunk.update_mesh_unimportant = false;
+                auto start_us = util::get_current_us();
                 update_mesh(lookups, building_arrays, chunk);
+                total_mesh_gen_us += util::get_current_us() - start_us;
                 break;
             }
         }

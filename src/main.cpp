@@ -11,8 +11,7 @@
 #include "dbg.hpp"
 #include "math.hpp"
 #include "input.hpp"
-#include <map>
-#include <numeric>
+#include "util.hpp"
 #include "game/block_raycast.hpp"
 #include "game/block_raycast.inl"
 #include "game/camera.hpp"
@@ -29,8 +28,6 @@
 #include "game/water_overlay.hpp"
 #include "game/debug_ui.hpp"
 #include "common.hpp"
-#include <ctime>
-#include <sys/time.h>
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -137,15 +134,14 @@ int main(int argc, char** argv) {
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
 
-	timeval start;
-	gettimeofday(&start, NULL);
-	auto start_us = (start.tv_sec * 1000000) + start.tv_usec;
+	s64 total_block_gen_us = 0;
+	s64 total_mesh_gen_us = 0;
+
+	auto start_us = util::get_current_us();
 
 	for (;;) {
 
-		timeval now;
-        gettimeofday(&now, NULL);
-        auto now_us = (now.tv_sec * 1000000) + now.tv_usec;
+        auto now_us = util::get_current_us();
 
 		auto delta_us = now_us - start_us;
 		f32 delta = delta_us / 1000000.0f;
@@ -163,12 +159,12 @@ int main(int argc, char** argv) {
 		character.apply_velocity(delta);
 		character.update_camera(cam);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh);
+		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_us);
 
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(block_nh_lookups, quad_building_arrays, chunks);
+		game::update_chunks(block_nh_lookups, quad_building_arrays, chunks, total_mesh_gen_us);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
@@ -194,7 +190,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		debug_ui.draw(std::floor(fps), 0, 0);
+		debug_ui.draw(std::floor(fps), total_block_gen_us, total_mesh_gen_us);
 
 		game::reset_update_params(cam);
 
