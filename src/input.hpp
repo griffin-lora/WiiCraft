@@ -17,6 +17,11 @@ namespace input {
         WPAD_ScanPads();
     }
 
+    inline bool scan_nunchuk(expansion_t& exp) {
+        WPAD_Expansion(0, &exp);
+        return exp.type == WPAD_EXP_NUNCHUK;
+    }
+
     inline u32 get_buttons_held(s32 chan) {
         return WPAD_ButtonsHeld(chan);
     }
@@ -25,8 +30,11 @@ namespace input {
         return WPAD_ButtonsDown(chan);
     }
 
+    inline glm::vec2 get_nunchuk_vector(const nunchuk_t& nunchuk) {
+        return { nunchuk.js.pos.x - nunchuk.js.center.x, nunchuk.js.pos.y - nunchuk.js.center.y };
+    }
+
     glm::vec2 get_dpad_input_vector(u32 buttons_held);
     std::optional<glm::vec2> get_pointer_position();
-    glm::vec2 get_joystick_input_vector();
     f32 get_plus_minus_input_scalar(u32 buttons_held);
 }

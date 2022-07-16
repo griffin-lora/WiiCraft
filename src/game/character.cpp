@@ -19,14 +19,8 @@ constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, f32 delta, u32 buttons_down) {
-    #ifndef PC_PORT
-    auto joystick_input_vector = input::get_joystick_input_vector();
-    #else
-    glm::vec2 joystick_input_vector = { 20.0f, 50.0f };
-    #endif
-
-    if ((buttons_down & WPAD_BUTTON_1) && grounded) {
+void character::handle_input(const camera& cam, f32 delta, glm::vec2 joystick_input_vector, u8 buttons_down) {
+    if ((buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         velocity.y = jump_velocity;
     }
 

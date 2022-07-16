@@ -44,7 +44,16 @@ void game::update_from_input(
         }
     }
 
-    character.handle_input(cam, delta, buttons_down);
+    expansion_t exp;
+    if (input::scan_nunchuk(exp)) {
+        const auto& nunchuk = exp.nunchuk;
+
+        auto nunchuk_vector = input::get_nunchuk_vector(nunchuk);
+
+        auto nunchuk_buttons_down = nunchuk.btns;
+
+        character.handle_input(cam, delta, nunchuk_vector, nunchuk_buttons_down);
+    }
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 

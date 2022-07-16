@@ -36,16 +36,6 @@ std::optional<glm::vec2> input::get_pointer_position() {
     }
 }
 
-glm::vec2 input::get_joystick_input_vector() {
-    expansion_t exp;
-    WPAD_Expansion(0, &exp);
-
-    if (exp.type == WPAD_EXP_NUNCHUK) {
-        return { exp.nunchuk.js.pos.x - exp.nunchuk.js.center.x, exp.nunchuk.js.pos.y - exp.nunchuk.js.center.y };
-    }
-    return { 0.0f, 0.0f };
-}
-
 f32 input::get_plus_minus_input_scalar(u32 buttons_held) {
     f32 scalar = 0.0f;
     if (buttons_held & WPAD_BUTTON_PLUS) {

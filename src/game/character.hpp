@@ -10,7 +10,7 @@ namespace game {
 
         bool grounded = false;
 
-        void handle_input(const camera& cam, f32 delta, u32 buttons_down);
+        void handle_input(const camera& cam, f32 delta, glm::vec2 nunchuk_vector, u8 nunchuk_buttons_down);
 
         void apply_movement(const camera& cam, f32 delta, glm::vec3 input_vector);
         void apply_no_movement(f32 delta);
