@@ -16,6 +16,7 @@ void game::update_from_input(
     camera& cam,
     chunk::map& chunks,
     cursor& cursor,
+    chrono::us now,
     f32 delta,
     std::optional<block_raycast>& raycast
 ) {
@@ -57,7 +58,7 @@ void game::update_from_input(
 
         auto nunchuk_buttons_down = nunchuk.btns;
 
-        character.handle_input(cam, delta, gforce, nunchuk_vector, nunchuk_buttons_down, *(const glm::vec3*)&nunchuk.gforce);
+        character.handle_input(cam, now, delta, gforce, nunchuk_vector, nunchuk_buttons_down, *(const glm::vec3*)&nunchuk.gforce);
     }
     #else
     character.handle_input(cam, delta, gforce, { 20.0f, 50.0f }, 0, gforce);

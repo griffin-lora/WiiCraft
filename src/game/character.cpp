@@ -18,7 +18,7 @@ constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gforce, glm::vec2 joystick_input_vector, u8 buttons_down, const glm::vec3& nunchuk_gforce) {
+void character::handle_input(const camera& cam, chrono::us now, f32 delta, const glm::vec3& gforce, glm::vec2 joystick_input_vector, u8 buttons_down, const glm::vec3& nunchuk_gforce) {
     if ((buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         velocity.y = jump_velocity;
     }
@@ -36,20 +36,20 @@ void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gfor
             joystick_input_vector.y = 0.0f;
         }
         if (joystick_input_vector.x == 0.0f && joystick_input_vector.y == 0.0f) {
-            apply_no_movement(delta);
+            apply_no_movement(now, delta);
         } else {
             glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
-            apply_movement(cam, delta, shaking, input_vector);
+            apply_movement(cam, now, delta, shaking, input_vector);
         }
     } else {
-        apply_no_movement(delta);
+        apply_no_movement(now, delta);
     }
 }
 
-void character::apply_movement(const camera& cam, f32 delta, bool shaking, glm::vec3 input_vector) {
+void character::apply_movement(const camera& cam, chrono::us now, f32 delta, bool shaking, glm::vec3 input_vector) {
     if (shaking && !sprinting) {
         sprinting = true;
-        fov_tween_start = chrono::get_current_us();
+        fov_tween_start = now;
     }
 
     glm::mat3 movement_matrix = {
@@ -79,10 +79,10 @@ void character::apply_movement(const camera& cam, f32 delta, bool shaking, glm::
     velocity = { move_vector.x, velocity.y, move_vector.z };
 }
 
-void character::apply_no_movement(f32 delta) {
+void character::apply_no_movement(chrono::us now, f32 delta) {
     if (sprinting) {
         sprinting = false;
-        fov_tween_start = chrono::get_current_us();
+        fov_tween_start = now;
     }
 
     glm::vec3 move_vector = { velocity.x, 0.0f, velocity.z };
@@ -165,12 +165,12 @@ void character::apply_velocity(f32 delta) {
     position += velocity * delta;
 }
 
-void character::update_camera(camera& cam) const {
+void character::update_camera(camera& cam, chrono::us now) const {
     cam.position = { position.x, position.y + 0.9f, position.z };
 
     cam.update_view = true;
 
-    auto elapsed = (chrono::get_current_us() - fov_tween_start);
+    auto elapsed = (now - fov_tween_start);
 
     if (elapsed <= camera::FOV_TWEEN_TIME) {
         auto alpha = math::get_eased(elapsed / (f32)camera::FOV_TWEEN_TIME);

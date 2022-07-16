@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	character.update_camera(cam);
+	character.update_camera(cam, chrono::get_current_us());
 	std::optional<math::vector3s32> last_cam_chunk_pos;
 	math::normalize(cam.look);
 
@@ -153,10 +153,10 @@ int main(int argc, char** argv) {
 		}, [](auto&) {});
 		bl_sel.handle_raycast(view, quad_building_arrays, raycast);
 
-		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, frame_delta, raycast);
+		game::update_from_input(cam_rotation_speed, draw.rmode->viWidth, draw.rmode->viHeight, character, cam, chunks, cursor, now, frame_delta, raycast);
 		character.apply_physics(chunks, frame_delta);
 		character.apply_velocity(frame_delta);
-		character.update_camera(cam);
+		character.update_camera(cam, now);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time);
 

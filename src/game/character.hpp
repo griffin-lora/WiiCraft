@@ -14,15 +14,15 @@ namespace game {
 
         chrono::us fov_tween_start = 0;
 
-        void handle_input(const camera& cam, f32 delta, const glm::vec3& gforce, glm::vec2 nunchuk_vector, u8 nunchuk_buttons_down, const glm::vec3& nunchuk_gforce);
+        void handle_input(const camera& cam, chrono::us now, f32 delta, const glm::vec3& gforce, glm::vec2 nunchuk_vector, u8 nunchuk_buttons_down, const glm::vec3& nunchuk_gforce);
 
-        void apply_movement(const camera& cam, f32 delta, bool shaking, glm::vec3 input_vector);
-        void apply_no_movement(f32 delta);
+        void apply_movement(const camera& cam, chrono::us now, f32 delta, bool shaking, glm::vec3 input_vector);
+        void apply_no_movement(chrono::us now, f32 delta);
         
         void apply_physics(chunk::map& chunks, f32 delta);
         void apply_velocity(f32 delta);
 
-        void update_camera(camera& cam) const;
+        void update_camera(camera& cam, chrono::us now) const;
 
         private:
             bool apply_collision(chunk::map& chunks, f32 delta);
