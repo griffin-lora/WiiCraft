@@ -4,6 +4,7 @@
 #include "chunk_math.hpp"
 #include "mesh_generation.hpp"
 #include "block_util.hpp"
+#include "chrono.hpp"
 
 namespace game {
     template<block::face face>
@@ -52,7 +53,7 @@ namespace game {
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
 
-    void update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, s64& total_mesh_gen_us);
+    void update_chunks(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_us);
 
     struct world_location {
         math::vector3s32 ch_pos;

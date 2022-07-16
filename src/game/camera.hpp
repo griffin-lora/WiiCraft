@@ -1,16 +1,21 @@
 #pragma once
 #include "math.hpp"
 #include "chunk.hpp"
+#include "chrono.hpp"
 
 namespace game {
     struct camera {
+        static constexpr f32 BASE_FOV = 90.0f;
+        static constexpr f32 SPRINT_FOV = BASE_FOV + 10.0f;
+        static constexpr chrono::us FOV_TWEEN_US = 150000;
+
         glm::vec3 position;
         glm::vec3 up;
         glm::vec3 look;
         f32 yaw = 0.0f;
         f32 pitch = 0.0f;
 
-        f32 fov;
+        f32 fov = BASE_FOV;
         f32 aspect;
         f32 near_clipping_plane_distance;
         f32 far_clipping_plane_distance;

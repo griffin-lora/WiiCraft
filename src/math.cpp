@@ -22,7 +22,7 @@ static f32 get_noise_at_grid_position(const math::vector2s32& pos) {
     return val / 1274126177.0f;
 }
 
-static f32 get_eased(f32 x) {
+f32 math::get_eased(f32 x) {
     return (
         6 * (x * x * x * x * x) -
         15 * (x * x * x * x) +
@@ -30,7 +30,7 @@ static f32 get_eased(f32 x) {
     );
 }
 
-static f32 lerp(f32 min, f32 max, f32 alpha) {
+f32 math::lerp(f32 min, f32 max, f32 alpha) {
     return min + alpha * (max - min);
 }
 

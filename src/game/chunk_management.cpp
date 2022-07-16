@@ -4,7 +4,7 @@
 #include "math.hpp"
 #include "stored_chunk.hpp"
 #include "util.hpp"
-#include "../util.hpp"
+#include "chrono.hpp"
 
 using namespace game;
 
@@ -19,7 +19,7 @@ void game::manage_chunks_around_camera(
     std::vector<math::vector3s32>& chunk_positions_to_erase,
     chunk::pos_set& chunk_positions_to_create_blocks,
     chunk::pos_set& chunk_positions_to_update_neighborhood_and_mesh,
-    s64& total_block_gen_us
+    chrono::us& total_block_gen_us
 ) {
     auto cam_chunk_pos = get_chunk_position_from_world_position(cam.position);
 
@@ -78,9 +78,9 @@ void game::manage_chunks_around_camera(
             stored_chunks.erase(pos);
         } else {
             chunk.blocks.resize_without_copying(chunk::BLOCKS_COUNT);
-            auto start_us = util::get_current_us();
+            auto start_us = chrono::get_current_us();
             generate_blocks(chunk, pos);
-            total_block_gen_us += util::get_current_us() - start_us;
+            total_block_gen_us += chrono::get_current_us() - start_us;
         }
 
         chunk_positions_to_update_neighborhood_and_mesh.insert(pos);

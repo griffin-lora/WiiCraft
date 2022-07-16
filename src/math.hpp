@@ -10,6 +10,7 @@ namespace math {
     using vector2u8 = glm::vec<2, u8, glm::defaultp>;
     using vector2u16 = glm::vec<2, u16, glm::defaultp>;
     using vector2s32 = glm::vec<2, s32, glm::defaultp>;
+    using vector3u16 = glm::vec<3, u16, glm::defaultp>;
     using vector3u32 = glm::vec<3, u32, glm::defaultp>;
     using vector3s32 = glm::vec<3, s32, glm::defaultp>;
     using matrix = Mtx;
@@ -66,6 +67,10 @@ namespace math {
         T ret = a % b;
         return ret >= 0 ? ret : ret + b;
     }
+
+    f32 get_eased(f32 x);
+
+    f32 lerp(f32 min, f32 max, f32 alpha);
 
     f32 get_noise_at(const glm::vec2& pos);
 }

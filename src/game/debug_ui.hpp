@@ -1,6 +1,7 @@
 #pragma once
 #include "gfx/text.hpp"
 #include "math/transform_2d.hpp"
+#include "chrono.hpp"
 
 namespace game {
     struct debug_ui {
@@ -19,6 +20,6 @@ namespace game {
 
         debug_ui();
 
-        void draw(u32 fps, s64 block_gen_time, s64 mesh_gen_time) const;
+        void draw(u32 fps, chrono::us block_gen_time, chrono::us mesh_gen_time) const;
     };
 }

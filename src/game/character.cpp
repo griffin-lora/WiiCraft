@@ -9,20 +9,21 @@
 #include "logic.hpp"
 #include "dbg.hpp"
 
-#include <cstdio>
-
 using namespace game;
 
 constexpr f32 movement_accel = 40.0f;
-constexpr f32 max_movement_speed = 9.0f;
+constexpr f32 max_walking_speed = 6.0f;
+constexpr f32 max_sprinting_speed = 9.0f;
 constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, f32 delta, glm::vec2 joystick_input_vector, u8 buttons_down) {
+void character::handle_input(const camera& cam, f32 delta, const glm::vec3& gforce, glm::vec2 joystick_input_vector, u8 buttons_down) {
     if ((buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         velocity.y = jump_velocity;
     }
+
+    bool shaking = std::abs(gforce.x) > 0.2f || std::abs(gforce.y) > 0.2f;
 
     if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
@@ -35,14 +36,19 @@ void character::handle_input(const camera& cam, f32 delta, glm::vec2 joystick_in
             apply_no_movement(delta);
         } else {
             glm::vec3 input_vector = { joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f };
-            apply_movement(cam, delta, input_vector);
+            apply_movement(cam, delta, shaking, input_vector);
         }
     } else {
         apply_no_movement(delta);
     }
 }
 
-void character::apply_movement(const camera& cam, f32 delta, glm::vec3 input_vector) {
+void character::apply_movement(const camera& cam, f32 delta, bool shaking, glm::vec3 input_vector) {
+    if (shaking && !sprinting) {
+        sprinting = true;
+        fov_tween_start_us = chrono::get_current_us();
+    }
+
     glm::mat3 movement_matrix = {
         { cam.look.x, 0, cam.look.z },
         { 0, 1, 0 },
@@ -61,7 +67,7 @@ void character::apply_movement(const camera& cam, f32 delta, glm::vec3 input_vec
 
     if (math::is_non_zero(move_vector) & math::is_non_zero(input_vector)) {
         auto len = glm::length(move_vector);
-        auto max = max_movement_speed * glm::length(input_vector);
+        auto max = (sprinting ? max_sprinting_speed : max_walking_speed) * glm::length(input_vector);
         if (len > max) {
             move_vector /= len;
             move_vector *= max;
@@ -71,6 +77,11 @@ void character::apply_movement(const camera& cam, f32 delta, glm::vec3 input_vec
 }
 
 void character::apply_no_movement(f32 delta) {
+    if (sprinting) {
+        sprinting = false;
+        fov_tween_start_us = chrono::get_current_us();
+    }
+
     glm::vec3 move_vector = { velocity.x, 0.0f, velocity.z };
     if (math::is_non_zero(move_vector)) {
         move_vector *= movement_decel_factor * delta;
@@ -155,4 +166,18 @@ void character::update_camera(camera& cam) const {
     cam.position = { position.x, position.y + 0.9f, position.z };
 
     cam.update_view = true;
+
+    auto elapsed_us = (chrono::get_current_us() - fov_tween_start_us);
+
+    if (elapsed_us < camera::FOV_TWEEN_US) {
+        auto alpha = math::get_eased(elapsed_us / (f32)camera::FOV_TWEEN_US);
+
+        if (sprinting) {
+            cam.fov = math::lerp(camera::BASE_FOV, camera::SPRINT_FOV, alpha);
+        } else if (!sprinting) {
+            cam.fov = math::lerp(camera::SPRINT_FOV, camera::BASE_FOV, alpha);
+        }
+
+        cam.update_perspective = true;
+    }
 }

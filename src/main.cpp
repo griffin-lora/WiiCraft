@@ -11,7 +11,7 @@
 #include "dbg.hpp"
 #include "math.hpp"
 #include "input.hpp"
-#include "util.hpp"
+#include "chrono.hpp"
 #include "game/block_raycast.hpp"
 #include "game/block_raycast.inl"
 #include "game/camera.hpp"
@@ -87,7 +87,6 @@ int main(int argc, char** argv) {
 		.position = {0.0f, 0.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.look = {0.0f, 0.0f, 1.0f},
-		.fov = 90.0f,
 		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
@@ -134,14 +133,14 @@ int main(int argc, char** argv) {
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
 
-	s64 total_block_gen_us = 0;
-	s64 total_mesh_gen_us = 0;
+	chrono::us total_block_gen_us = 0;
+	chrono::us total_mesh_gen_us = 0;
 
-	auto start_us = util::get_current_us();
+	auto start_us = chrono::get_current_us();
 
 	for (;;) {
 
-        auto now_us = util::get_current_us();
+        auto now_us = chrono::get_current_us();
 
 		auto delta_us = now_us - start_us;
 		f32 delta = delta_us / 1000000.0f;

@@ -17,8 +17,8 @@ namespace input {
         WPAD_ScanPads();
     }
 
-    inline bool scan_nunchuk(expansion_t& exp) {
-        WPAD_Expansion(0, &exp);
+    inline bool scan_nunchuk(s32 chan, expansion_t& exp) {
+        WPAD_Expansion(chan, &exp);
         return exp.type == WPAD_EXP_NUNCHUK;
     }
 
@@ -28,6 +28,18 @@ namespace input {
 
     inline u32 get_buttons_down(s32 chan) {
         return WPAD_ButtonsDown(chan);
+    }
+
+    inline glm::vec3 get_gforce(s32 chan) {
+        glm::vec3 gforce;
+        WPAD_GForce(0, (gforce_t*)&gforce);
+        return gforce;
+    }
+
+    inline math::vector3u16 get_accel(s32 chan) {
+        math::vector3u16 accel;
+        WPAD_Accel(chan, (vec3w_t*)&accel);
+        return accel;
     }
 
     inline glm::vec2 get_nunchuk_vector(const nunchuk_t& nunchuk) {

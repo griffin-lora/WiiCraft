@@ -19,7 +19,7 @@ debug_ui::debug_ui() {
     }, mgt_prefix_disp_list, MGT_PREFIX, CHAR_SIZE, CHAR_SIZE);
 }
 
-void debug_ui::draw(u32 fps, s64 block_gen_time, s64 mesh_gen_time) const {
+void debug_ui::draw(u32 fps, chrono::us block_gen_time, chrono::us mesh_gen_time) const {
     GX_SetCurrentMtx(MAT);
 
     fps_prefix_disp_list.call();
