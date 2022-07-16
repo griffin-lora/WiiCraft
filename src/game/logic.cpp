@@ -44,16 +44,21 @@ void game::update_from_input(
         }
     }
 
+
+    #ifndef PC_PORT
     expansion_t exp;
     if (input::scan_nunchuk(exp)) {
         const auto& nunchuk = exp.nunchuk;
-
+        
         auto nunchuk_vector = input::get_nunchuk_vector(nunchuk);
 
         auto nunchuk_buttons_down = nunchuk.btns;
 
         character.handle_input(cam, delta, nunchuk_vector, nunchuk_buttons_down);
     }
+    #else
+    character.handle_input(cam, delta, { 20.0f, 50.0f }, 0);
+    #endif
 
     auto pad_input_vector = input::get_dpad_input_vector(buttons_held);
 

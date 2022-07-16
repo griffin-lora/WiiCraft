@@ -210,6 +210,7 @@ int main(int argc, char** argv) {
 		
 		#ifdef PC_PORT
 		if (++frame_count == 1200) {
+			std::printf("BGT: %ld\nMGT: %ld\n", total_block_gen_us, total_mesh_gen_us);
 			std::exit(0);
 		}
 		#endif
