@@ -19,9 +19,12 @@ namespace gfx {
 
             template<typename F>
             inline void write_into(F func) {
+                DCInvalidateRange(m_data, m_size);
                 GX_BeginDispList(m_data, m_size);
                 func();
-                m_size = GX_EndDispList();
+                std::size_t new_size = GX_EndDispList();
+                DCFlushRange(m_data, m_size);
+                m_size = new_size;
             }
 
             inline void call() const {
@@ -33,6 +36,10 @@ namespace gfx {
                     return;
                 }
                 call();
+            }
+
+            inline std::size_t size() const {
+                return m_size;
             }
     };
 };

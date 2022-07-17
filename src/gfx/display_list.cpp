@@ -26,7 +26,4 @@ void display_list::resize(std::size_t size) {
     // Allocate memory
     m_data = memalign(32, m_size);
     std::memset(m_data, 0, m_size);
-
-    // Why???
-    DCInvalidateRange(m_data, m_size);
 }
