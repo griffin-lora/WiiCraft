@@ -95,10 +95,9 @@ void game::update_mesh(const block::neighborhood_lookups& lookups, standard_quad
 
     write_into_display_lists(begin, vf, chunk.standard_disp_list, chunk.foliage_disp_list, chunk.water_disp_list, [](auto vert_count) {
         return (
-            4 + // GX_Begin
+            (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8
-            vert_count * 2 + // GX_TexCoord2u8
-		    1 // GX_End
+            vert_count * 2 // GX_TexCoord2u8
         );
     }, [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);

@@ -21,7 +21,7 @@ void display_list::resize(std::size_t size) {
     }
 
     // Align to 32 bytes
-    m_size = (((size + 63) >> 5) + 1) << 5;
+    m_size = (size | 31) + 33;
 
     // Allocate memory
     m_data = memalign(32, m_size);

@@ -55,10 +55,9 @@ void block_selection::update_mesh(const math::matrix view, standard_quad_buildin
 
     write_into_display_lists({ building_arrays }, vf, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (
-            4 + // GX_Begin
+            (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8
-            vert_count * 4 + // GX_Color4u8
-            1 // GX_End
+            vert_count * 4 // GX_Color4u8
         );
     }, [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);

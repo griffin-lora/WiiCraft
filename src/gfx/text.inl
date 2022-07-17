@@ -6,10 +6,9 @@ void gfx::write_text_into_display_list(F write_vertex, gfx::display_list& disp_l
     std::size_t vertex_count = str.size() * 4;
 
     std::size_t disp_list_size = (
-        4 + // GX_Begin
+        (vertex_count > 0xff ? 4 : 3) + // GX_Begin
         vertex_count * 4 + // GX_Position2u16
-        vertex_count * 2 + // GX_TexCoord2u8
-        1 // GX_End
+        vertex_count * 2 // GX_TexCoord2u8
     );
 
     disp_list.resize(disp_list_size);

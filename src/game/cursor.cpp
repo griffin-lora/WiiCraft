@@ -6,10 +6,9 @@ cursor::cursor() {
     constexpr std::size_t vertex_count = 4;
     
     std::size_t disp_list_size = (
-		4 + // GX_Begin
+		3 + // GX_Begin
 		vertex_count * 2 + // GX_Position2u8
-		vertex_count * 2 + // GX_TexCoord2u8
-		1 // GX_End
+		vertex_count * 2 // GX_TexCoord2u8
 	);
 
     disp_list.resize(disp_list_size);
