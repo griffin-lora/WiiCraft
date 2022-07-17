@@ -32,7 +32,7 @@ cursor::cursor() {
 
 void cursor::update_from_pointer_position(u16 v_width, u16 v_height, const std::optional<glm::vec2>& pointer_pos) {
     if (pointer_pos.has_value()) {
-        tf.set_position(pointer_pos->x, pointer_pos->y);
+        tf.set_position(pointer_pos->x - 24.f, pointer_pos->y - 24.f);
         tf.load(MAT);
     } else {
         tf.set_position((v_width / 2) - 24.f, (v_height / 2) - 24.f);

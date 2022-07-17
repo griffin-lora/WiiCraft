@@ -18,8 +18,7 @@ void game::rotate_camera(camera& cam, const glm::vec2& move_vector) {
 void game::update_look(camera& cam) {
     f32 xz_length = cosf(cam.pitch);
     
-    cam.look = {xz_length * cosf(cam.yaw), sinf(cam.pitch), xz_length * sinf(-cam.yaw)};
-	math::normalize(cam.look);
+    cam.look = glm::normalize(glm::vec3{xz_length * cosf(cam.yaw), sinf(cam.pitch), xz_length * sinf(-cam.yaw)});
 }
 
 void game::update_needed(math::matrix view, math::matrix44 perspective, camera& cam) {
