@@ -12,6 +12,7 @@ namespace game {
         static constexpr const char* FPS_PREFIX = "FPS: ";
         static constexpr const char* BGT_PREFIX = "BGT: ";
         static constexpr const char* MGT_PREFIX = "MGT: ";
+        static constexpr const char* MGL_PREFIX = "MGL: ";
         static constexpr u16 CHAR_SIZE = 16;
         static constexpr u16 PREFIX_WIDTH = gfx::get_text_width(POS_PREFIX, CHAR_SIZE);
 
@@ -21,9 +22,10 @@ namespace game {
         gfx::display_list fps_prefix_disp_list;
         gfx::display_list bgt_prefix_disp_list;
         gfx::display_list mgt_prefix_disp_list;
+        gfx::display_list mgl_prefix_disp_list;
 
         debug_ui();
 
-        void draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us block_gen_time, chrono::us mesh_gen_time, u32 fps) const;
+        void draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us total_block_gen_time, chrono::us total_mesh_gen_time, chrono::us last_mesh_gen_time, u32 fps) const;
     };
 }

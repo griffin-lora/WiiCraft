@@ -22,6 +22,7 @@ debug_ui::debug_ui() {
     write_text(fps_prefix_disp_list, FPS_PREFIX, 2);
     write_text(bgt_prefix_disp_list, BGT_PREFIX, 3);
     write_text(mgt_prefix_disp_list, MGT_PREFIX, 4);
+    write_text(mgl_prefix_disp_list, MGL_PREFIX, 5);
 }
 
 static inline std::string to_string(const glm::vec3& v) {
@@ -30,7 +31,7 @@ static inline std::string to_string(const glm::vec3& v) {
     return ss.str();
 }
 
-void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us block_gen_time, chrono::us mesh_gen_time, u32 fps) const {
+void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us total_block_gen_time, chrono::us total_mesh_gen_time, chrono::us last_mesh_gen_time, u32 fps) const {
     GX_SetCurrentMtx(MAT);
 
     pos_prefix_disp_list.call();
@@ -38,13 +39,15 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us block
     fps_prefix_disp_list.call();
     bgt_prefix_disp_list.call();
     mgt_prefix_disp_list.call();
+    mgl_prefix_disp_list.call();
 
     auto pos_str = to_string(pos);
     auto dir_str = to_string(dir);
     auto fps_str = std::to_string(fps);
-    auto block_gen_time_str = std::to_string(block_gen_time);
-    auto mesh_gen_time_str = std::to_string(mesh_gen_time);
-    std::size_t vertex_count = 4 * (pos_str.size() + dir_str.size() + fps_str.size() + block_gen_time_str.size() + mesh_gen_time_str.size());
+    auto total_block_gen_time_str = std::to_string(total_block_gen_time);
+    auto total_mesh_gen_time_str = std::to_string(total_mesh_gen_time);
+    auto last_mesh_gen_time_str = std::to_string(last_mesh_gen_time);
+    std::size_t vertex_count = 4 * (pos_str.size() + dir_str.size() + fps_str.size() + total_block_gen_time_str.size() + total_mesh_gen_time_str.size() + last_mesh_gen_time_str.size());
     
     GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
@@ -58,8 +61,9 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us block
     write_text(pos_str, 0);
     write_text(dir_str, 1);
     write_text(fps_str, 2);
-    write_text(block_gen_time_str, 3);
-    write_text(mesh_gen_time_str, 4);
+    write_text(total_block_gen_time_str, 3);
+    write_text(total_mesh_gen_time_str, 4);
+    write_text(last_mesh_gen_time_str, 5);
 
     GX_End();
 }

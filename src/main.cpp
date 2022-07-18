@@ -132,6 +132,7 @@ int main(int argc, char** argv) {
 
 	chrono::us total_block_gen_time = 0;
 	chrono::us total_mesh_gen_time = 0;
+	chrono::us last_mesh_gen_time = 0;
 
 	auto start = chrono::get_current_us();
 
@@ -187,7 +188,7 @@ int main(int argc, char** argv) {
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(quad_building_arrays, chunks, total_mesh_gen_time);
+		game::update_chunks(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
@@ -213,7 +214,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		debug_ui.draw(character.position, cam.look, total_block_gen_time, total_mesh_gen_time, std::floor(fps));
+		debug_ui.draw(character.position, cam.look, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::floor(fps));
 
 		game::reset_update_params(cam);
 
