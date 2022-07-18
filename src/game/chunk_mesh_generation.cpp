@@ -14,11 +14,6 @@
 
 using namespace game;
 
-template<typename Bf, block::face face>
-static bool should_add_vertices_for_face(const block* blocks, const block* nb_blocks, std::size_t face_index, bl_st block_state) {
-    return Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[face_index]);
-}
-
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
 static constexpr s32 Y_OFFSET = chunk::SIZE;
 static constexpr s32 X_OFFSET = 1;
@@ -35,24 +30,12 @@ static inline std::size_t get_face_index_offset(std::size_t index) {
     );
 }
 
-template<block::face face>
-static inline u32 get_face_axis(u32 axis) {
-    return call_face_func_for<face, u32>(
-        [&]() { return axis + 1; },
-        [&]() { return axis - 1; },
-        [&]() { return axis + 1; },
-        [&]() { return axis - 1; },
-        [&]() { return axis + 1; },
-        [&]() { return axis - 1; }
-    );
-}
-
 template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, std::size_t index, u32 face_axis, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
+static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, std::size_t index, bool should_render_face, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
     if (
+        should_render_face &&
         Bf::template get_face_traits<face>(block_state).visible &&
-        face_axis < chunk::SIZE &&
-        should_add_vertices_for_face<Bf, face>(blocks, nb_blocks, get_face_index_offset<face>(index), block_state)
+        Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[get_face_index_offset<face>(index)])
     ) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
     }
@@ -85,8 +68,17 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
 
     std::size_t index = 0;
     for (u32 z = 0; z < chunk::SIZE; z++) {
+        bool should_render_left = z != 0;
+        bool should_render_right = z != (chunk::SIZE - 1);
+
         for (u32 y = 0; y < chunk::SIZE; y++) {
+            bool should_render_bottom = y != 0;
+            bool should_render_top = y != (chunk::SIZE - 1);
+
             for (u32 x = 0; x < chunk::SIZE; x++) {
+                bool should_render_back = x != 0;
+                bool should_render_front = x != (chunk::SIZE - 1);
+
                 auto& block = blocks[index];
 
                 auto visible = get_with_block_functionality<bool>(block.tp, [&block]<typename Bf>() { return Bf::get_block_traits(block.st).visible; });
@@ -95,7 +87,7 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
                     call_with_block_functionality(block.tp, [&]<typename Bf>() {
                         math::vector3u8 block_pos = { x, y, z };
 
-                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, index, get_face_axis<block::face::uppercase>(axis), block.st, vf, block_pos);
+                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, index, should_render_##lowercase, block.st, vf, block_pos);
 
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front, x)
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back, x)
