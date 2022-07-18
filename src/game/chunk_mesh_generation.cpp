@@ -15,11 +15,11 @@
 using namespace game;
 
 template<typename Bf, block::face face>
-static bool should_add_vertices_for_face(const block* blocks, const block* nb_blocks, u16 face_index, bool is_at_face_edge, bl_st block_state) {
-    if (is_at_face_edge) { // We are at the edge of the chunk, so we should check the neighbor chunk.
-        if (nb_blocks != nullptr) {
-            return Bf::template is_face_visible_with_neighbor<face>(block_state, nb_blocks[face_index]);
-        }
+static bool should_add_vertices_for_face(const block* blocks, const block* nb_blocks, std::size_t face_index, bl_st block_state) {
+    if (face_index >= chunk::BLOCKS_COUNT) { // We are at the edge of the chunk, so we should check the neighbor chunk.
+        // if (nb_blocks != nullptr) {
+        //     return Bf::template is_face_visible_with_neighbor<face>(block_state, nb_blocks[face_index]);
+        // }
 
         return false;
     }
@@ -27,15 +27,31 @@ static bool should_add_vertices_for_face(const block* blocks, const block* nb_bl
 }
 
 template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, u16 face_index, bool is_at_face_edge, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
-    if (Bf::template get_face_traits<face>(block_state).visible && should_add_vertices_for_face<Bf, face>(blocks, nb_blocks, face_index, is_at_face_edge, block_state)) {
+static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, std::size_t face_index, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
+
+
+    if (Bf::template get_face_traits<face>(block_state).visible && should_add_vertices_for_face<Bf, face>(blocks, nb_blocks, face_index, block_state)) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
     }
 }
 
-void game::update_mesh(const block::neighborhood_lookups& lookups, standard_quad_building_arrays& building_arrays, chunk& chunk) {
-    const auto lookups_array = lookups.data();
+static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
+static constexpr s32 Y_OFFSET = chunk::SIZE;
+static constexpr s32 X_OFFSET = 1;
 
+template<block::face face>
+static inline std::size_t get_face_index_offset(std::size_t index) {
+    return call_face_func_for<face, std::size_t>(
+        [&]() { return index + X_OFFSET; },
+        [&]() { return index - X_OFFSET; },
+        [&]() { return index + Y_OFFSET; },
+        [&]() { return index - Y_OFFSET; },
+        [&]() { return index + Z_OFFSET; },
+        [&]() { return index - Z_OFFSET; }
+    );
+}
+
+void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
     const auto blocks = chunk.blocks.data();
     
     const auto& chunk_nh = chunk.nh;
@@ -60,36 +76,43 @@ void game::update_mesh(const block::neighborhood_lookups& lookups, standard_quad
 
     standard_quad_iterators begin = { building_arrays };
 
-    for (std::size_t i = 0; i < chunk::BLOCKS_COUNT; i++) {
-        auto& block = blocks[i];
+    std::size_t index = 0;
+    for (u32 z = 0; z < chunk::SIZE; z++) {
+        for (u32 y = 0; y < chunk::SIZE; y++) {
+            for (u32 x = 0; x < chunk::SIZE; x++) {
+                auto& block = blocks[index];
 
-        call_with_block_functionality(block.tp, [&]<typename Bf>() {
-            if (Bf::get_block_traits(block.st).visible) {
-                auto& lookup = lookups_array[i];
+                auto visible = get_with_block_functionality<bool>(block.tp, [&block]<typename Bf>() { return Bf::get_block_traits(block.st).visible; });
 
-                auto block_pos = lookup.position;
+                if (visible) {
+                    call_with_block_functionality(block.tp, [&]<typename Bf>() {
+                        math::vector3u8 block_pos = { x, y, z };
 
-                #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, lookup.lowercase##_index, lookup.is_##lowercase##_edge, block.st, vf, block_pos);
+                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, get_face_index_offset<block::face::uppercase>(index), block.st, vf, block_pos);
 
-                EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front)
-                EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back)
-                EVAL_CALL_FACE_VERTICES_IF_NEEDED(TOP, top)
-                EVAL_CALL_FACE_VERTICES_IF_NEEDED(BOTTOM, bottom)
-                EVAL_CALL_FACE_VERTICES_IF_NEEDED(RIGHT, right)
-                EVAL_CALL_FACE_VERTICES_IF_NEEDED(LEFT, left)
+                        EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front)
+                        EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back)
+                        EVAL_CALL_FACE_VERTICES_IF_NEEDED(TOP, top)
+                        EVAL_CALL_FACE_VERTICES_IF_NEEDED(BOTTOM, bottom)
+                        EVAL_CALL_FACE_VERTICES_IF_NEEDED(RIGHT, right)
+                        EVAL_CALL_FACE_VERTICES_IF_NEEDED(LEFT, left)
 
-                Bf::add_general_vertices(vf, block_pos, block.st);
+                        Bf::add_general_vertices(vf, block_pos, block.st);
+                    });
+                }
+
+                if (
+                    (vf.it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
+                    (vf.it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
+                    (vf.it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+                ) {
+                    dbg::error([]() {
+                        printf("Chunk quad count is too high\n");
+                    });
+                }
+
+                index += X_OFFSET;
             }
-        });
-
-        if (
-            (vf.it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
-            (vf.it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
-            (vf.it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
-        ) {
-            dbg::error([]() {
-                printf("Chunk quad count is too high\n");
-            });
         }
     }
 

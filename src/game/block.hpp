@@ -62,26 +62,6 @@ namespace game {
         inline bool operator!=(const block& other) const {
             return tp != other.tp || st.slab != other.st.slab;
         }
-
-        struct neighborhood_lookup {
-            math::vector3u8 position;
-
-            u16 front_index;
-            u16 back_index;
-            u16 top_index;
-            u16 bottom_index;
-            u16 right_index;
-            u16 left_index;
-
-            bool is_front_edge;
-            bool is_back_edge;
-            bool is_top_edge;
-            bool is_bottom_edge;
-            bool is_right_edge;
-            bool is_left_edge;
-        };
-
-        using neighborhood_lookups = ext::data_array<neighborhood_lookup>;
     };
 
     constexpr u8 block_draw_size = 4;
