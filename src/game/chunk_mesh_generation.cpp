@@ -33,8 +33,8 @@ static inline std::size_t get_face_index_offset(std::size_t index) {
 template<typename Bf, block::face face, typename Vf>
 static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, std::size_t index, bool should_render_face, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
     if (
-        should_render_face &&
         Bf::template get_face_traits<face>(block_state).visible &&
+        should_render_face &&
         Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[get_face_index_offset<face>(index)])
     ) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
