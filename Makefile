@@ -130,9 +130,6 @@ image:
 	@cp -r build/data build/image
 	@sudo umount build/image
 
-usb:
-	./usb.sh
-
 
 #---------------------------------------------------------------------------------
 else
