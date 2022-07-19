@@ -26,13 +26,13 @@ static f32 get_plains_height(glm::vec2 position, f32 biome_value) {
     );
 }
 
-static f32 get_hills_height(glm::vec2 position, f32 biome_value) {
+static f32 get_hills_height(glm::vec2 position) {
     position /= 64.0f;
 
-    return biome_value * (
-        (get_noise_at(position) * 0.4f) +
-        (get_noise_at(position * 3.0f) * 0.2f) +
-        (get_noise_at(position * 6.0f) * 0.1f)
+    return (
+        (get_noise_at(position) * 0.9f) +
+        (get_noise_at(position * 4.0f) * 0.6f) +
+        (get_noise_at(position * 7.0f) * 0.3f)
     );
 }
 
@@ -58,7 +58,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
             f32 world_z = game::get_world_coord_from_block_position(z, chunk_pos.z);
             glm::vec2 noise_pos = { world_x, world_z };
 
-            auto plains_height = get_noise_at(noise_pos / 32.0f);
+            auto plains_height = get_hills_height(noise_pos);
             
             auto tallgrass_value = get_tallgrass_value(noise_pos);
 
