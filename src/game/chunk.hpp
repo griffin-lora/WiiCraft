@@ -51,9 +51,13 @@ namespace game {
         ext::data_array<block> blocks;
         neighborhood nh;
 
-        gfx::display_list standard_disp_list;
-        gfx::display_list foliage_disp_list;
-        gfx::display_list water_disp_list;
+        struct display_lists {
+            gfx::display_list standard;
+            gfx::display_list foliage;
+            gfx::display_list water;
+        };
+
+        display_lists core_disp_lists;
 
         math::transform_3d tf;
 

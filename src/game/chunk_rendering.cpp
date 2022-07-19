@@ -37,11 +37,11 @@ void game::draw_chunks_standard(const math::matrix view, const camera& cam, chun
 			chunk.tf.update_model_view(view);
 			chunk.tf.load(chunk::MAT);
 
-			chunk.standard_disp_list.call();
+			chunk.core_disp_lists.standard.call();
 		}
 	} else {
 		for (auto& [ pos, chunk ] : chunks) {
-			chunk.standard_disp_list.call();
+			chunk.core_disp_lists.standard.call();
 		}
 	}
 }
@@ -50,7 +50,7 @@ void game::draw_chunks_foliage(chunk::map& chunks) {
 	init_chunk_drawing();
 	for (auto& [ pos, chunk ] : chunks) {
 		chunk.tf.load(chunk::MAT);
-		chunk.foliage_disp_list.call();
+		chunk.core_disp_lists.foliage.call();
 	}
 }
 
@@ -58,6 +58,6 @@ void game::draw_chunks_water(chunk::map& chunks) {
 	init_chunk_drawing();
 	for (auto& [ pos, chunk ] : chunks) {
 		chunk.tf.load(chunk::MAT);
-		chunk.water_disp_list.call();
+		chunk.core_disp_lists.water.call();
 	}
 }

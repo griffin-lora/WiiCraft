@@ -188,7 +188,7 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
         bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
-    write_into_display_lists(begin, vf, chunk.standard_disp_list, chunk.foliage_disp_list, chunk.water_disp_list, [](auto vert_count) {
+    write_into_display_lists(begin, vf, chunk.core_disp_lists.standard, chunk.core_disp_lists.foliage, chunk.core_disp_lists.water, [](auto vert_count) {
         return (
             (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8
