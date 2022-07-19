@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
 			auto nunchuk_buttons_down = nunchuk.btns;
 
 			character.handle_input(cam, now, frame_delta, gforce, nunchuk_vector, nunchuk_buttons_down, { nunchuk.gforce.x, nunchuk.gforce.y, nunchuk.gforce.z });
-			character.velocity.y = input::get_plus_minus_input_scalar(buttons_held) * 15.0f;
+			// character.velocity.y = input::get_plus_minus_input_scalar(buttons_held) * 15.0f;
 		}
 		#else
 		character.handle_input(cam, now, frame_delta, gforce, { 20.0f, 50.0f }, 0, gforce);
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
 		bl_sel.handle_raycast(view, quad_building_arrays, raycast);
 
 		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
-		// character.apply_physics(chunks, frame_delta);
+		character.apply_physics(chunks, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 

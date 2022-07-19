@@ -138,21 +138,48 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
     }
 
     // Generate mesh for faces that are neighboring another chunk.
-    // Note that x and y in this context do not always mean the 3d x and y coordinates.
-    std::size_t front_index = (chunk::SIZE - 1);
+    std::size_t front_index = chunk::SIZE - 1;
     std::size_t back_index = 0;
-    for (u32 x = 0; x < chunk::SIZE; x++) {
-        for (u32 y = 0; y < chunk::SIZE; y++) {
-            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, vf, [x, y]() {
-                return math::vector3u8{ chunk::SIZE - 1, y, x };
+
+    std::size_t top_index = (chunk::SIZE - 1) * Y_OFFSET;
+    std::size_t bottom_index = 0;
+
+    std::size_t right_index = (chunk::SIZE - 1) * Z_OFFSET;
+    std::size_t left_index = 0;
+
+    for (u32 far = 0; far < chunk::SIZE; far++) {
+        for (u32 near = 0; near < chunk::SIZE; near++) {
+            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, vf, [far, near]() {
+                return math::vector3u8{ chunk::SIZE - 1, near, far };
             });
-            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, vf, [x, y]() {
-                return math::vector3u8{ 0, y, x };
+            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, vf, [far, near]() {
+                return math::vector3u8{ 0, near, far };
+            });
+            add_face_vertices_if_needed_at_neighbor<block::face::TOP>(blocks, top_nb_blocks, top_index, bottom_index, vf, [far, near]() {
+                return math::vector3u8{ near, chunk::SIZE - 1, far };
+            });
+            add_face_vertices_if_needed_at_neighbor<block::face::BOTTOM>(blocks, bottom_nb_blocks, bottom_index, top_index, vf, [far, near]() {
+                return math::vector3u8{ near, 0, far };
+            });
+            add_face_vertices_if_needed_at_neighbor<block::face::RIGHT>(blocks, right_nb_blocks, right_index, left_index, vf, [far, near]() {
+                return math::vector3u8{ near, far, chunk::SIZE - 1 };
+            });
+            add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, vf, [far, near]() {
+                return math::vector3u8{ near, far, 0 };
             });
             
             front_index += Y_OFFSET;
             back_index += Y_OFFSET;
+
+            top_index += X_OFFSET;
+            bottom_index += X_OFFSET;
+
+            right_index += X_OFFSET;
+            left_index += X_OFFSET;
         }
+
+        top_index += Z_OFFSET - Y_OFFSET;
+        bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
     write_into_display_lists(begin, vf, chunk.standard_disp_list, chunk.foliage_disp_list, chunk.water_disp_list, [](auto vert_count) {
