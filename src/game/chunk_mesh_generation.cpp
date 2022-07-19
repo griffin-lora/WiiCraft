@@ -64,6 +64,18 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
     }
 }
 
+static void check_vertex_count(const standard_quad_iterators& it, const standard_quad_iterators& begin) {
+    if (
+        (it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
+        (it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
+        (it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+    ) {
+        dbg::error([]() {
+            printf("Chunk quad count is too high\n");
+        });
+    }
+}
+
 void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
     const auto blocks = chunk.blocks.data();
     
@@ -122,15 +134,7 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
                     });
                 }
 
-                if (
-                    (vf.it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
-                    (vf.it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
-                    (vf.it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
-                ) {
-                    dbg::error([]() {
-                        printf("Chunk quad count is too high\n");
-                    });
-                }
+                check_vertex_count(vf.it, begin);
 
                 index += X_OFFSET;
             }
@@ -167,6 +171,8 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
             add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, vf, [far, near]() {
                 return math::vector3u8{ near, far, 0 };
             });
+            
+            check_vertex_count(vf.it, begin);
             
             front_index += Y_OFFSET;
             back_index += Y_OFFSET;
