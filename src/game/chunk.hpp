@@ -58,11 +58,15 @@ namespace game {
         };
 
         display_lists core_disp_lists;
+        display_lists shell_disp_lists;
 
         math::transform_3d tf;
 
-        bool update_mesh_important = false;
-        bool update_mesh_unimportant = false;
+        bool update_core_mesh_important = false;
+        bool update_core_mesh_unimportant = false;
+
+        bool update_shell_mesh_important = false;
+        bool update_shell_mesh_unimportant = false;
 
         bool update_neighborhood = false;
 

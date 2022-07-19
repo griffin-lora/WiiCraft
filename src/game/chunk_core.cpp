@@ -129,12 +129,13 @@ void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32&
 }
 
 void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& pos) {
-    chunk.update_mesh_important = true;
+    chunk.update_core_mesh_important = true;
+    chunk.update_shell_mesh_important = true;
     call_func_on_each_face<void>([&chunk, &pos]<block::face face>() {
         if (is_block_position_at_face_edge<face>(pos)) {
             auto nb_chunk = get_neighbor<face>(chunk.nh);
             if (nb_chunk.has_value()) {
-                nb_chunk->get().update_mesh_important = true;
+                nb_chunk->get().update_shell_mesh_important = true;
             }
         }
     });
@@ -144,7 +145,7 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
     call_func_on_each_face<void>([&chunk]<block::face face>() {
         auto nb_chunk = get_neighbor<face>(chunk.nh);
         if (nb_chunk.has_value()) {
-            nb_chunk->get().update_mesh_unimportant = true;
+            nb_chunk->get().update_shell_mesh_unimportant = true;
             nb_chunk->get().update_neighborhood = true;
         }
     });
@@ -169,26 +170,44 @@ void game::update_chunks(standard_quad_building_arrays& building_arrays, chunk::
 
     bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
-        if (chunk.update_mesh_important) {
+        if (chunk.update_core_mesh_important) {
             did_important_mesh_update = true;
-            chunk.update_mesh_important = false;
-            chunk.update_mesh_unimportant = false;
+            chunk.update_core_mesh_important = false;
+            chunk.update_core_mesh_unimportant = false;
             auto start = chrono::get_current_us();
-            update_mesh(building_arrays, chunk);
+            update_core_mesh(building_arrays, chunk);
             total_mesh_gen_time += chrono::get_current_us() - start;
             last_mesh_gen_time = chrono::get_current_us() - start;
+        }
+
+        if (chunk.update_shell_mesh_important) {
+            did_important_mesh_update = true;
+            chunk.update_shell_mesh_important = false;
+            chunk.update_shell_mesh_unimportant = false;
+            auto start = chrono::get_current_us();
+            update_shell_mesh(building_arrays, chunk);
+            total_mesh_gen_time += chrono::get_current_us() - start;
+            // Don't track MGL since its so small for this
         }
     }
 
     if (!did_important_mesh_update) {
         for (auto& [ pos, chunk ] : chunks) {
-            if (chunk.update_mesh_unimportant) {
-                chunk.update_mesh_important = false;
-                chunk.update_mesh_unimportant = false;
+            if (chunk.update_core_mesh_unimportant) {
+                chunk.update_core_mesh_important = false;
+                chunk.update_core_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
-                update_mesh(building_arrays, chunk);
+                update_core_mesh(building_arrays, chunk);
                 total_mesh_gen_time += chrono::get_current_us() - start;
                 last_mesh_gen_time = chrono::get_current_us() - start;
+                break;
+            } else if (chunk.update_shell_mesh_unimportant) {
+                chunk.update_shell_mesh_important = false;
+                chunk.update_shell_mesh_unimportant = false;
+                auto start = chrono::get_current_us();
+                update_shell_mesh(building_arrays, chunk);
+                total_mesh_gen_time += chrono::get_current_us() - start;
+                // Don't track MGL here as well
                 break;
             }
         }

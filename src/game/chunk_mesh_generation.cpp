@@ -76,24 +76,8 @@ static void check_vertex_count(const standard_quad_iterators& it, const standard
     }
 }
 
-void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
+void game::update_core_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
     const auto blocks = chunk.blocks.data();
-    
-    const auto& chunk_nh = chunk.nh;
-
-    auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
-        if (nb_chunk.has_value()) {
-            return nb_chunk->get().blocks.data();
-        }
-        return nullptr;
-    };
-
-    auto front_nb_blocks = get_nb_blocks(chunk_nh.front);
-    auto back_nb_blocks = get_nb_blocks(chunk_nh.back);
-    auto top_nb_blocks = get_nb_blocks(chunk_nh.top);
-    auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
-    auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
-    auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
 
     standard_vertex_function vf = {
         .it = { building_arrays }
@@ -141,6 +125,43 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
         }
     }
 
+    write_into_display_lists(begin, vf, chunk.core_disp_lists.standard, chunk.core_disp_lists.foliage, chunk.core_disp_lists.water, [](auto vert_count) {
+        return (
+            (vert_count > 0xff ? 4 : 3) + // GX_Begin
+            vert_count * 3 + // GX_Position3u8
+            vert_count * 2 // GX_TexCoord2u8
+        );
+    }, [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+    });
+}
+
+void game::update_shell_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
+    const auto blocks = chunk.blocks.data();
+    
+    const auto& chunk_nh = chunk.nh;
+
+    auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
+        if (nb_chunk.has_value()) {
+            return nb_chunk->get().blocks.data();
+        }
+        return nullptr;
+    };
+
+    auto front_nb_blocks = get_nb_blocks(chunk_nh.front);
+    auto back_nb_blocks = get_nb_blocks(chunk_nh.back);
+    auto top_nb_blocks = get_nb_blocks(chunk_nh.top);
+    auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
+    auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
+    auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
+
+    standard_vertex_function vf = {
+        .it = { building_arrays }
+    };
+
+    standard_quad_iterators begin = { building_arrays };
+    
     // Generate mesh for faces that are neighboring another chunk.
     std::size_t front_index = chunk::SIZE - 1;
     std::size_t back_index = 0;
@@ -188,7 +209,7 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
         bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
-    write_into_display_lists(begin, vf, chunk.core_disp_lists.standard, chunk.core_disp_lists.foliage, chunk.core_disp_lists.water, [](auto vert_count) {
+    write_into_display_lists(begin, vf, chunk.shell_disp_lists.standard, chunk.shell_disp_lists.foliage, chunk.shell_disp_lists.water, [](auto vert_count) {
         return (
             (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8
