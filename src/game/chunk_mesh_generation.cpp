@@ -31,13 +31,36 @@ static inline std::size_t get_face_index_offset(std::size_t index) {
 }
 
 template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const block* blocks, const block* nb_blocks, std::size_t index, bool should_render_face, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
+static void add_face_vertices_if_needed(const block* blocks, std::size_t index, bool should_render_face, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
     if (
         Bf::template get_face_traits<face>(block_state).visible &&
         should_render_face &&
         Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[get_face_index_offset<face>(index)])
     ) {
         Bf::template add_face_vertices<face>(vf, block_pos, block_state);
+    }
+}
+
+static bool is_block_visible(const block& block) {
+    return get_with_block_functionality<bool>(block.tp, [&block]<typename Bf>() { return Bf::get_block_traits(block.st).visible; });
+}
+
+template<block::face face, typename Vf, typename F>
+static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, Vf& vf, F get_block_pos) {
+    if (nb_blocks != nullptr) {
+        auto& block = blocks[index];
+        if (is_block_visible(block)) {
+            call_with_block_functionality(block.tp, [&]<typename Bf>() {
+                math::vector3u8 block_pos = get_block_pos();
+
+                if (
+                    Bf::template get_face_traits<face>(block.st).visible &&
+                    Bf::template is_face_visible_with_neighbor<face>(block.st, nb_blocks[nb_chunk_index])
+                ) {
+                    Bf::template add_face_vertices<face>(vf, block_pos, block.st);
+                }
+            });
+        }
     }
 }
 
@@ -66,6 +89,7 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
 
     standard_quad_iterators begin = { building_arrays };
 
+    // Generate mesh for faces that are not neighboring another chunk.
     std::size_t index = 0;
     for (u32 z = 0; z < chunk::SIZE; z++) {
         bool should_render_left = z != 0;
@@ -81,13 +105,11 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
 
                 auto& block = blocks[index];
 
-                auto visible = get_with_block_functionality<bool>(block.tp, [&block]<typename Bf>() { return Bf::get_block_traits(block.st).visible; });
-
-                if (visible) {
+                if (is_block_visible(block)) {
                     call_with_block_functionality(block.tp, [&]<typename Bf>() {
                         math::vector3u8 block_pos = { x, y, z };
 
-                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, lowercase##_nb_blocks, index, should_render_##lowercase, block.st, vf, block_pos);
+                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, index, should_render_##lowercase, block.st, vf, block_pos);
 
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front, x)
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back, x)
@@ -112,6 +134,24 @@ void game::update_mesh(standard_quad_building_arrays& building_arrays, chunk& ch
 
                 index += X_OFFSET;
             }
+        }
+    }
+
+    // Generate mesh for faces that are neighboring another chunk.
+    // Note that x and y in this context do not always mean the 3d x and y coordinates.
+    std::size_t front_index = (chunk::SIZE - 1);
+    std::size_t back_index = 0;
+    for (u32 x = 0; x < chunk::SIZE; x++) {
+        for (u32 y = 0; y < chunk::SIZE; y++) {
+            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, vf, [x, y]() {
+                return math::vector3u8{ chunk::SIZE - 1, y, x };
+            });
+            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, vf, [x, y]() {
+                return math::vector3u8{ 0, y, x };
+            });
+            
+            front_index += Y_OFFSET;
+            back_index += Y_OFFSET;
         }
     }
 
