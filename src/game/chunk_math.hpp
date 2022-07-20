@@ -8,9 +8,6 @@ namespace game {
     inline O get_index_from_position(T position) {
         return position.x + (position.y * chunk::SIZE) + (position.z * chunk::SIZE * chunk::SIZE);
     }
-    inline s32 get_world_coord_from_block_position(s32 block_coord, s32 chunk_coord) {
-        return ((chunk_coord * chunk::SIZE) + block_coord);
-    }
     template<typename O, typename T>
     inline glm::vec<3, O, glm::defaultp> floor_float_position(const T& position) {
         return {

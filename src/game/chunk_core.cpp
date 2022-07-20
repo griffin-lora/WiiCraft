@@ -49,24 +49,33 @@ static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos
     std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::AIR });
 }
 
+static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
+static constexpr s32 Y_OFFSET = chunk::SIZE;
+static constexpr s32 X_OFFSET = 1;
+
 static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     auto blocks = chunk.blocks.data();
 
-    for (s32 x = 0; x < chunk::SIZE; x++) {
-        for (s32 z = 0; z < chunk::SIZE; z++) {
-            f32 world_x = game::get_world_coord_from_block_position(x, chunk_pos.x);
-            f32 world_z = game::get_world_coord_from_block_position(z, chunk_pos.z);
+    std::size_t index = 0;
+
+    f32 world_chunk_x = chunk_pos.x * chunk::SIZE;
+    s32 world_chunk_y = chunk_pos.y * chunk::SIZE;
+    f32 world_chunk_z = chunk_pos.z * chunk::SIZE;
+
+    for (f32 z = 0; z < chunk::SIZE; z++) {
+        for (f32 x = 0; x < chunk::SIZE; x++) {
+            f32 world_x = world_chunk_x + x;
+            f32 world_z = world_chunk_z + z;
             glm::vec2 noise_pos = { world_x, world_z };
 
-            auto plains_height = get_hills_height(noise_pos);
+            f32 plains_height = get_hills_height(noise_pos);
             
-            auto tallgrass_value = get_tallgrass_value(noise_pos);
+            f32 tallgrass_value = get_tallgrass_value(noise_pos);
 
             s32 generated_height = (plains_height * 12) + 1;
 
             for (s32 y = 0; y < chunk::SIZE; y++) {
-                auto world_height = game::get_world_coord_from_block_position(y, chunk_pos.y);
-                auto index = game::get_index_from_position<std::size_t>(math::vector3s32{x, y, z});
+                s32 world_height = world_chunk_y + y;
 
                 auto& block = blocks[index];
 
@@ -87,8 +96,15 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
                         block = { .tp = block::type::AIR };
                     }
                 }
+
+                index += Y_OFFSET;
             }
+
+            index -= Y_OFFSET * Y_OFFSET;
+            index += X_OFFSET;
         }
+        index -= Y_OFFSET;
+        index += Z_OFFSET;
     }
 }
 
