@@ -1,7 +1,7 @@
 #include "block_mesh_generation.hpp"
 
 template<typename F1, typename F2>
-void game::write_into_display_lists(const block_quad_iterators& begin, const block_mesh_state& vf,
+void game::write_into_display_lists(const block_quad_iterators& begin, const block_quad_iterators& end,
     gfx::display_list& standard_disp_list,
     gfx::display_list& foliage_disp_list,
     gfx::display_list& water_disp_list,
@@ -28,7 +28,7 @@ void game::write_into_display_lists(const block_quad_iterators& begin, const blo
         });
     };
 
-    write_into_disp_list(begin.standard, vf.it.standard, standard_disp_list);
-    write_into_disp_list(begin.foliage, vf.it.foliage, foliage_disp_list);
-    write_into_disp_list(begin.water, vf.it.water, water_disp_list);
+    write_into_disp_list(begin.standard, end.standard, standard_disp_list);
+    write_into_disp_list(begin.foliage, end.foliage, foliage_disp_list);
+    write_into_disp_list(begin.water, end.water, water_disp_list);
 }

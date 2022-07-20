@@ -30,14 +30,14 @@ static inline std::size_t get_face_index_offset(std::size_t index) {
     );
 }
 
-template<typename Bf, block::face face, typename Vf>
-static void add_face_vertices_if_needed(const block* blocks, std::size_t index, bool should_render_face, bl_st block_state, Vf& vf, math::vector3u8 block_pos) {
+template<typename Bf, block::face face>
+static void add_face_vertices_if_needed(const block* blocks, std::size_t index, bool should_render_face, bl_st block_state, block_mesh_state& ms_st, math::vector3u8 block_pos) {
     if (
         Bf::template get_face_traits<face>(block_state).visible &&
         should_render_face &&
         Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[get_face_index_offset<face>(index)])
     ) {
-        Bf::template add_face_vertices<face>(vf, block_pos, block_state);
+        Bf::template add_face_vertices<face>(ms_st, block_pos, block_state);
     }
 }
 
@@ -45,8 +45,8 @@ static bool is_block_visible(const block& block) {
     return get_with_block_functionality<bool>(block.tp, [&block]<typename Bf>() { return Bf::get_block_traits(block.st).visible; });
 }
 
-template<block::face face, typename Vf, typename F>
-static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, Vf& vf, F get_block_pos) {
+template<block::face face, typename F>
+static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, block_mesh_state& ms_st, F get_block_pos) {
     if (nb_blocks != nullptr) {
         auto& block = blocks[index];
         if (is_block_visible(block)) {
@@ -57,18 +57,18 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
                     Bf::template get_face_traits<face>(block.st).visible &&
                     Bf::template is_face_visible_with_neighbor<face>(block.st, nb_blocks[nb_chunk_index])
                 ) {
-                    Bf::template add_face_vertices<face>(vf, block_pos, block.st);
+                    Bf::template add_face_vertices<face>(ms_st, block_pos, block.st);
                 }
             });
         }
     }
 }
 
-static void check_vertex_count(const block_quad_iterators& it, const block_quad_iterators& begin) {
+static void check_vertex_count(const block_quad_iterators& begin, const block_quad_iterators& end) {
     if (
-        (it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
-        (it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
-        (it.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+        (end.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
+        (end.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
+        (end.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
     ) {
         dbg::error([]() {
             printf("Chunk quad count is too high\n");
@@ -79,11 +79,11 @@ static void check_vertex_count(const block_quad_iterators& it, const block_quad_
 void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     const auto blocks = chunk.blocks.data();
 
-    block_mesh_state vf = {
+    const block_quad_iterators begin = { building_arrays };
+
+    block_mesh_state ms_st = {
         .it = { building_arrays }
     };
-
-    block_quad_iterators begin = { building_arrays };
 
     // Generate mesh for faces that are not neighboring another chunk.
     std::size_t index = 0;
@@ -105,7 +105,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
                     call_with_block_functionality(block.tp, [&]<typename Bf>() {
                         math::vector3u8 block_pos = { x, y, z };
 
-                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, index, should_render_##lowercase, block.st, vf, block_pos);
+                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, index, should_render_##lowercase, block.st, ms_st, block_pos);
 
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front, x)
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back, x)
@@ -114,18 +114,18 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(RIGHT, right, z)
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(LEFT, left, z)
 
-                        Bf::add_general_vertices(vf, block_pos, block.st);
+                        Bf::add_general_vertices(ms_st, block_pos, block.st);
                     });
                 }
 
-                check_vertex_count(vf.it, begin);
+                check_vertex_count(begin, ms_st.it);
 
                 index += X_OFFSET;
             }
         }
     }
 
-    write_into_display_lists(begin, vf, chunk.core_disp_lists.standard, chunk.core_disp_lists.foliage, chunk.core_disp_lists.water, [](auto vert_count) {
+    write_into_display_lists(begin, ms_st.it, chunk.core_disp_lists.standard, chunk.core_disp_lists.foliage, chunk.core_disp_lists.water, [](auto vert_count) {
         return (
             (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8
@@ -156,11 +156,11 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
     auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
     auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
 
-    block_mesh_state vf = {
+    const block_quad_iterators begin = { building_arrays };
+
+    block_mesh_state ms_st = {
         .it = { building_arrays }
     };
-
-    block_quad_iterators begin = { building_arrays };
     
     // Generate mesh for faces that are neighboring another chunk.
     std::size_t front_index = chunk::SIZE - 1;
@@ -174,26 +174,26 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
 
     for (u32 far = 0; far < chunk::SIZE; far++) {
         for (u32 near = 0; near < chunk::SIZE; near++) {
-            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, vf, [far, near]() {
+            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, ms_st, [far, near]() {
                 return math::vector3u8{ chunk::SIZE - 1, near, far };
             });
-            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, vf, [far, near]() {
+            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, ms_st, [far, near]() {
                 return math::vector3u8{ 0, near, far };
             });
-            add_face_vertices_if_needed_at_neighbor<block::face::TOP>(blocks, top_nb_blocks, top_index, bottom_index, vf, [far, near]() {
+            add_face_vertices_if_needed_at_neighbor<block::face::TOP>(blocks, top_nb_blocks, top_index, bottom_index, ms_st, [far, near]() {
                 return math::vector3u8{ near, chunk::SIZE - 1, far };
             });
-            add_face_vertices_if_needed_at_neighbor<block::face::BOTTOM>(blocks, bottom_nb_blocks, bottom_index, top_index, vf, [far, near]() {
+            add_face_vertices_if_needed_at_neighbor<block::face::BOTTOM>(blocks, bottom_nb_blocks, bottom_index, top_index, ms_st, [far, near]() {
                 return math::vector3u8{ near, 0, far };
             });
-            add_face_vertices_if_needed_at_neighbor<block::face::RIGHT>(blocks, right_nb_blocks, right_index, left_index, vf, [far, near]() {
+            add_face_vertices_if_needed_at_neighbor<block::face::RIGHT>(blocks, right_nb_blocks, right_index, left_index, ms_st, [far, near]() {
                 return math::vector3u8{ near, far, chunk::SIZE - 1 };
             });
-            add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, vf, [far, near]() {
+            add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, ms_st, [far, near]() {
                 return math::vector3u8{ near, far, 0 };
             });
             
-            check_vertex_count(vf.it, begin);
+            check_vertex_count(begin, ms_st.it);
             
             front_index += Y_OFFSET;
             back_index += Y_OFFSET;
@@ -209,7 +209,7 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
         bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
-    write_into_display_lists(begin, vf, chunk.shell_disp_lists.standard, chunk.shell_disp_lists.foliage, chunk.shell_disp_lists.water, [](auto vert_count) {
+    write_into_display_lists(begin, ms_st.it, chunk.shell_disp_lists.standard, chunk.shell_disp_lists.foliage, chunk.shell_disp_lists.water, [](auto vert_count) {
         return (
             (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8

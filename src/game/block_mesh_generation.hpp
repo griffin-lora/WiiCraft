@@ -41,7 +41,7 @@ namespace game {
     };
 
     template<typename F1, typename F2>
-    void write_into_display_lists(const block_quad_iterators& begin, const block_mesh_state& vf,
+    void write_into_display_lists(const block_quad_iterators& begin, const block_quad_iterators& end,
         gfx::display_list& standard_disp_list,
         gfx::display_list& foliage_disp_list,
         gfx::display_list& water_disp_list,

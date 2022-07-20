@@ -47,13 +47,13 @@ void block_selection::update_mesh(const math::matrix view, block_quad_building_a
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
     tf.load(MAT);
 
-    block_mesh_state vf = {
+    block_mesh_state ms_st = {
         .it = { building_arrays }
     };
 
-    add_block_vertices(vf, raycast.location.bl_pos, *raycast.location.bl);
+    add_block_vertices(ms_st, raycast.location.bl_pos, *raycast.location.bl);
 
-    write_into_display_lists({ building_arrays }, vf, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
+    write_into_display_lists({ building_arrays }, ms_st.it, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (
             (vert_count > 0xff ? 4 : 3) + // GX_Begin
             vert_count * 3 + // GX_Position3u8
