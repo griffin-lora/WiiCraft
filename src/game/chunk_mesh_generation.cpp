@@ -8,8 +8,8 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
-#include "mesh_generation.hpp"
-#include "mesh_generation.inl"
+#include "block_mesh_generation.hpp"
+#include "block_mesh_generation.inl"
 #include <cstdio>
 
 using namespace game;
@@ -64,7 +64,7 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
     }
 }
 
-static void check_vertex_count(const standard_quad_iterators& it, const standard_quad_iterators& begin) {
+static void check_vertex_count(const block_quad_iterators& it, const block_quad_iterators& begin) {
     if (
         (it.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
         (it.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
@@ -76,14 +76,14 @@ static void check_vertex_count(const standard_quad_iterators& it, const standard
     }
 }
 
-void game::update_core_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
+void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     const auto blocks = chunk.blocks.data();
 
-    standard_vertex_function vf = {
+    block_mesh_state vf = {
         .it = { building_arrays }
     };
 
-    standard_quad_iterators begin = { building_arrays };
+    block_quad_iterators begin = { building_arrays };
 
     // Generate mesh for faces that are not neighboring another chunk.
     std::size_t index = 0;
@@ -137,7 +137,7 @@ void game::update_core_mesh(standard_quad_building_arrays& building_arrays, chun
     });
 }
 
-void game::update_shell_mesh(standard_quad_building_arrays& building_arrays, chunk& chunk) {
+void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     const auto blocks = chunk.blocks.data();
     
     const auto& chunk_nh = chunk.nh;
@@ -156,11 +156,11 @@ void game::update_shell_mesh(standard_quad_building_arrays& building_arrays, chu
     auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
     auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
 
-    standard_vertex_function vf = {
+    block_mesh_state vf = {
         .it = { building_arrays }
     };
 
-    standard_quad_iterators begin = { building_arrays };
+    block_quad_iterators begin = { building_arrays };
     
     // Generate mesh for faces that are neighboring another chunk.
     std::size_t front_index = chunk::SIZE - 1;

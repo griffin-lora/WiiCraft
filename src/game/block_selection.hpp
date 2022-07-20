@@ -2,7 +2,7 @@
 #include "block_raycast.hpp"
 #include "logic.hpp"
 #include "math.hpp"
-#include "mesh_generation.hpp"
+#include "block_mesh_generation.hpp"
 #include "ext/data_array.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
@@ -24,9 +24,9 @@ namespace game {
 
         void update_if_needed(const math::matrix view, const camera& cam);
         void draw(const std::optional<block_raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, standard_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast);
+        void handle_raycast(const math::matrix view, block_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, standard_quad_building_arrays& building_arrays, const block_raycast& raycast);
+            void update_mesh(const math::matrix view, block_quad_building_arrays& building_arrays, const block_raycast& raycast);
     };
 }

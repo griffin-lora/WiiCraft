@@ -2,7 +2,7 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
-#include "mesh_generation.inl"
+#include "block_mesh_generation.inl"
 #include "rendering.hpp"
 
 using namespace game;
@@ -43,11 +43,11 @@ void block_selection::draw(const std::optional<block_raycast>& raycast) const {
     }
 }
 
-void block_selection::update_mesh(const math::matrix view, standard_quad_building_arrays& building_arrays, const block_raycast& raycast) {
+void block_selection::update_mesh(const math::matrix view, block_quad_building_arrays& building_arrays, const block_raycast& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
     tf.load(MAT);
 
-    standard_vertex_function vf = {
+    block_mesh_state vf = {
         .it = { building_arrays }
     };
 
@@ -65,7 +65,7 @@ void block_selection::update_mesh(const math::matrix view, standard_quad_buildin
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, standard_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, block_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos || *raycast->location.bl != *last_block) {

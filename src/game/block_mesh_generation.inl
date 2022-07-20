@@ -1,7 +1,7 @@
-#include "mesh_generation.hpp"
+#include "block_mesh_generation.hpp"
 
 template<typename F1, typename F2>
-void game::write_into_display_lists(const standard_quad_iterators& begin, const standard_vertex_function& vf,
+void game::write_into_display_lists(const block_quad_iterators& begin, const block_mesh_state& vf,
     gfx::display_list& standard_disp_list,
     gfx::display_list& foliage_disp_list,
     gfx::display_list& water_disp_list,

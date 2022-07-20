@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 	game::chunk::map chunks;
 
 	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
-	game::standard_quad_building_arrays quad_building_arrays;
+	game::block_quad_building_arrays quad_building_arrays;
 
 	game::stored_chunk::map stored_chunks;
 

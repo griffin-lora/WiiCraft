@@ -160,7 +160,7 @@ void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
     });
 }
 
-void game::update_chunks(standard_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time) {
+void game::update_chunks(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
