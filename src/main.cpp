@@ -130,6 +130,9 @@ int main(int argc, char** argv) {
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
 
+	math::vector3u16 last_wpad_accel = { 512, 512, 512 };
+	math::vector3u16 last_nunchuk_accel = { 512, 512, 512 };
+
 	chrono::us total_block_gen_time = 0;
 	chrono::us total_mesh_gen_time = 0;
 	chrono::us last_mesh_gen_time = 0;
@@ -158,19 +161,24 @@ int main(int argc, char** argv) {
 		auto pointer_pos = input::get_pointer_position(CHAN);
 		cursor.update_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, pointer_pos);
 
-    	auto gforce = input::get_gforce(CHAN);
 		#ifndef PC_PORT
+    	auto wpad_accel = input::get_accel(CHAN);
 		expansion_t exp;
 		if (input::scan_nunchuk(0, exp)) {
 			const auto& nunchuk = exp.nunchuk;
 			auto nunchuk_vector = input::get_nunchuk_vector(nunchuk);
 			auto nunchuk_buttons_down = nunchuk.btns;
 
-			character.handle_input(cam, now, frame_delta, gforce, nunchuk_vector, nunchuk_buttons_down, { nunchuk.gforce.x, nunchuk.gforce.y, nunchuk.gforce.z });
+			math::vector3u16 nunchuk_accel = { nunchuk.accel.x, nunchuk.accel.y, nunchuk.accel.z };
+
+			character.handle_input(cam, last_wpad_accel, last_nunchuk_accel, now, frame_delta, wpad_accel, nunchuk_vector, nunchuk_buttons_down, nunchuk_accel);
+
+			last_nunchuk_accel = nunchuk_accel;
 			// character.velocity.y = input::get_plus_minus_input_scalar(buttons_held) * 15.0f;
 		}
+		last_wpad_accel = wpad_accel;
 		#else
-		character.handle_input(cam, now, frame_delta, gforce, { 20.0f, 50.0f }, 0, gforce);
+		character.handle_input(cam, { 0, 0, 0 }, { 0, 0, 0 }, now, frame_delta, { 512, 512, 512 }, { 96.0f, 96.0f }, 0, { 512, 512, 512 });
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, cam, pointer_pos);

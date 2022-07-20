@@ -18,15 +18,19 @@ constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, chrono::us now, f32 delta, const glm::vec3& gforce, glm::vec2 joystick_input_vector, u8 buttons_down, const glm::vec3& nunchuk_gforce) {
-    if ((buttons_down & NUNCHUK_BUTTON_C) && grounded) {
+void character::handle_input(const camera& cam, const math::vector3u16& last_wpad_accel, const math::vector3u16& last_nunchuk_accel, chrono::us now, f32 delta, const math::vector3u16& wpad_accel, glm::vec2 joystick_input_vector, u8 nunchuk_buttons_down, const math::vector3u16& nunchuk_accel) {
+    if ((nunchuk_buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         velocity.y = jump_velocity;
     }
     
-    constexpr f32 SHAKING_THRESHOLD = 0.7f;
-    constexpr f32 NUNCHUK_SHAKING_THRESHOLD = 0.5f;
+    constexpr u16 SHAKING_ACCEL = 100;
+    constexpr u16 NUNCHUK_SHAKING_ACCEL = 100;
 
-    bool shaking = std::abs(gforce.x) > SHAKING_THRESHOLD || std::abs(gforce.y) > SHAKING_THRESHOLD || std::abs(nunchuk_gforce.x) > NUNCHUK_SHAKING_THRESHOLD || std::abs(nunchuk_gforce.y) > NUNCHUK_SHAKING_THRESHOLD;
+    bool shaking = [&last_wpad_accel, &last_nunchuk_accel, &wpad_accel, &nunchuk_accel]() {
+        auto wpad_diff = glm::abs(wpad_accel - last_wpad_accel);
+        auto nunchuk_diff = glm::abs(nunchuk_accel - last_nunchuk_accel);
+        return math::length_squared(wpad_diff) > (SHAKING_ACCEL * SHAKING_ACCEL) || math::length_squared(nunchuk_diff) > (NUNCHUK_SHAKING_ACCEL * NUNCHUK_SHAKING_ACCEL);
+    }();
 
     if (math::is_non_zero(joystick_input_vector)) {
         if (std::abs(joystick_input_vector.x) < 6.0f) {
