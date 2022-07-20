@@ -14,8 +14,8 @@ namespace game {
     struct block_functionality {
         BF_FUNC block_traits get_block_traits(bl_st) { return {}; }
 
-        template<typename Vf>
-        BF_FUNC void add_general_vertices(Vf&, math::vector3u8, bl_st) {}
+        template<typename M>
+        BF_FUNC void add_general_vertices(M&, math::vector3u8, bl_st) {}
 
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st) { return {}; }
@@ -23,8 +23,8 @@ namespace game {
         template<block::face face>
         BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block&) { return false; }
 
-        template<block::face face, typename Vf>
-        BF_FUNC void add_face_vertices(Vf&, math::vector3u8, bl_st) {}
+        template<block::face face, typename M>
+        BF_FUNC void add_face_vertices(M&, math::vector3u8, bl_st) {}
 
         BF_FUNC std::array<math::box, 0> get_selection_boxes(bl_st) { return {}; }
         BF_FUNC std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
@@ -38,8 +38,8 @@ namespace game {
             .visible = true
         }; }
 
-        template<typename Vf>
-        BF_FUNC void add_general_vertices(Vf&, math::vector3u8, bl_st) {}
+        template<typename M>
+        BF_FUNC void add_general_vertices(M&, math::vector3u8, bl_st) {}
 
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st) { return {
@@ -52,9 +52,9 @@ namespace game {
         template<block::face face>
         BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block& block) { return get_neighbor_face_traits<face>(block).partially_transparent; }
 
-        template<block::face face, typename Vf>
-        BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_standard>(vf, block_pos, st);
+        template<block::face face, typename M>
+        BF_FUNC void add_face_vertices(M& ms_st, math::vector3u8 block_pos, bl_st st) {
+            add_flat_face_vertices_from_block_position<face, self, M, &M::add_standard>(ms_st, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_boxes() {
@@ -94,12 +94,12 @@ namespace game {
             .visible = true
         }; }
 
-        template<typename Vf>
-        BF_FUNC void add_general_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
+        template<typename M>
+        BF_FUNC void add_general_vertices(M& ms_st, math::vector3u8 block_pos, bl_st st) {
             switch (st.slab) {
                 default: break;
-                case state::BOTTOM: add_flat_face_vertices_from_block_position<block::face::TOP, self, Vf, &Vf::add_standard>(vf, block_pos, st); break;
-                case state::TOP: add_flat_face_vertices_from_block_position<block::face::BOTTOM, self, Vf, &Vf::add_standard>(vf, block_pos, st); break;
+                case state::BOTTOM: add_flat_face_vertices_from_block_position<block::face::TOP, self, M, &M::add_standard>(ms_st, block_pos, st); break;
+                case state::TOP: add_flat_face_vertices_from_block_position<block::face::BOTTOM, self, M, &M::add_standard>(ms_st, block_pos, st); break;
             }
         }
 
@@ -134,9 +134,9 @@ namespace game {
             return traits.partially_transparent;
         }
 
-        template<block::face face, typename Vf>
-        BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_standard>(vf, block_pos, st);
+        template<block::face face, typename M>
+        BF_FUNC void add_face_vertices(M& ms_st, math::vector3u8 block_pos, bl_st st) {
+            add_flat_face_vertices_from_block_position<face, self, M, &M::add_standard>(ms_st, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_boxes(bl_st st) {
@@ -183,8 +183,8 @@ namespace game {
             .visible = true
         }; }
 
-        template<typename Vf>
-        BF_FUNC void add_general_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
+        template<typename M>
+        BF_FUNC void add_general_vertices(M& ms_st, math::vector3u8 block_pos, bl_st st) {
             draw_positions d_positions = {
                 .block_draw_pos = block_pos * block_draw_size,
                 .uv_draw_pos = Bf::get_uv_position(st) * block_draw_size
@@ -194,7 +194,7 @@ namespace game {
                 .block_draw_pos = d_positions.block_draw_pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size },
                 .uv_draw_pos = d_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
             };
-            add_foliage_vertices<Vf, &Vf::add_foliage>(vf, d_positions, offset_d_positions);
+            add_foliage_vertices<M, &M::add_foliage>(ms_st, d_positions, offset_d_positions);
         }
 
         template<block::face face>
@@ -205,8 +205,8 @@ namespace game {
         template<block::face face>
         BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block&) { return false; }
 
-        template<block::face face, typename Vf>
-        BF_FUNC void add_face_vertices(Vf&, math::vector3u8, bl_st) {}
+        template<block::face face, typename M>
+        BF_FUNC void add_face_vertices(M&, math::vector3u8, bl_st) {}
 
         BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) {
             return {
@@ -306,8 +306,8 @@ namespace game {
             .visible = true
         }; }
 
-        template<typename Vf>
-        BF_FUNC void add_general_vertices(Vf&, math::vector3u8, bl_st) {}
+        template<typename M>
+        BF_FUNC void add_general_vertices(M&, math::vector3u8, bl_st) {}
 
         template<block::face face>
         BF_FUNC face_traits get_face_traits(bl_st) { return {
@@ -317,9 +317,9 @@ namespace game {
         template<block::face face>
         BF_FUNC bool is_face_visible_with_neighbor(bl_st, const block& bl) { return bl.tp != block::type::WATER && get_neighbor_face_traits<face>(bl).partially_transparent; }
 
-        template<block::face face, typename Vf>
-        BF_FUNC void add_face_vertices(Vf& vf, math::vector3u8 block_pos, bl_st st) {
-            add_flat_face_vertices_from_block_position<face, self, Vf, &Vf::add_water>(vf, block_pos, st);
+        template<block::face face, typename M>
+        BF_FUNC void add_face_vertices(M& ms_st, math::vector3u8 block_pos, bl_st st) {
+            add_flat_face_vertices_from_block_position<face, self, M, &M::add_water>(ms_st, block_pos, st);
         }
 
         BF_FUNC std::array<math::box, 1> get_selection_boxes(bl_st) { return {
