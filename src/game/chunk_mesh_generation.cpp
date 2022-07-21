@@ -78,6 +78,19 @@ static void check_vertex_count(const block_quad_iterators& begin, const block_qu
     }
 }
 
+static inline void write_into_chunk_display_lists(const block_quad_iterators& begin, const block_quad_iterators& end, chunk::display_lists& disp_lists) {
+    write_into_display_lists(begin, end, disp_lists.standard, disp_lists.foliage, disp_lists.water, [](auto vert_count) {
+        return (
+            gfx::get_begin_instruction_size(vert_count) +
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+            gfx::get_vector_instruction_size<2, u8>(vert_count) // UV
+        );
+    }, [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+    });
+}
+
 void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     const block_quad_iterators begin = { building_arrays };
 
@@ -125,16 +138,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
         }
     }
 
-    write_into_display_lists(begin, ms_st.it, chunk.core_disp_lists.standard, chunk.core_disp_lists.foliage, chunk.core_disp_lists.water, [](auto vert_count) {
-        return (
-            (vert_count > 0xff ? 4 : 3) + // GX_Begin
-            vert_count * 3 + // GX_Position3u8
-            vert_count * 2 // GX_TexCoord2u8
-        );
-    }, [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    });
+    write_into_chunk_display_lists(begin, ms_st.it, chunk.core_disp_lists);
 }
 
 void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
@@ -209,14 +213,5 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
         bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
-    write_into_display_lists(begin, ms_st.it, chunk.shell_disp_lists.standard, chunk.shell_disp_lists.foliage, chunk.shell_disp_lists.water, [](auto vert_count) {
-        return (
-            (vert_count > 0xff ? 4 : 3) + // GX_Begin
-            vert_count * 3 + // GX_Position3u8
-            vert_count * 2 // GX_TexCoord2u8
-        );
-    }, [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    });
+    write_into_chunk_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
 }

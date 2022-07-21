@@ -6,9 +6,9 @@ skybox::skybox(const math::matrix view, const camera& cam) {
     constexpr std::size_t vertex_count = 24;
     
     std::size_t disp_list_size = (
-		3 + // GX_Begin
-		vertex_count * 3 + // GX_Position3s8
-		vertex_count * 2 // GX_TexCoord2u8
+		gfx::get_begin_instruction_size(vertex_count) +
+		gfx::get_vector_instruction_size<3, s8>(vertex_count) + // Position
+		gfx::get_vector_instruction_size<2, u8>(vertex_count) // UV
 	);
 
     disp_list.resize(disp_list_size);

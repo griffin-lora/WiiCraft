@@ -55,9 +55,9 @@ void block_selection::update_mesh(const math::matrix view, block_quad_building_a
 
     write_into_display_lists({ building_arrays }, ms_st.it, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (
-            (vert_count > 0xff ? 4 : 3) + // GX_Begin
-            vert_count * 3 + // GX_Position3u8
-            vert_count * 4 // GX_Color4u8
+            gfx::get_begin_instruction_size(vert_count) +
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+            gfx::get_vector_instruction_size<4, u8>(vert_count) // Color
         );
     }, [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
