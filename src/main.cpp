@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
 		cursor.draw();
 
 		game::init_text_rendering();
-		debug_ui.draw(character.position, cam.look, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::floor(fps));
+		debug_ui.draw(character.position, cam.look, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::ceil(fps));
 
 		game::reset_update_params(cam);
 
