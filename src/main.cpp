@@ -194,13 +194,15 @@ int main(int argc, char** argv) {
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time);
 
-
 		game::update_needed(view, perspective_3d, cam);
 
 		game::update_chunks(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time);
 
-		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.update_if_needed(view, cam);
+		bl_sel.update_if_needed(view, cam);
+		debug_ui.update(buttons_down);
+
+		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.draw();
 
 		GX_SetCurrentMtx(game::chunk::MAT);
@@ -214,7 +216,6 @@ int main(int argc, char** argv) {
 		game::init_water_rendering();
 		game::draw_chunks_water(chunks);
 		
-		bl_sel.update_if_needed(view, cam);
 		bl_sel.draw(raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
