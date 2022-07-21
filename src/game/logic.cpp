@@ -9,26 +9,26 @@
 using namespace game;
 
 glm::vec3 game::get_raycast_direction_from_pointer_position(u16 v_width, u16 v_height, const camera& cam, const std::optional<glm::vec2>& pointer_pos) {
-    if (pointer_pos.has_value()) {
-        glm::vec2 screen_size = { (f32)v_width, (f32)v_height };
-        auto relative_pos = *pointer_pos / screen_size;
-        relative_pos *= 2.f;
-        relative_pos.x -= 1.f;
-        relative_pos.y -= 1.f;
-        relative_pos.y *= -1.f;
-        // relative_pos is mapped to [-1, 1]
+    // if (pointer_pos.has_value()) {
+    //     glm::vec2 screen_size = { (f32)v_width, (f32)v_height };
+    //     auto relative_pos = *pointer_pos / screen_size;
+    //     relative_pos *= 2.f;
+    //     relative_pos.x -= 1.f;
+    //     relative_pos.y -= 1.f;
+    //     relative_pos.y *= -1.f;
+    //     // relative_pos is mapped to [-1, 1]
 
-        glm::vec3 right = { -cam.look.z, cam.look.y, cam.look.x };
-        auto up = glm::cross(right, cam.look);
+    //     glm::vec3 right = { -cam.look.z, cam.look.y, cam.look.x };
+    //     auto up = glm::cross(right, cam.look);
 
-        auto fov = glm::radians(cam.fov);
-        auto fov_tan = tanf(fov / 2.0f);
-        auto dir = cam.look + (right * (relative_pos.x * fov_tan)) + (up * (relative_pos.y * fov_tan));
+    //     auto fov = glm::radians(cam.fov);
+    //     auto fov_tan = tanf(fov / 2.0f);
+    //     auto dir = cam.look + (right * (relative_pos.x * fov_tan)) + (up * (relative_pos.y * fov_tan));
         
-        return glm::normalize(dir);
-    } else {
+    //     return glm::normalize(dir);
+    // } else {
         return cam.look;
-    }
+    // }
 }
 
 void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, std::optional<block_raycast>& raycast) {
