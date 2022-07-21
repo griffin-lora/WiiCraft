@@ -18,24 +18,26 @@ static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
 static constexpr s32 Y_OFFSET = chunk::SIZE;
 static constexpr s32 X_OFFSET = 1;
 
+using const_block_it = ext::data_array<block>::const_iterator;
+
 template<block::face face>
-static inline std::size_t get_face_index_offset(std::size_t index) {
-    return call_face_func_for<face, std::size_t>(
-        [&]() { return index + X_OFFSET; },
-        [&]() { return index - X_OFFSET; },
-        [&]() { return index + Y_OFFSET; },
-        [&]() { return index - Y_OFFSET; },
-        [&]() { return index + Z_OFFSET; },
-        [&]() { return index - Z_OFFSET; }
+static inline const_block_it get_block_face_iterator_offset(const_block_it it) {
+    return call_face_func_for<face, const_block_it>(
+        [&]() { return it + X_OFFSET; },
+        [&]() { return it - X_OFFSET; },
+        [&]() { return it + Y_OFFSET; },
+        [&]() { return it - Y_OFFSET; },
+        [&]() { return it + Z_OFFSET; },
+        [&]() { return it - Z_OFFSET; }
     );
 }
 
 template<typename Bf, block::face face>
-static void add_face_vertices_if_needed(const block* blocks, std::size_t index, bool should_render_face, bl_st block_state, block_mesh_state& ms_st, math::vector3u8 block_pos) {
+static void add_face_vertices_if_needed(const_block_it it, bool should_render_face, bl_st block_state, block_mesh_state& ms_st, math::vector3u8 block_pos) {
     if (
         Bf::template get_face_traits<face>(block_state).visible &&
         should_render_face &&
-        Bf::template is_face_visible_with_neighbor<face>(block_state, blocks[get_face_index_offset<face>(index)])
+        Bf::template is_face_visible_with_neighbor<face>(block_state, *get_block_face_iterator_offset<face>(it))
     ) {
         Bf::template add_face_vertices<face>(ms_st, block_pos, block_state);
     }
@@ -77,8 +79,6 @@ static void check_vertex_count(const block_quad_iterators& begin, const block_qu
 }
 
 void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
-    const auto blocks = chunk.blocks.data();
-
     const block_quad_iterators begin = { building_arrays };
 
     block_mesh_state ms_st = {
@@ -86,7 +86,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
     };
 
     // Generate mesh for faces that are not neighboring another chunk.
-    std::size_t index = 0;
+    auto it = chunk.blocks.begin();
     for (u32 z = 0; z < chunk::SIZE; z++) {
         bool should_render_left = z != 0;
         bool should_render_right = z != (chunk::SIZE - 1);
@@ -99,13 +99,13 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
                 bool should_render_back = x != 0;
                 bool should_render_front = x != (chunk::SIZE - 1);
 
-                auto& block = blocks[index];
+                auto& block = *it;
 
                 if (is_block_visible(block)) {
                     call_with_block_functionality(block.tp, [&]<typename Bf>() {
                         math::vector3u8 block_pos = { x, y, z };
 
-                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(blocks, index, should_render_##lowercase, block.st, ms_st, block_pos);
+                        #define EVAL_CALL_FACE_VERTICES_IF_NEEDED(uppercase, lowercase, axis) add_face_vertices_if_needed<Bf, block::face::uppercase>(it, should_render_##lowercase, block.st, ms_st, block_pos);
 
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(FRONT, front, x)
                         EVAL_CALL_FACE_VERTICES_IF_NEEDED(BACK, back, x)
@@ -120,7 +120,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
 
                 check_vertex_count(begin, ms_st.it);
 
-                index += X_OFFSET;
+                it += X_OFFSET;
             }
         }
     }

@@ -54,9 +54,7 @@ static constexpr s32 Y_OFFSET = chunk::SIZE;
 static constexpr s32 X_OFFSET = 1;
 
 static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    auto blocks = chunk.blocks.data();
-
-    std::size_t index = 0;
+    auto it = chunk.blocks.begin();
 
     f32 world_chunk_x = chunk_pos.x * chunk::SIZE;
     s32 world_chunk_y = chunk_pos.y * chunk::SIZE;
@@ -77,7 +75,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
             for (s32 y = 0; y < chunk::SIZE; y++) {
                 s32 world_height = world_chunk_y + y;
 
-                auto& block = blocks[index];
+                auto& block = *it;
 
                 if (world_height < generated_height) {
                     if (world_height < (generated_height - 2)) {
@@ -97,14 +95,12 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
                     }
                 }
 
-                index += Y_OFFSET;
+                it += Y_OFFSET;
             }
 
-            index -= Y_OFFSET * Y_OFFSET;
-            index += X_OFFSET;
+            it += X_OFFSET - Z_OFFSET;
         }
-        index -= Y_OFFSET;
-        index += Z_OFFSET;
+        it += Z_OFFSET - Y_OFFSET;
     }
 }
 
