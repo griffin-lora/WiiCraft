@@ -52,7 +52,7 @@ void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_d
                 auto normal_offset_loc = get_world_location_at_world_position(chunks, raycast->world_block_position + raycast->box_raycast.normal);
                 if (normal_offset_loc.has_value()) {
                     get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl)--;
-                    *normal_offset_loc->bl = { .tp = block::type::WOOD_PLANKS, .st = { .slab = block::slab_state::BOTTOM } };
+                    *normal_offset_loc->bl = { .tp = block::type::STONE_SLAB, .st = { .slab = block::slab_state::BOTTOM } };
                     get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl)++;
                     normal_offset_loc->ch->modified = true;
                     add_important_chunk_mesh_update(*normal_offset_loc->ch, normal_offset_loc->bl_pos);
