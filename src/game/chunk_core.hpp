@@ -50,6 +50,8 @@ namespace game {
 
     void add_chunk_neighborhood_update_to_neighbors(chunk& chunk);
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
+    
+    std::size_t& get_block_count_ref(chunk& chunk, block::type tp);
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
 

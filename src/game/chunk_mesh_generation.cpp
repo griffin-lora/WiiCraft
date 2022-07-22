@@ -92,6 +92,13 @@ static inline void write_into_chunk_display_lists(const block_quad_iterators& be
 }
 
 void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
+    if (
+        chunk.invisible_block_count == chunk::BLOCKS_COUNT ||
+        chunk.fully_transparent_block_count == chunk::BLOCKS_COUNT
+    ) {
+        return;
+    }
+
     const block_quad_iterators begin = { building_arrays };
 
     block_mesh_state ms_st = {
@@ -142,12 +149,22 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
 }
 
 void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
+    if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
+        return;
+    }
+
     const auto blocks = chunk.blocks.data();
     
     const auto& chunk_nh = chunk.nh;
 
     auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
         if (nb_chunk.has_value()) {
+            if (
+                nb_chunk->get().invisible_block_count == chunk::BLOCKS_COUNT ||
+                nb_chunk->get().fully_transparent_block_count == chunk::BLOCKS_COUNT
+            ) {
+                return nullptr;
+            }
             return nb_chunk->get().blocks.data();
         }
         return nullptr;
