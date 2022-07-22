@@ -12,4 +12,10 @@ namespace game {
         bool bottom_half_transparent = true;
         bool top_half_transparent = true;
     };
+
+    enum class block_counting_type {
+        INVISIBLE,
+        FULLY_OPAQUE,
+        PARTIALLY_OPAQUE
+    };
 };

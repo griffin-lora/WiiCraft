@@ -159,10 +159,7 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
 
     auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
         if (nb_chunk.has_value()) {
-            if (
-                nb_chunk->get().invisible_block_count == chunk::BLOCKS_COUNT ||
-                nb_chunk->get().fully_opaque_block_count == chunk::BLOCKS_COUNT
-            ) {
+            if (nb_chunk->get().fully_opaque_block_count == chunk::BLOCKS_COUNT) {
                 return nullptr;
             }
             return nb_chunk->get().blocks.data();

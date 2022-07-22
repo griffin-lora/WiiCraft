@@ -28,6 +28,8 @@ namespace game {
 
         BF_FUNC std::array<math::box, 0> get_selection_boxes(bl_st) { return {}; }
         BF_FUNC std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
+
+        BF_FUNC block_counting_type get_block_counting_type(bl_st) { return block_counting_type::INVISIBLE; }
     };
 
     template<typename Bf>
@@ -83,6 +85,8 @@ namespace game {
                 .uv_draw_pos = draw_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
             };
         }
+
+        BF_FUNC block_counting_type get_block_counting_type(bl_st) { return block_counting_type::FULLY_OPAQUE; }
     };
 
     template<typename Bf>
@@ -175,6 +179,12 @@ namespace game {
                 }()
             };
         }
+
+        BF_FUNC block_counting_type get_block_counting_type(bl_st st) { return (
+            st.slab == block::slab_state::BOTH ?
+            block_counting_type::FULLY_OPAQUE :
+            block_counting_type::PARTIALLY_OPAQUE
+        ); }
     };
     
     template<typename Bf>
@@ -217,6 +227,8 @@ namespace game {
             };
         }
         BF_FUNC std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
+
+        BF_FUNC block_counting_type get_block_counting_type(bl_st) { return block_counting_type::PARTIALLY_OPAQUE; }
     };
 
     template<>
@@ -345,5 +357,7 @@ namespace game {
                 .uv_draw_pos = draw_positions.uv_draw_pos + math::vector2u8{ block_draw_size, block_draw_size }
             };
         }
+
+        BF_FUNC block_counting_type get_block_counting_type(bl_st) { return block_counting_type::PARTIALLY_OPAQUE; }
     };
 }

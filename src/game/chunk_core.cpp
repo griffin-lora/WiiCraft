@@ -3,6 +3,7 @@
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "glm/gtc/noise.hpp"
+#include "block_functionality.hpp"
 #include <algorithm>
 
 using namespace game;
@@ -46,8 +47,9 @@ static f32 get_tallgrass_value(glm::vec2 position) {
 }
 
 static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::AIR });
-    get_block_count_ref(chunk, block::type::AIR) = chunk.blocks.size();
+    block block = { .tp = block::type::AIR };
+    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block);
+    get_block_count_ref(chunk, block) = chunk.blocks.size();
 }
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
@@ -96,7 +98,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
                     }
                 }
 
-                get_block_count_ref(chunk, block.tp)++;
+                get_block_count_ref(chunk, block)++;
 
                 it += Y_OFFSET;
             }
@@ -108,8 +110,9 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 }
 
 static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block{ .tp = block::type::STONE });
-    get_block_count_ref(chunk, block::type::STONE) = chunk.blocks.size();
+    block block = { .tp = block::type::STONE };
+    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block);
+    get_block_count_ref(chunk, block) = chunk.blocks.size();
 }
 
 void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
@@ -157,23 +160,18 @@ void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32&
     });
 }
 
-std::size_t& game::get_block_count_ref(chunk& chunk, block::type tp) {
+std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
     // TODO: Use block functionality
-    switch (tp) {
-        default:
-        case block::type::AIR:
-            return chunk.invisible_block_count;
-        case block::type::DEBUG:
-        case block::type::GRASS:
-        case block::type::STONE:
-        case block::type::DIRT:
-        case block::type::WOOD_PLANKS:
-            return chunk.fully_opaque_block_count;
-        case block::type::STONE_SLAB:
-        case block::type::TALL_GRASS:
-        case block::type::WATER:
-            return chunk.partially_opaque_block_count;
+    auto counting_type = get_with_block_functionality<block_counting_type>(block.tp, [&block]<typename Bf>() {
+        return Bf::get_block_counting_type(block.st);
+    });
+    switch (counting_type) {
+        case block_counting_type::INVISIBLE: return chunk.invisible_block_count;
+        case block_counting_type::FULLY_OPAQUE: return chunk.fully_opaque_block_count;
+        case block_counting_type::PARTIALLY_OPAQUE: return chunk.partially_opaque_block_count;
     }
+    // Compiler complains despite this being unreachable
+    return chunk.invisible_block_count;
 }
 
 void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
