@@ -63,8 +63,8 @@ namespace game {
         math::transform_3d tf;
 
         std::size_t invisible_block_count = 0;
-        std::size_t partially_transparent_block_count = 0;
-        std::size_t fully_transparent_block_count = 0;
+        std::size_t partially_opaque_block_count = 0;
+        std::size_t fully_opaque_block_count = 0;
 
         bool update_core_mesh_important = false;
         bool update_core_mesh_unimportant = false;

@@ -94,7 +94,7 @@ static inline void write_into_chunk_display_lists(const block_quad_iterators& be
 void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     if (
         chunk.invisible_block_count == chunk::BLOCKS_COUNT ||
-        chunk.fully_transparent_block_count == chunk::BLOCKS_COUNT
+        chunk.fully_opaque_block_count == chunk::BLOCKS_COUNT
     ) {
         return;
     }
@@ -161,7 +161,7 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
         if (nb_chunk.has_value()) {
             if (
                 nb_chunk->get().invisible_block_count == chunk::BLOCKS_COUNT ||
-                nb_chunk->get().fully_transparent_block_count == chunk::BLOCKS_COUNT
+                nb_chunk->get().fully_opaque_block_count == chunk::BLOCKS_COUNT
             ) {
                 return nullptr;
             }

@@ -168,11 +168,11 @@ std::size_t& game::get_block_count_ref(chunk& chunk, block::type tp) {
         case block::type::STONE:
         case block::type::DIRT:
         case block::type::WOOD_PLANKS:
-            return chunk.fully_transparent_block_count;
+            return chunk.fully_opaque_block_count;
         case block::type::STONE_SLAB:
         case block::type::TALL_GRASS:
         case block::type::WATER:
-            return chunk.partially_transparent_block_count;
+            return chunk.partially_opaque_block_count;
     }
 }
 
