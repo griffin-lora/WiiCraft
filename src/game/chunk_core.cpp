@@ -9,31 +9,13 @@
 using namespace game;
 using math::get_noise_at;
 
-static f32 get_biome_value(glm::vec2 position) {
-    position /= 256.0f;
-
-    return (
-        (get_noise_at(position)) +
-        (get_noise_at(position * 3.0f) * 0.5f)
-    );
-}
-
-static f32 get_plains_height(glm::vec2 position, f32 biome_value) {
+static f32 get_hills_height(glm::vec2 position) {
     position /= 32.0f;
 
-    return (1.0f - biome_value) * (
-        (get_noise_at(position) * 0.1f) +
-        (get_noise_at(position * 3.0f) * 0.04f)
-    );
-}
-
-static f32 get_hills_height(glm::vec2 position) {
-    position /= 64.0f;
-
-    return (
-        (get_noise_at(position) * 0.9f) +
-        (get_noise_at(position * 4.0f) * 0.6f) +
-        (get_noise_at(position * 7.0f) * 0.3f)
+    return 2.0f * (
+        (get_noise_at(position) * 0.4f) +
+        (get_noise_at(position * 3.0f) * 0.2f) +
+        (get_noise_at(position * 6.0f) * 0.1f)
     );
 }
 
@@ -60,7 +42,6 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
     auto it = chunk.blocks.begin();
 
     f32 world_chunk_x = chunk_pos.x * chunk::SIZE;
-    s32 world_chunk_y = chunk_pos.y * chunk::SIZE;
     f32 world_chunk_z = chunk_pos.z * chunk::SIZE;
 
     for (f32 z = 0; z < chunk::SIZE; z++) {
@@ -69,32 +50,38 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
             f32 world_z = world_chunk_z + z;
             glm::vec2 noise_pos = { world_x, world_z };
 
-            f32 plains_height = get_hills_height(noise_pos);
+            f32 height = get_hills_height(noise_pos);
             
             f32 tallgrass_value = get_tallgrass_value(noise_pos);
 
-            s32 generated_height = (plains_height * 12) + 1;
+            s32 gen_y = (height * 12) + 1;
 
             for (s32 y = 0; y < chunk::SIZE; y++) {
-                s32 world_height = world_chunk_y + y;
-
                 auto& block = *it;
 
-                if (world_height < generated_height) {
-                    if (world_height < (generated_height - 2)) {
-                        block = { .tp = block::type::STONE };
-                    } else {
-                        block = { .tp = block::type::DIRT };
-                    }
-                } else if (world_height == generated_height) {
-                    block = { .tp = block::type::GRASS };
-                } else {
-                    if (world_height < 5) {
+                if (y > gen_y) {
+                    if (y < 7) {
                         block = { .tp = block::type::WATER };
-                    } else if (world_height == (generated_height + 1) && tallgrass_value > 0.97f) {
+                    } else if (y == (gen_y + 1) && gen_y >= 7 && tallgrass_value > 0.97f) {
                         block = { .tp = block::type::TALL_GRASS };
                     } else {
                         block = { .tp = block::type::AIR };
+                    }
+                } else {
+                    if (gen_y < 7) {
+                        if (y < (gen_y - 2)) {
+                            block = { .tp = block::type::STONE };
+                        } else {
+                            block = { .tp = block::type::SAND };
+                        }
+                    } else if (y < gen_y) {
+                        if (y < (gen_y - 2)) {
+                            block = { .tp = block::type::STONE };
+                        } else {
+                            block = { .tp = block::type::DIRT };
+                        }
+                    } else {
+                        block = { .tp = block::type::GRASS };
                     }
                 }
 

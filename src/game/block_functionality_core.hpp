@@ -272,6 +272,14 @@ namespace game {
     };
 
     template<>
+    struct block_functionality<block::type::SAND> : public cube_block_functionality<block_functionality<block::type::SAND>> {
+        template<block::face face>
+        BF_FUNC math::vector2u8 get_uv_position(bl_st) {
+            return { 2, 1 };
+        }
+    };
+
+    template<>
     struct block_functionality<block::type::STONE> : public cube_block_functionality<block_functionality<block::type::STONE>> {
         template<block::face face>
         BF_FUNC math::vector2u8 get_uv_position(bl_st) {
