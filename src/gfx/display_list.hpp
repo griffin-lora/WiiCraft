@@ -16,6 +16,7 @@ namespace gfx {
             display_list(display_list&& other) noexcept;
 
             void resize(std::size_t size);
+            void clear();
 
             template<typename F>
             inline void write_into(F func) {

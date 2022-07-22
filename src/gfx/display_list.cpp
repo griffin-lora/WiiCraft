@@ -23,7 +23,16 @@ void display_list::resize(std::size_t size) {
     // Align to 32 bytes
     m_size = (size | 31) + 33;
 
-    // Allocate memory
     m_data = memalign(32, m_size);
     std::memset(m_data, 0, m_size);
+}
+
+void display_list::clear() {
+    if (m_data == nullptr) {
+        return;
+    }
+
+    free(m_data);
+    m_data = nullptr;
+    m_size = 0;
 }

@@ -91,11 +91,18 @@ static inline void write_into_chunk_display_lists(const block_quad_iterators& be
     });
 }
 
+static inline void clear_display_lists(chunk::display_lists& disp_lists) {
+    disp_lists.standard.clear();
+    disp_lists.foliage.clear();
+    disp_lists.water.clear();
+}
+
 void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     if (
         chunk.invisible_block_count == chunk::BLOCKS_COUNT ||
         chunk.fully_opaque_block_count == chunk::BLOCKS_COUNT
     ) {
+        clear_display_lists(chunk.core_disp_lists);
         return;
     }
 
@@ -150,6 +157,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
 
 void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
     if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
+        clear_display_lists(chunk.shell_disp_lists);
         return;
     }
 
