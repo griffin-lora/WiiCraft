@@ -23,7 +23,7 @@ namespace game {
         inline block_selection() { }
 
         void update_if_needed(const math::matrix view, const camera& cam);
-        void draw(const std::optional<block_raycast>& raycast) const;
+        void draw(chrono::us now, const std::optional<block_raycast>& raycast) const;
         void handle_raycast(const math::matrix view, block_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast);
 
         private:

@@ -137,11 +137,12 @@ int main(int argc, char** argv) {
 	chrono::us total_mesh_gen_time = 0;
 	chrono::us last_mesh_gen_time = 0;
 
-	auto start = chrono::get_current_us();
+	auto program_start = chrono::get_current_us();
+	chrono::us start = 0;
 
 	for (;;) {
 
-        auto now = chrono::get_current_us();
+        auto now = chrono::get_current_us() - program_start;
 
 		auto delta_time = now - start;
 		f32 frame_delta = delta_time / 1000000.0f;
@@ -216,7 +217,7 @@ int main(int argc, char** argv) {
 		game::init_water_rendering();
 		game::draw_chunks_water(chunks);
 		
-		bl_sel.draw(raycast);
+		bl_sel.draw(now, raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();

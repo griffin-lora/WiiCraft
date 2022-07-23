@@ -14,21 +14,25 @@ void block_selection::update_if_needed(const math::matrix view, const camera& ca
     }
 }
 
-void block_selection::draw(const std::optional<block_raycast>& raycast) const {
+void block_selection::draw(chrono::us now, const std::optional<block_raycast>& raycast) const {
     if (raycast.has_value()) {
         GX_SetNumChans(1);
         GX_SetNumTexGens(0);
+
         GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
         GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+
+        u8 alpha = 0x5f + (std::sin(now / 150000.0f) * 0x10);
+        GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });
+        GX_SetTevColorIn(GX_TEVSTAGE0, GX_CC_C1, GX_CC_C1, GX_CC_C1, GX_CC_C1);
+        GX_SetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A1);
 
         //
 
         GX_ClearVtxDesc();
         GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
-        GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
 
         GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
-        GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
 
         GX_SetCurrentMtx(MAT);
 
@@ -61,7 +65,6 @@ void block_selection::update_mesh(const math::matrix view, block_quad_building_a
         );
     }, [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_Color4u8(0xff, 0xff, 0xff, 0x7f);
     });
 }
 
