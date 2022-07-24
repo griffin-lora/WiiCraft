@@ -227,8 +227,37 @@ namespace game {
     struct block_functionality<block::type::WATER> {
         BF_MB block::category get_category(bl_st) { return block::category::TRANSPARENT_CUBE; }
 
+        template<block::face face>
+        BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
+            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
+                return N_Bf::get_category(nb.st);
+            });
+            return category == block::category::OPAQUE_CUBE || category == block::category::TRANSPARENT_CUBE;
+        }
+
+        template<block::face face, typename M, typename F>
+        BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+            const block* nb_block = get_face_neighbor_block.template operator()<face>();
+            if (
+                nb_block == nullptr ||
+                is_face_invisible_with_neighbor<face>(st, *nb_block)
+            ) {
+                return;
+            }
+            math::vector2u8 uv = math::vector2u8{ 13, 12 } * block_draw_size;
+            math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
+            add_flat_face_vertices<face, M, &M::add_water>(ms_st, pos, offset_pos, uv, offset_uv);
+        }
+
         template<typename M, typename F>
-        BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
+        BF_MB void add_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+            pos *= block_draw_size;
+            auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
+
+            call_func_on_each_face<void>(
+                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+            );
+        }
 
         BF_MB std::array<math::box, 1> get_selection_boxes(bl_st) { return {
             math::box{
