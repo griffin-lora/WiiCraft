@@ -53,3 +53,7 @@ void GX_DrawDone(void) {}
 
 void GX_SetAlphaCompare(u8 comp0, u8 ref0, u8 aop, u8 comp1, u8 ref1) {}
 void GX_SetZCompLoc(u8 before_tex) {}
+
+void GX_SetTevColor(u8 tev_regid, GXColor color) {}
+void GX_SetTevColorIn(u8 tevstage, u8 a, u8 b, u8 c, u8 d) {}
+void GX_SetTevAlphaIn(u8 tevstage, u8 a, u8 b, u8 c, u8 d) {}
