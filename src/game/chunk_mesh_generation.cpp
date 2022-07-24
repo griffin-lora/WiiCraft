@@ -31,31 +31,21 @@ static inline const_block_it get_block_face_iterator_offset(const_block_it it) {
     );
 }
 
-// template<typename Bf, block::face face>
-// static void add_face_vertices_if_needed(const_block_it it, bool should_render_face, bl_st block_state, block_mesh_state& ms_st, math::vector3u8 block_pos) {
-//     if (
-//         Bf::template get_face_traits<face>(block_state).visible &&
-//         should_render_face &&
-//         Bf::template is_face_visible_with_neighbor<face>(block_state, *get_block_face_iterator_offset<face>(it))
-//     ) {
-//         Bf::template add_face_vertices<face>(ms_st, block_pos, block_state);
-//     }
-// }
-
-// template<block::face face, typename F>
-// static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, block_mesh_state& ms_st, math::vector3u8 block_pos) {
-//     if (nb_blocks != nullptr) {
-//         auto& block = blocks[index];
-//         call_with_block_functionality(block.tp, [&]<typename Bf>() {
-//             if (
-//                 Bf::template get_face_traits<face>(block.st).visible &&
-//                 Bf::template is_face_visible_with_neighbor<face>(block.st, nb_blocks[nb_chunk_index])
-//             ) {
-//                 Bf::template add_face_vertices<face>(ms_st, block_pos, block.st);
-//             }
-//         });
-//     }
-// }
+template<block::face face>
+static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, block_mesh_state& ms_st, math::vector3u8 block_pos) {
+    if (nb_blocks != nullptr) {
+        auto& bl = blocks[index];
+        call_with_block_functionality(bl.tp, [&]<typename Bf>() {
+            add_block_vertices<Bf>(ms_st, [nb_blocks, nb_chunk_index]<block::face func_face>() -> const block* { // Get neighbor block
+                if constexpr (func_face == face) {
+                    return &nb_blocks[nb_chunk_index];
+                } else {
+                    return nullptr;
+                }
+            }, bl.st, block_pos);
+        });
+    }
+}
 
 static void check_vertex_count(const block_quad_iterators& begin, const block_quad_iterators& end) {
     if (
@@ -157,84 +147,72 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
 }
 
 void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
-    // if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
-    //     clear_display_lists(chunk.shell_disp_lists);
-    //     return;
-    // }
+    if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
+        clear_display_lists(chunk.shell_disp_lists);
+        return;
+    }
 
-    // const auto blocks = chunk.blocks.data();
+    const auto blocks = chunk.blocks.data();
     
-    // const auto& chunk_nh = chunk.nh;
+    const auto& chunk_nh = chunk.nh;
 
-    // auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
-    //     if (nb_chunk.has_value()) {
-    //         if (nb_chunk->get().fully_opaque_block_count == chunk::BLOCKS_COUNT) {
-    //             return nullptr;
-    //         }
-    //         return nb_chunk->get().blocks.data();
-    //     }
-    //     return nullptr;
-    // };
+    auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
+        if (nb_chunk.has_value()) {
+            if (nb_chunk->get().fully_opaque_block_count == chunk::BLOCKS_COUNT) {
+                return nullptr;
+            }
+            return nb_chunk->get().blocks.data();
+        }
+        return nullptr;
+    };
 
-    // auto front_nb_blocks = get_nb_blocks(chunk_nh.front);
-    // auto back_nb_blocks = get_nb_blocks(chunk_nh.back);
-    // auto top_nb_blocks = get_nb_blocks(chunk_nh.top);
-    // auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
-    // auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
-    // auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
+    auto front_nb_blocks = get_nb_blocks(chunk_nh.front);
+    auto back_nb_blocks = get_nb_blocks(chunk_nh.back);
+    auto top_nb_blocks = get_nb_blocks(chunk_nh.top);
+    auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
+    auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
+    auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
 
-    // const block_quad_iterators begin = { building_arrays };
+    const block_quad_iterators begin = { building_arrays };
 
-    // block_mesh_state ms_st = {
-    //     .it = { building_arrays }
-    // };
+    block_mesh_state ms_st = {
+        .it = { building_arrays }
+    };
     
-    // // Generate mesh for faces that are neighboring another chunk.
-    // std::size_t front_index = chunk::SIZE - 1;
-    // std::size_t back_index = 0;
+    // Generate mesh for faces that are neighboring another chunk.
+    std::size_t front_index = chunk::SIZE - 1;
+    std::size_t back_index = 0;
 
-    // std::size_t top_index = (chunk::SIZE - 1) * Y_OFFSET;
-    // std::size_t bottom_index = 0;
+    std::size_t top_index = (chunk::SIZE - 1) * Y_OFFSET;
+    std::size_t bottom_index = 0;
 
-    // std::size_t right_index = (chunk::SIZE - 1) * Z_OFFSET;
-    // std::size_t left_index = 0;
+    std::size_t right_index = (chunk::SIZE - 1) * Z_OFFSET;
+    std::size_t left_index = 0;
 
-    // for (u32 far = 0; far < chunk::SIZE; far++) {
-    //     for (u32 near = 0; near < chunk::SIZE; near++) {
-    //         add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, ms_st, [far, near]() {
-    //             return math::vector3u8{ chunk::SIZE - 1, near, far };
-    //         });
-    //         add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, ms_st, [far, near]() {
-    //             return math::vector3u8{ 0, near, far };
-    //         });
-    //         add_face_vertices_if_needed_at_neighbor<block::face::TOP>(blocks, top_nb_blocks, top_index, bottom_index, ms_st, [far, near]() {
-    //             return math::vector3u8{ near, chunk::SIZE - 1, far };
-    //         });
-    //         add_face_vertices_if_needed_at_neighbor<block::face::BOTTOM>(blocks, bottom_nb_blocks, bottom_index, top_index, ms_st, [far, near]() {
-    //             return math::vector3u8{ near, 0, far };
-    //         });
-    //         add_face_vertices_if_needed_at_neighbor<block::face::RIGHT>(blocks, right_nb_blocks, right_index, left_index, ms_st, [far, near]() {
-    //             return math::vector3u8{ near, far, chunk::SIZE - 1 };
-    //         });
-    //         add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, ms_st, [far, near]() {
-    //             return math::vector3u8{ near, far, 0 };
-    //         });
+    for (u32 far = 0; far < chunk::SIZE; far++) {
+        for (u32 near = 0; near < chunk::SIZE; near++) {
+            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, ms_st, { chunk::SIZE - 1, near, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, ms_st, { 0, near, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::TOP>(blocks, top_nb_blocks, top_index, bottom_index, ms_st, { near, chunk::SIZE - 1, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::BOTTOM>(blocks, bottom_nb_blocks, bottom_index, top_index, ms_st, { near, 0, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::RIGHT>(blocks, right_nb_blocks, right_index, left_index, ms_st, { near, far, chunk::SIZE - 1 });
+            add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, ms_st, { near, far, 0 });
             
-    //         check_vertex_count(begin, ms_st.it);
+            check_vertex_count(begin, ms_st.it);
             
-    //         front_index += Y_OFFSET;
-    //         back_index += Y_OFFSET;
+            front_index += Y_OFFSET;
+            back_index += Y_OFFSET;
 
-    //         top_index += X_OFFSET;
-    //         bottom_index += X_OFFSET;
+            top_index += X_OFFSET;
+            bottom_index += X_OFFSET;
 
-    //         right_index += X_OFFSET;
-    //         left_index += X_OFFSET;
-    //     }
+            right_index += X_OFFSET;
+            left_index += X_OFFSET;
+        }
 
-    //     top_index += Z_OFFSET - Y_OFFSET;
-    //     bottom_index += Z_OFFSET - Y_OFFSET;
-    // }
+        top_index += Z_OFFSET - Y_OFFSET;
+        bottom_index += Z_OFFSET - Y_OFFSET;
+    }
 
-    // write_into_chunk_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
+    write_into_chunk_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
 }
