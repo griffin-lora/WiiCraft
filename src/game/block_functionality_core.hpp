@@ -15,7 +15,10 @@ namespace game {
         BF_MB block::category get_category(bl_st) { return block::category::TRANSPARENT; }
 
         template<typename M, typename F>
-        BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
+        BF_MB void add_faces_vertices(M&, const F&, bl_st, math::vector3u8) {}
+
+        template<typename M, typename F>
+        BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
         BF_MB std::array<math::box, 0> get_selection_boxes(bl_st) { return {}; }
         BF_MB std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
@@ -50,7 +53,7 @@ namespace game {
         }
 
         template<typename M, typename F>
-        BF_MB void add_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+        BF_MB void add_faces_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
             pos *= block_draw_size;
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
@@ -58,6 +61,9 @@ namespace game {
                 [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
+
+        template<typename M, typename F>
+        BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
         BF_MB std::array<math::box, 1> get_boxes() {
             return {
@@ -87,7 +93,10 @@ namespace game {
         }
 
         template<typename M, typename F>
-        BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
+        BF_MB void add_faces_vertices(M&, const F&, bl_st, math::vector3u8) {}
+
+        template<typename M, typename F>
+        BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
         BF_MB std::array<math::box, 1> get_boxes(bl_st st) {
             return {
@@ -113,7 +122,10 @@ namespace game {
         BF_MB block::category get_category(bl_st) { return block::category::TRANSPARENT; }
 
         template<typename M, typename F>
-        BF_MB void add_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+        BF_MB void add_faces_vertices(M&, const F&, bl_st, math::vector3u8) {}
+
+        template<typename M, typename F>
+        BF_MB void add_general_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
             pos *= block_draw_size;
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
@@ -250,7 +262,7 @@ namespace game {
         }
 
         template<typename M, typename F>
-        BF_MB void add_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+        BF_MB void add_faces_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
             pos *= block_draw_size;
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
@@ -258,6 +270,9 @@ namespace game {
                 [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
+
+        template<typename M, typename F>
+        BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
         BF_MB std::array<math::box, 1> get_selection_boxes(bl_st) { return {
             math::box{

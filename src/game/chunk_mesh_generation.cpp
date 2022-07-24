@@ -36,7 +36,7 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
     if (nb_blocks != nullptr) {
         auto& bl = blocks[index];
         call_with_block_functionality(bl.tp, [&]<typename Bf>() {
-            add_block_vertices<Bf>(ms_st, [nb_blocks, nb_chunk_index]<block::face func_face>() -> const block* { // Get neighbor block
+            add_block_faces_vertices<Bf>(ms_st, [nb_blocks, nb_chunk_index]<block::face func_face>() -> const block* { // Get neighbor block
                 if constexpr (func_face == face) {
                     return &nb_blocks[nb_chunk_index];
                 } else {
