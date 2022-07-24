@@ -148,7 +148,6 @@ void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32&
 }
 
 std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
-    // TODO: Use block functionality
     auto counting_type = get_with_block_functionality<block_counting_type>(block.tp, [&block]<typename Bf>() {
         return Bf::get_block_counting_type(block.st);
     });
