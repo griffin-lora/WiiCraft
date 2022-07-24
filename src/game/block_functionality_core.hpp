@@ -35,7 +35,10 @@ namespace game {
             auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
                 return N_Bf::get_category(nb.st);
             });
-            return category == block::category::OPAQUE_CUBE;
+            return
+                category == block::category::OPAQUE_CUBE ||
+                (face == block::face::TOP && category == block::category::OPAQUE_BOTTOM_SLAB) ||
+                (face == block::face::BOTTOM && category == block::category::OPAQUE_TOP_SLAB);
         }
 
         template<block::face face, typename M, typename F>
@@ -244,7 +247,11 @@ namespace game {
             auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
                 return N_Bf::get_category(nb.st);
             });
-            return category == block::category::OPAQUE_CUBE || category == block::category::TRANSPARENT_CUBE;
+            return
+                category == block::category::OPAQUE_CUBE ||
+                category == block::category::TRANSPARENT_CUBE ||
+                (face == block::face::TOP && category == block::category::OPAQUE_BOTTOM_SLAB) ||
+                (face == block::face::BOTTOM && category == block::category::OPAQUE_TOP_SLAB);
         }
 
         template<block::face face, typename M, typename F>
