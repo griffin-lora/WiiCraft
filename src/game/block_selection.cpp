@@ -59,7 +59,7 @@ void block_selection::update_mesh(const math::matrix view, block_quad_building_a
     math::vector3u8 block_pos = raycast.location.bl_pos;
 
     call_with_block_functionality(block.tp, [&ms_st, &block, block_pos]<typename Bf>() {
-        add_block_vertices<Bf>(ms_st, []() { return nullptr; }, block.st, block_pos);
+        add_block_vertices<Bf>(ms_st, []<block::face face>() { return nullptr; }, block.st, block_pos);
     });
 
     write_into_display_lists({ building_arrays }, ms_st.it, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {

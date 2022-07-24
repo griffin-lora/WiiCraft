@@ -23,8 +23,32 @@ namespace game {
 
     template<typename Bf>
     struct cube_block_functionality {
+        template<block::face face, typename M, typename F>
+        BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+            const block* nb_block = get_face_neighbor_block.template operator()<face>();
+            if (nb_block == nullptr || nb_block->tp != block::type::AIR) {
+                return;
+            }
+            math::vector2u8 uv = Bf::template get_face_uv<face>(st/* TODO: add this param: , *nb_block */);
+            math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
+            add_flat_face_vertices<face, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
+        }
+
         template<typename M, typename F>
-        BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
+        BF_MB void add_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+            pos *= block_draw_size;
+            auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
+
+            // TODO: Use call_func_on_each_face
+            #define CALL_ADD_FACE_VERTICES(f) add_face_vertices<block::face::f>(ms_st, get_face_neighbor_block, st, pos, offset_pos);
+            CALL_ADD_FACE_VERTICES(FRONT)
+            CALL_ADD_FACE_VERTICES(BACK)
+            CALL_ADD_FACE_VERTICES(TOP)
+            CALL_ADD_FACE_VERTICES(BOTTOM)
+            CALL_ADD_FACE_VERTICES(RIGHT)
+            CALL_ADD_FACE_VERTICES(LEFT)
+            #undef CALL_ADD_FACE_VERTICES
+        }
 
         BF_MB std::array<math::box, 1> get_boxes() {
             return {
@@ -88,7 +112,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::DEBUG> : public cube_block_functionality<block_functionality<block::type::DEBUG>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
             return call_face_func_for<face, v2u8>(
                 []() { return v2u8{0, 0}; },
@@ -104,7 +128,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::GRASS> : public cube_block_functionality<block_functionality<block::type::GRASS>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
             return call_face_func_for<face, v2u8>(
                 []() { return v2u8{3, 0}; },
@@ -120,7 +144,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::DIRT> : public cube_block_functionality<block_functionality<block::type::DIRT>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 2, 0 };
         }
     };
@@ -128,7 +152,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::SAND> : public cube_block_functionality<block_functionality<block::type::SAND>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 2, 1 };
         }
     };
@@ -136,7 +160,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::STONE> : public cube_block_functionality<block_functionality<block::type::STONE>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 1, 0 };
         }
     };
@@ -144,7 +168,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::WOOD_PLANKS> : public cube_block_functionality<block_functionality<block::type::WOOD_PLANKS>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 4, 0 };
         }
     };
@@ -152,7 +176,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::STONE_SLAB> : public slab_block_functionality<block_functionality<block::type::STONE_SLAB>> {
         template<block::face face>
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
             return call_face_func_for<face, v2u8>(
                 []() { return v2u8{5, 0}; },
@@ -167,7 +191,7 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::TALL_GRASS> : public foliage_block_functionality<block_functionality<block::type::TALL_GRASS>> {
-        BF_MB math::vector2u8 get_uv_position(bl_st) {
+        BF_MB math::vector2u8 get_uv(bl_st) {
             return { 7, 2 };
         }
     };

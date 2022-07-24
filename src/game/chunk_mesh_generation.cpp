@@ -117,10 +117,10 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
                 bool should_add_back = x != 0;
                 bool should_add_front = x != (chunk::SIZE - 1);
 
-                auto& block = *it;
+                auto& bl = *it;
                 math::vector3u8 block_pos = { x, y, z };
 
-                call_with_block_functionality(block.tp, [&]<typename Bf>() {
+                call_with_block_functionality(bl.tp, [&]<typename Bf>() {
                     add_block_vertices<Bf>(ms_st, [
                         should_add_left,
                         should_add_right,
@@ -129,7 +129,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
                         should_add_back,
                         should_add_front,
                         it
-                    ]<block::face face>() { // Get neighbor block
+                    ]<block::face face>() -> const block* { // Get neighbor block
                         bool should_add_face = call_face_func_for<face, bool>(
                             [&]() { return should_add_front; },
                             [&]() { return should_add_back; },
@@ -143,7 +143,7 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
                         } else {
                             return nullptr;
                         }
-                    }, block.st, block_pos);
+                    }, bl.st, block_pos);
                 });
 
                 check_vertex_count(begin, ms_st.it);
