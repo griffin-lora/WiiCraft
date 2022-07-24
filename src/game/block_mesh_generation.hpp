@@ -40,6 +40,11 @@ namespace game {
         }
     };
 
+    template<typename Bf, typename F>
+    inline void add_block_vertices(block_mesh_state& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 block_pos) {
+        Bf::add_vertices(ms_st, get_face_neighbor_block, st, block_pos);
+    }
+
     template<typename F1, typename F2>
     void write_into_display_lists(const block_quad_iterators& begin, const block_quad_iterators& end,
         gfx::display_list& standard_disp_list,

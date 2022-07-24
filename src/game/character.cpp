@@ -1,6 +1,5 @@
 #include "character.hpp"
 #include "block_core.hpp"
-#include "block_core.inl"
 #include "block_raycast.hpp"
 #include "block_raycast.inl"
 #include "chunk_core.hpp"

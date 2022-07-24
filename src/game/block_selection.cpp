@@ -1,8 +1,8 @@
 #include "block_selection.hpp"
-#include "face_mesh_generation.hpp"
 #include "face_mesh_generation_core.hpp"
 #include "face_mesh_generation_core.inl"
 #include "block_mesh_generation.inl"
+#include "block_functionality.hpp"
 #include "rendering.hpp"
 
 using namespace game;
@@ -55,7 +55,12 @@ void block_selection::update_mesh(const math::matrix view, block_quad_building_a
         .it = { building_arrays }
     };
 
-    add_block_vertices(ms_st, raycast.location.bl_pos, *raycast.location.bl);
+    const auto& block = *raycast.location.bl;
+    math::vector3u8 block_pos = raycast.location.bl_pos;
+
+    call_with_block_functionality(block.tp, [&ms_st, &block, block_pos]<typename Bf>() {
+        add_block_vertices<Bf>(ms_st, []() { return nullptr; }, block.st, block_pos);
+    });
 
     write_into_display_lists({ building_arrays }, ms_st.it, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
         return (
