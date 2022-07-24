@@ -12,6 +12,8 @@ namespace game {
 
     template<block::type type>
     struct block_functionality {
+        BF_MB block::category get_category(bl_st) { return block::category::TRANSPARENT; }
+
         template<typename M, typename F>
         BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
@@ -23,10 +25,23 @@ namespace game {
 
     template<typename Bf>
     struct cube_block_functionality {
+        BF_MB block::category get_category(bl_st) { return block::category::OPAQUE_CUBE; }
+
+        template<block::face face>
+        BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
+            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
+                return N_Bf::get_category(nb.st);
+            });
+            return category == block::category::OPAQUE_CUBE;
+        }
+
         template<block::face face, typename M, typename F>
         BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
             const block* nb_block = get_face_neighbor_block.template operator()<face>();
-            if (nb_block == nullptr || nb_block->tp != block::type::AIR) {
+            if (
+                nb_block == nullptr ||
+                is_face_invisible_with_neighbor<face>(st, *nb_block)
+            ) {
                 return;
             }
             math::vector2u8 uv = Bf::template get_face_uv<face>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
@@ -67,10 +82,18 @@ namespace game {
 
     template<typename Bf>
     struct slab_block_functionality {
+        using state = block::slab_state;
+
+        BF_MB block::category get_category(bl_st st) {
+            switch (st.slab) {
+                default: return block::category::OPAQUE_CUBE;
+                case state::TOP: return block::category::OPAQUE_TOP_SLAB;
+                case state::BOTTOM: return block::category::OPAQUE_BOTTOM_SLAB;
+            }
+        }
+
         template<typename M, typename F>
         BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
-
-        using state = block::slab_state;
 
         BF_MB std::array<math::box, 1> get_boxes(bl_st st) {
             return {
@@ -93,6 +116,8 @@ namespace game {
     
     template<typename Bf>
     struct foliage_block_functionality {
+        BF_MB block::category get_category(bl_st) { return block::category::TRANSPARENT; }
+
         template<typename M, typename F>
         BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
@@ -198,6 +223,8 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::WATER> {
+        BF_MB block::category get_category(bl_st) { return block::category::TRANSPARENT_CUBE; }
+
         template<typename M, typename F>
         BF_MB void add_vertices(M&, const F&, bl_st, math::vector3u8) {}
 

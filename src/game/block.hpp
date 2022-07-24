@@ -63,6 +63,15 @@ namespace game {
         inline bool operator!=(const block& other) const {
             return tp != other.tp || st.slab != other.st.slab;
         }
+
+
+        enum class category {
+            TRANSPARENT,
+            OPAQUE_CUBE,
+            TRANSPARENT_CUBE,
+            OPAQUE_TOP_SLAB,
+            OPAQUE_BOTTOM_SLAB,
+        };
     };
 
     constexpr u8 block_draw_size = 4;
