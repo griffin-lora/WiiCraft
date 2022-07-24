@@ -29,7 +29,7 @@ namespace game {
             if (nb_block == nullptr || nb_block->tp != block::type::AIR) {
                 return;
             }
-            math::vector2u8 uv = Bf::template get_face_uv<face>(st/* TODO: add this param: , *nb_block */);
+            math::vector2u8 uv = Bf::template get_face_uv<face>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
             add_flat_face_vertices<face, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
         }
