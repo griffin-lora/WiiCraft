@@ -55,14 +55,9 @@ namespace game {
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
             // TODO: Use call_func_on_each_face
-            #define CALL_ADD_FACE_VERTICES(f) add_face_vertices<block::face::f>(ms_st, get_face_neighbor_block, st, pos, offset_pos);
-            CALL_ADD_FACE_VERTICES(FRONT)
-            CALL_ADD_FACE_VERTICES(BACK)
-            CALL_ADD_FACE_VERTICES(TOP)
-            CALL_ADD_FACE_VERTICES(BOTTOM)
-            CALL_ADD_FACE_VERTICES(RIGHT)
-            CALL_ADD_FACE_VERTICES(LEFT)
-            #undef CALL_ADD_FACE_VERTICES
+            call_func_on_each_face<void>(
+                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+            );
         }
 
         BF_MB std::array<math::box, 1> get_boxes() {
