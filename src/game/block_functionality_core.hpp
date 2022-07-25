@@ -95,11 +95,88 @@ namespace game {
             }
         }
 
-        template<typename M, typename F>
-        BF_MB void add_faces_vertices(M&, const F&, bl_st, math::vector3u8) {}
+        template<block::face face>
+        BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
+            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
+                return N_Bf::get_category(nb.st);
+            });
+            if (category == block::category::OPAQUE_CUBE) {
+                return true;
+            }
+            switch (st.slab) {
+                case state::BOTTOM: return
+                    face == block::face::BOTTOM ?
+                    category == block::category::OPAQUE_TOP_SLAB :
+                    category == block::category::OPAQUE_BOTTOM_SLAB;
+                case state::TOP: return
+                    face == block::face::TOP ?
+                    category == block::category::OPAQUE_BOTTOM_SLAB :
+                    category == block::category::OPAQUE_TOP_SLAB;
+                case state::BOTH: return
+                    (face == block::face::TOP && category == block::category::OPAQUE_BOTTOM_SLAB) ||
+                    (face == block::face::BOTTOM && category == block::category::OPAQUE_TOP_SLAB);
+            }
+            return true;
+        }
+
+        template<block::face face, typename M, typename F>
+        BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+            if (
+                (face == block::face::TOP && st.slab == state::BOTTOM) ||
+                (face == block::face::BOTTOM && st.slab == state::TOP)
+            ) {
+                return;
+            }
+
+            const block* nb_block = get_face_neighbor_block.template operator()<face>();
+            if (
+                nb_block == nullptr ||
+                is_face_invisible_with_neighbor<face>(st, *nb_block)
+            ) {
+                return;
+            }
+            math::vector2u8 uv = Bf::template get_face_uv<face>(st) * block_draw_size;
+            math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, (
+                face != block::face::TOP && face != block::face::BOTTOM ?
+                (st.slab == state::BOTH ? block_draw_size : half_block_draw_size) :
+                block_draw_size
+            ) };
+            add_flat_face_vertices<face, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
+        }
 
         template<typename M, typename F>
-        BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
+        BF_MB void add_faces_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+            pos *= block_draw_size;
+            if (st.slab == state::TOP) {
+                pos.y += half_block_draw_size;
+            }
+            auto offset_pos = pos + math::vector3u8{ block_draw_size, st.slab == state::BOTH ? block_draw_size : half_block_draw_size, block_draw_size };
+
+            call_func_on_each_face<void>(
+                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+            );
+        }
+
+        template<typename M, typename F>
+        BF_MB void add_general_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+            if (st.slab != state::BOTH) {
+                pos *= block_draw_size;
+                if (st.slab == state::TOP) {
+                    pos.y += half_block_draw_size;
+                }
+                auto offset_pos = pos + math::vector3u8{ block_draw_size, half_block_draw_size, block_draw_size };
+
+                if (st.slab == state::BOTTOM) {
+                    math::vector2u8 uv = Bf::template get_face_uv<block::face::TOP>(st) * block_draw_size;
+                    math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
+                    add_flat_face_vertices<block::face::TOP, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
+                } else {
+                    math::vector2u8 uv = Bf::template get_face_uv<block::face::BOTTOM>(st) * block_draw_size;
+                    math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
+                    add_flat_face_vertices<block::face::BOTTOM, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
+                }
+            }
+        }
 
         BF_MB std::array<math::box, 1> get_boxes(bl_st st) {
             return {
