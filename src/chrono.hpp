@@ -6,5 +6,8 @@ namespace chrono {
     // Microseconds
     using us = s64;
 
-    us get_current_us();
+    template<typename T>
+    using us_tp = T;
+
+    us_tp<s64> get_current_us();
 };

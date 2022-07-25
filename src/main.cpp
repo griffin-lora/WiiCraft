@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	character.update_camera(cam, chrono::get_current_us());
+	character.update_camera(cam, 0);
 	std::optional<math::vector3s32> last_cam_chunk_pos;
 	math::normalize(cam.look);
 
@@ -137,14 +137,14 @@ int main(int argc, char** argv) {
 	chrono::us total_mesh_gen_time = 0;
 	chrono::us last_mesh_gen_time = 0;
 
-	auto program_start = chrono::get_current_us();
+	chrono::us_tp<s64> program_start = chrono::get_current_us();
 	chrono::us start = 0;
 
 	for (;;) {
 
-        auto now = chrono::get_current_us() - program_start;
+        chrono::us now = chrono::get_current_us() - program_start;
 
-		auto delta_time = now - start;
+		chrono::us delta_time = now - start;
 		f32 frame_delta = delta_time / 1000000.0f;
 		f32 fps = 1000000.0f / delta_time;
 
