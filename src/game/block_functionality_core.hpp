@@ -1,7 +1,7 @@
 #pragma once
 #include "block.hpp"
 #include "block_core.hpp"
-#include "face_mesh_generation_core.hpp"
+#include "face_mesh_generation.hpp"
 #include "math/box.hpp"
 #include "traits.hpp"
 #include "block_util.hpp"

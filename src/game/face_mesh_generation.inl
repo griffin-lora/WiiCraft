@@ -1,5 +1,5 @@
 #pragma once
-#include "face_mesh_generation_core.hpp"
+#include "face_mesh_generation.hpp"
 
 ADD_FACE_TEMPLATE void game::add_flat_front_vertices(SHORT_FACE_PARAMS) {
     // +x

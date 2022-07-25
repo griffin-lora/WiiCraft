@@ -5,8 +5,8 @@
 #include "chunk_math.hpp"
 #include "dbg.hpp"
 #include "block_functionality.hpp"
-#include "face_mesh_generation_core.hpp"
-#include "face_mesh_generation_core.inl"
+#include "face_mesh_generation.hpp"
+#include "face_mesh_generation.inl"
 #include "block_mesh_generation.hpp"
 #include "block_mesh_generation.inl"
 #include <cstdio>
