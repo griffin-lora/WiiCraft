@@ -191,8 +191,11 @@ void game::update_chunks(block_quad_building_arrays& building_arrays, chunk::map
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_core_mesh_important) {
             did_important_mesh_update = true;
+            chunk.alpha = 0xff;
             chunk.update_core_mesh_important = false;
             chunk.update_core_mesh_unimportant = false;
+            chunk.fade_in_when_mesh_is_updated = false;
+            chunk.fade_in = false;
             auto start = chrono::get_current_us();
             update_core_mesh(building_arrays, chunk);
             total_mesh_gen_time += chrono::get_current_us() - start;
@@ -201,8 +204,11 @@ void game::update_chunks(block_quad_building_arrays& building_arrays, chunk::map
 
         if (chunk.update_shell_mesh_important) {
             did_important_mesh_update = true;
+            chunk.alpha = 0xff;
             chunk.update_shell_mesh_important = false;
             chunk.update_shell_mesh_unimportant = false;
+            chunk.fade_in_when_mesh_is_updated = false;
+            chunk.fade_in = false;
             auto start = chrono::get_current_us();
             update_shell_mesh(building_arrays, chunk);
             total_mesh_gen_time += chrono::get_current_us() - start;
