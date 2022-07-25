@@ -194,10 +194,11 @@ int main(int argc, char** argv) {
 		character.update_camera(cam, now);
 
 		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time);
+		game::update_chunk_neighborhoods(chunks);
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now);
+		game::update_chunk_visuals(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		skybox.update_if_needed(view, cam);
 		bl_sel.update_if_needed(view, cam);

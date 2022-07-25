@@ -3,8 +3,14 @@
 #include "camera.hpp"
 #include "chunk.hpp"
 #include "stored_chunk.hpp"
+#include "block_mesh_generation.hpp"
+#include "chrono.hpp"
 
 namespace game {
+    void update_chunk_neighborhoods(chunk::map& chunks);
+
+    void update_chunk_visuals(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now);
+
     void manage_chunks_around_camera(
         s32 chunk_erasure_radius,
         s32 chunk_generation_radius,

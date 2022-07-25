@@ -5,8 +5,95 @@
 #include "stored_chunk.hpp"
 #include "util.hpp"
 #include "chrono.hpp"
+#include "chunk_mesh_generation.hpp"
+#include "chunk_block_generation.hpp"
 
 using namespace game;
+
+void game::update_chunk_neighborhoods(chunk::map& chunks) {
+    for (auto& [ pos, chunk ] : chunks) {
+        if (chunk.update_neighborhood) {
+            chunk.update_neighborhood = false;
+            update_chunk_neighborhood(chunks, pos, chunk);
+        }
+    }
+}
+
+void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
+    bool did_important_mesh_update = false;
+    for (auto& [ pos, chunk ] : chunks) {
+        if (chunk.update_core_mesh_important) {
+            did_important_mesh_update = true;
+            chunk.alpha = 0xff;
+            chunk.update_core_mesh_important = false;
+            chunk.update_core_mesh_unimportant = false;
+            chunk.fade_in_when_mesh_is_updated = false;
+            chunk.fade_in = false;
+            auto start = chrono::get_current_us();
+            update_core_mesh(building_arrays, chunk);
+            total_mesh_gen_time += chrono::get_current_us() - start;
+            last_mesh_gen_time = chrono::get_current_us() - start;
+        }
+
+        if (chunk.update_shell_mesh_important) {
+            did_important_mesh_update = true;
+            chunk.alpha = 0xff;
+            chunk.update_shell_mesh_important = false;
+            chunk.update_shell_mesh_unimportant = false;
+            chunk.fade_in_when_mesh_is_updated = false;
+            chunk.fade_in = false;
+            auto start = chrono::get_current_us();
+            update_shell_mesh(building_arrays, chunk);
+            total_mesh_gen_time += chrono::get_current_us() - start;
+            // Don't track MGL since its so small for this
+        }
+    }
+
+    if (!did_important_mesh_update) {
+        for (auto& [ pos, chunk ] : chunks) {
+            if (chunk.update_core_mesh_unimportant) {
+                chunk.update_core_mesh_important = false;
+                chunk.update_core_mesh_unimportant = false;
+                auto start = chrono::get_current_us();
+                update_core_mesh(building_arrays, chunk);
+                total_mesh_gen_time += chrono::get_current_us() - start;
+                last_mesh_gen_time = chrono::get_current_us() - start;
+                if (!chunk.update_shell_mesh_unimportant) {
+                    break;
+                }
+            }
+            if (chunk.update_shell_mesh_unimportant) {
+                chunk.update_shell_mesh_important = false;
+                chunk.update_shell_mesh_unimportant = false;
+                auto start = chrono::get_current_us();
+                update_shell_mesh(building_arrays, chunk);
+                total_mesh_gen_time += chrono::get_current_us() - start;
+                // Don't track MGL here as well
+
+                if (chunk.fade_in_when_mesh_is_updated) {
+                    chunk.fade_in_when_mesh_is_updated = false;
+                    chunk.fade_in = true;
+                    chunk.fade_in_start = now;
+                }
+
+                break;
+            }
+        }
+    }
+
+    for (auto& [ pos, chunk ] : chunks) {
+        if (chunk.fade_in) {
+            auto elapsed = now - chunk.fade_in_start;
+            if (elapsed <= chunk::FADE_IN_TIME) {
+                auto lerp_alpha = math::get_eased(elapsed / (f32)chunk::FADE_IN_TIME);
+
+                chunk.alpha = math::lerp(0x0, 0xff, lerp_alpha);
+            } else {
+                chunk.fade_in = false;
+            }
+        }
+    }
+}
 
 void game::manage_chunks_around_camera(
     s32 chunk_erasure_radius,

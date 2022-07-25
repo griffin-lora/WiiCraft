@@ -46,16 +46,12 @@ namespace game {
         );
     }
 
-    void generate_blocks(chunk& chunk, const math::vector3s32& pos);
-
     void add_chunk_neighborhood_update_to_neighbors(chunk& chunk);
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
     
     std::size_t& get_block_count_ref(chunk& chunk, const block& block);
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
-
-    void update_chunks(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now);
 
     struct world_location {
         math::vector3s32 ch_pos;
