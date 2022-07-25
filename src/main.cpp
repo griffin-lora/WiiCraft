@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunks(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time);
+		game::update_chunks(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		skybox.update_if_needed(view, cam);
 		bl_sel.update_if_needed(view, cam);

@@ -179,7 +179,7 @@ void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
     });
 }
 
-void game::update_chunks(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time) {
+void game::update_chunks(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_neighborhood) {
             chunk.update_neighborhood = false;
@@ -219,15 +219,38 @@ void game::update_chunks(block_quad_building_arrays& building_arrays, chunk::map
                 update_core_mesh(building_arrays, chunk);
                 total_mesh_gen_time += chrono::get_current_us() - start;
                 last_mesh_gen_time = chrono::get_current_us() - start;
-                break;
-            } else if (chunk.update_shell_mesh_unimportant) {
+                if (!chunk.update_shell_mesh_unimportant) {
+                    break;
+                }
+            }
+            if (chunk.update_shell_mesh_unimportant) {
                 chunk.update_shell_mesh_important = false;
                 chunk.update_shell_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
                 update_shell_mesh(building_arrays, chunk);
                 total_mesh_gen_time += chrono::get_current_us() - start;
                 // Don't track MGL here as well
+
+                if (chunk.fade_in_when_mesh_is_updated) {
+                    chunk.fade_in_when_mesh_is_updated = false;
+                    chunk.fade_in = true;
+                    chunk.fade_in_start = now;
+                }
+
                 break;
+            }
+        }
+    }
+
+    for (auto& [ pos, chunk ] : chunks) {
+        if (chunk.fade_in) {
+            auto elapsed = now - chunk.fade_in_start;
+            if (elapsed <= chunk::FADE_IN_TIME) {
+                auto lerp_alpha = math::get_eased(elapsed / (f32)chunk::FADE_IN_TIME);
+
+                chunk.alpha = math::lerp(0x0, 0xff, lerp_alpha);
+            } else {
+                chunk.fade_in = false;
             }
         }
     }

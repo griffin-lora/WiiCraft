@@ -173,7 +173,7 @@ void character::update_camera(camera& cam, chrono::us now) const {
 
     cam.update_view = true;
 
-    auto elapsed = (now - fov_tween_start);
+    auto elapsed = now - fov_tween_start;
 
     if (elapsed <= camera::FOV_TWEEN_TIME) {
         auto alpha = math::get_eased(elapsed / (f32)camera::FOV_TWEEN_TIME);

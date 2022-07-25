@@ -5,6 +5,7 @@
 #include "ext/data_array.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
+#include "chrono.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <optional>
@@ -57,6 +58,7 @@ namespace game {
             gfx::display_list water;
         };
 
+        u8 alpha = 0;
         display_lists core_disp_lists;
         display_lists shell_disp_lists;
 
@@ -75,6 +77,13 @@ namespace game {
         bool update_neighborhood = false;
 
         bool modified = false;
+
+        bool fade_in_when_mesh_is_updated = false;
+
+        static constexpr chrono::us FADE_IN_TIME = 1500000;
+
+        bool fade_in = false;
+        chrono::us fade_in_start;
         
         inline chunk(const math::matrix view, const math::vector3s32& pos) {
             tf.set_position(view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);

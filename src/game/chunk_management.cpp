@@ -100,6 +100,7 @@ void game::manage_chunks_around_camera(
             chunk.update_core_mesh_unimportant = true;
             chunk.update_shell_mesh_unimportant = true;
             chunk.update_neighborhood = false; // Don't update neighborhood since we just updated it
+            chunk.fade_in_when_mesh_is_updated = true;
         }
 
         chunk_positions_to_update_neighborhood_and_mesh.clear();

@@ -17,7 +17,6 @@ void game::init_chunk_drawing() {
 
 	GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
 	GX_SetTevOp(GX_TEVSTAGE1, GX_PASSCLR);
-	GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, 0x7f });
 	GX_SetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_APREV, GX_CA_A1, GX_CA_ZERO);
 	GX_SetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
 
@@ -34,10 +33,16 @@ void game::init_chunk_drawing() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 6);
 }
 
+static void set_alpha(u8 alpha) {
+	GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });
+}
+
 void game::draw_chunks_standard(const math::matrix view, const camera& cam, chunk::map& chunks) {
 	init_chunk_drawing();
 	if (cam.update_view) {
 		for (auto& [ pos, chunk ] : chunks) {
+			set_alpha(chunk.alpha);
+
 			chunk.tf.update_model_view(view);
 			chunk.tf.load(chunk::MAT);
 
@@ -55,6 +60,8 @@ void game::draw_chunks_standard(const math::matrix view, const camera& cam, chun
 void game::draw_chunks_foliage(chunk::map& chunks) {
 	init_chunk_drawing();
 	for (auto& [ pos, chunk ] : chunks) {
+		set_alpha(chunk.alpha);
+
 		chunk.tf.load(chunk::MAT);
 		chunk.core_disp_lists.foliage.call();
 		chunk.shell_disp_lists.foliage.call();
@@ -64,6 +71,8 @@ void game::draw_chunks_foliage(chunk::map& chunks) {
 void game::draw_chunks_water(chunk::map& chunks) {
 	init_chunk_drawing();
 	for (auto& [ pos, chunk ] : chunks) {
+		set_alpha(chunk.alpha);
+		
 		chunk.tf.load(chunk::MAT);
 		chunk.core_disp_lists.water.call();
 		chunk.shell_disp_lists.water.call();
