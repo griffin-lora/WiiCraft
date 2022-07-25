@@ -16,6 +16,7 @@ void block_selection::update_if_needed(const math::matrix view, const camera& ca
 
 void block_selection::draw(chrono::us now, const std::optional<block_raycast>& raycast) const {
     if (raycast.has_value()) {
+        GX_SetNumTevStages(1);
         GX_SetNumChans(1);
         GX_SetNumTexGens(0);
 
@@ -24,8 +25,10 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
 
         u8 alpha = 0x5f + (std::sin(now / 150000.0f) * 0x10);
         GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });
-        GX_SetTevColorIn(GX_TEVSTAGE0, GX_CC_C1, GX_CC_C1, GX_CC_C1, GX_CC_C1);
+        GX_SetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_C1);
+	    GX_SetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
         GX_SetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A1);
+	    GX_SetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
 
         //
 

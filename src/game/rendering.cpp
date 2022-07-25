@@ -4,6 +4,7 @@
 using namespace game;
 
 void game::init_ui_rendering() {
+	GX_SetNumTevStages(1);
 	// set number of rasterized color channels
 	GX_SetNumChans(1);
 

@@ -4,10 +4,8 @@
 using namespace game;
 
 void game::init_chunk_drawing() {
-	// set number of rasterized color channels
+	GX_SetNumTevStages(2);
 	GX_SetNumChans(1);
-
-	//set number of textures to generate
 	GX_SetNumTexGens(1);
 
 	// setup texture coordinate generation
@@ -16,6 +14,12 @@ void game::init_chunk_drawing() {
 
 	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+
+	GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+	GX_SetTevOp(GX_TEVSTAGE1, GX_PASSCLR);
+	GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, 0x7f });
+	GX_SetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_APREV, GX_CA_A1, GX_CA_ZERO);
+	GX_SetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
 
 	//
 

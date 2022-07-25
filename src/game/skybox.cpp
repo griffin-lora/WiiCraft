@@ -122,6 +122,7 @@ void skybox::update_if_needed(const math::matrix view, const camera& cam) {
 }
 
 void skybox::draw() const {
+    GX_SetNumTevStages(1);
     // set number of rasterized color channels
 	GX_SetNumChans(1);
 
