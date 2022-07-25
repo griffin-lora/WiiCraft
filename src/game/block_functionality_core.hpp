@@ -145,7 +145,7 @@ namespace game {
         }
 
         template<typename M, typename F>
-        BF_MB void add_faces_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+        static void __attribute__((noinline)) add_faces_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
             pos *= block_draw_size;
             if (st.slab == state::TOP) {
                 pos.y += half_block_draw_size;
@@ -158,7 +158,7 @@ namespace game {
         }
 
         template<typename M, typename F>
-        BF_MB void add_general_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
+        static void __attribute__((noinline)) add_general_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos) {
             if (st.slab != state::BOTH) {
                 pos *= block_draw_size;
                 if (st.slab == state::TOP) {
