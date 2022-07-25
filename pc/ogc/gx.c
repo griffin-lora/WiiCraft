@@ -57,3 +57,7 @@ void GX_SetZCompLoc(u8 before_tex) {}
 void GX_SetTevColor(u8 tev_regid, GXColor color) {}
 void GX_SetTevColorIn(u8 tevstage, u8 a, u8 b, u8 c, u8 d) {}
 void GX_SetTevAlphaIn(u8 tevstage, u8 a, u8 b, u8 c, u8 d) {}
+
+void GX_SetTevColorOp(u8 tevstage, u8 tevop, u8 tevbias, u8 tevscale, u8 clamp, u8 tevregid) {}
+void GX_SetTevAlphaOp(u8 tevstage, u8 tevop, u8 tevbias, u8 tevscale, u8 clamp, u8 tevregid) {}
+void GX_SetNumTevStages(u8 num) {}
