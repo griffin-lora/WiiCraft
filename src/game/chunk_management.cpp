@@ -28,7 +28,7 @@ void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chu
             chunk.update_core_mesh_important = false;
             chunk.update_core_mesh_unimportant = false;
             chunk.fade_in_when_mesh_is_updated = false;
-            chunk.fade_in = false;
+            chunk.fade_st = chunk::fade_state::NONE;
             auto start = chrono::get_current_us();
             update_core_mesh(building_arrays, chunk);
             total_mesh_gen_time += chrono::get_current_us() - start;
@@ -41,7 +41,7 @@ void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chu
             chunk.update_shell_mesh_important = false;
             chunk.update_shell_mesh_unimportant = false;
             chunk.fade_in_when_mesh_is_updated = false;
-            chunk.fade_in = false;
+            chunk.fade_st = chunk::fade_state::NONE;
             auto start = chrono::get_current_us();
             update_shell_mesh(building_arrays, chunk);
             total_mesh_gen_time += chrono::get_current_us() - start;
@@ -72,8 +72,8 @@ void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chu
 
                 if (chunk.fade_in_when_mesh_is_updated) {
                     chunk.fade_in_when_mesh_is_updated = false;
-                    chunk.fade_in = true;
-                    chunk.fade_in_start = now;
+                    chunk.fade_st = chunk::fade_state::IN;
+                    chunk.fade_start = now;
                 }
 
                 break;
@@ -82,14 +82,21 @@ void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chu
     }
 
     for (auto& [ pos, chunk ] : chunks) {
-        if (chunk.fade_in) {
-            auto elapsed = now - chunk.fade_in_start;
-            if (elapsed <= chunk::FADE_IN_TIME) {
-                auto lerp_alpha = math::get_eased(elapsed / (f32)chunk::FADE_IN_TIME);
+        if (chunk.fade_st != chunk::fade_state::NONE) {
+            auto elapsed = now - chunk.fade_start;
+            if (elapsed <= chunk::FADE_TIME) {
+                u8 begin = chunk.fade_st == chunk::fade_state::IN ? 0x0 : 0xff;
+                u8 end = chunk.fade_st == chunk::fade_state::IN ? 0xff : 0x0;
 
-                chunk.alpha = math::lerp(0x0, 0xff, lerp_alpha);
+                auto lerp_alpha = math::get_eased(elapsed / (f32)chunk::FADE_TIME);
+
+                chunk.alpha = math::lerp(begin, end, lerp_alpha);
             } else {
-                chunk.fade_in = false;
+                if (chunk.fade_st == chunk::fade_state::OUT) {
+                    // Keep in mind that when the chunk fades out it is expected to be erased
+                    chunk.should_erase = true;
+                }
+                chunk.fade_st = chunk::fade_state::NONE;
             }
         }
     }
@@ -106,7 +113,8 @@ void game::manage_chunks_around_camera(
     std::vector<math::vector3s32>& chunk_positions_to_erase,
     chunk::pos_set& chunk_positions_to_create_blocks,
     chunk::pos_set& chunk_positions_to_update_neighborhood_and_mesh,
-    chrono::us& total_block_gen_time
+    chrono::us& total_block_gen_time,
+    chrono::us now
 ) {
     auto cam_chunk_pos = get_chunk_position_from_world_position(cam.position);
 
@@ -114,7 +122,11 @@ void game::manage_chunks_around_camera(
     if (!last_cam_chunk_pos.has_value() || cam_chunk_pos != last_cam_chunk_pos) {
         // Remove chunks outside of the sphere of radius chunk_erasure_radius
         for (auto& [ pos, chunk ] : chunks) {
-            if (math::length_squared(pos - cam_chunk_pos) > (chunk_erasure_radius * chunk_erasure_radius)) {
+            if (chunk.fade_st == chunk::fade_state::NONE && math::length_squared(pos - cam_chunk_pos) > (chunk_erasure_radius * chunk_erasure_radius)) {
+                chunk.fade_st = chunk::fade_state::OUT;
+                chunk.fade_start = now;
+            }
+            if (chunk.should_erase) {
                 if (chunk.modified) {
                     // If the chunk is modified the chunk in the stored_chunks map
                     auto stored_pos = pos;

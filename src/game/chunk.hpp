@@ -76,14 +76,22 @@ namespace game {
 
         bool update_neighborhood = false;
 
-        bool modified = false;
+        bool should_erase = false;
 
+        bool modified = false;
+        
         bool fade_in_when_mesh_is_updated = false;
 
-        static constexpr chrono::us FADE_IN_TIME = 1500000;
+        static constexpr chrono::us FADE_TIME = 1500000;
 
-        bool fade_in = false;
-        chrono::us fade_in_start;
+        enum class fade_state {
+            NONE,
+            IN,
+            OUT
+        };
+
+        fade_state fade_st = fade_state::NONE;
+        chrono::us fade_start;
         
         inline chunk(const math::matrix view, const math::vector3s32& pos) {
             tf.set_position(view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);

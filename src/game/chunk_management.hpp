@@ -22,6 +22,7 @@ namespace game {
         std::vector<math::vector3s32>& chunk_positions_in_function_state,
         chunk::pos_set& chunk_positions_to_create_blocks,
         chunk::pos_set& chunk_positions_to_update_neighborhood_and_mesh,
-        chrono::us& total_block_gen_time
+        chrono::us& total_block_gen_time,
+        chrono::us now
     );
 }
