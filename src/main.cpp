@@ -27,6 +27,7 @@
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
 #include "game/debug_ui.hpp"
+#include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
@@ -108,7 +109,7 @@ int main(int argc, char** argv) {
 	game::chunk::map chunks;
 
 	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
-	game::block_quad_building_arrays quad_building_arrays;
+	game::chunk_quad_building_arrays quad_building_arrays;
 
 	game::stored_chunk::map stored_chunks;
 
@@ -186,7 +187,7 @@ int main(int argc, char** argv) {
 		auto raycast = game::get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), []<typename Bf>(game::bl_st st) {
 			return Bf::get_selection_boxes(st);
 		}, [](auto&) {});
-		bl_sel.handle_raycast(view, quad_building_arrays, raycast);
+		bl_sel.handle_raycast(view, quad_building_arrays.standard, raycast);
 
 		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
 		character.apply_physics(chunks, frame_delta);
@@ -208,15 +209,8 @@ int main(int argc, char** argv) {
 		skybox.draw();
 
 		GX_SetCurrentMtx(game::chunk::MAT);
-		
-		game::init_standard_rendering();
-		game::draw_chunks_standard(view, cam, chunks);
 
-		game::init_foliage_rendering();
-		game::draw_chunks_foliage(chunks);
-
-		game::init_water_rendering();
-		game::draw_chunks_water(chunks);
+		game::draw_chunks(view, cam, chunks);
 		
 		bl_sel.draw(now, raycast);
 		

@@ -1,8 +1,19 @@
 #pragma once
 #include "chunk.hpp"
-#include "block_mesh_generation.hpp"
+#include "chunk_mesh_generation.hpp"
 
 namespace game {
-    void update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk);
-    void update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk);
+    struct chunk_quad_building_arrays {
+        static constexpr std::size_t SAFE_BUFFER_OVERFLOW_SIZE = 0x100;
+
+        using quad_array = ext::data_array<chunk::quad>;
+        quad_array standard;
+        quad_array foliage;
+        quad_array transparent;
+
+        inline chunk_quad_building_arrays() : standard(chunk::MAX_STANDARD_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), foliage(chunk::MAX_FOLIAGE_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), transparent(chunk::MAX_TRANSPARENT_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE) {}
+    };
+
+    void update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk);
+    void update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk);
 }

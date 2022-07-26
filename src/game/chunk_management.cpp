@@ -19,7 +19,7 @@ void game::update_chunk_neighborhoods(chunk::map& chunks) {
     }
 }
 
-void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
+void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
     bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_core_mesh_important) {

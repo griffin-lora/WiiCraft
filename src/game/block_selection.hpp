@@ -15,18 +15,18 @@ namespace game {
         std::optional<math::vector3s32> last_block_pos;
         std::optional<block> last_block;
 
-	    gfx::display_list standard_disp_list;
-	    gfx::display_list foliage_disp_list;
-	    gfx::display_list water_disp_list;
+	    gfx::display_list disp_list;
         math::transform_3d tf;
+
+        bool cull_back = true;
 
         inline block_selection() { }
 
         void update_if_needed(const math::matrix view, const camera& cam);
         void draw(chrono::us now, const std::optional<block_raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, block_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast);
+        void handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_array, const std::optional<block_raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, block_quad_building_arrays& building_arrays, const block_raycast& raycast);
+            void update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_array, const block_raycast& raycast);
     };
 }

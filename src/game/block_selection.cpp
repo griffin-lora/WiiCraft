@@ -1,7 +1,6 @@
 #include "block_selection.hpp"
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
-#include "block_mesh_generation.inl"
 #include "block_functionality.hpp"
 #include "rendering.hpp"
 
@@ -39,23 +38,44 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
 
         GX_SetCurrentMtx(MAT);
 
-        init_standard_rendering();
-	    standard_disp_list.call();
+        GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+        GX_SetZCompLoc(GX_TRUE);
 
-        init_foliage_rendering();
-	    foliage_disp_list.call();
+        GX_SetCullMode(cull_back ? GX_CULL_BACK : GX_CULL_NONE);
+	    disp_list.call();
 
-        init_water_rendering();
-	    water_disp_list.call();
+        if (!cull_back) {
+            GX_SetCullMode(GX_CULL_BACK);
+        }
     }
 }
 
-void block_selection::update_mesh(const math::matrix view, block_quad_building_arrays& building_arrays, const block_raycast& raycast) {
+struct block_selection_mesh_state {
+    ext::data_array<chunk::quad>::iterator back_cull_it;
+    ext::data_array<chunk::quad>::iterator no_cull_it;
+
+    inline void add_standard(const chunk::quad& quad) {
+        *back_cull_it++ = quad;
+    }
+
+    inline void add_foliage(const chunk::quad& quad) {
+        *no_cull_it++ = quad;
+    }
+
+    inline void add_transparent(const chunk::quad& quad) {
+        *back_cull_it++ = quad;
+    }
+};
+
+void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_array, const block_raycast& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
     tf.load(MAT);
 
-    block_mesh_state ms_st = {
-        .it = { building_arrays }
+    auto begin = building_array.begin();
+
+    block_selection_mesh_state ms_st = {
+        .back_cull_it = begin,
+        .no_cull_it = begin
     };
 
     // TODO: actually use real block data
@@ -68,22 +88,42 @@ void block_selection::update_mesh(const math::matrix view, block_quad_building_a
         add_block_vertices<Bf>(ms_st, [&air_block]<block::face face>() { return &air_block; }, block.st, block_pos);
     });
 
-    write_into_display_lists({ building_arrays }, ms_st.it, standard_disp_list, foliage_disp_list, water_disp_list, [](auto vert_count) {
-        return (
-            gfx::get_begin_instruction_size(vert_count) +
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-            gfx::get_vector_instruction_size<4, u8>(vert_count) // Color
-        );
-    }, [](auto& vert) {
+    cull_back = true;
+    auto end = ms_st.back_cull_it;
+    std::size_t vert_count = 4 * (end - begin);
+    if (vert_count == 0) {
+        cull_back = false;
+        end = ms_st.no_cull_it;
+        vert_count = 4 * (end - begin);
+    }
+
+    disp_list.resize(
+        gfx::get_begin_instruction_size(vert_count) +
+        gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+        gfx::get_vector_instruction_size<4, u8>(vert_count) // Color
+    );
+
+    constexpr auto write_vertex = [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+    };
+
+    disp_list.write_into([begin, end, vert_count, write_vertex]() {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
+        for (auto it = begin; it != end; ++it) {
+            write_vertex(it->vert0);
+            write_vertex(it->vert1);
+            write_vertex(it->vert2);
+            write_vertex(it->vert3);
+        }
+        GX_End();
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, block_quad_building_arrays& building_arrays, const std::optional<block_raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_array, const std::optional<block_raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos || *raycast->location.bl != *last_block) {
-            update_mesh(view, building_arrays, *raycast);
+            update_mesh(view, building_array, *raycast);
         }
 
         last_block_pos = raycast->location.bl_pos;

@@ -7,11 +7,71 @@
 #include "block_functionality.hpp"
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
-#include "block_mesh_generation.hpp"
-#include "block_mesh_generation.inl"
 #include <cstdio>
 
 using namespace game;
+
+struct chunk_quad_iterators {
+    using quad_it = ext::data_array<chunk::quad>::iterator;
+    quad_it standard;
+    quad_it foliage;
+    quad_it transparent;
+
+    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : standard(arrays.standard.begin()), foliage(arrays.foliage.begin()), transparent(arrays.transparent.begin()) {}
+};
+
+struct chunk_mesh_state {
+    chunk_quad_iterators it;
+
+    inline void add_standard(const chunk::quad& quad) {
+        *it.standard++ = quad;
+    }
+
+    inline void add_foliage(const chunk::quad& quad) {
+        *it.foliage++ = quad;
+    }
+
+    inline void add_transparent(const chunk::quad& quad) {
+        *it.transparent++ = quad;
+    }
+};
+
+static void write_into_display_lists(const chunk_quad_iterators& begin, const chunk_quad_iterators& end, chunk::display_lists& disp_lists) {
+    using const_quad_it = ext::data_array<chunk::quad>::const_iterator;
+
+    auto write_into_disp_list = [](const_quad_it begin, const_quad_it end, gfx::display_list& disp_list) {
+        std::size_t vert_count = (end - begin) * 4;
+
+        std::size_t disp_list_size = (
+            gfx::get_begin_instruction_size(vert_count) +
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+            gfx::get_vector_instruction_size<2, u8>(vert_count) // UV
+        );
+        disp_list.resize(disp_list_size);
+
+        disp_list.write_into([&begin, &end, vert_count]() {
+            GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
+
+            constexpr auto write_vert = [](auto& vert) {
+                GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+                GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+            };
+
+            for (auto it = begin; it != end; ++it) {
+                write_vert(it->vert0);
+                write_vert(it->vert1);
+                write_vert(it->vert2);
+                write_vert(it->vert3);
+            }
+            
+            GX_End();
+        });
+    };
+
+    write_into_disp_list(begin.standard, end.standard, disp_lists.standard);
+    write_into_disp_list(begin.foliage, end.foliage, disp_lists.foliage);
+    write_into_disp_list(begin.transparent, end.transparent, disp_lists.transparent);
+}
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
 static constexpr s32 Y_OFFSET = chunk::SIZE;
@@ -32,7 +92,7 @@ static inline const_block_it get_block_face_iterator_offset(const_block_it it) {
 }
 
 template<block::face face>
-static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, block_mesh_state& ms_st, math::vector3u8 block_pos) {
+static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, chunk_mesh_state& ms_st, math::vector3u8 block_pos) {
     if (nb_blocks != nullptr) {
         auto& bl = blocks[index];
         call_with_block_functionality(bl.tp, [&]<typename Bf>() {
@@ -47,11 +107,11 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
     }
 }
 
-static void check_vertex_count(const block_quad_iterators& begin, const block_quad_iterators& end) {
+static void check_vertex_count(const chunk_quad_iterators& begin, const chunk_quad_iterators& end) {
     if (
         (end.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
         (end.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
-        (end.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+        (end.transparent - begin.transparent) > chunk::MAX_TRANSPARENT_QUAD_COUNT
     ) {
         dbg::error([]() {
             printf("Chunk quad count is too high\n");
@@ -59,26 +119,13 @@ static void check_vertex_count(const block_quad_iterators& begin, const block_qu
     }
 }
 
-static inline void write_into_chunk_display_lists(const block_quad_iterators& begin, const block_quad_iterators& end, chunk::display_lists& disp_lists) {
-    write_into_display_lists(begin, end, disp_lists.standard, disp_lists.foliage, disp_lists.water, [](auto vert_count) {
-        return (
-            gfx::get_begin_instruction_size(vert_count) +
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-            gfx::get_vector_instruction_size<2, u8>(vert_count) // UV
-        );
-    }, [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    });
-}
-
 static inline void clear_display_lists(chunk::display_lists& disp_lists) {
     disp_lists.standard.clear();
     disp_lists.foliage.clear();
-    disp_lists.water.clear();
+    disp_lists.transparent.clear();
 }
 
-void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
+void game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
     if (
         chunk.invisible_block_count == chunk::BLOCKS_COUNT ||
         chunk.fully_opaque_block_count == chunk::BLOCKS_COUNT
@@ -87,9 +134,9 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
         return;
     }
 
-    const block_quad_iterators begin = { building_arrays };
+    const chunk_quad_iterators begin = { building_arrays };
 
-    block_mesh_state ms_st = {
+    chunk_mesh_state ms_st = {
         .it = { building_arrays }
     };
 
@@ -143,10 +190,10 @@ void game::update_core_mesh(block_quad_building_arrays& building_arrays, chunk& 
         }
     }
 
-    write_into_chunk_display_lists(begin, ms_st.it, chunk.core_disp_lists);
+    write_into_display_lists(begin, ms_st.it, chunk.core_disp_lists);
 }
 
-void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk& chunk) {
+void game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
     if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
         clear_display_lists(chunk.shell_disp_lists);
         return;
@@ -173,9 +220,9 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
     auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
     auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
 
-    const block_quad_iterators begin = { building_arrays };
+    const chunk_quad_iterators begin = { building_arrays };
 
-    block_mesh_state ms_st = {
+    chunk_mesh_state ms_st = {
         .it = { building_arrays }
     };
     
@@ -214,5 +261,5 @@ void game::update_shell_mesh(block_quad_building_arrays& building_arrays, chunk&
         bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
-    write_into_chunk_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
+    write_into_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
 }
