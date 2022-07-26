@@ -93,8 +93,11 @@ void game::update_chunk_visuals(block_quad_building_arrays& building_arrays, chu
                 chunk.alpha = math::lerp(begin, end, lerp_alpha);
             } else {
                 if (chunk.fade_st == chunk::fade_state::OUT) {
+                    chunk.alpha = 0x0;
                     // Keep in mind that when the chunk fades out it is expected to be erased
                     chunk.should_erase = true;
+                } else {
+                    chunk.alpha = 0xff;
                 }
                 chunk.fade_st = chunk::fade_state::NONE;
             }
