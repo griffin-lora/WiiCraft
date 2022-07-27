@@ -122,7 +122,8 @@ void game::manage_chunks_around_camera(
     chunk::pos_set& chunk_positions_to_create_blocks,
     chunk::pos_set& chunk_positions_to_update_neighborhood_and_mesh,
     chrono::us& total_block_gen_time,
-    chrono::us now
+    chrono::us_tp<s64> now_from_epoch,
+    chrono::us now_from_program_start
 ) {
     auto cam_chunk_pos = get_chunk_position_from_world_position(cam.position);
 
@@ -132,7 +133,7 @@ void game::manage_chunks_around_camera(
         for (auto& [ pos, chunk ] : chunks) {
             if (chunk.fade_st == chunk::fade_state::NONE && math::length_squared(pos - cam_chunk_pos) > (chunk_erasure_radius * chunk_erasure_radius)) {
                 chunk.fade_st = chunk::fade_state::OUT;
-                chunk.fade_start = now;
+                chunk.fade_start = now_from_program_start;
             }
             if (chunk.should_erase) {
                 if (chunk.modified) {
@@ -168,7 +169,7 @@ void game::manage_chunks_around_camera(
         last_cam_chunk_pos = cam_chunk_pos;
     }
 
-    if (chunk_positions_to_create_blocks.size() > 0) {
+    while (chunk_positions_to_create_blocks.size() > 0) {
         auto pos_it = chunk_positions_to_create_blocks.begin();
 
         auto chunk_pos = *pos_it;
@@ -188,6 +189,10 @@ void game::manage_chunks_around_camera(
             auto start = chrono::get_current_us();
             generate_blocks(chunk, pos);
             total_block_gen_time += chrono::get_current_us() - start;
+        }
+        auto now = chrono::get_current_us();
+        if ((now - now_from_epoch) >= 15600) {
+            break;
         }
 
         chunk_positions_to_update_neighborhood_and_mesh.insert(pos);

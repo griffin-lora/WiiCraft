@@ -23,6 +23,7 @@ namespace game {
         chunk::pos_set& chunk_positions_to_create_blocks,
         chunk::pos_set& chunk_positions_to_update_neighborhood_and_mesh,
         chrono::us& total_block_gen_time,
-        chrono::us now
+        chrono::us_tp<s64> now_from_epoch,
+        chrono::us now_from_program_start
     );
 }
