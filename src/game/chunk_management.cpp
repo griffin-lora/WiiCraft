@@ -52,6 +52,10 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
     if (!did_important_mesh_update) {
         for (auto& [ pos, chunk ] : chunks) {
             if (chunk.update_core_mesh_unimportant) {
+                if ((chrono::get_current_us() - now_from_epoch) >= 13600) {
+                    break;
+                }
+
                 chunk.update_core_mesh_important = false;
                 chunk.update_core_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
@@ -59,28 +63,23 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
                 auto now = chrono::get_current_us();
                 total_mesh_gen_time += now - start;
                 last_mesh_gen_time = now - start;
-
-                if ((now - now_from_epoch) >= 13600) {
-                    break;
-                }
             }
             if (chunk.update_shell_mesh_unimportant) {
+                if ((chrono::get_current_us() - now_from_epoch) >= 15600) {
+                    break;
+                }
+
                 chunk.update_shell_mesh_important = false;
                 chunk.update_shell_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
                 update_shell_mesh(building_arrays, chunk);
-                auto now = chrono::get_current_us();
-                total_mesh_gen_time += now - start;
+                total_mesh_gen_time += chrono::get_current_us() - start;
                 // Don't track MGL here as well
 
                 if (chunk.fade_in_when_mesh_is_updated) {
                     chunk.fade_in_when_mesh_is_updated = false;
                     chunk.fade_st = chunk::fade_state::IN;
                     chunk.fade_start = now_from_program_start;
-                }
-
-                if ((now - now_from_epoch) >= 15600) {
-                    break;
                 }
             }
         }
@@ -170,6 +169,10 @@ void game::manage_chunks_around_camera(
     }
 
     while (chunk_positions_to_create_blocks.size() > 0) {
+        if ((chrono::get_current_us() - now_from_epoch) >= 15600) {
+            break;
+        }
+
         auto pos_it = chunk_positions_to_create_blocks.begin();
 
         auto chunk_pos = *pos_it;
@@ -189,10 +192,6 @@ void game::manage_chunks_around_camera(
             auto start = chrono::get_current_us();
             generate_blocks(chunk, pos);
             total_block_gen_time += chrono::get_current_us() - start;
-        }
-        auto now = chrono::get_current_us();
-        if ((now - now_from_epoch) >= 15600) {
-            break;
         }
 
         chunk_positions_to_update_neighborhood_and_mesh.insert(pos);
