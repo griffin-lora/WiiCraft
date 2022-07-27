@@ -50,9 +50,18 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
     }
 }
 
+struct block_selection_quad {
+    math::vector3u8 vert0;
+    math::vector3u8 vert1;
+    math::vector3u8 vert2;
+    math::vector3u8 vert3;
+
+    inline block_selection_quad(const chunk::quad& quad) : vert0(quad.vert0.pos), vert1(quad.vert1.pos), vert2(quad.vert2.pos), vert3(quad.vert3.pos) { }
+};
+
 struct block_selection_mesh_state {
-    ext::data_array<chunk::quad>::iterator back_cull_it;
-    ext::data_array<chunk::quad>::iterator no_cull_it;
+    block_selection_quad* back_cull_it;
+    block_selection_quad* no_cull_it;
 
     inline void add_standard(const chunk::quad& quad) {
         *back_cull_it++ = quad;
@@ -71,7 +80,7 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
     tf.load(MAT);
 
-    auto begin = building_array.begin();
+    auto begin = (block_selection_quad*)building_array.data();
 
     block_selection_mesh_state ms_st = {
         .back_cull_it = begin,
@@ -104,7 +113,7 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
     );
 
     constexpr auto write_vertex = [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_Position3u8(vert.x, vert.y, vert.z);
     };
 
     disp_list.write_into([begin, end, vert_count, write_vertex]() {
