@@ -19,7 +19,7 @@ void game::update_chunk_neighborhoods(chunk::map& chunks) {
     }
 }
 
-void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
+void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us_tp<s64> now_from_epoch, chrono::us now_from_program_start) {
     bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_core_mesh_important) {
@@ -56,9 +56,11 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
                 chunk.update_core_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
                 update_core_mesh(building_arrays, chunk);
-                total_mesh_gen_time += chrono::get_current_us() - start;
-                last_mesh_gen_time = chrono::get_current_us() - start;
-                if (!chunk.update_shell_mesh_unimportant) {
+                auto now = chrono::get_current_us();
+                total_mesh_gen_time += now - start;
+                last_mesh_gen_time = now - start;
+
+                if ((now - now_from_epoch) >= 13600) {
                     break;
                 }
             }
@@ -67,23 +69,26 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
                 chunk.update_shell_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
                 update_shell_mesh(building_arrays, chunk);
-                total_mesh_gen_time += chrono::get_current_us() - start;
+                auto now = chrono::get_current_us();
+                total_mesh_gen_time += now - start;
                 // Don't track MGL here as well
 
                 if (chunk.fade_in_when_mesh_is_updated) {
                     chunk.fade_in_when_mesh_is_updated = false;
                     chunk.fade_st = chunk::fade_state::IN;
-                    chunk.fade_start = now;
+                    chunk.fade_start = now_from_program_start;
                 }
 
-                break;
+                if ((now - now_from_epoch) >= 15600) {
+                    break;
+                }
             }
         }
     }
 
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.fade_st != chunk::fade_state::NONE) {
-            auto elapsed = now - chunk.fade_start;
+            auto elapsed = now_from_program_start - chunk.fade_start;
             if (elapsed <= chunk::FADE_TIME) {
                 u8 begin = chunk.fade_st == chunk::fade_state::IN ? 0x0 : 0xff;
                 u8 end = chunk.fade_st == chunk::fade_state::IN ? 0xff : 0x0;

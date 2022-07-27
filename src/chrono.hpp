@@ -4,7 +4,7 @@
 // Not std::chrono since that doesn't work :)
 namespace chrono {
     // Microseconds
-    using us = s64;
+    using us = u32;
 
     template<typename T>
     using us_tp = T;
