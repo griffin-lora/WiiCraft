@@ -272,7 +272,7 @@ namespace game {
     struct block_functionality<block::type::SAND> : public cube_block_functionality<block_functionality<block::type::SAND>> {
         template<block::face face>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
-            return { 2, 1 };
+            return { 9, 0 };
         }
     };
 
@@ -311,7 +311,7 @@ namespace game {
     template<>
     struct block_functionality<block::type::TALL_GRASS> : public foliage_block_functionality<block_functionality<block::type::TALL_GRASS>> {
         BF_MB math::vector2u8 get_uv(bl_st) {
-            return { 7, 2 };
+            return { 7, 0 };
         }
     };
 
@@ -340,7 +340,7 @@ namespace game {
             ) {
                 return;
             }
-            math::vector2u8 uv = math::vector2u8{ 13, 12 } * block_draw_size;
+            math::vector2u8 uv = math::vector2u8{ 8, 0 } * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
             add_flat_face_vertices<face, M, &M::add_transparent>(ms_st, pos, offset_pos, uv, offset_uv);
         }

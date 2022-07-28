@@ -21,13 +21,13 @@ water_overlay::water_overlay() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
 
         GX_Position2u16(0, 0);
-        GX_TexCoord2u8(13, 12);
+        GX_TexCoord2u8(8, 0);
         GX_Position2u16(640, 0);
-        GX_TexCoord2u8(14, 12);
+        GX_TexCoord2u8(9, 0);
         GX_Position2u16(640, 480);
-        GX_TexCoord2u8(14, 13);
+        GX_TexCoord2u8(9, 1);
         GX_Position2u16(0, 480);
-        GX_TexCoord2u8(13, 13);
+        GX_TexCoord2u8(8, 1);
 
         GX_End();
     });
