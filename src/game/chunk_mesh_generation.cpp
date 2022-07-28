@@ -125,13 +125,13 @@ static inline void clear_display_lists(chunk::display_lists& disp_lists) {
     disp_lists.transparent.clear();
 }
 
-void game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
+mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
     if (
         chunk.invisible_block_count == chunk::BLOCKS_COUNT ||
         chunk.fully_opaque_block_count == chunk::BLOCKS_COUNT
     ) {
         clear_display_lists(chunk.core_disp_lists);
-        return;
+        return mesh_update_state::CONTINUE;
     }
 
     const chunk_quad_iterators begin = { building_arrays };
@@ -191,12 +191,14 @@ void game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& 
     }
 
     write_into_display_lists(begin, ms_st.it, chunk.core_disp_lists);
+    
+    return mesh_update_state::BREAK;
 }
 
-void game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
+mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
     if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
         clear_display_lists(chunk.shell_disp_lists);
-        return;
+        return mesh_update_state::CONTINUE;
     }
 
     const auto blocks = chunk.blocks.data();
@@ -219,6 +221,12 @@ void game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk&
     auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
     auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
     auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
+
+    // TODO: Implement this better.
+    if (front_nb_blocks == nullptr && back_nb_blocks == nullptr && top_nb_blocks == nullptr && bottom_nb_blocks == nullptr && right_nb_blocks == nullptr && left_nb_blocks == nullptr) {
+        clear_display_lists(chunk.shell_disp_lists);
+        return mesh_update_state::CONTINUE;
+    }
 
     const chunk_quad_iterators begin = { building_arrays };
 
@@ -262,4 +270,6 @@ void game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk&
     }
 
     write_into_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
+
+    return mesh_update_state::BREAK;
 }

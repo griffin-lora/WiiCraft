@@ -9,7 +9,7 @@
 namespace game {
     void update_chunk_neighborhoods(chunk::map& chunks);
 
-    void update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us_tp<s64> now_from_epoch, chrono::us now_from_program_start);
+    void update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now);
 
     void manage_chunks_around_camera(
         s32 chunk_erasure_radius,
@@ -23,7 +23,6 @@ namespace game {
         chunk::pos_set& chunk_positions_to_create_blocks,
         chunk::pos_set& chunk_positions_to_update_neighborhood_and_mesh,
         chrono::us& total_block_gen_time,
-        chrono::us_tp<s64> now_from_epoch,
-        chrono::us now_from_program_start
+        chrono::us now
     );
 }

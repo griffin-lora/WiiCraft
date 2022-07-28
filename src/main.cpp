@@ -139,18 +139,16 @@ int main(int argc, char** argv) {
 	chrono::us last_mesh_gen_time = 0;
 
 	chrono::us_tp<s64> program_start = chrono::get_current_us();
-	chrono::us start_from_program_start = 0;
+	chrono::us start = 0;
 
 	for (;;) {
+        chrono::us now = chrono::get_current_us() - program_start;
 
-		chrono::us_tp<s64> now_from_epoch = chrono::get_current_us();
-        chrono::us now_from_program_start = now_from_epoch - program_start;
-
-		chrono::us delta_time = now_from_program_start - start_from_program_start;
+		chrono::us delta_time = now - start;
 		f32 frame_delta = delta_time / 1000000.0f;
 		f32 fps = 1000000.0f / delta_time;
 
-		start_from_program_start = now_from_program_start;
+		start = now;
 
 		static constexpr s32 CHAN = 0;
 
@@ -174,7 +172,7 @@ int main(int argc, char** argv) {
 
 			math::vector3u16 nunchuk_accel = { nunchuk.accel.x, nunchuk.accel.y, nunchuk.accel.z };
 
-			character.handle_input(cam, last_wpad_accel, last_nunchuk_accel, now_from_program_start, frame_delta, wpad_accel, nunchuk_vector, nunchuk_buttons_down, nunchuk_accel);
+			character.handle_input(cam, last_wpad_accel, last_nunchuk_accel, now, frame_delta, wpad_accel, nunchuk_vector, nunchuk_buttons_down, nunchuk_accel);
 
 			last_nunchuk_accel = nunchuk_accel;
 			// character.velocity.y = input::get_plus_minus_input_scalar(buttons_held) * 15.0f;
@@ -193,14 +191,14 @@ int main(int argc, char** argv) {
 		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
 		character.apply_physics(chunks, frame_delta);
 		character.apply_velocity(frame_delta);
-		character.update_camera(cam, now_from_program_start);
+		character.update_camera(cam, now);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time, now_from_epoch, now_from_program_start);
+		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time, now);
 		game::update_chunk_neighborhoods(chunks);
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunk_visuals(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now_from_epoch, now_from_program_start);
+		game::update_chunk_visuals(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		skybox.update_if_needed(view, cam);
 		bl_sel.update_if_needed(view, cam);
@@ -213,7 +211,7 @@ int main(int argc, char** argv) {
 
 		game::draw_chunks(view, cam, chunks);
 		
-		bl_sel.draw(now_from_program_start, raycast);
+		bl_sel.draw(now, raycast);
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();
