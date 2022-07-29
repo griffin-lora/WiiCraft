@@ -94,6 +94,20 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		}
 	}
 
+	// Transparent
+	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+	GX_SetZCompLoc(GX_TRUE);
+	GX_SetCullMode(GX_CULL_BACK);
+	for (auto& [ pos, chunk ] : chunks) {
+		set_alpha(chunk.alpha);
+		
+		chunk.tf.load(chunk::MAT);
+		chunk.core_disp_lists.transparent.call();
+		chunk.shell_disp_lists.transparent.call();
+	}
+
+	init_tinted_chunk_drawing();
 	// Foliage
 	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 
@@ -106,19 +120,5 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		chunk.tf.load(chunk::MAT);
 		chunk.core_disp_lists.foliage.call();
 		chunk.shell_disp_lists.foliage.call();
-	}
-
-	init_tinted_chunk_drawing();
-	// Transparent
-	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
-
-	GX_SetZCompLoc(GX_TRUE);
-	GX_SetCullMode(GX_CULL_BACK);
-	for (auto& [ pos, chunk ] : chunks) {
-		set_alpha(chunk.alpha);
-		
-		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.transparent.call();
-		chunk.shell_disp_lists.transparent.call();
 	}
 }

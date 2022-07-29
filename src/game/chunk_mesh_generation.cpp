@@ -86,8 +86,8 @@ static void write_into_display_lists(const chunk_quad_iterators& begin, const ch
     };
     
     write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.standard, end.standard, disp_lists.standard);
-    write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.foliage, end.foliage, disp_lists.foliage);
-    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.transparent, end.transparent, disp_lists.transparent);
+    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.foliage, end.foliage, disp_lists.foliage);
+    write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.transparent, end.transparent, disp_lists.transparent);
 }
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
