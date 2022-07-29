@@ -36,41 +36,58 @@ struct chunk_mesh_state {
     }
 };
 
+using const_quad_it = ext::data_array<chunk::quad>::const_iterator;
+
+template<typename F1, typename F2>
+static void write_into_display_list(F1 get_disp_list_size, F2 write_vert, const_quad_it begin, const_quad_it end, gfx::display_list& disp_list) {
+    std::size_t vert_count = (end - begin) * 4;
+
+    disp_list.resize(get_disp_list_size(vert_count));
+
+    disp_list.write_into([&write_vert, &begin, &end, vert_count]() {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
+
+        for (auto it = begin; it != end; ++it) {
+            write_vert(it->vert0);
+            write_vert(it->vert1);
+            write_vert(it->vert2);
+            write_vert(it->vert3);
+        }
+        
+        GX_End();
+    });
+};
+
 static void write_into_display_lists(const chunk_quad_iterators& begin, const chunk_quad_iterators& end, chunk::display_lists& disp_lists) {
-    using const_quad_it = ext::data_array<chunk::quad>::const_iterator;
-
-    auto write_into_disp_list = [](const_quad_it begin, const_quad_it end, gfx::display_list& disp_list) {
-        std::size_t vert_count = (end - begin) * 4;
-
-        std::size_t disp_list_size = (
+    constexpr auto standard_get_disp_list_size = [](std::size_t vert_count) {
+        return
             gfx::get_begin_instruction_size(vert_count) +
             gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-            gfx::get_vector_instruction_size<2, u8>(vert_count) // UV
-        );
-        disp_list.resize(disp_list_size);
-
-        disp_list.write_into([&begin, &end, vert_count]() {
-            GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
-
-            constexpr auto write_vert = [](auto& vert) {
-                GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-                GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-            };
-
-            for (auto it = begin; it != end; ++it) {
-                write_vert(it->vert0);
-                write_vert(it->vert1);
-                write_vert(it->vert2);
-                write_vert(it->vert3);
-            }
-            
-            GX_End();
-        });
+            gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
     };
 
-    write_into_disp_list(begin.standard, end.standard, disp_lists.standard);
-    write_into_disp_list(begin.foliage, end.foliage, disp_lists.foliage);
-    write_into_disp_list(begin.transparent, end.transparent, disp_lists.transparent);
+    constexpr auto standard_write_vert = [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+    };
+
+    constexpr auto tinted_get_disp_list_size = [](std::size_t vert_count) {
+        return
+            gfx::get_begin_instruction_size(vert_count) +
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+            gfx::get_vector_instruction_size<2, u8>(vert_count) + // UV
+            gfx::get_vector_instruction_size<3, u8>(vert_count); // Color
+    };
+
+    constexpr auto tinted_write_vert = [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_Color3u8(0x91, 0xbd, 0x59);
+        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+    };
+    
+    write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.standard, end.standard, disp_lists.standard);
+    write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.foliage, end.foliage, disp_lists.foliage);
+    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.transparent, end.transparent, disp_lists.transparent);
 }
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
