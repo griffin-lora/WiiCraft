@@ -27,7 +27,7 @@ namespace game {
         static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x2eff;
         static constexpr s32 MAX_GRASS_QUAD_COUNT = 0x1000;
         static constexpr s32 MAX_FOLIAGE_QUAD_COUNT = 0x1000;
-        static constexpr s32 MAX_TRANSPARENT_QUAD_COUNT = 0x1000;
+        static constexpr s32 MAX_WATER_QUAD_COUNT = 0x1000;
 
         struct vertex {
             math::vector3u8 pos;
@@ -55,7 +55,7 @@ namespace game {
 
         struct display_lists {
             gfx::display_list standard;
-            gfx::display_list transparent;
+            gfx::display_list water;
             gfx::display_list grass;
             gfx::display_list foliage;
         };

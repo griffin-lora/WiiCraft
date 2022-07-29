@@ -353,7 +353,7 @@ namespace game {
             }
             math::vector2u8 uv = math::vector2u8{ 8, 0 } * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_face_vertices<face, M, &M::add_transparent>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_face_vertices<face, M, &M::add_water>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>

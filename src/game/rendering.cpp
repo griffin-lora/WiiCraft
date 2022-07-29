@@ -36,10 +36,3 @@ void game::init_ui_rendering() {
 void game::init_text_rendering() {
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP3, GX_COLOR0A0);
 }
-
-void game::init_standard_rendering() {
-	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
-
-	GX_SetZCompLoc(GX_TRUE);
-	GX_SetCullMode(GX_CULL_BACK);
-}

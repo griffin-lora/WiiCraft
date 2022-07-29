@@ -71,7 +71,7 @@ struct block_selection_mesh_state {
         *no_cull_it++ = quad;
     }
 
-    inline void add_transparent(const chunk::quad& quad) {
+    inline void add_water(const chunk::quad& quad) {
         *back_cull_it++ = quad;
     }
 

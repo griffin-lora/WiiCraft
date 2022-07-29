@@ -95,15 +95,6 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		}
 	}
 
-	// Transparent
-	for (auto& [ pos, chunk ] : chunks) {
-		set_alpha(chunk.alpha);
-		
-		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.transparent.call();
-		chunk.shell_disp_lists.transparent.call();
-	}
-
 	init_tinted_chunk_drawing();
 	// Grass
 	for (auto& [ pos, chunk ] : chunks) {
@@ -126,5 +117,14 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		chunk.tf.load(chunk::MAT);
 		chunk.core_disp_lists.foliage.call();
 		chunk.shell_disp_lists.foliage.call();
+	}
+
+	// Water
+	for (auto& [ pos, chunk ] : chunks) {
+		set_alpha(chunk.alpha);
+		
+		chunk.tf.load(chunk::MAT);
+		chunk.core_disp_lists.water.call();
+		chunk.shell_disp_lists.water.call();
 	}
 }
