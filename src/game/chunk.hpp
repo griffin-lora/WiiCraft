@@ -24,7 +24,8 @@ namespace game {
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         
-        static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x3eff;
+        static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x2eff;
+        static constexpr s32 MAX_GRASS_QUAD_COUNT = 0x1000;
         static constexpr s32 MAX_FOLIAGE_QUAD_COUNT = 0x1000;
         static constexpr s32 MAX_TRANSPARENT_QUAD_COUNT = 0x1000;
 
@@ -54,8 +55,9 @@ namespace game {
 
         struct display_lists {
             gfx::display_list standard;
-            gfx::display_list foliage;
             gfx::display_list transparent;
+            gfx::display_list grass;
+            gfx::display_list foliage;
         };
 
         u8 alpha = 0;

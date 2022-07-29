@@ -14,10 +14,11 @@ using namespace game;
 struct chunk_quad_iterators {
     using quad_it = ext::data_array<chunk::quad>::iterator;
     quad_it standard;
+    quad_it grass;
     quad_it foliage;
     quad_it transparent;
 
-    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : standard(arrays.standard.begin()), foliage(arrays.foliage.begin()), transparent(arrays.transparent.begin()) {}
+    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : standard(arrays.standard.begin()), grass(arrays.grass.begin()), foliage(arrays.foliage.begin()), transparent(arrays.transparent.begin()) {}
 };
 
 struct chunk_mesh_state {
@@ -33,6 +34,10 @@ struct chunk_mesh_state {
 
     inline void add_transparent(const chunk::quad& quad) {
         *it.transparent++ = quad;
+    }
+
+    inline void add_grass(const chunk::quad& quad) {
+        *it.grass++ = quad;
     }
 };
 
@@ -86,8 +91,9 @@ static void write_into_display_lists(const chunk_quad_iterators& begin, const ch
     };
     
     write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.standard, end.standard, disp_lists.standard);
-    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.foliage, end.foliage, disp_lists.foliage);
     write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.transparent, end.transparent, disp_lists.transparent);
+    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.grass, end.grass, disp_lists.grass);
+    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.foliage, end.foliage, disp_lists.foliage);
 }
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;

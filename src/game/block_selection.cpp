@@ -74,6 +74,10 @@ struct block_selection_mesh_state {
     inline void add_transparent(const chunk::quad& quad) {
         *back_cull_it++ = quad;
     }
+
+    inline void add_grass(const chunk::quad& quad) {
+        *back_cull_it++ = quad;
+    }
 };
 
 void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_array, const block_raycast& raycast) {

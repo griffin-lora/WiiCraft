@@ -41,8 +41,13 @@ namespace game {
                 (face == block::face::BOTTOM && category == block::category::OPAQUE_TOP_SLAB);
         }
 
+        template<block::face face, typename M>
+        BF_MB void add_face_vertices(M& ms_st, math::vector3u8 pos, math::vector3u8 offset_pos, math::vector2u8 uv, math::vector2u8 offset_uv) {
+            add_flat_face_vertices<face, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
+        }
+
         template<block::face face, typename M, typename F>
-        BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+        BF_MB void add_face_vertices_if_needed(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
             const block* nb_block = get_face_neighbor_block.template operator()<face>();
             if (
                 nb_block == nullptr ||
@@ -52,7 +57,7 @@ namespace game {
             }
             math::vector2u8 uv = Bf::template get_face_uv<face>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_face_vertices<face, M, &M::add_standard>(ms_st, pos, offset_pos, uv, offset_uv);
+            Bf::template add_face_vertices<face, M>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -61,7 +66,7 @@ namespace game {
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
             call_func_on_each_face<void>(
-                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+                [&]<block::face face>() { add_face_vertices_if_needed<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
 
@@ -246,17 +251,23 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::GRASS> : public cube_block_functionality<block_functionality<block::type::GRASS>> {
+        template<block::face face, typename M>
+        BF_MB void add_face_vertices(M& ms_st, math::vector3u8 pos, math::vector3u8 offset_pos, math::vector2u8 uv, math::vector2u8 offset_uv) {
+            add_flat_face_vertices<face, M, &M::add_grass>(ms_st, pos, offset_pos, uv, offset_uv);
+        }
+
         template<block::face face>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
-            using v2u8 = math::vector2u8;
-            return call_face_func_for<face, v2u8>(
-                []() { return v2u8{3, 0}; },
-                []() { return v2u8{3, 0}; },
-                []() { return v2u8{0, 0}; },
-                []() { return v2u8{2, 0}; },
-                []() { return v2u8{3, 0}; },
-                []() { return v2u8{3, 0}; }
-            );
+            // using v2u8 = math::vector2u8;
+            // return call_face_func_for<face, v2u8>(
+            //     []() { return v2u8{3, 0}; },
+            //     []() { return v2u8{3, 0}; },
+            //     []() { return v2u8{0, 0}; },
+            //     []() { return v2u8{2, 0}; },
+            //     []() { return v2u8{3, 0}; },
+            //     []() { return v2u8{3, 0}; }
+            // );
+            return { 0, 0 };
         }
     };
 

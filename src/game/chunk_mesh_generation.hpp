@@ -8,10 +8,11 @@ namespace game {
 
         using quad_array = ext::data_array<chunk::quad>;
         quad_array standard;
+        quad_array grass;
         quad_array foliage;
         quad_array transparent;
 
-        inline chunk_quad_building_arrays() : standard(chunk::MAX_STANDARD_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), foliage(chunk::MAX_FOLIAGE_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), transparent(chunk::MAX_TRANSPARENT_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE) {}
+        inline chunk_quad_building_arrays() : standard(chunk::MAX_STANDARD_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), grass(chunk::MAX_GRASS_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), foliage(chunk::MAX_FOLIAGE_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), transparent(chunk::MAX_TRANSPARENT_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE) {}
     };
 
     enum class mesh_update_state {

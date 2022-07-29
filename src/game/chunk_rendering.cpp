@@ -72,11 +72,12 @@ static void set_alpha(u8 alpha) {
 void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
 	init_standard_chunk_drawing();
 
-	// Standard
 	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
 
 	GX_SetZCompLoc(GX_TRUE);
 	GX_SetCullMode(GX_CULL_BACK);
+	
+	// Standard
 	if (cam.update_view) {
 		for (auto& [ pos, chunk ] : chunks) {
 			set_alpha(chunk.alpha);
@@ -95,10 +96,6 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 	}
 
 	// Transparent
-	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
-
-	GX_SetZCompLoc(GX_TRUE);
-	GX_SetCullMode(GX_CULL_BACK);
 	for (auto& [ pos, chunk ] : chunks) {
 		set_alpha(chunk.alpha);
 		
@@ -108,6 +105,15 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 	}
 
 	init_tinted_chunk_drawing();
+	// Grass
+	for (auto& [ pos, chunk ] : chunks) {
+		set_alpha(chunk.alpha);
+
+		chunk.tf.load(chunk::MAT);
+		chunk.core_disp_lists.grass.call();
+		chunk.shell_disp_lists.grass.call();
+	}
+
 	// Foliage
 	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 
