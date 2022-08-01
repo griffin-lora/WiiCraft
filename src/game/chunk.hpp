@@ -1,5 +1,6 @@
 #pragma once
 #include "block.hpp"
+#include "block_mesh_generation.hpp"
 #include "common.hpp"
 #include "math.hpp"
 #include "ext/data_array.hpp"
@@ -41,12 +42,7 @@ namespace game {
         ext::data_array<block> blocks;
         neighborhood nh;
 
-        struct display_lists {
-            gfx::display_list standard;
-            gfx::display_list tinted;
-            gfx::display_list tinted_decal;
-            gfx::display_list tinted_double_side_alpha;
-        };
+        using display_lists = block_mesh_layers<block_mesh_layers_single_type_getter<gfx::display_list>>;
 
         u8 alpha = 0;
         display_lists core_disp_lists;
