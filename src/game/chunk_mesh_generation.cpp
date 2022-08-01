@@ -13,12 +13,6 @@ using namespace game;
 
 static constexpr std::size_t SBOS = 0x100;
 
-chunk_quad_building_arrays::chunk_quad_building_arrays() :
-    standard(chunk::MAX_STANDARD_QUAD_COUNT + SBOS),
-    tinted(chunk::MAX_TINTED_QUAD_COUNT + SBOS),
-    tinted_decal(chunk::MAX_TINTED_DECAL_QUAD_COUNT + SBOS),
-    tinted_double_side_alpha(chunk::MAX_TINTED_DOUBLE_SIDE_ALPHA_QUAD_COUNT + SBOS) {}
-
 struct chunk_quad_iterators {
     ext::data_array<standard_quad>::iterator standard;
     ext::data_array<tinted_quad>::iterator tinted;

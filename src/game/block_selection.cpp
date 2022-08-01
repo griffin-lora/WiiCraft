@@ -79,7 +79,7 @@ struct block_selection_mesh_state {
     }
 };
 
-void block_selection::update_mesh(const math::matrix view, ext::data_array<standard_quad>& building_array, const block_raycast& raycast) {
+void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
     tf.load(MAT);
 
@@ -131,7 +131,7 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<stand
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, ext::data_array<standard_quad>& building_array, const std::optional<block_raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const std::optional<block_raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos || *raycast->location.bl != *last_block) {

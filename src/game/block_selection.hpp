@@ -3,6 +3,7 @@
 #include "logic.hpp"
 #include "math.hpp"
 #include "block_mesh_generation.hpp"
+#include "chunk_mesh_generation.hpp"
 #include "ext/data_array.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_3d.hpp"
@@ -24,9 +25,9 @@ namespace game {
 
         void update_if_needed(const math::matrix view, const camera& cam);
         void draw(chrono::us now, const std::optional<block_raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, ext::data_array<standard_quad>& building_array, const std::optional<block_raycast>& raycast);
+        void handle_raycast(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const std::optional<block_raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, ext::data_array<standard_quad>& building_array, const block_raycast& raycast);
+            void update_mesh(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast& raycast);
     };
 }

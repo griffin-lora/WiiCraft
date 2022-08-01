@@ -3,14 +3,12 @@
 #include "block_mesh_generation.hpp"
 
 namespace game {
-    struct chunk_quad_building_arrays {
-        ext::data_array<standard_quad> standard;
-        ext::data_array<tinted_quad> tinted;
-        ext::data_array<tinted_decal_quad> tinted_decal;
-        ext::data_array<tinted_quad> tinted_double_side_alpha;
-
-        chunk_quad_building_arrays();
+    struct identity_getter {
+        template<typename T>
+        using type = T;
     };
+
+    using chunk_quad_building_arrays = block_mesh_layers<block_mesh_layers_block_quad_array_getter<identity_getter>>;
 
     enum class mesh_update_state {
         CONTINUE,
