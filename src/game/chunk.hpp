@@ -25,21 +25,9 @@ namespace game {
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         
         static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x2eff;
-        static constexpr s32 MAX_GRASS_QUAD_COUNT = 0x1000;
-        static constexpr s32 MAX_FOLIAGE_QUAD_COUNT = 0x1000;
-        static constexpr s32 MAX_WATER_QUAD_COUNT = 0x1000;
-
-        struct vertex {
-            math::vector3u8 pos;
-            math::vector2u8 uv;
-        };
-
-        struct quad {
-            vertex vert0;
-            vertex vert1;
-            vertex vert2;
-            vertex vert3;
-        };
+        static constexpr s32 MAX_TINTED_QUAD_COUNT = 0x500;
+        static constexpr s32 MAX_TINTED_DECAL_QUAD_COUNT = 0x500;
+        static constexpr s32 MAX_TINTED_DOUBLE_SIDE_ALPHA_QUAD_COUNT = 0x1000;
         
         struct neighborhood {
             opt_ref front;
@@ -55,9 +43,9 @@ namespace game {
 
         struct display_lists {
             gfx::display_list standard;
-            gfx::display_list water;
-            gfx::display_list grass;
-            gfx::display_list foliage;
+            gfx::display_list tinted;
+            gfx::display_list tinted_decal;
+            gfx::display_list tinted_double_side_alpha;
         };
 
         u8 alpha = 0;

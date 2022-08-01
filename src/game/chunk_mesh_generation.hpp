@@ -1,18 +1,15 @@
 #pragma once
 #include "chunk.hpp"
-#include "chunk_mesh_generation.hpp"
+#include "block_mesh_generation.hpp"
 
 namespace game {
     struct chunk_quad_building_arrays {
-        static constexpr std::size_t SAFE_BUFFER_OVERFLOW_SIZE = 0x100;
+        ext::data_array<standard_quad> standard;
+        ext::data_array<tinted_quad> tinted;
+        ext::data_array<tinted_decal_quad> tinted_decal;
+        ext::data_array<tinted_quad> tinted_double_side_alpha;
 
-        using quad_array = ext::data_array<chunk::quad>;
-        quad_array standard;
-        quad_array grass;
-        quad_array foliage;
-        quad_array water;
-
-        inline chunk_quad_building_arrays() : standard(chunk::MAX_STANDARD_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), grass(chunk::MAX_GRASS_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), foliage(chunk::MAX_FOLIAGE_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE), water(chunk::MAX_WATER_QUAD_COUNT + SAFE_BUFFER_OVERFLOW_SIZE) {}
+        chunk_quad_building_arrays();
     };
 
     enum class mesh_update_state {

@@ -96,35 +96,40 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 	}
 
 	init_tinted_chunk_drawing();
-	// Grass
+	// Tinted
 	for (auto& [ pos, chunk ] : chunks) {
 		set_alpha(chunk.alpha);
 
 		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.grass.call();
-		chunk.shell_disp_lists.grass.call();
+		chunk.core_disp_lists.tinted.call();
+		chunk.shell_disp_lists.tinted.call();
 	}
 
-	// Foliage
+	// Tinted decal
+	for (auto& [ pos, chunk ] : chunks) {
+		set_alpha(chunk.alpha);
+
+		chunk.tf.load(chunk::MAT);
+		chunk.core_disp_lists.tinted_decal.call();
+		chunk.shell_disp_lists.tinted_decal.call();
+	}
+
 	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 
 	GX_SetZCompLoc(GX_FALSE);
 	GX_SetCullMode(GX_CULL_NONE);
 
-	for (auto& [ pos, chunk ] : chunks) {
-		set_alpha(chunk.alpha);
-
-		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.foliage.call();
-		chunk.shell_disp_lists.foliage.call();
-	}
-
-	// Water
+	// Tinted double side alpha
 	for (auto& [ pos, chunk ] : chunks) {
 		set_alpha(chunk.alpha);
 		
 		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.water.call();
-		chunk.shell_disp_lists.water.call();
+		chunk.core_disp_lists.tinted_double_side_alpha.call();
+		chunk.shell_disp_lists.tinted_double_side_alpha.call();
 	}
+
+	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+
+	GX_SetZCompLoc(GX_TRUE);
+	GX_SetCullMode(GX_CULL_BACK);
 }

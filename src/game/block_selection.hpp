@@ -24,9 +24,9 @@ namespace game {
 
         void update_if_needed(const math::matrix view, const camera& cam);
         void draw(chrono::us now, const std::optional<block_raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_array, const std::optional<block_raycast>& raycast);
+        void handle_raycast(const math::matrix view, ext::data_array<standard_quad>& building_array, const std::optional<block_raycast>& raycast);
 
         private:
-            void update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_array, const block_raycast& raycast);
+            void update_mesh(const math::matrix view, ext::data_array<standard_quad>& building_array, const block_raycast& raycast);
     };
 }

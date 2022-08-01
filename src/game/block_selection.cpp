@@ -2,6 +2,7 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
 #include "block_functionality.hpp"
+#include "block_mesh_generation.hpp"
 #include "rendering.hpp"
 
 using namespace game;
@@ -51,36 +52,34 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
 }
 
 struct block_selection_quad {
-    math::vector3u8 vert0;
-    math::vector3u8 vert1;
-    math::vector3u8 vert2;
-    math::vector3u8 vert3;
-
-    inline block_selection_quad(const chunk::quad& quad) : vert0(quad.vert0.pos), vert1(quad.vert1.pos), vert2(quad.vert2.pos), vert3(quad.vert3.pos) { }
+    std::array<math::vector3u8, 4> verts;
+    
+    template<typename T>
+    inline block_selection_quad(const T& quad) : verts({ quad.vert0.pos, quad.vert1.pos, quad.vert2.pos, quad.vert3.pos }) { }
 };
 
 struct block_selection_mesh_state {
     block_selection_quad* back_cull_it;
     block_selection_quad* no_cull_it;
 
-    inline void add_standard(const chunk::quad& quad) {
+    inline void add_standard(const standard_quad& quad) {
         *back_cull_it++ = quad;
     }
 
-    inline void add_foliage(const chunk::quad& quad) {
+    inline void add_foliage(const tinted_quad& quad) {
         *no_cull_it++ = quad;
     }
 
-    inline void add_water(const chunk::quad& quad) {
+    inline void add_water(const tinted_quad& quad) {
         *back_cull_it++ = quad;
     }
 
-    inline void add_grass(const chunk::quad& quad) {
+    inline void add_grass(const standard_quad& quad) {
         *back_cull_it++ = quad;
     }
 };
 
-void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk::quad>& building_array, const block_raycast& raycast) {
+void block_selection::update_mesh(const math::matrix view, ext::data_array<standard_quad>& building_array, const block_raycast& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
     tf.load(MAT);
 
@@ -123,16 +122,16 @@ void block_selection::update_mesh(const math::matrix view, ext::data_array<chunk
     disp_list.write_into([begin, end, vert_count, write_vertex]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
         for (auto it = begin; it != end; ++it) {
-            write_vertex(it->vert0);
-            write_vertex(it->vert1);
-            write_vertex(it->vert2);
-            write_vertex(it->vert3);
+            write_vertex(it->verts[0]);
+            write_vertex(it->verts[1]);
+            write_vertex(it->verts[2]);
+            write_vertex(it->verts[3]);
         }
         GX_End();
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, ext::data_array<chunk::quad>& building_array, const std::optional<block_raycast>& raycast) {
+void block_selection::handle_raycast(const math::matrix view, ext::data_array<standard_quad>& building_array, const std::optional<block_raycast>& raycast) {
     if (raycast.has_value()) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast->location.bl_pos != last_block_pos || *raycast->location.bl != *last_block) {

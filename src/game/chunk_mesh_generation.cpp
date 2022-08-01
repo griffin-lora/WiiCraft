@@ -11,40 +11,49 @@
 
 using namespace game;
 
-struct chunk_quad_iterators {
-    using quad_it = ext::data_array<chunk::quad>::iterator;
-    quad_it standard;
-    quad_it grass;
-    quad_it foliage;
-    quad_it water;
+static constexpr std::size_t SBOS = 0x100;
 
-    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : standard(arrays.standard.begin()), grass(arrays.grass.begin()), foliage(arrays.foliage.begin()), water(arrays.water.begin()) {}
+chunk_quad_building_arrays::chunk_quad_building_arrays() :
+    standard(chunk::MAX_STANDARD_QUAD_COUNT + SBOS),
+    tinted(chunk::MAX_TINTED_QUAD_COUNT + SBOS),
+    tinted_decal(chunk::MAX_TINTED_DECAL_QUAD_COUNT + SBOS),
+    tinted_double_side_alpha(chunk::MAX_TINTED_DOUBLE_SIDE_ALPHA_QUAD_COUNT + SBOS) {}
+
+struct chunk_quad_iterators {
+    ext::data_array<standard_quad>::iterator standard;
+    ext::data_array<tinted_quad>::iterator tinted;
+    ext::data_array<tinted_decal_quad>::iterator tinted_decal;
+    ext::data_array<tinted_quad>::iterator tinted_double_side_alpha;
+
+    chunk_quad_iterators(chunk_quad_building_arrays& arrays) :
+        standard(arrays.standard.begin()),
+        tinted(arrays.tinted.begin()),
+        tinted_decal(arrays.tinted_decal.begin()),
+        tinted_double_side_alpha(arrays.tinted_double_side_alpha.begin()) {}
 };
 
 struct chunk_mesh_state {
     chunk_quad_iterators it;
 
-    inline void add_standard(const chunk::quad& quad) {
+    inline void add_standard(const standard_quad& quad) {
         *it.standard++ = quad;
     }
 
-    inline void add_foliage(const chunk::quad& quad) {
-        *it.foliage++ = quad;
+    inline void add_tinted(const tinted_quad& quad) {
+        *it.tinted++ = quad;
     }
 
-    inline void add_water(const chunk::quad& quad) {
-        *it.water++ = quad;
+    inline void add_tinted_decal(const tinted_decal_quad& quad) {
+        *it.tinted_decal++ = quad;
     }
 
-    inline void add_grass(const chunk::quad& quad) {
-        *it.grass++ = quad;
+    inline void add_tinted_double_side_alpha(const tinted_quad& quad) {
+        *it.tinted_double_side_alpha++ = quad;
     }
 };
 
-using const_quad_it = ext::data_array<chunk::quad>::const_iterator;
-
-template<typename F1, typename F2>
-static void write_into_display_list(F1 get_disp_list_size, F2 write_vert, const_quad_it begin, const_quad_it end, gfx::display_list& disp_list) {
+template<typename I, typename F1, typename F2>
+static void write_into_display_list(F1 get_disp_list_size, F2 write_vert, I begin, I end, gfx::display_list& disp_list) {
     std::size_t vert_count = (end - begin) * 4;
 
     disp_list.resize(get_disp_list_size(vert_count));
@@ -80,26 +89,36 @@ static void write_into_display_lists(const chunk_quad_iterators& begin, const ch
         return
             gfx::get_begin_instruction_size(vert_count) +
             gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
+            gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
+    };
+
+    constexpr auto tinted_write_vert = [](auto& vert) {
+        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+        GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
+        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+    };
+
+    constexpr auto tinted_decal_get_disp_list_size = [](std::size_t vert_count) {
+        return
+            gfx::get_begin_instruction_size(vert_count) +
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
             gfx::get_vector_instruction_size<2, u8>(vert_count) + // UV
-            gfx::get_vector_instruction_size<3, u8>(vert_count); // Color
+            gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
     };
 
-    constexpr auto green_tinted_write_vert = [](auto& vert) {
+    constexpr auto tinted_decal_write_vert = [](auto& vert) {
         GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_Color3u8(0x91, 0xbd, 0x59);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    };
-
-    constexpr auto blue_tinted_write_vert = [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_Color3u8(0x3f, 0x76, 0xe4);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+        GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
+        GX_TexCoord2u8(vert.uvs[0].x, vert.uvs[0].y);
+        GX_TexCoord2u8(vert.uvs[1].x, vert.uvs[1].y);
     };
     
     write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.standard, end.standard, disp_lists.standard);
-    write_into_display_list(tinted_get_disp_list_size, green_tinted_write_vert, begin.grass, end.grass, disp_lists.grass);
-    write_into_display_list(tinted_get_disp_list_size, green_tinted_write_vert, begin.foliage, end.foliage, disp_lists.foliage);
-    write_into_display_list(tinted_get_disp_list_size, blue_tinted_write_vert, begin.water, end.water, disp_lists.water);
+    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.tinted, end.tinted, disp_lists.tinted);
+    write_into_display_list(tinted_decal_get_disp_list_size, tinted_decal_write_vert, begin.tinted_decal, end.tinted_decal, disp_lists.tinted_decal);
+    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.tinted_double_side_alpha, end.tinted_double_side_alpha, disp_lists.tinted_double_side_alpha);
 }
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
@@ -139,8 +158,9 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
 static void check_vertex_count(const chunk_quad_iterators& begin, const chunk_quad_iterators& end) {
     if (
         (end.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
-        (end.foliage - begin.foliage) > chunk::MAX_FOLIAGE_QUAD_COUNT ||
-        (end.water - begin.water) > chunk::MAX_WATER_QUAD_COUNT
+        (end.tinted - begin.tinted) > chunk::MAX_TINTED_QUAD_COUNT ||
+        (end.tinted_decal - begin.tinted_decal) > chunk::MAX_TINTED_DECAL_QUAD_COUNT ||
+        (end.tinted_double_side_alpha - begin.tinted_double_side_alpha) > chunk::MAX_TINTED_DOUBLE_SIDE_ALPHA_QUAD_COUNT
     ) {
         dbg::error([]() {
             printf("Chunk quad count is too high\n");
@@ -150,8 +170,9 @@ static void check_vertex_count(const chunk_quad_iterators& begin, const chunk_qu
 
 static inline void clear_display_lists(chunk::display_lists& disp_lists) {
     disp_lists.standard.clear();
-    disp_lists.foliage.clear();
-    disp_lists.water.clear();
+    disp_lists.tinted.clear();
+    disp_lists.tinted_decal.clear();
+    disp_lists.tinted_double_side_alpha.clear();
 }
 
 mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
