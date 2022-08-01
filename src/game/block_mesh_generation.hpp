@@ -41,33 +41,12 @@ namespace game {
         vertex vert3;
     };
 
-    template<typename T>
-    struct block_mesh_layers {
-        T::standard standard;
-        T::tinted tinted;
-        T::tinted_decal tinted_decal;
-        T::tinted_double_side_alpha tinted_double_side_alpha;
-
-        template<typename F>
-        void for_each(const F& func) const {
-            func(standard);
-            for_each_except_standard(func);
-        }
-
-        template<typename F>
-        void for_each_except_standard(const F& func) const {
-            func(tinted);
-            func(tinted_decal);
-            func(tinted_double_side_alpha);
-        }
-    };
-
     static constexpr std::size_t safe_buffer_overflow_size = 0x100;
 
     template<typename T, std::size_t MAX_QUAD_COUNT>
     struct block_quad_array {
-        using quad_array = ext::data_array<T>;
-        quad_array quads;
+        using iterator = ext::data_array<T>::iterator;
+        ext::data_array<T> quads;
 
         inline block_quad_array() : quads(MAX_QUAD_COUNT + safe_buffer_overflow_size) {}
 
@@ -80,20 +59,99 @@ namespace game {
         inline const T* data() const { return quads.data(); }
     };
 
-    template<typename T>
-    struct block_mesh_layers_block_quad_array_getter {
-        using standard = typename T::type<block_quad_array<standard_quad, 0x2eff>>;
-        using tinted = typename T::type<block_quad_array<tinted_quad, 0x1000>>;
-        using tinted_decal = typename T::type<block_quad_array<tinted_decal_quad, 0x1000>>;
-        using tinted_double_side_alpha = typename T::type<block_quad_array<tinted_quad, 0x1000>>;
+    struct standard_block_mesh_layer {
+        static constexpr const char* name = "standard layer";
+
+        static constexpr std::size_t max_quad_count = 0x2eff;
+        using quad_array = block_quad_array<standard_quad, max_quad_count>;
     };
 
+    struct tinted_block_mesh_layer {
+        static constexpr const char* name = "tinted block mesh layer";
+
+        static constexpr std::size_t max_quad_count = 0x1000;
+        using quad_array = block_quad_array<tinted_quad, max_quad_count>;
+    };
+
+    struct tinted_decal_block_mesh_layer {
+        static constexpr const char* name = "tinted decal block mesh layer";
+
+        static constexpr std::size_t max_quad_count = 0x1000;
+        using quad_array = block_quad_array<tinted_decal_quad, max_quad_count>;
+    };
+
+    struct tinted_double_side_alpha_block_mesh_layer {
+        static constexpr const char* name = "tintel double side alpha block mesh layer";
+
+        static constexpr std::size_t max_quad_count = 0x1000;
+        using quad_array = block_quad_array<tinted_quad, max_quad_count>;
+    };
+
+    template<typename F>
+    void for_each_block_mesh_layer(const F& func) {
+        func.template operator()<standard_block_mesh_layer>();
+        func.template operator()<tinted_block_mesh_layer>();
+        func.template operator()<tinted_decal_block_mesh_layer>();
+        func.template operator()<tinted_double_side_alpha_block_mesh_layer>();
+    }
+
+    template<typename C>
+    struct block_mesh_layers {
+        C::template type<standard_block_mesh_layer> standard;
+        C::template type<tinted_block_mesh_layer> tinted;
+        C::template type<tinted_decal_block_mesh_layer> tinted_decal;
+        C::template type<tinted_double_side_alpha_block_mesh_layer> tinted_double_side_alpha;
+
+        block_mesh_layers() = default;
+
+        template<typename F>
+        block_mesh_layers(const F& func) :
+            standard(func.template operator()<standard_block_mesh_layer>()),
+            tinted(func.template operator()<tinted_block_mesh_layer>()),
+            tinted_decal(func.template operator()<tinted_decal_block_mesh_layer>()),
+            tinted_double_side_alpha(func.template operator()<tinted_double_side_alpha_block_mesh_layer>()) {}
+
+        template<typename T>
+        const auto& get_layer() const {
+            if constexpr (std::is_same_v<T, standard_block_mesh_layer>) {
+                return standard;
+            } else if constexpr (std::is_same_v<T, tinted_block_mesh_layer>) {
+                return tinted;
+            } else if constexpr (std::is_same_v<T, tinted_decal_block_mesh_layer>) {
+                return tinted_decal;
+            } else if constexpr (std::is_same_v<T, tinted_double_side_alpha_block_mesh_layer>) {
+                return tinted_double_side_alpha;
+            }
+        }
+
+        template<typename T>
+        auto& get_layer() {
+            if constexpr (std::is_same_v<T, standard_block_mesh_layer>) {
+                return standard;
+            } else if constexpr (std::is_same_v<T, tinted_block_mesh_layer>) {
+                return tinted;
+            } else if constexpr (std::is_same_v<T, tinted_decal_block_mesh_layer>) {
+                return tinted_decal;
+            } else if constexpr (std::is_same_v<T, tinted_double_side_alpha_block_mesh_layer>) {
+                return tinted_double_side_alpha;
+            }
+        }
+    };
+    
     template<typename T>
-    struct block_mesh_layers_single_type_getter {
-        using standard = T;
-        using tinted = T;
-        using tinted_decal = T;
-        using tinted_double_side_alpha = T;
+    struct single_type_container {
+        template<typename T1>
+        using type = T;
+    };
+
+    struct quad_array_container {
+        template<typename T>
+        using type = T::quad_array;
+    };
+
+    struct quad_array_iterator_container {
+        template<typename T>
+        using type = T::quad_array::iterator;
     };
 
     template<typename Bf, typename M, typename F>

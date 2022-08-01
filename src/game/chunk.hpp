@@ -25,11 +25,6 @@ namespace game {
         static constexpr s32 SIZE = 32;
         static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
         
-        static constexpr s32 MAX_STANDARD_QUAD_COUNT = 0x2eff;
-        static constexpr s32 MAX_TINTED_QUAD_COUNT = 0x500;
-        static constexpr s32 MAX_TINTED_DECAL_QUAD_COUNT = 0x500;
-        static constexpr s32 MAX_TINTED_DOUBLE_SIDE_ALPHA_QUAD_COUNT = 0x1000;
-        
         struct neighborhood {
             opt_ref front;
             opt_ref back;
@@ -42,7 +37,7 @@ namespace game {
         ext::data_array<block> blocks;
         neighborhood nh;
 
-        using display_lists = block_mesh_layers<block_mesh_layers_single_type_getter<gfx::display_list>>;
+        using display_lists = block_mesh_layers<single_type_container<gfx::display_list>>;
 
         u8 alpha = 0;
         display_lists core_disp_lists;

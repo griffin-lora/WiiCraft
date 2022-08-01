@@ -3,12 +3,7 @@
 #include "block_mesh_generation.hpp"
 
 namespace game {
-    struct identity_getter {
-        template<typename T>
-        using type = T;
-    };
-
-    using chunk_quad_building_arrays = block_mesh_layers<block_mesh_layers_block_quad_array_getter<identity_getter>>;
+    using chunk_quad_building_arrays = block_mesh_layers<quad_array_container>;
 
     enum class mesh_update_state {
         CONTINUE,

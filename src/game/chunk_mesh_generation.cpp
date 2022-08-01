@@ -13,17 +13,13 @@ using namespace game;
 
 static constexpr std::size_t SBOS = 0x100;
 
-struct chunk_quad_iterators {
-    ext::data_array<standard_quad>::iterator standard;
-    ext::data_array<tinted_quad>::iterator tinted;
-    ext::data_array<tinted_decal_quad>::iterator tinted_decal;
-    ext::data_array<tinted_quad>::iterator tinted_double_side_alpha;
+struct iterator_container {
+    template<typename T>
+    using type = T::iterator;
+};
 
-    chunk_quad_iterators(chunk_quad_building_arrays& arrays) :
-        standard(arrays.standard.begin()),
-        tinted(arrays.tinted.begin()),
-        tinted_decal(arrays.tinted_decal.begin()),
-        tinted_double_side_alpha(arrays.tinted_double_side_alpha.begin()) {}
+struct chunk_quad_iterators : public block_mesh_layers<quad_array_iterator_container> {
+    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : block_mesh_layers<quad_array_iterator_container>([&arrays]<typename T>() { return arrays.get_layer<T>().begin(); }) {}
 };
 
 struct chunk_mesh_state {
@@ -150,16 +146,14 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
 }
 
 static void check_vertex_count(const chunk_quad_iterators& begin, const chunk_quad_iterators& end) {
-    if (
-        (end.standard - begin.standard) > chunk::MAX_STANDARD_QUAD_COUNT ||
-        (end.tinted - begin.tinted) > chunk::MAX_TINTED_QUAD_COUNT ||
-        (end.tinted_decal - begin.tinted_decal) > chunk::MAX_TINTED_DECAL_QUAD_COUNT ||
-        (end.tinted_double_side_alpha - begin.tinted_double_side_alpha) > chunk::MAX_TINTED_DOUBLE_SIDE_ALPHA_QUAD_COUNT
-    ) {
-        dbg::error([]() {
-            printf("Chunk quad count is too high\n");
-        });
-    }
+    for_each_block_mesh_layer([begin, end]<typename T>() {
+        std::size_t quad_count = end.get_layer<T>() - begin.get_layer<T>();
+        if (quad_count >= T::max_quad_count) {
+            dbg::error([quad_count]() {
+                std::printf("Too many quads for %s, should be %d, count is %d\n", T::name, T::max_quad_count, quad_count);
+            });
+        }
+    });
 }
 
 static inline void clear_display_lists(chunk::display_lists& disp_lists) {
