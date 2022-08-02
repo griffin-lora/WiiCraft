@@ -21,100 +21,117 @@ namespace game {
         inline const T* data() const { return quads.data(); }
     };
 
-    struct standard_block_mesh_layer {
-        static constexpr const char* name = "standard layer";
+    namespace block_mesh_layer {
+        struct standard {
+            static constexpr const char* name = "standard";
 
-        using chunk_quad = standard_quad;
-        static constexpr std::size_t max_quad_count = 0x2eff;
-        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+            using chunk_quad = standard_quad;
+            static constexpr std::size_t max_quad_count = 0x2000;
+            using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
-        static std::size_t get_chunk_display_list_size(std::size_t vert_count);
-        static void write_chunk_vertex(const chunk_quad::vertex& vert);
-    };
+            static std::size_t get_chunk_display_list_size(std::size_t vert_count);
+            static void write_chunk_vertex(const chunk_quad::vertex& vert);
+        };
 
-    struct tinted_block_mesh_layer {
-        static constexpr const char* name = "tinted block mesh layer";
+        struct tinted {
+            static constexpr const char* name = "tinted";
 
-        using chunk_quad = tinted_quad;
-        static constexpr std::size_t max_quad_count = 0x1000;
-        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+            using chunk_quad = tinted_quad;
+            static constexpr std::size_t max_quad_count = 0x1000;
+            using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
-        static std::size_t get_chunk_display_list_size(std::size_t vert_count);
-        static void write_chunk_vertex(const chunk_quad::vertex& vert);
-    };
+            static std::size_t get_chunk_display_list_size(std::size_t vert_count);
+            static void write_chunk_vertex(const chunk_quad::vertex& vert);
+        };
 
-    struct tinted_decal_block_mesh_layer {
-        static constexpr const char* name = "tinted decal block mesh layer";
+        struct tinted_alpha {
+            static constexpr const char* name = "tinted alpha block";
 
-        using chunk_quad = tinted_decal_quad;
-        static constexpr std::size_t max_quad_count = 0x1000;
-        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+            using chunk_quad = tinted_quad;
+            static constexpr std::size_t max_quad_count = 0x500;
+            using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
-        static std::size_t get_chunk_display_list_size(std::size_t vert_count);
-        static void write_chunk_vertex(const chunk_quad::vertex& vert);
-    };
+            static std::size_t get_chunk_display_list_size(std::size_t vert_count);
+            static void write_chunk_vertex(const chunk_quad::vertex& vert);
+        };
 
-    struct tinted_double_side_alpha_block_mesh_layer {
-        static constexpr const char* name = "tinted double side alpha block mesh layer";
+        struct tinted_double_side_alpha {
+            static constexpr const char* name = "tinted double side alpha";
 
-        using chunk_quad = tinted_quad;
-        static constexpr std::size_t max_quad_count = 0x1000;
-        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+            using chunk_quad = tinted_quad;
+            static constexpr std::size_t max_quad_count = 0x1000;
+            using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
-        static std::size_t get_chunk_display_list_size(std::size_t vert_count);
-        static void write_chunk_vertex(const chunk_quad::vertex& vert);
-    };
+            static std::size_t get_chunk_display_list_size(std::size_t vert_count);
+            static void write_chunk_vertex(const chunk_quad::vertex& vert);
+        };
+
+        struct tinted_decal {
+            static constexpr const char* name = "tinted decal";
+
+            using chunk_quad = tinted_decal_quad;
+            static constexpr std::size_t max_quad_count = 0x1000;
+            using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+
+            static std::size_t get_chunk_display_list_size(std::size_t vert_count);
+            static void write_chunk_vertex(const chunk_quad::vertex& vert);
+        };
+    }
+
+    #define EVAL_MACRO_ON_FIRST_BLOCK_MESH_LAYERS(macro) \
+    macro(standard) \
+    macro(tinted) \
+    macro(tinted_alpha) \
+    macro(tinted_double_side_alpha)
+
+    #define EVAL_MACRO_ON_LAST_BLOCK_MESH_LAYER(macro) \
+    macro(tinted_decal)
+
+    #define EVAL_MACRO_ON_BLOCK_MESH_LAYERS(macro) \
+    EVAL_MACRO_ON_FIRST_BLOCK_MESH_LAYERS(macro) \
+    EVAL_MACRO_ON_LAST_BLOCK_MESH_LAYER(macro)
 
     template<typename F>
     void for_each_block_mesh_layer(const F& func) {
-        func.template operator()<standard_block_mesh_layer>();
-        func.template operator()<tinted_block_mesh_layer>();
-        func.template operator()<tinted_decal_block_mesh_layer>();
-        func.template operator()<tinted_double_side_alpha_block_mesh_layer>();
+        #define EVAL(layer) func.template operator()<block_mesh_layer::layer>();
+        EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
+        #undef EVAL
     }
 
     template<typename C>
     struct block_mesh_layers {
-        C::template type<standard_block_mesh_layer> standard;
-        C::template type<tinted_block_mesh_layer> tinted;
-        C::template type<tinted_decal_block_mesh_layer> tinted_decal;
-        C::template type<tinted_double_side_alpha_block_mesh_layer> tinted_double_side_alpha;
+        #define EVAL(layer) C::template type<block_mesh_layer::layer> layer;
+        EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
+        #undef EVAL
 
         block_mesh_layers() = default;
 
         template<typename F>
         block_mesh_layers(const F& func) :
-            standard(func.template operator()<standard_block_mesh_layer>()),
-            tinted(func.template operator()<tinted_block_mesh_layer>()),
-            tinted_decal(func.template operator()<tinted_decal_block_mesh_layer>()),
-            tinted_double_side_alpha(func.template operator()<tinted_double_side_alpha_block_mesh_layer>()) {}
+            #define EVAL(layer) layer(func.template operator()<block_mesh_layer::layer>()),
+            EVAL_MACRO_ON_FIRST_BLOCK_MESH_LAYERS(EVAL)
+            #undef EVAL
+            #define EVAL(layer) layer(func.template operator()<block_mesh_layer::layer>())
+            EVAL_MACRO_ON_LAST_BLOCK_MESH_LAYER(EVAL)
+            #undef EVAL
+        {}
 
         template<typename L>
         const auto& get_layer() const {
-            if constexpr (std::is_same_v<L, standard_block_mesh_layer>) {
-                return standard;
-            } else if constexpr (std::is_same_v<L, tinted_block_mesh_layer>) {
-                return tinted;
-            } else if constexpr (std::is_same_v<L, tinted_decal_block_mesh_layer>) {
-                return tinted_decal;
-            } else if constexpr (std::is_same_v<L, tinted_double_side_alpha_block_mesh_layer>) {
-                return tinted_double_side_alpha;
-            }
+            #define EVAL(layer) if constexpr (std::is_same_v<L, block_mesh_layer::layer>) return layer;
+            EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
+            #undef EVAL
         }
 
         template<typename L>
         auto& get_layer() {
-            if constexpr (std::is_same_v<L, standard_block_mesh_layer>) {
-                return standard;
-            } else if constexpr (std::is_same_v<L, tinted_block_mesh_layer>) {
-                return tinted;
-            } else if constexpr (std::is_same_v<L, tinted_decal_block_mesh_layer>) {
-                return tinted_decal;
-            } else if constexpr (std::is_same_v<L, tinted_double_side_alpha_block_mesh_layer>) {
-                return tinted_double_side_alpha;
-            }
+            #define EVAL(layer) if constexpr (std::is_same_v<L, block_mesh_layer::layer>) return layer;
+            EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
+            #undef EVAL
         }
     };
+
+    #undef EVAL_MACRO_ON_BLOCK_MESH_LAYERS
     
     template<typename T>
     struct single_type_container {
