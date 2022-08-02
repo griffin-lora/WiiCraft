@@ -83,7 +83,7 @@ namespace game {
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
-            
+
             static void init_chunk_rendering();
         };
     }
@@ -102,7 +102,7 @@ namespace game {
     EVAL_MACRO_ON_LAST_BLOCK_MESH_LAYER(macro)
 
     template<typename F>
-    void for_each_block_mesh_layer(const F& func) {
+    constexpr void for_each_block_mesh_layer(const F& func) {
         #define EVAL(layer) func.template operator()<block_mesh_layer::layer>();
         EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
         #undef EVAL
@@ -117,7 +117,7 @@ namespace game {
         block_mesh_layers() = default;
 
         template<typename F>
-        block_mesh_layers(const F& func) :
+        constexpr block_mesh_layers(const F& func) :
             #define EVAL(layer) layer(func.template operator()<block_mesh_layer::layer>()),
             EVAL_MACRO_ON_FIRST_BLOCK_MESH_LAYERS(EVAL)
             #undef EVAL
@@ -127,14 +127,14 @@ namespace game {
         {}
 
         template<typename L>
-        const auto& get_layer() const {
+        constexpr const auto& get_layer() const {
             #define EVAL(layer) if constexpr (std::is_same_v<L, block_mesh_layer::layer>) return layer;
             EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
             #undef EVAL
         }
 
         template<typename L>
-        auto& get_layer() {
+        constexpr auto& get_layer() {
             #define EVAL(layer) if constexpr (std::is_same_v<L, block_mesh_layer::layer>) return layer;
             EVAL_MACRO_ON_BLOCK_MESH_LAYERS(EVAL)
             #undef EVAL
