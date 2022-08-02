@@ -1,6 +1,6 @@
 #pragma once
 #include "chunk.hpp"
-#include "block_mesh_generation.hpp"
+#include "block_mesh_layers.hpp"
 
 namespace game {
     using chunk_quad_building_arrays = block_mesh_layers<chunk_quad_array_container>;
