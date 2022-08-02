@@ -62,19 +62,8 @@ struct block_selection_mesh_state {
     block_selection_quad* back_cull_it;
     block_selection_quad* no_cull_it;
 
-    inline void add_standard(const standard_quad& quad) {
-        *back_cull_it++ = quad;
-    }
-
-    inline void add_foliage(const tinted_quad& quad) {
-        *no_cull_it++ = quad;
-    }
-
-    inline void add_water(const tinted_quad& quad) {
-        *back_cull_it++ = quad;
-    }
-
-    inline void add_grass(const standard_quad& quad) {
+    template<typename L>
+    inline void add_quad(const L::chunk_quad& quad) {
         *back_cull_it++ = quad;
     }
 };

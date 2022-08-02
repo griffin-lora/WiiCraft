@@ -3,7 +3,7 @@
 #include "block_mesh_generation.hpp"
 
 namespace game {
-    using chunk_quad_building_arrays = block_mesh_layers<quad_array_container>;
+    using chunk_quad_building_arrays = block_mesh_layers<chunk_quad_array_container>;
 
     enum class mesh_update_state {
         CONTINUE,

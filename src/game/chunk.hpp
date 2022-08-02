@@ -37,11 +37,11 @@ namespace game {
         ext::data_array<block> blocks;
         neighborhood nh;
 
-        using display_lists = block_mesh_layers<single_type_container<gfx::display_list>>;
+        using display_list_layers = block_mesh_layers<single_type_container<gfx::display_list>>;
 
         u8 alpha = 0;
-        display_lists core_disp_lists;
-        display_lists shell_disp_lists;
+        display_list_layers core_disp_list_layers;
+        display_list_layers shell_disp_list_layers;
 
         math::transform_3d tf;
 

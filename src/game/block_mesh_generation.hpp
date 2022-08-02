@@ -1,5 +1,6 @@
 #pragma once
 #include "block.hpp"
+#include "gfx/display_list.hpp"
 #include <array>
 
 namespace game {
@@ -62,29 +63,89 @@ namespace game {
     struct standard_block_mesh_layer {
         static constexpr const char* name = "standard layer";
 
+        using chunk_quad = standard_quad;
         static constexpr std::size_t max_quad_count = 0x2eff;
-        using quad_array = block_quad_array<standard_quad, max_quad_count>;
+        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+
+        static inline std::size_t get_chunk_display_list_size(std::size_t vert_count) {
+            return
+                gfx::get_begin_instruction_size(vert_count) +
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+                gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
+        }
+
+        static inline void write_chunk_vertex(const chunk_quad::vertex& vert) {
+            GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+            GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+        }
     };
 
     struct tinted_block_mesh_layer {
         static constexpr const char* name = "tinted block mesh layer";
 
+        using chunk_quad = tinted_quad;
         static constexpr std::size_t max_quad_count = 0x1000;
-        using quad_array = block_quad_array<tinted_quad, max_quad_count>;
+        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+
+        static inline std::size_t get_chunk_display_list_size(std::size_t vert_count) {
+            return
+                gfx::get_begin_instruction_size(vert_count) +
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
+                gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
+        }
+
+        static inline void write_chunk_vertex(const chunk_quad::vertex& vert) {
+            GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+            GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
+            GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+        }
     };
 
     struct tinted_decal_block_mesh_layer {
         static constexpr const char* name = "tinted decal block mesh layer";
 
+        using chunk_quad = tinted_decal_quad;
         static constexpr std::size_t max_quad_count = 0x1000;
-        using quad_array = block_quad_array<tinted_decal_quad, max_quad_count>;
+        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+
+        static inline std::size_t get_chunk_display_list_size(std::size_t vert_count) {
+            return
+                gfx::get_begin_instruction_size(vert_count) +
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
+                gfx::get_vector_instruction_size<2, u8>(vert_count) + // UV
+                gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
+        }
+
+        static inline void write_chunk_vertex(const chunk_quad::vertex& vert) {
+            GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+            GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
+            GX_TexCoord2u8(vert.uvs[0].x, vert.uvs[0].y);
+            GX_TexCoord2u8(vert.uvs[1].x, vert.uvs[1].y);
+        }
     };
 
     struct tinted_double_side_alpha_block_mesh_layer {
-        static constexpr const char* name = "tintel double side alpha block mesh layer";
+        static constexpr const char* name = "tinted double side alpha block mesh layer";
 
+        using chunk_quad = tinted_quad;
         static constexpr std::size_t max_quad_count = 0x1000;
-        using quad_array = block_quad_array<tinted_quad, max_quad_count>;
+        using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+
+        static inline std::size_t get_chunk_display_list_size(std::size_t vert_count) {
+            return
+                gfx::get_begin_instruction_size(vert_count) +
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
+                gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
+                gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
+        }
+
+        static inline void write_chunk_vertex(const chunk_quad::vertex& vert) {
+            GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
+            GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
+            GX_TexCoord2u8(vert.uv.x, vert.uv.y);
+        }
     };
 
     template<typename F>
@@ -111,28 +172,28 @@ namespace game {
             tinted_decal(func.template operator()<tinted_decal_block_mesh_layer>()),
             tinted_double_side_alpha(func.template operator()<tinted_double_side_alpha_block_mesh_layer>()) {}
 
-        template<typename T>
+        template<typename L>
         const auto& get_layer() const {
-            if constexpr (std::is_same_v<T, standard_block_mesh_layer>) {
+            if constexpr (std::is_same_v<L, standard_block_mesh_layer>) {
                 return standard;
-            } else if constexpr (std::is_same_v<T, tinted_block_mesh_layer>) {
+            } else if constexpr (std::is_same_v<L, tinted_block_mesh_layer>) {
                 return tinted;
-            } else if constexpr (std::is_same_v<T, tinted_decal_block_mesh_layer>) {
+            } else if constexpr (std::is_same_v<L, tinted_decal_block_mesh_layer>) {
                 return tinted_decal;
-            } else if constexpr (std::is_same_v<T, tinted_double_side_alpha_block_mesh_layer>) {
+            } else if constexpr (std::is_same_v<L, tinted_double_side_alpha_block_mesh_layer>) {
                 return tinted_double_side_alpha;
             }
         }
 
-        template<typename T>
+        template<typename L>
         auto& get_layer() {
-            if constexpr (std::is_same_v<T, standard_block_mesh_layer>) {
+            if constexpr (std::is_same_v<L, standard_block_mesh_layer>) {
                 return standard;
-            } else if constexpr (std::is_same_v<T, tinted_block_mesh_layer>) {
+            } else if constexpr (std::is_same_v<L, tinted_block_mesh_layer>) {
                 return tinted;
-            } else if constexpr (std::is_same_v<T, tinted_decal_block_mesh_layer>) {
+            } else if constexpr (std::is_same_v<L, tinted_decal_block_mesh_layer>) {
                 return tinted_decal;
-            } else if constexpr (std::is_same_v<T, tinted_double_side_alpha_block_mesh_layer>) {
+            } else if constexpr (std::is_same_v<L, tinted_double_side_alpha_block_mesh_layer>) {
                 return tinted_double_side_alpha;
             }
         }
@@ -144,14 +205,14 @@ namespace game {
         using type = T;
     };
 
-    struct quad_array_container {
+    struct chunk_quad_array_container {
         template<typename T>
-        using type = T::quad_array;
+        using type = T::chunk_quad_array;
     };
 
-    struct quad_array_iterator_container {
+    struct chunk_quad_array_iterator_container {
         template<typename T>
-        using type = T::quad_array::iterator;
+        using type = T::chunk_quad_array::iterator;
     };
 
     template<typename Bf, typename M, typename F>

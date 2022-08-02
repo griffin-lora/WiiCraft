@@ -85,13 +85,13 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.update_model_view(view);
 			chunk.tf.load(chunk::MAT);
 
-			chunk.core_disp_lists.standard.call();
-			chunk.shell_disp_lists.standard.call();
+			chunk.core_disp_list_layers.standard.call();
+			chunk.shell_disp_list_layers.standard.call();
 		}
 	} else {
 		for (auto& [ pos, chunk ] : chunks) {
-			chunk.core_disp_lists.standard.call();
-			chunk.shell_disp_lists.standard.call();
+			chunk.core_disp_list_layers.standard.call();
+			chunk.shell_disp_list_layers.standard.call();
 		}
 	}
 
@@ -101,8 +101,8 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		set_alpha(chunk.alpha);
 
 		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.tinted.call();
-		chunk.shell_disp_lists.tinted.call();
+		chunk.core_disp_list_layers.tinted.call();
+		chunk.shell_disp_list_layers.tinted.call();
 	}
 
 	// Tinted decal
@@ -110,8 +110,8 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		set_alpha(chunk.alpha);
 
 		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.tinted_decal.call();
-		chunk.shell_disp_lists.tinted_decal.call();
+		chunk.core_disp_list_layers.tinted_decal.call();
+		chunk.shell_disp_list_layers.tinted_decal.call();
 	}
 
 	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
@@ -124,8 +124,8 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		set_alpha(chunk.alpha);
 		
 		chunk.tf.load(chunk::MAT);
-		chunk.core_disp_lists.tinted_double_side_alpha.call();
-		chunk.shell_disp_lists.tinted_double_side_alpha.call();
+		chunk.core_disp_list_layers.tinted_double_side_alpha.call();
+		chunk.shell_disp_list_layers.tinted_double_side_alpha.call();
 	}
 
 	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);

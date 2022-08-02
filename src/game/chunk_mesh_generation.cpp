@@ -18,31 +18,20 @@ struct iterator_container {
     using type = T::iterator;
 };
 
-struct chunk_quad_iterators : public block_mesh_layers<quad_array_iterator_container> {
-    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : block_mesh_layers<quad_array_iterator_container>([&arrays]<typename T>() { return arrays.get_layer<T>().begin(); }) {}
+struct chunk_quad_iterators : public block_mesh_layers<chunk_quad_array_iterator_container> {
+    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : block_mesh_layers<chunk_quad_array_iterator_container>([&arrays]<typename L>() { return arrays.get_layer<L>().begin(); }) {}
 };
 
 struct chunk_mesh_state {
     chunk_quad_iterators it;
 
-    inline void add_standard(const standard_quad& quad) {
-        *it.standard++ = quad;
-    }
-
-    inline void add_tinted(const tinted_quad& quad) {
-        *it.tinted++ = quad;
-    }
-
-    inline void add_tinted_decal(const tinted_decal_quad& quad) {
-        *it.tinted_decal++ = quad;
-    }
-
-    inline void add_tinted_double_side_alpha(const tinted_quad& quad) {
-        *it.tinted_double_side_alpha++ = quad;
+    template<typename L>
+    inline void add_quad(const L::chunk_quad& quad) {
+        *it.get_layer<L>()++ = quad;
     }
 };
 
-template<typename I, typename F1, typename F2>
+template<typename F1, typename F2, typename I>
 static void write_into_display_list(F1 get_disp_list_size, F2 write_vert, I begin, I end, gfx::display_list& disp_list) {
     std::size_t vert_count = (end - begin) * 4;
 
@@ -62,53 +51,10 @@ static void write_into_display_list(F1 get_disp_list_size, F2 write_vert, I begi
     });
 };
 
-static void write_into_display_lists(const chunk_quad_iterators& begin, const chunk_quad_iterators& end, chunk::display_lists& disp_lists) {
-    constexpr auto standard_get_disp_list_size = [](std::size_t vert_count) {
-        return
-            gfx::get_begin_instruction_size(vert_count) +
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-            gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
-    };
-
-    constexpr auto standard_write_vert = [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    };
-
-    constexpr auto tinted_get_disp_list_size = [](std::size_t vert_count) {
-        return
-            gfx::get_begin_instruction_size(vert_count) +
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
-            gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
-    };
-
-    constexpr auto tinted_write_vert = [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
-        GX_TexCoord2u8(vert.uv.x, vert.uv.y);
-    };
-
-    constexpr auto tinted_decal_get_disp_list_size = [](std::size_t vert_count) {
-        return
-            gfx::get_begin_instruction_size(vert_count) +
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-            gfx::get_vector_instruction_size<3, u8>(vert_count) + // Color
-            gfx::get_vector_instruction_size<2, u8>(vert_count) + // UV
-            gfx::get_vector_instruction_size<2, u8>(vert_count); // UV
-    };
-
-    constexpr auto tinted_decal_write_vert = [](auto& vert) {
-        GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
-        GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
-        GX_TexCoord2u8(vert.uvs[0].x, vert.uvs[0].y);
-        GX_TexCoord2u8(vert.uvs[1].x, vert.uvs[1].y);
-    };
-    
-    write_into_display_list(standard_get_disp_list_size, standard_write_vert, begin.standard, end.standard, disp_lists.standard);
-    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.tinted, end.tinted, disp_lists.tinted);
-    write_into_display_list(tinted_decal_get_disp_list_size, tinted_decal_write_vert, begin.tinted_decal, end.tinted_decal, disp_lists.tinted_decal);
-    write_into_display_list(tinted_get_disp_list_size, tinted_write_vert, begin.tinted_double_side_alpha, end.tinted_double_side_alpha, disp_lists.tinted_double_side_alpha);
+static void write_into_display_list_layers(const chunk_quad_iterators& begin, const chunk_quad_iterators& end, chunk::display_list_layers& disp_list_layers) {
+    for_each_block_mesh_layer([&begin, &end, &disp_list_layers]<typename L>() {
+        write_into_display_list(L::get_chunk_display_list_size, L::write_chunk_vertex, begin.get_layer<L>(), end.get_layer<L>(), disp_list_layers.get_layer<L>());
+    });
 }
 
 static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
@@ -146,21 +92,20 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
 }
 
 static void check_vertex_count(const chunk_quad_iterators& begin, const chunk_quad_iterators& end) {
-    for_each_block_mesh_layer([begin, end]<typename T>() {
-        std::size_t quad_count = end.get_layer<T>() - begin.get_layer<T>();
-        if (quad_count >= T::max_quad_count) {
+    for_each_block_mesh_layer([&begin, &end]<typename L>() {
+        std::size_t quad_count = end.get_layer<L>() - begin.get_layer<L>();
+        if (quad_count >= L::max_quad_count) {
             dbg::error([quad_count]() {
-                std::printf("Too many quads for %s, should be %d, count is %d\n", T::name, T::max_quad_count, quad_count);
+                std::printf("Too many quads for %s, should be %d, count is %d\n", L::name, L::max_quad_count, quad_count);
             });
         }
     });
 }
 
-static inline void clear_display_lists(chunk::display_lists& disp_lists) {
-    disp_lists.standard.clear();
-    disp_lists.tinted.clear();
-    disp_lists.tinted_decal.clear();
-    disp_lists.tinted_double_side_alpha.clear();
+static inline void clear_display_list_layers(chunk::display_list_layers& disp_list_layers) {
+    for_each_block_mesh_layer([&disp_list_layers]<typename L>() {
+        disp_list_layers.get_layer<L>().clear();
+    });
 }
 
 mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
@@ -168,7 +113,7 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
         chunk.invisible_block_count == chunk::BLOCKS_COUNT ||
         chunk.fully_opaque_block_count == chunk::BLOCKS_COUNT
     ) {
-        clear_display_lists(chunk.core_disp_lists);
+        clear_display_list_layers(chunk.core_disp_list_layers);
         return mesh_update_state::CONTINUE;
     }
 
@@ -228,14 +173,14 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
         }
     }
 
-    write_into_display_lists(begin, ms_st.it, chunk.core_disp_lists);
+    write_into_display_list_layers(begin, ms_st.it, chunk.core_disp_list_layers);
     
     return mesh_update_state::BREAK;
 }
 
 mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
     if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
-        clear_display_lists(chunk.shell_disp_lists);
+        clear_display_list_layers(chunk.shell_disp_list_layers);
         return mesh_update_state::CONTINUE;
     }
 
@@ -262,7 +207,7 @@ mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_a
 
     // TODO: Implement this better.
     if (front_nb_blocks == nullptr && back_nb_blocks == nullptr && top_nb_blocks == nullptr && bottom_nb_blocks == nullptr && right_nb_blocks == nullptr && left_nb_blocks == nullptr) {
-        clear_display_lists(chunk.shell_disp_lists);
+        clear_display_list_layers(chunk.shell_disp_list_layers);
         return mesh_update_state::CONTINUE;
     }
 
@@ -307,7 +252,7 @@ mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_a
         bottom_index += Z_OFFSET - Y_OFFSET;
     }
 
-    write_into_display_lists(begin, ms_st.it, chunk.shell_disp_lists);
+    write_into_display_list_layers(begin, ms_st.it, chunk.shell_disp_list_layers);
 
     return mesh_update_state::BREAK;
 }
