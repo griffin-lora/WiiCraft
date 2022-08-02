@@ -15,28 +15,28 @@ namespace game {
         typename ...A
     >
     constexpr R call_face_func_for(F0 front, F1 back, F2 top, F3 bottom, F4 right, F5 left, A&&... args) {
-        if constexpr (face == block::face::FRONT) {
+        if constexpr (face == block::face::front) {
             return front(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::BACK) {
+        } else if constexpr (face == block::face::back) {
             return back(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::TOP) {
+        } else if constexpr (face == block::face::top) {
             return top(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::BOTTOM) {
+        } else if constexpr (face == block::face::bottom) {
             return bottom(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::RIGHT) {
+        } else if constexpr (face == block::face::right) {
             return right(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::LEFT) {
+        } else if constexpr (face == block::face::left) {
             return left(std::forward<A>(args)...);
         }
     }
 
     template<typename R, typename F, typename ...A>
     constexpr R call_func_on_each_face(F func, A&&... args) {
-        func.template operator()<block::face::FRONT>(std::forward<A>(args)...);
-        func.template operator()<block::face::BACK>(std::forward<A>(args)...);
-        func.template operator()<block::face::TOP>(std::forward<A>(args)...);
-        func.template operator()<block::face::BOTTOM>(std::forward<A>(args)...);
-        func.template operator()<block::face::RIGHT>(std::forward<A>(args)...);
-        func.template operator()<block::face::LEFT>(std::forward<A>(args)...);
+        func.template operator()<block::face::front>(std::forward<A>(args)...);
+        func.template operator()<block::face::back>(std::forward<A>(args)...);
+        func.template operator()<block::face::top>(std::forward<A>(args)...);
+        func.template operator()<block::face::bottom>(std::forward<A>(args)...);
+        func.template operator()<block::face::right>(std::forward<A>(args)...);
+        func.template operator()<block::face::left>(std::forward<A>(args)...);
     }
 }

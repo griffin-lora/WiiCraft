@@ -24,7 +24,7 @@ static f32 get_tallgrass_value(glm::vec2 position) {
 }
 
 static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    block block = { .tp = block::type::AIR };
+    block block = { .tp = block::type::air };
     std::fill(chunk.blocks.begin(), chunk.blocks.end(), block);
     get_block_count_ref(chunk, block) = chunk.blocks.size();
 }
@@ -56,27 +56,27 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
                 if (y > gen_y) {
                     if (y < 7) {
-                        block = { .tp = block::type::WATER };
+                        block = { .tp = block::type::water };
                     } else if (y == (gen_y + 1) && gen_y >= 7 && tallgrass_value > 0.97f) {
-                        block = { .tp = block::type::TALL_GRASS };
+                        block = { .tp = block::type::tall_grass };
                     } else {
-                        block = { .tp = block::type::AIR };
+                        block = { .tp = block::type::air };
                     }
                 } else {
                     if (gen_y < 7) {
                         if (y < (gen_y - 2)) {
-                            block = { .tp = block::type::STONE };
+                            block = { .tp = block::type::stone };
                         } else {
-                            block = { .tp = block::type::SAND };
+                            block = { .tp = block::type::sand };
                         }
                     } else if (y < gen_y) {
                         if (y < (gen_y - 2)) {
-                            block = { .tp = block::type::STONE };
+                            block = { .tp = block::type::stone };
                         } else {
-                            block = { .tp = block::type::DIRT };
+                            block = { .tp = block::type::dirt };
                         }
                     } else {
-                        block = { .tp = block::type::GRASS };
+                        block = { .tp = block::type::grass };
                     }
                 }
 
@@ -92,7 +92,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 }
 
 static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    block block = { .tp = block::type::STONE };
+    block block = { .tp = block::type::stone };
     std::fill(chunk.blocks.begin(), chunk.blocks.end(), block);
     get_block_count_ref(chunk, block) = chunk.blocks.size();
 }

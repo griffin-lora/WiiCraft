@@ -80,7 +80,7 @@ void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_b
     };
 
     // TODO: actually use real block data
-    block air_block = { .tp = block::type::AIR };
+    block air_block = { .tp = block::type::air };
 
     const auto& block = *raycast.location.bl;
     math::vector3u8 block_pos = raycast.location.bl_pos;

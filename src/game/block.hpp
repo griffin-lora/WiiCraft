@@ -9,27 +9,27 @@
  * Then add its functionality in block_functionality.hpp
  */
 #define EVAL_MACRO_ON_BLOCK_TYPES(macro) \
-macro(AIR) \
-macro(DEBUG) \
-macro(GRASS) \
-macro(STONE) \
-macro(DIRT) \
-macro(SAND) \
-macro(WOOD_PLANKS) \
-macro(STONE_SLAB) \
-macro(TALL_GRASS) \
-macro(WATER)
+macro(air) \
+macro(debug) \
+macro(grass) \
+macro(stone) \
+macro(dirt) \
+macro(sand) \
+macro(wood_planks) \
+macro(stone_slab) \
+macro(tall_grass) \
+macro(water)
 
 namespace game {
     
     struct block {
         enum class face : u8 {
-            FRONT, // +x
-            BACK, // -x
-            TOP, // +y
-            BOTTOM, // -z
-            RIGHT, // +z
-            LEFT // -z
+            front, // +x
+            back, // -x
+            top, // +y
+            bottom, // -z
+            right, // +z
+            left // -z
         };
         
         enum class type : u8 {
@@ -49,9 +49,9 @@ namespace game {
         };
 
         enum class slab_state : u8 {
-            BOTTOM,
-            TOP,
-            BOTH
+            bottom,
+            top,
+            both
         };
 
         union state {
@@ -66,11 +66,11 @@ namespace game {
 
 
         enum class category {
-            TRANSPARENT,
-            OPAQUE_CUBE,
-            TRANSPARENT_CUBE,
-            OPAQUE_TOP_SLAB,
-            OPAQUE_BOTTOM_SLAB,
+            transparent,
+            opaque_cube,
+            transparent_cube,
+            opaque_top_slab,
+            opaque_bottom_slab,
         };
     };
 

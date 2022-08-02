@@ -20,12 +20,12 @@ static chunk::opt_ref get_neighbor_from_map(chunk::map& chunks, const math::vect
 
 void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk) {
     chunk.nh = {
-        .front = get_neighbor_from_map<block::face::FRONT>(chunks, pos),
-        .back = get_neighbor_from_map<block::face::BACK>(chunks, pos),
-        .top = get_neighbor_from_map<block::face::TOP>(chunks, pos),
-        .bottom = get_neighbor_from_map<block::face::BOTTOM>(chunks, pos),
-        .right = get_neighbor_from_map<block::face::RIGHT>(chunks, pos),
-        .left = get_neighbor_from_map<block::face::LEFT>(chunks, pos),
+        .front = get_neighbor_from_map<block::face::front>(chunks, pos),
+        .back = get_neighbor_from_map<block::face::back>(chunks, pos),
+        .top = get_neighbor_from_map<block::face::top>(chunks, pos),
+        .bottom = get_neighbor_from_map<block::face::bottom>(chunks, pos),
+        .right = get_neighbor_from_map<block::face::right>(chunks, pos),
+        .left = get_neighbor_from_map<block::face::left>(chunks, pos),
     };
 }
 
@@ -47,9 +47,9 @@ std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
         return Bf::get_block_counting_type(block.st);
     });
     switch (counting_type) {
-        case block_counting_type::INVISIBLE: return chunk.invisible_block_count;
-        case block_counting_type::FULLY_OPAQUE: return chunk.fully_opaque_block_count;
-        case block_counting_type::PARTIALLY_OPAQUE: return chunk.partially_opaque_block_count;
+        case block_counting_type::invisible: return chunk.invisible_block_count;
+        case block_counting_type::fully_opaque: return chunk.fully_opaque_block_count;
+        case block_counting_type::partially_opaque: return chunk.partially_opaque_block_count;
     }
     // Compiler complains despite this being unreachable
     return chunk.invisible_block_count;

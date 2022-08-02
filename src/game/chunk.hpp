@@ -66,12 +66,12 @@ namespace game {
         static constexpr chrono::us FADE_TIME = 1500000;
 
         enum class fade_state {
-            NONE,
-            IN,
-            OUT
+            none,
+            in,
+            out
         };
 
-        fade_state fade_st = fade_state::NONE;
+        fade_state fade_st = fade_state::none;
         chrono::us fade_start;
         
         inline chunk(const math::matrix view, const math::vector3s32& pos) {

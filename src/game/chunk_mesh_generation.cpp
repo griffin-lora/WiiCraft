@@ -114,7 +114,7 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
         chunk.fully_opaque_block_count == chunk::BLOCKS_COUNT
     ) {
         clear_display_list_layers(chunk.core_disp_list_layers);
-        return mesh_update_state::CONTINUE;
+        return mesh_update_state::should_continue;
     }
 
     const chunk_quad_iterators begin = { building_arrays };
@@ -175,13 +175,13 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
 
     write_into_display_list_layers(begin, ms_st.it, chunk.core_disp_list_layers);
     
-    return mesh_update_state::BREAK;
+    return mesh_update_state::should_break;
 }
 
 mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
     if (chunk.invisible_block_count == chunk::BLOCKS_COUNT) {
         clear_display_list_layers(chunk.shell_disp_list_layers);
-        return mesh_update_state::CONTINUE;
+        return mesh_update_state::should_continue;
     }
 
     const auto blocks = chunk.blocks.data();
@@ -208,7 +208,7 @@ mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_a
     // TODO: Implement this better.
     if (front_nb_blocks == nullptr && back_nb_blocks == nullptr && top_nb_blocks == nullptr && bottom_nb_blocks == nullptr && right_nb_blocks == nullptr && left_nb_blocks == nullptr) {
         clear_display_list_layers(chunk.shell_disp_list_layers);
-        return mesh_update_state::CONTINUE;
+        return mesh_update_state::should_continue;
     }
 
     const chunk_quad_iterators begin = { building_arrays };
@@ -229,12 +229,12 @@ mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_a
 
     for (u32 far = 0; far < chunk::SIZE; far++) {
         for (u32 near = 0; near < chunk::SIZE; near++) {
-            add_face_vertices_if_needed_at_neighbor<block::face::FRONT>(blocks, front_nb_blocks, front_index, back_index, ms_st, { chunk::SIZE - 1, near, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::BACK>(blocks, back_nb_blocks, back_index, front_index, ms_st, { 0, near, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::TOP>(blocks, top_nb_blocks, top_index, bottom_index, ms_st, { near, chunk::SIZE - 1, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::BOTTOM>(blocks, bottom_nb_blocks, bottom_index, top_index, ms_st, { near, 0, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::RIGHT>(blocks, right_nb_blocks, right_index, left_index, ms_st, { near, far, chunk::SIZE - 1 });
-            add_face_vertices_if_needed_at_neighbor<block::face::LEFT>(blocks, left_nb_blocks, left_index, right_index, ms_st, { near, far, 0 });
+            add_face_vertices_if_needed_at_neighbor<block::face::front>(blocks, front_nb_blocks, front_index, back_index, ms_st, { chunk::SIZE - 1, near, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::back>(blocks, back_nb_blocks, back_index, front_index, ms_st, { 0, near, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::top>(blocks, top_nb_blocks, top_index, bottom_index, ms_st, { near, chunk::SIZE - 1, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::bottom>(blocks, bottom_nb_blocks, bottom_index, top_index, ms_st, { near, 0, far });
+            add_face_vertices_if_needed_at_neighbor<block::face::right>(blocks, right_nb_blocks, right_index, left_index, ms_st, { near, far, chunk::SIZE - 1 });
+            add_face_vertices_if_needed_at_neighbor<block::face::left>(blocks, left_nb_blocks, left_index, right_index, ms_st, { near, far, 0 });
             
             check_vertex_count(begin, ms_st.it);
             
@@ -254,5 +254,5 @@ mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_a
 
     write_into_display_list_layers(begin, ms_st.it, chunk.shell_disp_list_layers);
 
-    return mesh_update_state::BREAK;
+    return mesh_update_state::should_break;
 }

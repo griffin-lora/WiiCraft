@@ -23,33 +23,33 @@ namespace game {
     struct invert_face;
 
     template<>
-    struct invert_face<block::face::FRONT> {
-        static constexpr block::face value = block::face::BACK;
+    struct invert_face<block::face::front> {
+        static constexpr block::face value = block::face::back;
     };
 
     template<>
-    struct invert_face<block::face::BACK> {
-        static constexpr block::face value = block::face::FRONT;
+    struct invert_face<block::face::back> {
+        static constexpr block::face value = block::face::front;
     };
 
     template<>
-    struct invert_face<block::face::TOP> {
-        static constexpr block::face value = block::face::BOTTOM;
+    struct invert_face<block::face::top> {
+        static constexpr block::face value = block::face::bottom;
     };
 
     template<>
-    struct invert_face<block::face::BOTTOM> {
-        static constexpr block::face value = block::face::TOP;
+    struct invert_face<block::face::bottom> {
+        static constexpr block::face value = block::face::top;
     };
 
     template<>
-    struct invert_face<block::face::RIGHT> {
-        static constexpr block::face value = block::face::LEFT;
+    struct invert_face<block::face::right> {
+        static constexpr block::face value = block::face::left;
     };
 
     template<>
-    struct invert_face<block::face::LEFT> {
-        static constexpr block::face value = block::face::RIGHT;
+    struct invert_face<block::face::left> {
+        static constexpr block::face value = block::face::right;
     };
 
     bool does_world_position_select_block(const glm::vec3& world_position, const block& block, const glm::vec3& world_block_position);
