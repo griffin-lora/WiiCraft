@@ -31,6 +31,8 @@ namespace game {
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
+
+            static void init_chunk_rendering();
         };
 
         struct tinted {
@@ -42,6 +44,8 @@ namespace game {
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
+
+            static void init_chunk_rendering();
         };
 
         struct tinted_alpha {
@@ -53,6 +57,8 @@ namespace game {
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
+
+            static void init_chunk_rendering();
         };
 
         struct tinted_double_side_alpha {
@@ -64,6 +70,8 @@ namespace game {
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
+
+            static void init_chunk_rendering();
         };
 
         struct tinted_decal {
@@ -75,6 +83,8 @@ namespace game {
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
+            
+            static void init_chunk_rendering();
         };
     }
 
