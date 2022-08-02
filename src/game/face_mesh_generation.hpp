@@ -38,4 +38,17 @@ namespace game {
             ms_st, pos, offset_pos, uv, offset_uv
         );
     }
+
+    template<block::face FACE, typename L, typename M>
+    constexpr void add_flat_tinted_face_vertices(TINTED_FACE_PARAMS) {
+        call_face_func_for<FACE, void>(
+            add_flat_tinted_front_vertices<L, M>,
+            add_flat_tinted_back_vertices<L, M>,
+            add_flat_tinted_top_vertices<L, M>,
+            add_flat_tinted_bottom_vertices<L, M>,
+            add_flat_tinted_right_vertices<L, M>,
+            add_flat_tinted_left_vertices<L, M>,
+            ms_st, pos, offset_pos, color, uv, offset_uv
+        );
+    }
 }

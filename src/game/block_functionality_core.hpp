@@ -8,6 +8,9 @@
 #include <array>
 
 namespace game {
+    static constexpr math::vector3u8 green_tint_color = { 0x91, 0xbd, 0x59 };
+    static constexpr math::vector3u8 water_tint_color = { 0x3f, 0x76, 0xe4 };
+
     #define BF_MB static constexpr
 
     template<block::type TYPE>
@@ -41,8 +44,13 @@ namespace game {
                 (FACE == block::face::bottom && category == block::category::opaque_top_slab);
         }
 
+        template<block::face FACE, typename M>
+        BF_MB void add_face_vertices(M& ms_st, math::vector3u8 pos, math::vector3u8 offset_pos, math::vector2u8 uv, math::vector2u8 offset_uv) {
+            add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
+        }
+
         template<block::face FACE, typename M, typename F>
-        BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+        BF_MB void add_face_vertices_if_needed(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
             const block* nb_block = get_face_neighbor_block.template operator()<FACE>();
             if (
                 nb_block == nullptr ||
@@ -52,7 +60,7 @@ namespace game {
             }
             math::vector2u8 uv = BF::template get_face_uv<FACE>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
+            BF::template add_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -61,7 +69,7 @@ namespace game {
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
             call_func_on_each_face<void>(
-                [&]<block::face FACE>() { add_face_vertices<FACE>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+                [&]<block::face FACE>() { add_face_vertices_if_needed<FACE>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
 
@@ -212,7 +220,7 @@ namespace game {
             math::vector2u8 uv = BF::get_uv(st) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
 
-            add_foliage_vertices<block_mesh_layer::tinted_double_side_alpha>(ms_st, pos, offset_pos, { 0x91, 0xbd, 0x59 }, uv, offset_uv);
+            add_foliage_vertices<block_mesh_layer::tinted_double_side_alpha>(ms_st, pos, offset_pos, green_tint_color, uv, offset_uv);
         }
 
         BF_MB std::array<math::box, 1> get_selection_boxes(bl_st) {
@@ -246,6 +254,15 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::grass> : public cube_block_functionality<block_functionality<block::type::grass>> {
+        template<block::face FACE, typename M>
+        BF_MB void add_face_vertices(M& ms_st, math::vector3u8 pos, math::vector3u8 offset_pos, math::vector2u8 uv, math::vector2u8 offset_uv) {
+            if constexpr (FACE == block::face::top) {
+                add_flat_tinted_face_vertices<FACE, block_mesh_layer::tinted>(ms_st, pos, offset_pos, green_tint_color, uv, offset_uv);
+            } else {
+                add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
+            }
+        }
+
         template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
@@ -342,7 +359,7 @@ namespace game {
             }
             math::vector2u8 uv = math::vector2u8{ 7, 0 } * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_tinted_face_vertices<FACE, block_mesh_layer::tinted_alpha>(ms_st, pos, offset_pos, water_tint_color, uv, offset_uv);
         }
 
         template<typename M, typename F>
