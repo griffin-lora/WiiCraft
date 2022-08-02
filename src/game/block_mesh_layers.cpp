@@ -4,6 +4,10 @@
 using namespace game;
 using namespace block_mesh_layer;
 
+bool standard::is_single_sided() {
+	return true;
+}
+
 std::size_t standard::get_chunk_display_list_size(std::size_t vert_count) {
     return
         gfx::get_begin_instruction_size(vert_count) +
@@ -60,6 +64,10 @@ static void write_tinted_chunk_vertex(const auto& vert) {
     GX_TexCoord2u8(vert.uv.x, vert.uv.y);
 }
 
+bool tinted::is_single_sided() {
+	return true;
+}
+
 std::size_t tinted::get_chunk_display_list_size(std::size_t vert_count) {
     return get_tinted_chunk_display_list_size(vert_count);
 }
@@ -100,6 +108,10 @@ void tinted::init_chunk_rendering() {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGB, GX_RGB8, 0);
 }
 
+bool tinted_alpha::is_single_sided() {
+	return true;
+}
+
 std::size_t tinted_alpha::get_chunk_display_list_size(std::size_t vert_count) {
     return get_tinted_chunk_display_list_size(vert_count);
 }
@@ -113,6 +125,10 @@ void tinted_alpha::init_chunk_rendering() {
 	GX_SetZCompLoc(GX_FALSE);
 }
 
+bool tinted_double_side_alpha::is_single_sided() {
+	return false;
+}
+
 std::size_t tinted_double_side_alpha::get_chunk_display_list_size(std::size_t vert_count) {
     return get_tinted_chunk_display_list_size(vert_count);
 }
@@ -123,6 +139,10 @@ void tinted_double_side_alpha::write_chunk_vertex(const chunk_quad::vertex& vert
 
 void tinted_double_side_alpha::init_chunk_rendering() {
 	GX_SetCullMode(GX_CULL_NONE);
+}
+
+bool tinted_decal::is_single_sided() {
+	return true;
 }
 
 std::size_t tinted_decal::get_chunk_display_list_size(std::size_t vert_count) {

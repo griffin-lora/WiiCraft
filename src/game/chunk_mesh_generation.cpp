@@ -16,7 +16,9 @@ struct iterator_container {
 };
 
 struct chunk_quad_iterators : public block_mesh_layers<chunk_quad_array_iterator_container> {
-    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : block_mesh_layers<chunk_quad_array_iterator_container>([&arrays]<typename L>() { return arrays.get_layer<L>().begin(); }) {}
+    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : block_mesh_layers<chunk_quad_array_iterator_container>(
+        [&arrays]<typename L>() { return arrays.get_layer<L>().begin(); }
+    ) {}
 };
 
 struct chunk_mesh_state {
