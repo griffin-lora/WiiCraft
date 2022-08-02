@@ -20,10 +20,10 @@ namespace game {
 
         using pos_set = std::unordered_set<math::vector3s32, hash_vector3s32>;
 
-        static constexpr u32 MAT = GX_PNMTX5;
+        static constexpr u32 mat = GX_PNMTX5;
 
-        static constexpr s32 SIZE = 32;
-        static constexpr u32 BLOCKS_COUNT = SIZE * SIZE * SIZE;
+        static constexpr s32 size = 32;
+        static constexpr u32 blocks_count = size * size * size;
         
         struct neighborhood {
             opt_ref front;
@@ -63,7 +63,7 @@ namespace game {
         
         bool fade_in_when_mesh_is_updated = false;
 
-        static constexpr chrono::us FADE_TIME = 1500000;
+        static constexpr chrono::us fade_time = 1500000;
 
         enum class fade_state {
             none,
@@ -75,7 +75,7 @@ namespace game {
         chrono::us fade_start;
         
         inline chunk(const math::matrix view, const math::vector3s32& pos) {
-            tf.set_position(view, pos.x * chunk::SIZE, pos.y * chunk::SIZE, pos.z * chunk::SIZE);
+            tf.set_position(view, pos.x * chunk::size, pos.y * chunk::size, pos.z * chunk::size);
         }
     };
 }

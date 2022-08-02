@@ -9,21 +9,21 @@ using namespace game;
 
 debug_ui::debug_ui() {
     tf.set_position(10.0f, 20.0f);
-    tf.load(MAT);
+    tf.load(mat);
 
     constexpr auto write_text = [](gfx::display_list& disp_list, std::string_view str, u16 y_offset) {
         gfx::write_text_into_display_list<u8>([y_offset](u16 x, u16 y, u8 u, u8 v) {
-            GX_Position2u16(x, y + (CHAR_SIZE * y_offset));
+            GX_Position2u16(x, y + (char_size * y_offset));
             GX_TexCoord2u8(u, v);
-        }, disp_list, str, CHAR_SIZE, CHAR_SIZE);
+        }, disp_list, str, char_size, char_size);
     };
 
-    write_text(fps_prefix_disp_list, FPS_PREFIX, 0);
-    write_text(pos_prefix_disp_list, POS_PREFIX, 1);
-    write_text(dir_prefix_disp_list, DIR_PREFIX, 2);
-    write_text(bgt_prefix_disp_list, BGT_PREFIX, 3);
-    write_text(mgt_prefix_disp_list, MGT_PREFIX, 4);
-    write_text(mgl_prefix_disp_list, MGL_PREFIX, 5);
+    write_text(fps_prefix_disp_list, fps_prefix, 0);
+    write_text(pos_prefix_disp_list, pos_prefix, 1);
+    write_text(dir_prefix_disp_list, dir_prefix, 2);
+    write_text(bgt_prefix_disp_list, bgt_prefix, 3);
+    write_text(mgt_prefix_disp_list, mgt_prefix, 4);
+    write_text(mgl_prefix_disp_list, mgl_prefix, 5);
 }
 
 static inline std::string to_string(const glm::vec3& v) {
@@ -41,12 +41,12 @@ void debug_ui::update(u32 buttons_down) {
 void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us total_block_gen_time, chrono::us total_mesh_gen_time, chrono::us last_mesh_gen_time, u32 fps) const {
     constexpr auto write_text = [](std::string_view str, u16 y_offset) {
         gfx::write_text_vertices<u8>([y_offset](u16 x, u16 y, u8 u, u8 v) {
-            GX_Position2u16(x + PREFIX_WIDTH, y + (CHAR_SIZE * y_offset));
+            GX_Position2u16(x + prefix_width, y + (char_size * y_offset));
             GX_TexCoord2u8(u, v);
-        }, str, CHAR_SIZE, CHAR_SIZE);
+        }, str, char_size, char_size);
     };
 
-    GX_SetCurrentMtx(MAT);
+    GX_SetCurrentMtx(mat);
 
     fps_prefix_disp_list.call();
     auto fps_str = std::to_string(fps);

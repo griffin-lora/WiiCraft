@@ -88,11 +88,11 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.fade_st != chunk::fade_state::none) {
             auto elapsed = now - chunk.fade_start;
-            if (elapsed <= chunk::FADE_TIME) {
+            if (elapsed <= chunk::fade_time) {
                 u8 begin = chunk.fade_st == chunk::fade_state::in ? 0x0 : 0xff;
                 u8 end = chunk.fade_st == chunk::fade_state::in ? 0xff : 0x0;
 
-                auto lerp_alpha = math::get_eased(elapsed / (f32)chunk::FADE_TIME);
+                auto lerp_alpha = math::get_eased(elapsed / (f32)chunk::fade_time);
 
                 chunk.alpha = math::lerp(begin, end, lerp_alpha);
             } else {
@@ -183,7 +183,7 @@ void game::manage_chunks_around_camera(
             chunk.blocks = std::move(stored_chunk.blocks);
             stored_chunks.erase(pos);
         } else {
-            chunk.blocks.resize_without_copying(chunk::BLOCKS_COUNT);
+            chunk.blocks.resize_without_copying(chunk::blocks_count);
             auto start = chrono::get_current_us();
             generate_blocks(chunk, pos);
             total_block_gen_time += chrono::get_current_us() - start;

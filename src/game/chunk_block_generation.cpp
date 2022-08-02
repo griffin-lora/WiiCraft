@@ -29,18 +29,18 @@ static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos
     get_block_count_ref(chunk, block) = chunk.blocks.size();
 }
 
-static constexpr s32 Z_OFFSET = chunk::SIZE * chunk::SIZE;
-static constexpr s32 Y_OFFSET = chunk::SIZE;
-static constexpr s32 X_OFFSET = 1;
+static constexpr s32 z_offset = chunk::size * chunk::size;
+static constexpr s32 y_offset = chunk::size;
+static constexpr s32 x_offset = 1;
 
 static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     auto it = chunk.blocks.begin();
 
-    f32 world_chunk_x = chunk_pos.x * chunk::SIZE;
-    f32 world_chunk_z = chunk_pos.z * chunk::SIZE;
+    f32 world_chunk_x = chunk_pos.x * chunk::size;
+    f32 world_chunk_z = chunk_pos.z * chunk::size;
 
-    for (f32 z = 0; z < chunk::SIZE; z++) {
-        for (f32 x = 0; x < chunk::SIZE; x++) {
+    for (f32 z = 0; z < chunk::size; z++) {
+        for (f32 x = 0; x < chunk::size; x++) {
             f32 world_x = world_chunk_x + x;
             f32 world_z = world_chunk_z + z;
             glm::vec2 noise_pos = { world_x, world_z };
@@ -51,7 +51,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
             s32 gen_y = (height * 12) + 1;
 
-            for (s32 y = 0; y < chunk::SIZE; y++) {
+            for (s32 y = 0; y < chunk::size; y++) {
                 auto& block = *it;
 
                 if (y > gen_y) {
@@ -82,12 +82,12 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
                 get_block_count_ref(chunk, block)++;
 
-                it += Y_OFFSET;
+                it += y_offset;
             }
 
-            it += X_OFFSET - Z_OFFSET;
+            it += x_offset - z_offset;
         }
-        it += Z_OFFSET - Y_OFFSET;
+        it += z_offset - y_offset;
     }
 }
 

@@ -10,7 +10,7 @@ using namespace game;
 void block_selection::update_if_needed(const math::matrix view, const camera& cam) {
     if (cam.update_view) {
         tf.update_model_view(view);
-        tf.load(MAT);
+        tf.load(mat);
     }
 }
 
@@ -37,7 +37,7 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
 
         GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 
-        GX_SetCurrentMtx(MAT);
+        GX_SetCurrentMtx(mat);
 
         GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
         GX_SetZCompLoc(GX_TRUE);
@@ -69,8 +69,8 @@ struct block_selection_mesh_state {
 };
 
 void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast& raycast) {
-    tf.set_position(view, raycast.location.ch_pos.x * chunk::SIZE, raycast.location.ch_pos.y * chunk::SIZE, raycast.location.ch_pos.z * chunk::SIZE);
-    tf.load(MAT);
+    tf.set_position(view, raycast.location.ch_pos.x * chunk::size, raycast.location.ch_pos.y * chunk::size, raycast.location.ch_pos.z * chunk::size);
+    tf.load(mat);
 
     auto begin = (block_selection_quad*)building_array.data();
 

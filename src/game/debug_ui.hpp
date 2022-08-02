@@ -5,16 +5,16 @@
 
 namespace game {
     struct debug_ui {
-        static constexpr u32 MAT = GX_PNMTX2;
+        static constexpr u32 mat = GX_PNMTX2;
 
-        static constexpr const char* FPS_PREFIX = "FPS: ";
-        static constexpr const char* POS_PREFIX = "POS: ";
-        static constexpr const char* DIR_PREFIX = "DIR: ";
-        static constexpr const char* BGT_PREFIX = "BGT: ";
-        static constexpr const char* MGT_PREFIX = "MGT: ";
-        static constexpr const char* MGL_PREFIX = "MGL: ";
-        static constexpr u16 CHAR_SIZE = 16;
-        static constexpr u16 PREFIX_WIDTH = gfx::get_text_width(FPS_PREFIX, CHAR_SIZE);
+        static constexpr const char* fps_prefix = "FPS: ";
+        static constexpr const char* pos_prefix = "POS: ";
+        static constexpr const char* dir_prefix = "DIR: ";
+        static constexpr const char* bgt_prefix = "BGT: ";
+        static constexpr const char* mgt_prefix = "MGT: ";
+        static constexpr const char* mgl_prefix = "MGL: ";
+        static constexpr u16 char_size = 16;
+        static constexpr u16 prefix_width = gfx::get_text_width(fps_prefix, char_size);
 
         math::transform_2d tf;
         gfx::display_list fps_prefix_disp_list;

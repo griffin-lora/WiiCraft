@@ -5,7 +5,7 @@ using namespace game;
 
 water_overlay::water_overlay() {
     tf.set_position(0, 0);
-    tf.load(MAT);
+    tf.load(mat);
 
     constexpr std::size_t vertex_count = 4;
     
@@ -38,7 +38,7 @@ void water_overlay::draw(const camera& cam, const chunk::map& chunks) const {
     if (block.has_value() && block->get().tp == block::type::water && does_world_position_select_block(cam.position, *block, floor_float_position<f32>(cam.position))) {
         GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
-        GX_SetCurrentMtx(MAT);
+        GX_SetCurrentMtx(mat);
 
         disp_list.call();
     }

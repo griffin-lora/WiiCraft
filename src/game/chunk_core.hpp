@@ -35,7 +35,7 @@ namespace game {
 
     template<block::face FACE, typename T>
     constexpr bool is_block_position_at_face_edge(T pos) {
-        constexpr auto edge_coord = (chunk::SIZE - 1);
+        constexpr auto edge_coord = (chunk::size - 1);
         return call_face_func_for<FACE, bool>(
             [&]() { return pos.x == edge_coord; },
             [&]() { return pos.x == 0; },

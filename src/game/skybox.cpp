@@ -112,7 +112,7 @@ skybox::skybox(const math::matrix view, const camera& cam) {
 
 void skybox::update(const math::matrix view, const camera& cam) {
     tf.set_position(view, cam.position.x, cam.position.y, cam.position.z);
-    tf.load(MAT);
+    tf.load(mat);
 }
 
 void skybox::update_if_needed(const math::matrix view, const camera& cam) {
@@ -155,7 +155,7 @@ void skybox::draw() const {
 
     //
     
-    GX_SetCurrentMtx(MAT);
+    GX_SetCurrentMtx(mat);
 
     disp_list.call();
 }

@@ -6,7 +6,7 @@
 
 namespace game {
     struct skybox {
-        static constexpr u32 MAT = GX_PNMTX0;
+        static constexpr u32 mat = GX_PNMTX0;
 
         math::transform_3d tf;
         gfx::display_list disp_list;

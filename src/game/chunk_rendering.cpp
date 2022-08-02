@@ -17,7 +17,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 					set_alpha(chunk.alpha);
 
 					chunk.tf.update_model_view(view);
-					chunk.tf.load(chunk::MAT);
+					chunk.tf.load(chunk::mat);
 
 					chunk.core_disp_list_layers.standard.call();
 					chunk.shell_disp_list_layers.standard.call();
@@ -33,7 +33,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		for (auto& [ pos, chunk ] : chunks) {
 			set_alpha(chunk.alpha);
 
-			chunk.tf.load(chunk::MAT);
+			chunk.tf.load(chunk::mat);
 			chunk.core_disp_list_layers.template get_layer<L>().call();
 			chunk.shell_disp_list_layers.template get_layer<L>().call();
 		}

@@ -5,9 +5,9 @@
 
 namespace game {
     struct camera {
-        static constexpr f32 BASE_FOV = 90.0f;
-        static constexpr f32 SPRINT_FOV = BASE_FOV + 10.0f;
-        static constexpr chrono::us FOV_TWEEN_TIME = 150000;
+        static constexpr f32 base_fov = 90.0f;
+        static constexpr f32 sprint_fov = base_fov + 10.0f;
+        static constexpr chrono::us fov_tween_time = 150000;
 
         glm::vec3 position;
         glm::vec3 up;
@@ -15,7 +15,7 @@ namespace game {
         f32 yaw = 0.0f;
         f32 pitch = 0.0f;
 
-        f32 fov = BASE_FOV;
+        f32 fov = base_fov;
         f32 aspect;
         f32 near_clipping_plane_distance;
         f32 far_clipping_plane_distance;

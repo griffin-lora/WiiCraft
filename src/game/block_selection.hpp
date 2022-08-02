@@ -11,7 +11,7 @@
 
 namespace game {
     struct block_selection {
-        static constexpr u32 MAT = GX_PNMTX4;
+        static constexpr u32 mat = GX_PNMTX4;
 
         std::optional<math::vector3s32> last_block_pos;
         std::optional<block> last_block;

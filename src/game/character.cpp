@@ -175,13 +175,13 @@ void character::update_camera(camera& cam, chrono::us now) const {
 
     auto elapsed = now - fov_tween_start;
 
-    if (elapsed <= camera::FOV_TWEEN_TIME) {
-        auto alpha = math::get_eased(elapsed / (f32)camera::FOV_TWEEN_TIME);
+    if (elapsed <= camera::fov_tween_time) {
+        auto alpha = math::get_eased(elapsed / (f32)camera::fov_tween_time);
 
         if (sprinting) {
-            cam.fov = math::lerp(camera::BASE_FOV, camera::SPRINT_FOV, alpha);
+            cam.fov = math::lerp(camera::base_fov, camera::sprint_fov, alpha);
         } else if (!sprinting) {
-            cam.fov = math::lerp(camera::SPRINT_FOV, camera::BASE_FOV, alpha);
+            cam.fov = math::lerp(camera::sprint_fov, camera::base_fov, alpha);
         }
 
         cam.update_perspective = true;

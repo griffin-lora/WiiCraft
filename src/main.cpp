@@ -150,20 +150,20 @@ int main(int argc, char** argv) {
 
 		start = now;
 
-		static constexpr s32 CHAN = 0;
+		s32 chan = 0;
 
 		input::scan_pads();
-		u32 buttons_down = input::get_buttons_down(CHAN);
-		if (buttons_down & WPAD_BUTTON_HOME) { std::exit(CHAN); }
-		u32 buttons_held = input::get_buttons_held(CHAN);
+		u32 buttons_down = input::get_buttons_down(chan);
+		if (buttons_down & WPAD_BUTTON_HOME) { std::exit(chan); }
+		u32 buttons_held = input::get_buttons_held(chan);
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
-		auto pointer_pos = input::get_pointer_position(CHAN);
+		auto pointer_pos = input::get_pointer_position(chan);
 		cursor.update_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, pointer_pos);
 
 		#ifndef PC_PORT
-    	auto wpad_accel = input::get_accel(CHAN);
+    	auto wpad_accel = input::get_accel(chan);
 		expansion_t exp;
 		if (input::scan_nunchuk(0, exp)) {
 			const auto& nunchuk = exp.nunchuk;
@@ -207,7 +207,7 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox.draw();
 
-		GX_SetCurrentMtx(game::chunk::MAT);
+		GX_SetCurrentMtx(game::chunk::mat);
 
 		game::draw_chunks(view, cam, chunks);
 		
