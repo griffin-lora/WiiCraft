@@ -52,7 +52,7 @@ namespace game {
             }
             math::vector2u8 uv = BF::template get_face_uv<FACE>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -141,7 +141,7 @@ namespace game {
                 (st.slab == state::both ? block_draw_size : half_block_draw_size) :
                 block_draw_size
             ) };
-            add_flat_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -169,11 +169,11 @@ namespace game {
                 if (st.slab == state::bottom) {
                     math::vector2u8 uv = BF::template get_face_uv<block::face::top>(st) * block_draw_size;
                     math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-                    add_flat_face_vertices<block::face::top>(ms_st, pos, offset_pos, uv, offset_uv);
+                    add_flat_standard_face_vertices<block::face::top, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
                 } else {
                     math::vector2u8 uv = BF::template get_face_uv<block::face::bottom>(st) * block_draw_size;
                     math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-                    add_flat_face_vertices<block::face::bottom>(ms_st, pos, offset_pos, uv, offset_uv);
+                    add_flat_standard_face_vertices<block::face::bottom, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
                 }
             }
         }
@@ -212,7 +212,7 @@ namespace game {
             math::vector2u8 uv = BF::get_uv(st) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
 
-            add_foliage_vertices(ms_st, pos, offset_pos, uv, offset_uv);
+            add_foliage_vertices<block_mesh_layer::tinted_double_side_alpha>(ms_st, pos, offset_pos, { 0x91, 0xbd, 0x59 }, uv, offset_uv);
         }
 
         BF_MB std::array<math::box, 1> get_selection_boxes(bl_st) {
@@ -342,7 +342,7 @@ namespace game {
             }
             math::vector2u8 uv = math::vector2u8{ 7, 0 } * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
