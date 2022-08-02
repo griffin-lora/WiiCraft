@@ -4,7 +4,7 @@
 namespace game {
 
     template<
-        block::face face,
+        block::face FACE,
         typename R,
         typename F0,
         typename F1,
@@ -15,17 +15,17 @@ namespace game {
         typename ...A
     >
     constexpr R call_face_func_for(F0 front, F1 back, F2 top, F3 bottom, F4 right, F5 left, A&&... args) {
-        if constexpr (face == block::face::front) {
+        if constexpr (FACE == block::face::front) {
             return front(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::back) {
+        } else if constexpr (FACE == block::face::back) {
             return back(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::top) {
+        } else if constexpr (FACE == block::face::top) {
             return top(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::bottom) {
+        } else if constexpr (FACE == block::face::bottom) {
             return bottom(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::right) {
+        } else if constexpr (FACE == block::face::right) {
             return right(std::forward<A>(args)...);
-        } else if constexpr (face == block::face::left) {
+        } else if constexpr (FACE == block::face::left) {
             return left(std::forward<A>(args)...);
         }
     }

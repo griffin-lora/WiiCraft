@@ -29,9 +29,9 @@ void game::handle_block_raycasts_in_region(chunk::map& chunks, const glm::vec3& 
                 
                 auto world_loc = get_world_location_at_world_position(chunks, world_block_pos);
                 if (world_loc.has_value()) {
-                    auto box_raycast = get_with_block_functionality<std::optional<math::box_raycast>>(world_loc->bl->tp, [&]<typename Bf>() -> std::optional<math::box_raycast> {
+                    auto box_raycast = get_with_block_functionality<std::optional<math::box_raycast>>(world_loc->bl->tp, [&]<typename BF>() -> std::optional<math::box_raycast> {
 
-                        auto boxes = get_boxes.template operator()<Bf>(world_loc->bl->st);
+                        auto boxes = get_boxes.template operator()<BF>(world_loc->bl->st);
                         for (auto& box : boxes) {
                             transform_box(box);
                             box.lesser_corner += world_block_pos;

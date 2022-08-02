@@ -17,9 +17,9 @@ namespace game {
 
     ADD_FACE_TEMPLATE void add_foliage_vertices(FACE_PARAMS);
 
-    template<block::face face, typename M>
+    template<block::face FACE, typename M>
     constexpr void add_flat_face_vertices(FACE_PARAMS) {
-        call_face_func_for<face, void>(
+        call_face_func_for<FACE, void>(
             add_flat_front_vertices<M>,
             add_flat_back_vertices<M>,
             add_flat_top_vertices<M>,

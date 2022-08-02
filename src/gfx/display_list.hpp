@@ -48,8 +48,8 @@ namespace gfx {
         return vert_count > 0xff ? 4 : 3;
     }
 
-    template<std::size_t dim, typename T>
+    template<std::size_t DIM, typename T>
     constexpr std::size_t get_vector_instruction_size(u16 vert_count) {
-        return vert_count * dim * sizeof(T);
+        return vert_count * DIM * sizeof(T);
     }
 };

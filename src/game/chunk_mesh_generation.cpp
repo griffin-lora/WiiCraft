@@ -63,9 +63,9 @@ static constexpr s32 X_OFFSET = 1;
 
 using const_block_it = ext::data_array<block>::const_iterator;
 
-template<block::face face>
+template<block::face FACE>
 static inline const_block_it get_block_face_iterator_offset(const_block_it it) {
-    return call_face_func_for<face, const_block_it>(
+    return call_face_func_for<FACE, const_block_it>(
         [&]() { return it + X_OFFSET; },
         [&]() { return it - X_OFFSET; },
         [&]() { return it + Y_OFFSET; },
@@ -75,13 +75,13 @@ static inline const_block_it get_block_face_iterator_offset(const_block_it it) {
     );
 }
 
-template<block::face face>
+template<block::face FACE>
 static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, chunk_mesh_state& ms_st, math::vector3u8 block_pos) {
     if (nb_blocks != nullptr) {
         auto& bl = blocks[index];
-        call_with_block_functionality(bl.tp, [&]<typename Bf>() {
-            add_block_faces_vertices<Bf>(ms_st, [nb_blocks, nb_chunk_index]<block::face func_face>() -> const block* { // Get neighbor block
-                if constexpr (func_face == face) {
+        call_with_block_functionality(bl.tp, [&]<typename BF>() {
+            add_block_faces_vertices<BF>(ms_st, [nb_blocks, nb_chunk_index]<block::face GET_NB_FACE>() -> const block* { // Get neighbor block
+                if constexpr (GET_NB_FACE == FACE) {
                     return &nb_blocks[nb_chunk_index];
                 } else {
                     return nullptr;
@@ -140,8 +140,8 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
                 auto& bl = *it;
                 math::vector3u8 block_pos = { x, y, z };
 
-                call_with_block_functionality(bl.tp, [&]<typename Bf>() {
-                    add_block_vertices<Bf>(ms_st, [
+                call_with_block_functionality(bl.tp, [&]<typename BF>() {
+                    add_block_vertices<BF>(ms_st, [
                         should_add_left,
                         should_add_right,
                         should_add_bottom,
@@ -149,8 +149,8 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
                         should_add_back,
                         should_add_front,
                         it
-                    ]<block::face face>() -> const block* { // Get neighbor block
-                        bool should_add_face = call_face_func_for<face, bool>(
+                    ]<block::face FACE>() -> const block* { // Get neighbor block
+                        bool should_add_face = call_face_func_for<FACE, bool>(
                             [&]() { return should_add_front; },
                             [&]() { return should_add_back; },
                             [&]() { return should_add_top; },
@@ -159,7 +159,7 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_ar
                             [&]() { return should_add_left; }
                         );
                         if (should_add_face) {
-                            return &(*get_block_face_iterator_offset<face>(it));
+                            return &(*get_block_face_iterator_offset<FACE>(it));
                         } else {
                             return nullptr;
                         }

@@ -7,9 +7,9 @@
 #include "chrono.hpp"
 
 namespace game {
-    template<block::face face>
+    template<block::face FACE>
     constexpr chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
-        return call_face_func_for<face, chunk::const_opt_ref>(
+        return call_face_func_for<FACE, chunk::const_opt_ref>(
             [&]() { return nh.front; },
             [&]() { return nh.back; },
             [&]() { return nh.top; },
@@ -19,9 +19,9 @@ namespace game {
         );
     }
 
-    template<block::face face>
+    template<block::face FACE>
     constexpr chunk::opt_ref get_neighbor(chunk::neighborhood& nh) {
-        return call_face_func_for<face, chunk::opt_ref>(
+        return call_face_func_for<FACE, chunk::opt_ref>(
             [&]() { return nh.front; },
             [&]() { return nh.back; },
             [&]() { return nh.top; },
@@ -33,10 +33,10 @@ namespace game {
 
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 
-    template<block::face face, typename T>
+    template<block::face FACE, typename T>
     constexpr bool is_block_position_at_face_edge(T pos) {
         constexpr auto edge_coord = (chunk::SIZE - 1);
-        return call_face_func_for<face, bool>(
+        return call_face_func_for<FACE, bool>(
             [&]() { return pos.x == edge_coord; },
             [&]() { return pos.x == 0; },
             [&]() { return pos.y == edge_coord; },

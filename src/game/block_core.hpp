@@ -6,9 +6,9 @@
 #include <vector>
 
 namespace game {
-    template<block::face face, typename T>
+    template<block::face FACE, typename T>
     constexpr T get_face_offset_position(T pos) {
-        call_face_func_for<face, void>(
+        call_face_func_for<FACE, void>(
             [&]() { pos.x += 1; },
             [&]() { pos.x -= 1; },
             [&]() { pos.y += 1; },
@@ -19,7 +19,7 @@ namespace game {
         return pos;
     }
 
-    template<block::face face>
+    template<block::face FACE>
     struct invert_face;
 
     template<>

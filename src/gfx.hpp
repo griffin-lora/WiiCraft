@@ -26,13 +26,6 @@ namespace gfx {
         explicit draw_state(color4 bkg);
     };
 
-    template<typename F>
-    inline void draw_quads(std::size_t vertices, F func) {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vertices);
-        func();
-        GX_End();
-    }
-
     using texture = GXTexObj;
 
     std::tuple<bool, error_code> load_from_file(texture& texture, const char* path);

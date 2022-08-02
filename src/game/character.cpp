@@ -128,8 +128,8 @@ bool character::apply_collision(chunk::map& chunks, f32 delta) {
         end.z = next_end.z;
     }
 
-    auto raycast = get_block_raycast(chunks, position, direction, begin, end, []<typename Bf>(game::bl_st st) {
-        return Bf::get_collision_boxes(st);
+    auto raycast = get_block_raycast(chunks, position, direction, begin, end, []<typename BF>(game::bl_st st) {
+        return BF::get_collision_boxes(st);
     }, [](auto& box) {
         box.lesser_corner -= half_size;
         box.greater_corner += half_size;

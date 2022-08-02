@@ -183,8 +183,8 @@ int main(int argc, char** argv) {
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, cam, pointer_pos);
-		auto raycast = game::get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), []<typename Bf>(game::bl_st st) {
-			return Bf::get_selection_boxes(st);
+		auto raycast = game::get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), []<typename BF>(game::bl_st st) {
+			return BF::get_selection_boxes(st);
 		}, [](auto&) {});
 		bl_sel.handle_raycast(view, quad_building_arrays.standard, raycast);
 

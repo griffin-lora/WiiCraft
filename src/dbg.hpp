@@ -11,8 +11,8 @@ namespace dbg {
         freeze();
     }
 
-    template<typename Tf, typename Cf, typename ...Args>
-    inline void try_catch(Tf try_func, Cf catch_func, Args&& ...args) {
+    template<typename F1, typename F2, typename ...Args>
+    inline void try_catch(const F1& try_func, const F2& catch_func, Args&& ...args) {
         auto [ success, code ] = try_func(std::forward<Args>(args)...);
         if (!success) {
             gfx::console_state console;

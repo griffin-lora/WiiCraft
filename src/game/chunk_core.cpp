@@ -7,9 +7,9 @@
 #include <algorithm>
 using namespace game;
 
-template<block::face face>
+template<block::face FACE>
 static chunk::opt_ref get_neighbor_from_map(chunk::map& chunks, const math::vector3s32& pos) {
-    math::vector3s32 offset_pos = get_face_offset_position<face>(pos);
+    math::vector3s32 offset_pos = get_face_offset_position<FACE>(pos);
     auto it = chunks.find(offset_pos);
     if (it != chunks.end()) {
         return it->second;
@@ -32,9 +32,9 @@ void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32&
 void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& pos) {
     chunk.update_core_mesh_important = true;
     chunk.update_shell_mesh_important = true;
-    call_func_on_each_face<void>([&chunk, &pos]<block::face face>() {
-        if (is_block_position_at_face_edge<face>(pos)) {
-            auto nb_chunk = get_neighbor<face>(chunk.nh);
+    call_func_on_each_face<void>([&chunk, &pos]<block::face FACE>() {
+        if (is_block_position_at_face_edge<FACE>(pos)) {
+            auto nb_chunk = get_neighbor<FACE>(chunk.nh);
             if (nb_chunk.has_value()) {
                 nb_chunk->get().update_shell_mesh_important = true;
             }
@@ -43,8 +43,8 @@ void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32&
 }
 
 std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
-    auto counting_type = get_with_block_functionality<block_counting_type>(block.tp, [&block]<typename Bf>() {
-        return Bf::get_block_counting_type(block.st);
+    auto counting_type = get_with_block_functionality<block_counting_type>(block.tp, [&block]<typename BF>() {
+        return BF::get_block_counting_type(block.st);
     });
     switch (counting_type) {
         case block_counting_type::invisible: return chunk.invisible_block_count;
@@ -56,8 +56,8 @@ std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
 }
 
 void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
-    call_func_on_each_face<void>([&chunk]<block::face face>() {
-        auto nb_chunk = get_neighbor<face>(chunk.nh);
+    call_func_on_each_face<void>([&chunk]<block::face FACE>() {
+        auto nb_chunk = get_neighbor<FACE>(chunk.nh);
         if (nb_chunk.has_value()) {
             nb_chunk->get().update_shell_mesh_unimportant = true;
             nb_chunk->get().update_neighborhood = true;
@@ -66,8 +66,8 @@ void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
 }
 
 void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
-    call_func_on_each_face<void>([&chunk]<block::face face>() {
-        auto nb_chunk = get_neighbor<face>(chunk.nh);
+    call_func_on_each_face<void>([&chunk]<block::face FACE>() {
+        auto nb_chunk = get_neighbor<FACE>(chunk.nh);
         if (nb_chunk.has_value()) {
             nb_chunk->get().update_neighborhood = true;
         }

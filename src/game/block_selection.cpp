@@ -85,8 +85,8 @@ void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_b
     const auto& block = *raycast.location.bl;
     math::vector3u8 block_pos = raycast.location.bl_pos;
     
-    call_with_block_functionality(block.tp, [&ms_st, &air_block, &block, block_pos]<typename Bf>() {
-        add_block_vertices<Bf>(ms_st, [&air_block]<block::face face>() { return &air_block; }, block.st, block_pos);
+    call_with_block_functionality(block.tp, [&ms_st, &air_block, &block, block_pos]<typename BF>() {
+        add_block_vertices<BF>(ms_st, [&air_block]<block::face FACE>() { return &air_block; }, block.st, block_pos);
     });
 
     cull_back = true;

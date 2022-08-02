@@ -10,7 +10,7 @@
 namespace game {
     #define BF_MB static constexpr
 
-    template<block::type type>
+    template<block::type TYPE>
     struct block_functionality {
         BF_MB block::category get_category(bl_st) { return block::category::transparent; }
 
@@ -26,33 +26,33 @@ namespace game {
         BF_MB block_counting_type get_block_counting_type(bl_st) { return block_counting_type::invisible; }
     };
 
-    template<typename Bf>
+    template<typename BF>
     struct cube_block_functionality {
         BF_MB block::category get_category(bl_st) { return block::category::opaque_cube; }
 
-        template<block::face face>
+        template<block::face FACE>
         BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
-            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
-                return N_Bf::get_category(nb.st);
+            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename NB_BF>() {
+                return NB_BF::get_category(nb.st);
             });
             return
                 category == block::category::opaque_cube ||
-                (face == block::face::top && category == block::category::opaque_bottom_slab) ||
-                (face == block::face::bottom && category == block::category::opaque_top_slab);
+                (FACE == block::face::top && category == block::category::opaque_bottom_slab) ||
+                (FACE == block::face::bottom && category == block::category::opaque_top_slab);
         }
 
-        template<block::face face, typename M, typename F>
+        template<block::face FACE, typename M, typename F>
         BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
-            const block* nb_block = get_face_neighbor_block.template operator()<face>();
+            const block* nb_block = get_face_neighbor_block.template operator()<FACE>();
             if (
                 nb_block == nullptr ||
-                is_face_invisible_with_neighbor<face>(st, *nb_block)
+                is_face_invisible_with_neighbor<FACE>(st, *nb_block)
             ) {
                 return;
             }
-            math::vector2u8 uv = Bf::template get_face_uv<face>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
+            math::vector2u8 uv = BF::template get_face_uv<FACE>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_face_vertices<face>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -61,7 +61,7 @@ namespace game {
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
             call_func_on_each_face<void>(
-                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+                [&]<block::face FACE>() { add_face_vertices<FACE>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
 
@@ -83,7 +83,7 @@ namespace game {
         BF_MB block_counting_type get_block_counting_type(bl_st) { return block_counting_type::fully_opaque; }
     };
 
-    template<typename Bf>
+    template<typename BF>
     struct slab_block_functionality {
         using state = block::slab_state;
 
@@ -95,53 +95,53 @@ namespace game {
             }
         }
 
-        template<block::face face>
+        template<block::face FACE>
         BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
-            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
-                return N_Bf::get_category(nb.st);
+            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename NB_BF>() {
+                return NB_BF::get_category(nb.st);
             });
             if (category == block::category::opaque_cube) {
                 return true;
             }
             switch (st.slab) {
                 case state::bottom: return
-                    face == block::face::bottom ?
+                    FACE == block::face::bottom ?
                     category == block::category::opaque_top_slab :
                     category == block::category::opaque_bottom_slab;
                 case state::top: return
-                    face == block::face::top ?
+                    FACE == block::face::top ?
                     category == block::category::opaque_bottom_slab :
                     category == block::category::opaque_top_slab;
                 case state::both: return
-                    (face == block::face::top && category == block::category::opaque_bottom_slab) ||
-                    (face == block::face::bottom && category == block::category::opaque_top_slab);
+                    (FACE == block::face::top && category == block::category::opaque_bottom_slab) ||
+                    (FACE == block::face::bottom && category == block::category::opaque_top_slab);
             }
             return true;
         }
 
-        template<block::face face, typename M, typename F>
+        template<block::face FACE, typename M, typename F>
         BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
             if (
-                (face == block::face::top && st.slab == state::bottom) ||
-                (face == block::face::bottom && st.slab == state::top)
+                (FACE == block::face::top && st.slab == state::bottom) ||
+                (FACE == block::face::bottom && st.slab == state::top)
             ) {
                 return;
             }
 
-            const block* nb_block = get_face_neighbor_block.template operator()<face>();
+            const block* nb_block = get_face_neighbor_block.template operator()<FACE>();
             if (
                 nb_block == nullptr ||
-                is_face_invisible_with_neighbor<face>(st, *nb_block)
+                is_face_invisible_with_neighbor<FACE>(st, *nb_block)
             ) {
                 return;
             }
-            math::vector2u8 uv = Bf::template get_face_uv<face>(st) * block_draw_size;
+            math::vector2u8 uv = BF::template get_face_uv<FACE>(st) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, (
-                face != block::face::top && face != block::face::bottom ?
+                FACE != block::face::top && FACE != block::face::bottom ?
                 (st.slab == state::both ? block_draw_size : half_block_draw_size) :
                 block_draw_size
             ) };
-            add_flat_face_vertices<face>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -153,7 +153,7 @@ namespace game {
             auto offset_pos = pos + math::vector3u8{ block_draw_size, st.slab == state::both ? block_draw_size : half_block_draw_size, block_draw_size };
 
             call_func_on_each_face<void>(
-                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+                [&]<block::face FACE>() { add_face_vertices<FACE>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
 
@@ -167,11 +167,11 @@ namespace game {
                 auto offset_pos = pos + math::vector3u8{ block_draw_size, half_block_draw_size, block_draw_size };
 
                 if (st.slab == state::bottom) {
-                    math::vector2u8 uv = Bf::template get_face_uv<block::face::top>(st) * block_draw_size;
+                    math::vector2u8 uv = BF::template get_face_uv<block::face::top>(st) * block_draw_size;
                     math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
                     add_flat_face_vertices<block::face::top>(ms_st, pos, offset_pos, uv, offset_uv);
                 } else {
-                    math::vector2u8 uv = Bf::template get_face_uv<block::face::bottom>(st) * block_draw_size;
+                    math::vector2u8 uv = BF::template get_face_uv<block::face::bottom>(st) * block_draw_size;
                     math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
                     add_flat_face_vertices<block::face::bottom>(ms_st, pos, offset_pos, uv, offset_uv);
                 }
@@ -197,7 +197,7 @@ namespace game {
         ); }
     };
     
-    template<typename Bf>
+    template<typename BF>
     struct foliage_block_functionality {
         BF_MB block::category get_category(bl_st) { return block::category::transparent; }
 
@@ -209,7 +209,7 @@ namespace game {
             pos *= block_draw_size;
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
-            math::vector2u8 uv = Bf::get_uv(st) * block_draw_size;
+            math::vector2u8 uv = BF::get_uv(st) * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
 
             add_foliage_vertices(ms_st, pos, offset_pos, uv, offset_uv);
@@ -230,10 +230,10 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::debug> : public cube_block_functionality<block_functionality<block::type::debug>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
-            return call_face_func_for<face, v2u8>(
+            return call_face_func_for<FACE, v2u8>(
                 []() { return v2u8{0, 0}; },
                 []() { return v2u8{1, 0}; },
                 []() { return v2u8{2, 0}; },
@@ -246,10 +246,10 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::grass> : public cube_block_functionality<block_functionality<block::type::grass>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
-            return call_face_func_for<face, v2u8>(
+            return call_face_func_for<FACE, v2u8>(
                 []() { return v2u8{4, 0}; },
                 []() { return v2u8{4, 0}; },
                 []() { return v2u8{0, 0}; },
@@ -262,7 +262,7 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::dirt> : public cube_block_functionality<block_functionality<block::type::dirt>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 2, 0 };
         }
@@ -270,7 +270,7 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::sand> : public cube_block_functionality<block_functionality<block::type::sand>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 6, 0 };
         }
@@ -278,7 +278,7 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::stone> : public cube_block_functionality<block_functionality<block::type::stone>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 1, 0 };
         }
@@ -286,7 +286,7 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::wood_planks> : public cube_block_functionality<block_functionality<block::type::wood_planks>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             return { 10, 0 };
         }
@@ -294,10 +294,10 @@ namespace game {
 
     template<>
     struct block_functionality<block::type::stone_slab> : public slab_block_functionality<block_functionality<block::type::stone_slab>> {
-        template<block::face face>
+        template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
-            return call_face_func_for<face, v2u8>(
+            return call_face_func_for<FACE, v2u8>(
                 []() { return v2u8{8, 0}; },
                 []() { return v2u8{8, 0}; },
                 []() { return v2u8{9, 0}; },
@@ -319,30 +319,30 @@ namespace game {
     struct block_functionality<block::type::water> {
         BF_MB block::category get_category(bl_st) { return block::category::transparent_cube; }
 
-        template<block::face face>
+        template<block::face FACE>
         BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
-            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename N_Bf>() {
-                return N_Bf::get_category(nb.st);
+            auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename NB_BF>() {
+                return NB_BF::get_category(nb.st);
             });
             return
                 category == block::category::opaque_cube ||
                 category == block::category::transparent_cube ||
-                (face == block::face::top && category == block::category::opaque_bottom_slab) ||
-                (face == block::face::bottom && category == block::category::opaque_top_slab);
+                (FACE == block::face::top && category == block::category::opaque_bottom_slab) ||
+                (FACE == block::face::bottom && category == block::category::opaque_top_slab);
         }
 
-        template<block::face face, typename M, typename F>
+        template<block::face FACE, typename M, typename F>
         BF_MB void add_face_vertices(M& ms_st, const F& get_face_neighbor_block, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
-            const block* nb_block = get_face_neighbor_block.template operator()<face>();
+            const block* nb_block = get_face_neighbor_block.template operator()<FACE>();
             if (
                 nb_block == nullptr ||
-                is_face_invisible_with_neighbor<face>(st, *nb_block)
+                is_face_invisible_with_neighbor<FACE>(st, *nb_block)
             ) {
                 return;
             }
             math::vector2u8 uv = math::vector2u8{ 7, 0 } * block_draw_size;
             math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            add_flat_face_vertices<face>(ms_st, pos, offset_pos, uv, offset_uv);
+            add_flat_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
         template<typename M, typename F>
@@ -351,7 +351,7 @@ namespace game {
             auto offset_pos = pos + math::vector3u8{ block_draw_size, block_draw_size, block_draw_size };
 
             call_func_on_each_face<void>(
-                [&]<block::face face>() { add_face_vertices<face>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
+                [&]<block::face FACE>() { add_face_vertices<FACE>(ms_st, get_face_neighbor_block, st, pos, offset_pos); }
             );
         }
 
