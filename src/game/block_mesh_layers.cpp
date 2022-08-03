@@ -157,8 +157,8 @@ std::size_t tinted_decal::get_chunk_display_list_size(std::size_t vert_count) {
 void tinted_decal::write_chunk_vertex(const chunk_quad::vertex& vert) {
     GX_Position3u8(vert.pos.x, vert.pos.y, vert.pos.z);
     GX_Color3u8(vert.color.r, vert.color.g, vert.color.b);
-    GX_TexCoord2u8(vert.uvs[0].x, vert.uvs[0].y);
-    GX_TexCoord2u8(vert.uvs[1].x, vert.uvs[1].y);
+    GX_TexCoord2u8(vert.uv_0.x, vert.uv_0.y);
+    // GX_TexCoord2u8(vert.uv_1.x, vert.uv_1.y);
 }
 
 void tinted_decal::init_chunk_rendering() {

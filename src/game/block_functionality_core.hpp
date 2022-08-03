@@ -45,7 +45,9 @@ namespace game {
         }
 
         template<block::face FACE, typename M>
-        BF_MB void add_face_vertices(M& ms_st, math::vector3u8 pos, math::vector3u8 offset_pos, math::vector2u8 uv, math::vector2u8 offset_uv) {
+        BF_MB void add_face_vertices(M& ms_st, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+            math::vector2u8 uv = BF::template get_face_uv<FACE>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
+            math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
             add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
@@ -54,13 +56,11 @@ namespace game {
             const block* nb_block = get_face_neighbor_block.template operator()<FACE>();
             if (
                 nb_block == nullptr ||
-                is_face_invisible_with_neighbor<FACE>(st, *nb_block)
+                BF::template is_face_invisible_with_neighbor<FACE>(st, *nb_block)
             ) {
                 return;
             }
-            math::vector2u8 uv = BF::template get_face_uv<FACE>(st/* TODO: add this param: , *nb_block */) * block_draw_size;
-            math::vector2u8 offset_uv = uv + math::vector2u8{ block_draw_size, block_draw_size };
-            BF::template add_face_vertices<FACE>(ms_st, pos, offset_pos, uv, offset_uv);
+            BF::template add_face_vertices<FACE>(ms_st, st, pos, offset_pos);
         }
 
         template<typename M, typename F>
@@ -255,25 +255,36 @@ namespace game {
     template<>
     struct block_functionality<block::type::grass> : public cube_block_functionality<block_functionality<block::type::grass>> {
         template<block::face FACE, typename M>
-        BF_MB void add_face_vertices(M& ms_st, math::vector3u8 pos, math::vector3u8 offset_pos, math::vector2u8 uv, math::vector2u8 offset_uv) {
+        BF_MB void add_face_vertices(M& ms_st, bl_st st, math::vector3u8 pos, math::vector3u8 offset_pos) {
+            math::vector2u8 uv_0 = get_face_uv_0<FACE>() * block_draw_size;
+            math::vector2u8 offset_uv_0 = uv_0 + math::vector2u8{ block_draw_size, block_draw_size };
             if constexpr (FACE == block::face::top) {
-                add_flat_tinted_face_vertices<FACE, block_mesh_layer::tinted>(ms_st, pos, offset_pos, green_tint_color, uv, offset_uv);
+                add_flat_tinted_face_vertices<FACE, block_mesh_layer::tinted>(ms_st, pos, offset_pos, green_tint_color, uv_0, offset_uv_0);
+            } else if constexpr (FACE == block::face::bottom) {
+                add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv_0, offset_uv_0);
             } else {
-                add_flat_standard_face_vertices<FACE, block_mesh_layer::standard>(ms_st, pos, offset_pos, uv, offset_uv);
+                math::vector2u8 uv_1 = get_face_uv_1<FACE>() * block_draw_size;
+                math::vector2u8 offset_uv_1 = uv_1 + math::vector2u8{ block_draw_size, block_draw_size };
+                add_flat_tinted_decal_face_vertices<FACE, block_mesh_layer::tinted_decal>(ms_st, pos, offset_pos, green_tint_color, uv_0, offset_uv_0, uv_1, offset_uv_1);
             }
         }
 
         template<block::face FACE>
-        BF_MB math::vector2u8 get_face_uv(bl_st) {
+        BF_MB math::vector2u8 get_face_uv_0() {
             using v2u8 = math::vector2u8;
             return call_face_func_for<FACE, v2u8>(
-                []() { return v2u8{4, 0}; },
-                []() { return v2u8{4, 0}; },
+                []() { return v2u8{3, 0}; },
+                []() { return v2u8{3, 0}; },
                 []() { return v2u8{0, 0}; },
                 []() { return v2u8{2, 0}; },
-                []() { return v2u8{4, 0}; },
-                []() { return v2u8{4, 0}; }
+                []() { return v2u8{3, 0}; },
+                []() { return v2u8{3, 0}; }
             );
+        }
+
+        template<block::face FACE>
+        BF_MB math::vector2u8 get_face_uv_1() {
+            return { 2, 0 };
         }
     };
 
