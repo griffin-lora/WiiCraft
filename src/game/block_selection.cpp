@@ -21,7 +21,6 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
         GX_SetNumTexGens(0);
 
         GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-        GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
 
         u8 alpha = 0x5f + (std::sin(now / 150000.0f) * 0x10);
         GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });

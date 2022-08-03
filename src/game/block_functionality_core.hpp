@@ -284,7 +284,7 @@ namespace game {
 
         template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv_1() {
-            return { 2, 0 };
+            return { 4, 0 };
         }
     };
 
