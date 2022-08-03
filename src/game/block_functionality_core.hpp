@@ -8,7 +8,7 @@
 #include <array>
 
 namespace game {
-    static constexpr math::vector3u8 green_tint_color = { 0x91, 0xbd, 0x59 };
+    static constexpr math::vector3u8 green_tint_color = { 0x91, 0xcd, 0x59 };
     static constexpr math::vector3u8 water_tint_color = { 0x3f, 0x76, 0xe4 };
 
     #define BF_MB static constexpr
