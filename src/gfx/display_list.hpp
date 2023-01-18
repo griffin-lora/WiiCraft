@@ -24,7 +24,7 @@ namespace gfx {
                 GX_BeginDispList(m_data, m_size);
                 func();
                 std::size_t new_size = GX_EndDispList();
-                DCFlushRange(m_data, m_size);
+                DCFlushRange(m_data, m_size); // This is not necessary afaik and slows things down
                 m_size = new_size;
             }
 

@@ -24,7 +24,7 @@ void display_list::resize(std::size_t size) {
     m_size = (size | 31) + 33;
 
     m_data = memalign(32, m_size);
-    std::memset(m_data, 0, m_size);
+    std::memset(m_data, 0, m_size); // Small optimization here is possible due to 32 byte alignemnt, also why are we doing this?
 }
 
 void display_list::clear() {
