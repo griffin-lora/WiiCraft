@@ -33,7 +33,7 @@ namespace game {
         template<block::face FACE>
         BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
             auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename NB_BF>() {
-                return NB_BF::get_category(nb.st);
+                return NB_BF::get_category((game::block::state)game::block::slab_state::bottom);
             });
             return
                 category == block::category::opaque_cube ||
@@ -98,7 +98,7 @@ namespace game {
         template<block::face FACE>
         BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
             auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename NB_BF>() {
-                return NB_BF::get_category(nb.st);
+                return NB_BF::get_category((game::block::state)game::block::slab_state::bottom);
             });
             if (category == block::category::opaque_cube) {
                 return true;
@@ -293,7 +293,7 @@ namespace game {
     };
 
     template<>
-    struct block_functionality<block::type::stone_slab> : public slab_block_functionality<block_functionality<block::type::stone_slab>> {
+    struct block_functionality<block::type::stone_slab_top> : public slab_block_functionality<block_functionality<block::type::stone_slab_top>> {
         template<block::face FACE>
         BF_MB math::vector2u8 get_face_uv(bl_st) {
             using v2u8 = math::vector2u8;
@@ -322,7 +322,7 @@ namespace game {
         template<block::face FACE>
         BF_MB bool is_face_invisible_with_neighbor(bl_st st, const block& nb) {
             auto category = get_with_block_functionality<block::category>(nb.tp, [&nb]<typename NB_BF>() {
-                return NB_BF::get_category(nb.st);
+                return NB_BF::get_category((game::block::state)game::block::slab_state::bottom);
             });
             return
                 category == block::category::opaque_cube ||

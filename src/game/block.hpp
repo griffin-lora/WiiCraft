@@ -16,7 +16,9 @@ macro(stone) \
 macro(dirt) \
 macro(sand) \
 macro(wood_planks) \
-macro(stone_slab) \
+macro(stone_slab_bottom) \
+macro(stone_slab_top) \
+macro(stone_slab_both) \
 macro(tall_grass) \
 macro(water)
 
@@ -58,10 +60,8 @@ namespace game {
             slab_state slab;
         };
 
-        state st;
-
         inline bool operator!=(const block& other) const {
-            return tp != other.tp || st.slab != other.st.slab;
+            return tp != other.tp;
         }
 
 
@@ -79,4 +79,6 @@ namespace game {
 
     // TODO: change this when the sizeof the type is changed
     using bl_st = block::state;
+
+    static_assert(sizeof(block) == 1, "block must be 1 byte wide");
 }

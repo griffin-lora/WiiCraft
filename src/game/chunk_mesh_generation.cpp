@@ -83,173 +83,121 @@ static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const b
                 } else {
                     return nullptr;
                 }
-            }, bl.st, block_pos);
+            }, (game::block::state)game::block::slab_state::bottom, block_pos);
         });
     }
 }
 
-static void check_vertex_count(const chunk_quad_iterators& begin, const chunk_quad_iterators& end) {
-    for_each_block_mesh_layer([&begin, &end]<typename L>() {
-        std::size_t quad_count = end.get_layer<L>() - begin.get_layer<L>();
-        if (quad_count >= L::max_quad_count) {
-            dbg::error([quad_count]() {
-                std::printf("Too many quads for %s, should be %d, count is %d\n", L::name, L::max_quad_count, quad_count);
-            });
-        }
-    });
+#define NUM_BUILDING_QUADS 0x400
+
+typedef struct chunk_mesh_vertex {
+    u8 x;
+    u8 y;
+    u8 z;
+    u8 u;
+    u8 v;
+} chunk_mesh_vertex_t;
+
+typedef struct {
+    chunk_mesh_vertex_t verts[4];
+} chunk_mesh_quad_t;
+
+static_assert(sizeof(chunk_mesh_quad_t) == 4 * 5);
+
+alignas(32) static chunk_mesh_quad_t building_quads[NUM_BUILDING_QUADS];
+
+static void check_quads_count(size_t quads_count) {
+    if (quads_count >= NUM_BUILDING_QUADS) [[unlikely]] {
+        dbg::error([quads_count]() {
+            std::printf("Too many quads for should be %d, count is %d\n", NUM_BUILDING_QUADS, quads_count);
+        });
+    }
 }
 
-static inline void clear_display_list_layers(chunk::display_list_layers& disp_list_layers) {
-    for_each_block_mesh_layer([&disp_list_layers]<typename L>() {
-        disp_list_layers.get_layer<L>().clear();
-    });
-}
+mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
+    // if (
+    //     chunk.invisible_block_count == chunk::blocks_count ||
+    //     chunk.fully_opaque_block_count == chunk::blocks_count
+    // ) {
+    //     chunk.disp_list.clear();
+    //     return mesh_update_state::should_continue;
+    // }
 
-mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
-    if (
-        chunk.invisible_block_count == chunk::blocks_count ||
-        chunk.fully_opaque_block_count == chunk::blocks_count
-    ) {
-        clear_display_list_layers(chunk.core_disp_list_layers);
-        return mesh_update_state::should_continue;
-    }
+    // const block* blocks = chunk.blocks.data();
 
-    const chunk_quad_iterators begin = { building_arrays };
+    // size_t quads_index = 0;
 
-    chunk_mesh_state ms_st = {
-        .it = { building_arrays }
-    };
+    // // Generate mesh for faces that are not neighboring another chunk.
+    // size_t blocks_index = 0;
+    // for (u32 z = 0; z < chunk::size; z++) {
+    //     bool should_add_left = z != 0;
+    //     bool should_add_right = z != (chunk::size - 1);
 
-    // Generate mesh for faces that are not neighboring another chunk.
-    auto it = chunk.blocks.begin();
-    for (u32 z = 0; z < chunk::size; z++) {
-        bool should_add_left = z != 0;
-        bool should_add_right = z != (chunk::size - 1);
+    //     for (u32 y = 0; y < chunk::size; y++) {
+    //         bool should_add_bottom = y != 0;
+    //         bool should_add_top = y != (chunk::size - 1);
 
-        for (u32 y = 0; y < chunk::size; y++) {
-            bool should_add_bottom = y != 0;
-            bool should_add_top = y != (chunk::size - 1);
+    //         for (u32 x = 0; x < chunk::size; x++) {
+    //             bool should_add_back = x != 0;
+    //             bool should_add_front = x != (chunk::size - 1);
 
-            for (u32 x = 0; x < chunk::size; x++) {
-                bool should_add_back = x != 0;
-                bool should_add_front = x != (chunk::size - 1);
+    //             block block = blocks[blocks_index];
+    //             math::vector3u8 block_pos = { x, y, z };
 
-                auto& bl = *it;
-                math::vector3u8 block_pos = { x, y, z };
+    //             if (block.tp == block::type::water) {
+    //                 u8 px = x;
+    //                 u8 py = y;
+    //                 u8 pz = z;
+    //                 u8 pox = x + 1;
+    //                 u8 poy = y + 1;
+    //                 u8 poz = z + 1;
+    //                 u8 ux = 0;
+    //                 u8 uy = 0;
+    //                 u8 uox = 1;
+    //                 u8 uoy = 1;
 
-                call_with_block_functionality(bl.tp, [&]<typename BF>() {
-                    add_block_vertices<BF>(ms_st, [
-                        should_add_left,
-                        should_add_right,
-                        should_add_bottom,
-                        should_add_top,
-                        should_add_back,
-                        should_add_front,
-                        it
-                    ]<block::face FACE>() -> const block* { // Get neighbor block
-                        bool should_add_face = call_face_func_for<FACE, bool>(
-                            [&]() { return should_add_front; },
-                            [&]() { return should_add_back; },
-                            [&]() { return should_add_top; },
-                            [&]() { return should_add_bottom; },
-                            [&]() { return should_add_right; },
-                            [&]() { return should_add_left; }
-                        );
-                        if (should_add_face) {
-                            return &(*get_block_face_iterator_offset<FACE>(it));
-                        } else {
-                            return nullptr;
-                        }
-                    }, bl.st, block_pos);
-                });
+    //                 building_quads[quads_index++] = chunk_mesh_quad_t{{
+    //                     { px,poy,poz, ux,uy },	// Bottom Left Of The Quad (Back)
+    //                     { px,poy,pz, uox,uy },	// Bottom Right Of The Quad (Back)
+    //                     { pox, poy,pz, uox,uoy },	// Top Right Of The Quad (Back)
+    //                     { pox, poy,poz, ux,uoy }	// Top Left Of The Quad (Back)
+    //                 }};
+    //             }
 
-                check_vertex_count(begin, ms_st.it);
+    //             check_quads_count(quads_index);
 
-                it += x_offset;
-            }
-        }
-    }
+    //             blocks_index++;
+    //         }
+    //     }
+    // }
 
-    write_into_display_list_layers(begin, ms_st.it, chunk.core_disp_list_layers);
-    
+    // size_t num_quads_written = quads_index;
+
+    // chunk.disp_list.write_into([num_quads_written]() {
+    //     GX_Begin(GX_QUADS, GX_VTXFMT0, num_quads_written * 4);
+
+    //     for (size_t i = 0; i < num_quads_written; i++) {
+    //         chunk_mesh_quad_t* quad = &building_quads[i];
+            
+    //         GX_Position3u8(quad->verts[0].x, quad->verts[0].y, quad->verts[0].z);
+    //         GX_TexCoord2u8(quad->verts[0].u, quad->verts[0].v);
+
+    //         GX_Position3u8(quad->verts[1].x, quad->verts[1].y, quad->verts[1].z);
+    //         GX_TexCoord2u8(quad->verts[1].u, quad->verts[1].v);
+
+    //         GX_Position3u8(quad->verts[2].x, quad->verts[2].y, quad->verts[2].z);
+    //         GX_TexCoord2u8(quad->verts[2].u, quad->verts[2].v);
+
+    //         GX_Position3u8(quad->verts[3].x, quad->verts[3].y, quad->verts[3].z);
+    //         GX_TexCoord2u8(quad->verts[3].u, quad->verts[3].v);
+    //     }
+        
+    //     GX_End();
+    // });
+
     return mesh_update_state::should_break;
 }
 
 mesh_update_state game::update_shell_mesh(chunk_quad_building_arrays& building_arrays, chunk& chunk) {
-    if (chunk.invisible_block_count == chunk::blocks_count) {
-        clear_display_list_layers(chunk.shell_disp_list_layers);
-        return mesh_update_state::should_continue;
-    }
-
-    const auto blocks = chunk.blocks.data();
-    
-    const auto& chunk_nh = chunk.nh;
-
-    auto get_nb_blocks = [](chunk::const_opt_ref nb_chunk) -> const block* {
-        if (nb_chunk.has_value()) {
-            if (nb_chunk->get().fully_opaque_block_count == chunk::blocks_count) {
-                return nullptr;
-            }
-            return nb_chunk->get().blocks.data();
-        }
-        return nullptr;
-    };
-
-    auto front_nb_blocks = get_nb_blocks(chunk_nh.front);
-    auto back_nb_blocks = get_nb_blocks(chunk_nh.back);
-    auto top_nb_blocks = get_nb_blocks(chunk_nh.top);
-    auto bottom_nb_blocks = get_nb_blocks(chunk_nh.bottom);
-    auto right_nb_blocks = get_nb_blocks(chunk_nh.right);
-    auto left_nb_blocks = get_nb_blocks(chunk_nh.left);
-
-    // TODO: Implement this better.
-    if (front_nb_blocks == nullptr && back_nb_blocks == nullptr && top_nb_blocks == nullptr && bottom_nb_blocks == nullptr && right_nb_blocks == nullptr && left_nb_blocks == nullptr) {
-        clear_display_list_layers(chunk.shell_disp_list_layers);
-        return mesh_update_state::should_continue;
-    }
-
-    const chunk_quad_iterators begin = { building_arrays };
-
-    chunk_mesh_state ms_st = {
-        .it = { building_arrays }
-    };
-    
-    // Generate mesh for faces that are neighboring another chunk.
-    std::size_t front_index = chunk::size - 1;
-    std::size_t back_index = 0;
-
-    std::size_t top_index = (chunk::size - 1) * y_offset;
-    std::size_t bottom_index = 0;
-
-    std::size_t right_index = (chunk::size - 1) * z_offset;
-    std::size_t left_index = 0;
-
-    for (u32 far = 0; far < chunk::size; far++) {
-        for (u32 near = 0; near < chunk::size; near++) {
-            add_face_vertices_if_needed_at_neighbor<block::face::front>(blocks, front_nb_blocks, front_index, back_index, ms_st, { chunk::size - 1, near, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::back>(blocks, back_nb_blocks, back_index, front_index, ms_st, { 0, near, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::top>(blocks, top_nb_blocks, top_index, bottom_index, ms_st, { near, chunk::size - 1, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::bottom>(blocks, bottom_nb_blocks, bottom_index, top_index, ms_st, { near, 0, far });
-            add_face_vertices_if_needed_at_neighbor<block::face::right>(blocks, right_nb_blocks, right_index, left_index, ms_st, { near, far, chunk::size - 1 });
-            add_face_vertices_if_needed_at_neighbor<block::face::left>(blocks, left_nb_blocks, left_index, right_index, ms_st, { near, far, 0 });
-            
-            check_vertex_count(begin, ms_st.it);
-            
-            front_index += y_offset;
-            back_index += y_offset;
-
-            top_index += x_offset;
-            bottom_index += x_offset;
-
-            right_index += x_offset;
-            left_index += x_offset;
-        }
-
-        top_index += z_offset - y_offset;
-        bottom_index += z_offset - y_offset;
-    }
-
-    write_into_display_list_layers(begin, ms_st.it, chunk.shell_disp_list_layers);
-
     return mesh_update_state::should_break;
 }

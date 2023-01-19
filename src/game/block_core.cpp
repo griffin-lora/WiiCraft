@@ -11,7 +11,7 @@ bool game::does_world_position_select_block(const glm::vec3& world_pos, const bl
     auto offset_into_block_pos = world_pos - world_block_pos;
 
     return get_with_block_functionality<bool>(block.tp, [&block, &offset_into_block_pos]<typename BF>() {
-        auto boxes = BF::get_selection_boxes(block.st);
+        auto boxes = BF::get_selection_boxes((game::block::state)game::block::slab_state::bottom);
         return std::any_of(boxes.begin(), boxes.end(), [&offset_into_block_pos](auto& box) { return box.is_inside(offset_into_block_pos); });
     });
 }
@@ -24,7 +24,7 @@ std::vector<math::box> game::get_block_boxes_that_collide_with_world_box(const m
     };
 
     call_with_block_functionality(block.tp, [&block, &collided_block_boxes, &box_offset_into_block_pos]<typename BF>() {
-        auto block_boxes = BF::get_collision_boxes(block.st);
+        auto block_boxes = BF::get_collision_boxes((game::block::state)game::block::slab_state::bottom);
         for (auto& block_box : block_boxes) {
             if (math::do_boxes_collide(box_offset_into_block_pos, block_box)) {
                 collided_block_boxes.push_back(block_box);

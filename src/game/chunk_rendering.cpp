@@ -8,34 +8,47 @@ static void set_alpha(u8 alpha) {
 }
 
 void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
-	for_each_block_mesh_layer([view, &cam, &chunks]<typename L>() {
-		L::init_chunk_rendering();
+	GX_SetNumTevStages(2);
+	GX_SetNumChans(1);
+	GX_SetNumTexGens(1);
 
-		if constexpr (std::is_same_v<L, block_mesh_layer::standard>) {
-			if (cam.update_view) {
-				for (auto& [ pos, chunk ] : chunks) {
-					set_alpha(chunk.alpha);
+	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
 
-					chunk.tf.update_model_view(view);
-					chunk.tf.load(chunk::mat);
+	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
-					chunk.core_disp_list_layers.standard.call();
-					chunk.shell_disp_list_layers.standard.call();
-				}
-			} else {
-				for (auto& [ pos, chunk ] : chunks) {
-					chunk.core_disp_list_layers.standard.call();
-					chunk.shell_disp_list_layers.standard.call();
-				}
-			}
+	GX_SetTevOrder(GX_TEVSTAGE1, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+	GX_SetTevOp(GX_TEVSTAGE1, GX_PASSCLR);
+	GX_SetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_APREV, GX_CA_A1, GX_CA_ZERO);
+	GX_SetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+	//
+
+	GX_ClearVtxDesc();
+	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+
+	
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
+	// Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
+	// I dont think that information is acccurate
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 6);
+
+	if (cam.update_view) { // This may be a mostly useless micro-optimization, matrix multiplication vs a branch ehhh (we are using a very expensive for loop though so yeah)
+		for (auto& [ pos, chunk ] : chunks) {
+			set_alpha(chunk.alpha);
+
+			chunk.tf.update_model_view(view);
+			chunk.tf.load(chunk::mat);
+
+			chunk.disp_list.call();
 		}
-
+	} else {
 		for (auto& [ pos, chunk ] : chunks) {
 			set_alpha(chunk.alpha);
 
 			chunk.tf.load(chunk::mat);
-			chunk.core_disp_list_layers.template get_layer<L>().call();
-			chunk.shell_disp_list_layers.template get_layer<L>().call();
+			chunk.disp_list.call();
 		}
-	});
+	}
 }

@@ -40,8 +40,7 @@ namespace game {
         using display_list_layers = block_mesh_layers<single_type_container<gfx::display_list>>;
 
         u8 alpha = 0;
-        display_list_layers core_disp_list_layers;
-        display_list_layers shell_disp_list_layers;
+        gfx::display_list disp_list;
 
         math::transform_3d tf;
 

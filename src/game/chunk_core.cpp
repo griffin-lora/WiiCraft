@@ -44,7 +44,7 @@ void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32&
 
 std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
     auto counting_type = get_with_block_functionality<block_counting_type>(block.tp, [&block]<typename BF>() {
-        return BF::get_block_counting_type(block.st);
+        return BF::get_block_counting_type((game::block::state)game::block::slab_state::bottom);
     });
     switch (counting_type) {
         case block_counting_type::invisible: return chunk.invisible_block_count;
