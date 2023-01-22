@@ -34,12 +34,12 @@ water_overlay::water_overlay() {
 }
 
 void water_overlay::draw(const camera& cam, const chunk::map& chunks) const {
-    auto block = get_block_from_world_position(chunks, cam.position);
-    if (block.has_value() && block->get().tp == block::type::water && does_world_position_select_block(cam.position, *block, floor_float_position<f32>(cam.position))) {
-        GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    // auto block = get_block_from_world_position(chunks, cam.position);
+    // if (block.has_value() && block->get().tp == block::type::water && does_world_position_select_block(cam.position, *block, floor_float_position<f32>(cam.position))) {
+    //     GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
-        GX_SetCurrentMtx(mat);
+    //     GX_SetCurrentMtx(mat);
 
-        disp_list.call();
-    }
+    //     disp_list.call();
+    // }
 }

@@ -29,9 +29,7 @@
 #include "game/debug_ui.hpp"
 #include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
-extern "C" {
-	#include "log.h"
-}
+#include "log.hpp"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
