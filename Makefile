@@ -25,8 +25,8 @@ INCLUDES	:=  src lib
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	= -Ofast -Wall -fno-exceptions -std=c++2a $(MACHDEP) $(INCLUDE)
-CXXFLAGS	=	$(CFLAGS)
+CFLAGS	= -Ofast -Wall -fno-exceptions -std=c2x $(MACHDEP) $(INCLUDE)
+CXXFLAGS	=	$(CFLAGS) -std=c++2a
 
 LDFLAGS	=	$(MACHDEP) -Wl,-Map,$(notdir $@).map
 

@@ -29,6 +29,9 @@
 #include "game/debug_ui.hpp"
 #include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
+extern "C" {
+	#include "log.h"
+}
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -44,6 +47,10 @@ int main(int argc, char** argv) {
 		printf("fatInitDefault() failed!\n");
 		dbg::freeze();
 	}
+
+	init_log_file();
+
+	fprintf(log_file, "Log file started\n");
 
 	gfx::texture chunk_tex;
 	gfx::safe_load_from_file(chunk_tex, "data/textures/chunk.tpl");
@@ -154,7 +161,11 @@ int main(int argc, char** argv) {
 
 		input::scan_pads();
 		u32 buttons_down = input::get_buttons_down(chan);
-		if (buttons_down & WPAD_BUTTON_HOME) { std::exit(chan); }
+		if (buttons_down & WPAD_BUTTON_HOME) {
+			fprintf(log_file, "Log file ended\n");
+			term_log_file();
+			std::exit(0);
+		}
 		u32 buttons_held = input::get_buttons_held(chan);
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
