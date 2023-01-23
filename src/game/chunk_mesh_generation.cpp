@@ -10,83 +10,8 @@
 #include <cstdio>
 
 using namespace game;
-struct iterator_container {
-    template<typename T>
-    using type = T::iterator;
-};
 
-struct chunk_quad_iterators : public block_mesh_layers<chunk_quad_array_iterator_container> {
-    chunk_quad_iterators(chunk_quad_building_arrays& arrays) : block_mesh_layers<chunk_quad_array_iterator_container>([&arrays]<typename L>() { return arrays.get_layer<L>().begin(); }) {}
-};
-
-struct chunk_mesh_state {
-    chunk_quad_iterators it;
-
-    template<typename L>
-    inline void add_quad(const L::chunk_quad& quad) {
-        *it.get_layer<L>()++ = quad;
-    }
-};
-
-template<typename F1, typename F2, typename I>
-static void write_into_display_list(F1 get_disp_list_size, F2 write_vert, I begin, I end, gfx::display_list& disp_list) {
-    std::size_t vert_count = (end - begin) * 4;
-
-    disp_list.resize(get_disp_list_size(vert_count));
-
-    disp_list.write_into([&write_vert, &begin, &end, vert_count]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
-
-        for (auto it = begin; it != end; ++it) {
-            write_vert(it->vert0);
-            write_vert(it->vert1);
-            write_vert(it->vert2);
-            write_vert(it->vert3);
-        }
-        
-        GX_End();
-    });
-};
-
-static void write_into_display_list_layers(const chunk_quad_iterators& begin, const chunk_quad_iterators& end, chunk::display_list_layers& disp_list_layers) {
-    for_each_block_mesh_layer([&begin, &end, &disp_list_layers]<typename L>() {
-        write_into_display_list(L::get_chunk_display_list_size, L::write_chunk_vertex, begin.get_layer<L>(), end.get_layer<L>(), disp_list_layers.get_layer<L>());
-    });
-}
-
-static constexpr s32 z_offset = chunk::size * chunk::size;
-static constexpr s32 y_offset = chunk::size;
-static constexpr s32 x_offset = 1;
-
-using const_block_it = ext::data_array<block>::const_iterator;
-
-template<block::face FACE>
-static inline const_block_it get_block_face_iterator_offset(const_block_it it) {
-    return call_face_func_for<FACE, const_block_it>(
-        [&]() { return it + x_offset; },
-        [&]() { return it - x_offset; },
-        [&]() { return it + y_offset; },
-        [&]() { return it - y_offset; },
-        [&]() { return it + z_offset; },
-        [&]() { return it - z_offset; }
-    );
-}
-
-template<block::face FACE>
-static void add_face_vertices_if_needed_at_neighbor(const block* blocks, const block* nb_blocks, std::size_t index, std::size_t nb_chunk_index, chunk_mesh_state& ms_st, math::vector3u8 block_pos) {
-    if (nb_blocks != nullptr) {
-        auto& bl = blocks[index];
-        call_with_block_functionality(bl.tp, [&]<typename BF>() {
-            add_block_faces_vertices<BF>(ms_st, [nb_blocks, nb_chunk_index]<block::face GET_NB_FACE>() -> const block* { // Get neighbor block
-                if constexpr (GET_NB_FACE == FACE) {
-                    return &nb_blocks[nb_chunk_index];
-                } else {
-                    return nullptr;
-                }
-            }, (game::block::state)game::block::slab_state::bottom, block_pos);
-        });
-    }
-}
+typedef block::type block_type_t;
 
 #define NUM_BUILDING_QUADS 0x800
 
@@ -114,6 +39,77 @@ static void check_quads_count(size_t quads_count) {
     }
 }
 
+typedef enum {
+    block_mesh_category_invisible,
+    block_mesh_category_cube,
+    block_mesh_category_cross,
+    block_mesh_category_slab_bottom,
+    block_mesh_category_slab_top
+} block_mesh_category_t;
+
+static block_mesh_category_t get_block_mesh_category(block_type_t type) {
+    switch (type) {
+        default:
+            return block_mesh_category_invisible;
+        case block::type::debug:
+        case block::type::grass:
+        case block::type::stone:
+        case block::type::dirt:
+        case block::type::sand:
+        case block::type::wood_planks:
+        case block::type::stone_slab_both:
+            return block_mesh_category_cube;
+        case block::type::tall_grass:
+            return block_mesh_category_cross;
+        case block::type::stone_slab_bottom:
+            return block_mesh_category_slab_bottom;
+        case block::type::stone_slab_top:
+            return block_mesh_category_slab_top;
+    }
+}
+
+#define NUM_BLOCKS (32 * 32 * 32)
+#define Z_OFFSET (32 * 32)
+#define Y_OFFSET 32
+#define X_OFFSET 1
+
+typedef size_t (*add_face_mesh_function_t)(size_t, u32, u32, u32);
+
+static size_t add_cube_face_mesh_if_needed(const block_type_t block_types[], size_t quads_index, u32 x, u32 y, u32 z, bool should_add_face, size_t neighbor_index, add_face_mesh_function_t add_face_mesh_function) {
+    if (!should_add_face) [[unlikely]] {
+        return quads_index;
+    }
+    block_mesh_category_t neighbor_mesh_category = get_block_mesh_category(block_types[neighbor_index]);
+    if (neighbor_mesh_category == block_mesh_category_cube) {
+        return quads_index;
+    }
+    return add_face_mesh_function(quads_index, x, y, z);
+}
+
+/*
+The idea of how I'm going to optimize this is to layout the cache like this
+[
+block types
+-
+-
+-
+display lists
+]
+This will avoid any fighting over space in the cache and will mean that the amount of unnecessary cache misses will be 0
+I am also going to try to optimize this by not using the stack anywhere within the update_core_mesh function since this will mean that I can position the block memory and display lists anywhere in the cache without having to worry about where the stack will be in the cache, should that not be possible I will use a layout roughly like this
+[
+block types
+-
+-
+stack
+-
+-
+display lists
+]
+
+Ways to optimize for avoiding stack usage will be to not use the should_add_face loop computed values. The original intent behind this optimization was to reduce the number of comparison operations, however it is the branch that is expensive and so this isnt really a worthwhile optimization and takes up valuable register space.
+*/
+
 mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
     if (
         chunk.invisible_block_count == chunk::blocks_count ||
@@ -123,45 +119,54 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         return mesh_update_state::should_continue;
     }
 
-    const block* blocks = chunk.blocks.data();
+    const block_type_t* block_types = (const block_type_t*)chunk.blocks.data();
 
     size_t quads_index = 0;
 
     // Generate mesh for faces that are not neighboring another chunk.
     size_t blocks_index = 0;
     for (u32 z = 0; z < chunk::size; z++) {
-        bool should_add_left = z != 0;
         bool should_add_right = z != (chunk::size - 1);
+        bool should_add_left = z != 0;
 
         for (u32 y = 0; y < chunk::size; y++) {
-            bool should_add_bottom = y != 0;
             bool should_add_top = y != (chunk::size - 1);
+            bool should_add_bottom = y != 0;
 
             for (u32 x = 0; x < chunk::size; x++) {
-                bool should_add_back = x != 0;
                 bool should_add_front = x != (chunk::size - 1);
+                bool should_add_back = x != 0;
+                
+                block_type_t type = block_types[blocks_index];
 
-                block block = blocks[blocks_index];
-                math::vector3u8 block_pos = { x, y, z };
+                block_mesh_category_t mesh_category = get_block_mesh_category(type);
+                switch (mesh_category) {
+                    default: break;
+                    case block_mesh_category_cube: {
+                        quads_index = add_cube_face_mesh_if_needed(block_types, quads_index, x, y, z, should_add_top, blocks_index + Y_OFFSET, [](size_t quads_index, u32 x, u32 y, u32 z) {
+                            u8 px = x * 4;
+                            u8 py = y * 4;
+                            u8 pz = z * 4;
+                            u8 pox = px + 4;
+                            u8 poy = py + 4;
+                            u8 poz = pz + 4;
+                            u8 ux = 0;
+                            u8 uy = 0;
+                            u8 uox = 4;
+                            u8 uoy = 4;
 
-                if (block.tp == block::type::grass) {
-                    u8 px = x * 4;
-                    u8 py = y * 4;
-                    u8 pz = z * 4;
-                    u8 pox = px + 4;
-                    u8 poy = py + 4;
-                    u8 poz = pz + 4;
-                    u8 ux = 0;
-                    u8 uy = 0;
-                    u8 uox = 4;
-                    u8 uoy = 4;
+                            building_quads[quads_index++] = chunk_mesh_quad_t{{
+                                { px, poy, poz, ux, uy },	// Bottom Left Of The Quad (Back)
+                                { px, poy, pz, uox, uy },	// Bottom Right Of The Quad (Back)
+                                { pox, poy, pz, uox, uoy },	// Top Right Of The Quad (Back)
+                                { pox, poy, poz, ux, uoy }	// Top Left Of The Quad (Back)
+                            }};
 
-                    building_quads[quads_index++] = chunk_mesh_quad_t{{
-                        { px, poy, poz, ux, uy },	// Bottom Left Of The Quad (Back)
-                        { px, poy, pz, uox, uy },	// Bottom Right Of The Quad (Back)
-                        { pox, poy, pz, uox, uoy },	// Top Right Of The Quad (Back)
-                        { pox, poy, poz, ux, uoy }	// Top Left Of The Quad (Back)
-                    }};
+                            return quads_index;
+                        });
+
+                        break;
+                    }
                 }
 
                 check_quads_count(quads_index);

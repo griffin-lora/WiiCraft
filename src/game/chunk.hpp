@@ -22,6 +22,8 @@ namespace game {
 
         static constexpr u32 mat = GX_PNMTX5;
 
+        // reduce this to 16 so that we don't have a lot of cache misses when we are generating the mesh
+        // this is because the blocks and mesh are fighting over the same area in cache
         static constexpr s32 size = 32;
         static constexpr u32 blocks_count = size * size * size;
         

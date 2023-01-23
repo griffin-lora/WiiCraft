@@ -37,6 +37,7 @@ namespace game {
         enum class type : u8 {
             #define EVAL_BLOCK_TYPE_ENUM(T) T,
             EVAL_MACRO_ON_BLOCK_TYPES(EVAL_BLOCK_TYPE_ENUM)
+            null = 0xff
         };
         type tp;
 
