@@ -33,9 +33,10 @@ alignas(32768) static chunk_mesh_quad_t building_quads[NUM_BUILDING_QUADS];
 
 static void check_quads_count(size_t quads_count) {
     if (quads_count >= NUM_BUILDING_QUADS) [[unlikely]] {
-        dbg::error([quads_count]() {
-            std::printf("Too many quads for should be %d, count is %d\n", NUM_BUILDING_QUADS, quads_count);
-        });
+        // dbg::error([quads_count]() {
+        //     std::printf("Too many quads for should be %d, count is %d\n", NUM_BUILDING_QUADS, quads_count);
+        // });
+        dbg::freeze();
     }
 }
 
@@ -113,27 +114,17 @@ display lists
 Ways to optimize for avoiding stack usage will be to not use the should_add_face loop computed values. The original intent behind this optimization was to reduce the number of comparison operations, however it is the branch that is expensive and so this isnt really a worthwhile optimization and takes up valuable register space.
 */
 
-mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
-    if (
-        chunk.invisible_block_count == chunk::blocks_count ||
-        chunk.fully_opaque_block_count == chunk::blocks_count
-    ) {
-        chunk.disp_list.clear();
-        return mesh_update_state::should_continue;
-    }
-
-    const block_type_t* block_types = (const block_type_t*)chunk.blocks.data(); // r4
-
-    size_t quads_index = 0; // r2
+static size_t generate_block_meshes_into_building_mesh(const block_type_t block_types[]) {
+    size_t quads_index = 0;
 
     // Generate mesh for faces that are not neighboring another chunk.
-    size_t blocks_index = 0; // r5
-    for (u32 z = 0; /* r6 */ z < chunk::size; z++) {
-        for (u32 y = 0; /* r7 */ y < chunk::size; y++) {
-            for (u32 x = 0; /* r8 */ x < chunk::size; x++) {
-                block_type_t type = block_types[blocks_index]; // r9
+    size_t blocks_index = 0;
+    for (u32 z = 0; z < chunk::size; z++) {
+        for (u32 y = 0; y < chunk::size; y++) {
+            for (u32 x = 0; x < chunk::size; x++) {
+                block_type_t type = block_types[blocks_index];
 
-                block_mesh_category_t mesh_category = get_block_mesh_category(type); // r10
+                block_mesh_category_t mesh_category = get_block_mesh_category(type);
                 switch (mesh_category) {
                     default: break;
                     case block_mesh_category_cube: {
@@ -275,15 +266,17 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         }
     }
 
-    size_t num_quads_written = quads_index;
-    size_t num_verts_written = num_quads_written * 4;
+    return quads_index;
+}
 
-    chunk.disp_list.resize(
+static void write_building_mesh_into_display_list(size_t num_quads_written, gfx::display_list* disp_list) {
+    size_t num_verts_written = num_quads_written * 4;
+    disp_list->resize(
         gfx::get_begin_instruction_size(num_verts_written) +
         gfx::get_vector_instruction_size<3, u8>(num_verts_written) + // Position
         gfx::get_vector_instruction_size<2, u8>(num_verts_written) // Tex Coords
     );
-    chunk.disp_list.write_into([num_quads_written, num_verts_written]() {
+    disp_list->write_into([num_quads_written, num_verts_written]() {
         GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts_written);
 
         for (size_t i = 0; i < num_quads_written; i++) {
@@ -304,6 +297,19 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         
         GX_End();
     });
+}
+
+mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
+    if (
+        chunk.invisible_block_count == chunk::blocks_count ||
+        chunk.fully_opaque_block_count == chunk::blocks_count
+    ) {
+        chunk.disp_list.clear();
+        return mesh_update_state::should_continue;
+    }
+
+    size_t num_quads_written = generate_block_meshes_into_building_mesh((const block_type_t*)chunk.blocks.data());
+    write_building_mesh_into_display_list(num_quads_written, &chunk.disp_list);
 
     return mesh_update_state::should_break;
 }
