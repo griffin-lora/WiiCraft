@@ -18,6 +18,10 @@ namespace gfx {
             void resize(std::size_t size);
             void clear();
 
+            inline void* data() {
+                return m_data;
+            }
+
             template<typename F>
             inline void write_into(F func) {
                 DCInvalidateRange(m_data, m_size);
