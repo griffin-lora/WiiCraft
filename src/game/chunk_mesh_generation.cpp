@@ -8,7 +8,6 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
 #include "log.hpp"
-#include <cstdio>
 
 using namespace game;
 
@@ -32,15 +31,6 @@ typedef struct {
 static_assert(sizeof(chunk_mesh_quad_t) == 4 * 5);
 
 alignas(32768) static chunk_mesh_quad_t building_quads[NUM_BUILDING_QUADS + 0x20];
-
-static void check_num_quads_written(size_t num_quads_written) {
-    if (num_quads_written >= NUM_BUILDING_QUADS) [[unlikely]] {
-        // dbg::error([num_quads_written]() {
-        //     std::printf("Too many quads for should be %d, count is %d\n", NUM_BUILDING_QUADS, num_quads_written);
-        // });
-        dbg::freeze();
-    }
-}
 
 typedef enum {
     block_mesh_category_invisible,
@@ -222,7 +212,9 @@ static size_t generate_block_meshes_into_building_mesh(const block_type_t block_
                     }
                 }
 
-                check_num_quads_written(quads_index);
+                if (quads_index >= NUM_BUILDING_QUADS) [[unlikely]] {
+                    lprintf("Too many quads for should be %d, count is %d\n", NUM_BUILDING_QUADS, quads_index);
+                }
 
                 blocks_index++;
             }
@@ -274,7 +266,8 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
     size_t num_quads_written = generate_block_meshes_into_building_mesh((const block_type_t*)chunk.blocks.data());
     write_building_mesh_into_display_list(num_quads_written, &chunk.disp_list);
     
-    // fprintf(log_file, "%p, %p, %p, %p\n", &chunk, building_quads, chunk.blocks.data(), chunk.disp_list.data());
+    u8 stack_var;
+    lprintf("%p, %p, %p, %p\n", &stack_var, building_quads, chunk.blocks.data(), chunk.disp_list.data());
 
     return mesh_update_state::should_break;
 }

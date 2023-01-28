@@ -4,8 +4,6 @@
 #include "input.hpp"
 #include "dbg.hpp"
 
-#include <cstdio>
-
 using namespace game;
 
 glm::vec3 game::get_raycast_direction_from_pointer_position(u16 v_width, u16 v_height, const camera& cam, const std::optional<glm::vec2>& pointer_pos) {

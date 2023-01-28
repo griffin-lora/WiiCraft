@@ -1,8 +1,8 @@
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <malloc.h>
 #include <cmath>
+#include <cstdio>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 #include <fat.h>
@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
 
 	gfx::console_state con;
 
-	init_log_file();
+	log_init();
 
-	// fprintf(log_file, "Log file started\n");
+	lprintf("Log started\n");
 
 	game_textures_t textures = load_game_textures();
 
@@ -146,8 +146,8 @@ int main(int argc, char** argv) {
 		input::scan_pads();
 		u32 buttons_down = input::get_buttons_down(chan);
 		if (buttons_down & WPAD_BUTTON_HOME) {
-			// fprintf(log_file, "Log file ended\n");
-			term_log_file();
+			lprintf("Log ended\n");
+			log_term();
 			std::exit(0);
 		}
 		u32 buttons_held = input::get_buttons_held(chan);

@@ -1,7 +1,5 @@
 #pragma once
-#include <stdio.h>
 
-extern FILE* log_file;
-
-void init_log_file(void);
-void term_log_file(void);
+void log_init(void);
+void log_term(void);
+__attribute__((format(printf, 1, 2))) void lprintf(const char* fmt, ...);
