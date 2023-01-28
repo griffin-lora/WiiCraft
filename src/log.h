@@ -1,5 +1,6 @@
 #pragma once
+#include <stdbool.h>
 
-void log_init(void);
+bool log_init(void);
 void log_term(void);
 __attribute__((format(printf, 1, 2))) void lprintf(const char* fmt, ...);

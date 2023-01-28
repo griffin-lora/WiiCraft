@@ -42,7 +42,9 @@ int main(int argc, char** argv) {
 
 	gfx::console_state con;
 
-	log_init();
+	if (!log_init()) {
+		dbg::freeze();
+	}
 
 	lprintf("Log started\n");
 

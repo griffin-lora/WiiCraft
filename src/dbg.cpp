@@ -6,6 +6,8 @@
 using namespace dbg;
 
 void dbg::freeze() {
+    WPAD_Init();
+
     for (;;) {
 		WPAD_ScanPads();
 
