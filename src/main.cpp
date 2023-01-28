@@ -30,6 +30,7 @@
 #include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "log.hpp"
+#include "gfx/texture_load.hpp"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -41,26 +42,11 @@ int main(int argc, char** argv) {
 
 	gfx::console_state con;
 
-	if (!fatInitDefault()) {
-		printf("fatInitDefault() failed!\n");
-		dbg::freeze();
-	}
-
 	init_log_file();
 
-	fprintf(log_file, "Log file started\n");
+	// fprintf(log_file, "Log file started\n");
 
-	gfx::texture chunk_tex;
-	gfx::safe_load_from_file(chunk_tex, "data/textures/chunk.tpl");
-
-	gfx::texture icons_tex;
-	gfx::safe_load_from_file(icons_tex, "data/textures/icons.tpl");
-
-	gfx::texture skybox_tex;
-	gfx::safe_load_from_file(skybox_tex, "data/textures/skybox.tpl");
-
-	gfx::texture font_tex;
-	gfx::safe_load_from_file(font_tex, "data/textures/font.tpl");
+	game_textures_t textures = load_game_textures();
 
 	input::init(con.rmode->viWidth, con.rmode->viHeight);
 
@@ -68,15 +54,15 @@ int main(int argc, char** argv) {
 
 	input::set_resolution(draw.rmode->viWidth, draw.rmode->viHeight);
 
-	gfx::set_filtering_mode(chunk_tex, GX_NEAR, GX_NEAR);
-	gfx::set_filtering_mode(icons_tex, GX_NEAR, GX_NEAR);
-	gfx::set_filtering_mode(font_tex, GX_NEAR, GX_NEAR);
+	gfx::set_filtering_mode(textures.chunk, GX_NEAR, GX_NEAR);
+	gfx::set_filtering_mode(textures.icons, GX_NEAR, GX_NEAR);
+	gfx::set_filtering_mode(textures.font, GX_NEAR, GX_NEAR);
 
 
-	gfx::load(chunk_tex, GX_TEXMAP0);
-	gfx::load(icons_tex, GX_TEXMAP1);
-	gfx::load(skybox_tex, GX_TEXMAP2);
-	gfx::load(font_tex, GX_TEXMAP3);
+	gfx::load(textures.chunk, GX_TEXMAP0);
+	gfx::load(textures.icons, GX_TEXMAP1);
+	gfx::load(textures.skybox, GX_TEXMAP2);
+	gfx::load(textures.font, GX_TEXMAP3);
 
 	math::matrix44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
@@ -160,7 +146,7 @@ int main(int argc, char** argv) {
 		input::scan_pads();
 		u32 buttons_down = input::get_buttons_down(chan);
 		if (buttons_down & WPAD_BUTTON_HOME) {
-			fprintf(log_file, "Log file ended\n");
+			// fprintf(log_file, "Log file ended\n");
 			term_log_file();
 			std::exit(0);
 		}
