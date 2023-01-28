@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
 		input::scan_pads();
 		u32 buttons_down = input::get_buttons_down(chan);
 		if (buttons_down & WPAD_BUTTON_HOME) {
-			lprintf("Log ended\n");
+			lprintf("BGT: %d\nMGT: %d\nMGL: %d\nLog ended\n", total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time);
 			log_term();
 			std::exit(0);
 		}

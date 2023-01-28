@@ -214,6 +214,7 @@ static size_t generate_block_meshes_into_building_mesh(const block_type_t block_
 
                 if (quads_index >= NUM_BUILDING_QUADS) [[unlikely]] {
                     lprintf("Too many quads for should be %d, count is %d\n", NUM_BUILDING_QUADS, quads_index);
+                    return quads_index;
                 }
 
                 blocks_index++;
@@ -266,8 +267,8 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
     size_t num_quads_written = generate_block_meshes_into_building_mesh((const block_type_t*)chunk.blocks.data());
     write_building_mesh_into_display_list(num_quads_written, &chunk.disp_list);
     
-    u8 stack_var;
-    lprintf("%p, %p, %p, %p\n", &stack_var, building_quads, chunk.blocks.data(), chunk.disp_list.data());
+    // u8 stack_var;
+    // lprintf("%p, %p, %p, %p\n", &stack_var, building_quads, chunk.blocks.data(), chunk.disp_list.data());
 
     return mesh_update_state::should_break;
 }
