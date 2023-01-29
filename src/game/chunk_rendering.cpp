@@ -41,14 +41,47 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.update_model_view(view);
 			chunk.tf.load(chunk::mat);
 
-			chunk.disp_list.call();
+			chunk.solid_disp_list.call();
 		}
+		for (auto& [ pos, chunk ] : chunks) {
+			chunk.tf.load(chunk::mat);
+
+			chunk.transparent_disp_list.call();
+		}
+		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
+		GX_SetZCompLoc(GX_FALSE);
+		GX_SetCullMode(GX_CULL_NONE);
+		for (auto& [ pos, chunk ] : chunks) {
+			chunk.tf.load(chunk::mat);
+
+			chunk.transparent_double_sided_disp_list.call();
+		}
+		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+		GX_SetZCompLoc(GX_TRUE);
+		GX_SetCullMode(GX_CULL_BACK);
 	} else {
 		for (auto& [ pos, chunk ] : chunks) {
 			set_alpha(chunk.alpha);
 
 			chunk.tf.load(chunk::mat);
-			chunk.disp_list.call();
+			chunk.solid_disp_list.call();
 		}
+
+		for (auto& [ pos, chunk ] : chunks) {
+			chunk.tf.load(chunk::mat);
+
+			chunk.transparent_disp_list.call();
+		}
+		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
+		GX_SetZCompLoc(GX_FALSE);
+		GX_SetCullMode(GX_CULL_NONE);
+		for (auto& [ pos, chunk ] : chunks) {
+			chunk.tf.load(chunk::mat);
+
+			chunk.transparent_double_sided_disp_list.call();
+		}
+		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+		GX_SetZCompLoc(GX_TRUE);
+		GX_SetCullMode(GX_CULL_BACK);
 	}
 }
