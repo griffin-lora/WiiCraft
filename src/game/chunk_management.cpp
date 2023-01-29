@@ -22,11 +22,14 @@ void game::update_chunk_neighborhoods(chunk::map& chunks) {
 void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
     bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
-        if (chunk.update_core_mesh_important) {
+        if (chunk.update_core_mesh_important || chunk.update_shell_mesh_important) {
             did_important_mesh_update = true;
             chunk.alpha = 0xff;
             chunk.update_core_mesh_important = false;
             chunk.update_core_mesh_unimportant = false;
+            chunk.fade_in_when_mesh_is_updated = false;
+            chunk.update_shell_mesh_important = false;
+            chunk.update_shell_mesh_unimportant = false;
             chunk.fade_in_when_mesh_is_updated = false;
             chunk.fade_st = chunk::fade_state::none;
             auto start = chrono::get_current_us();
@@ -34,43 +37,20 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
             total_mesh_gen_time += chrono::get_current_us() - start;
             last_mesh_gen_time = chrono::get_current_us() - start;
         }
-
-        if (chunk.update_shell_mesh_important) {
-            did_important_mesh_update = true;
-            chunk.alpha = 0xff;
-            chunk.update_shell_mesh_important = false;
-            chunk.update_shell_mesh_unimportant = false;
-            chunk.fade_in_when_mesh_is_updated = false;
-            chunk.fade_st = chunk::fade_state::none;
-            auto start = chrono::get_current_us();
-            update_shell_mesh(building_arrays, chunk);
-            total_mesh_gen_time += chrono::get_current_us() - start;
-            // Don't track MGL since its so small for this
-        }
     }
 
     if (!did_important_mesh_update) {
         for (auto& [ pos, chunk ] : chunks) {
-            if (chunk.update_core_mesh_unimportant) {
+            if (chunk.update_core_mesh_unimportant || chunk.update_shell_mesh_unimportant) {
                 chunk.update_core_mesh_important = false;
                 chunk.update_core_mesh_unimportant = false;
+                chunk.update_shell_mesh_important = false;
+                chunk.update_shell_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
                 auto mesh_update_state = update_core_mesh(building_arrays, chunk);
                 auto now = chrono::get_current_us();
                 total_mesh_gen_time += now - start;
                 last_mesh_gen_time = now - start;
-
-                if (mesh_update_state == mesh_update_state::should_break) {
-                    break;
-                }
-            }
-            if (chunk.update_shell_mesh_unimportant) {
-                chunk.update_shell_mesh_important = false;
-                chunk.update_shell_mesh_unimportant = false;
-                auto start = chrono::get_current_us();
-                auto mesh_update_state = update_shell_mesh(building_arrays, chunk);
-                total_mesh_gen_time += chrono::get_current_us() - start;
-                // Don't track MGL here as well
 
                 if (chunk.fade_in_when_mesh_is_updated) {
                     chunk.fade_in_when_mesh_is_updated = false;
