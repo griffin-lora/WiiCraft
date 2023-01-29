@@ -95,9 +95,14 @@ static u8 get_cube_face_tex_y(block_type_t type, block_face_t face) {
 typedef chunk_mesh_quad_t (*get_face_quad_function_t)(u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy);
 
 static size_t add_cube_face_mesh_if_needed(size_t quads_index, const block_type_t block_types[], u32 x, u32 y, u32 z, block_type_t type, block_face_t face, size_t neighbor_index, get_face_quad_function_t get_face_quad_function) {
-    // TODO: This check doesn't work
-    if (neighbor_index >= NUM_BLOCKS) [[unlikely]] {
-        return quads_index;
+    // Check if we are out of bounds
+    switch (face) {
+        case block::face::front: if (x == 31) { return quads_index; } break;
+        case block::face::back: if (x == 0) { return quads_index; } break;
+        case block::face::top: if (y == 31) { return quads_index; } break;
+        case block::face::bottom: if (y == 0) { return quads_index; } break;
+        case block::face::left:
+        case block::face::right: if (neighbor_index >= NUM_BLOCKS) { return quads_index; } break;
     }
     block_mesh_category_t neighbor_mesh_category = get_block_mesh_category(block_types[neighbor_index]);
     if (neighbor_mesh_category == block_mesh_category_cube) {
