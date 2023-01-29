@@ -6,5 +6,6 @@ lib
 *.iso
 *.o
 *.out
+*.d
 callgrind.*
 scripts

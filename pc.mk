@@ -1,24 +1,30 @@
-OBJECTS = $(patsubst %.cpp,%.o, $(shell find . -name *.cpp)) $(patsubst %.c,%.o, $(shell find . -name *.c))
-CC = g++
-CFLAGS = -DPC_PORT -c -I lib -I src -I/opt/devkitpro/libogc/include/ -I/opt/devkitpro/libogc/include/ogc -Wall -std=c++2a -g -O3 -fno-exceptions
+TARGET := app
 
-LDFLAGS = 
+SOURCES := $(wildcard src/*.c) $(wildcard src/*.cpp) $(wildcard src/ext/*.c) $(wildcard src/ext/*.cpp) $(wildcard src/game/*.c) $(wildcard src/game/*.cpp) $(wildcard src/gfx/*.c) $(wildcard src/gfx/*.cpp) $(wildcard src/math/*.c) $(wildcard src/math/*.cpp) $(wildcard pc/*.c) $(wildcard pc/ogc/*.c) $(wildcard pc/wiiuse/*.c)
+LIBS := -lm
+WARNS := -Wall
+OBJECTS := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCES)))
+DEPENDS := $(patsubst %.c,%.d,$(patsubst %.cpp,%.d,$(SOURCES)))
 
-OUT_FILE = app.elf
+override XFLAGS += -O3 -fno-exceptions -I lib -I src -I/opt/devkitpro/libogc/include/ -I/opt/devkitpro/libogc/include/ogc -DPC_PORT -g
+CFLAGS = $(XFLAGS) -std=c2x
+CXXFLAGS = $(XFLAGS) -std=c++2a
 
-.PHONY: build
+.PHONY: build run clean
+
 build: $(OBJECTS)
-	$(CC) -o $(OUT_FILE) $(OBJECTS) $(LDFLAGS)
+	$(CXX) $(CFLAGS) -o $(TARGET).elf $(OBJECTS) $(LIBS)
 
 run: build
-	./$(OUT_FILE)
+	@./$(TARGET).elf
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) $< -o $@
-
-%.o: %.c
-	$(CC) $(CFLAGS) $< -o $@
-
-.PHONY: clean
 clean:
-	rm $(OBJECTS) $(OUT_FILE)
+	$(RM) $(OBJECTS) $(DEPENDS)
+
+-include $(DEPENDS)
+
+%.o: %.c Makefile
+	$(CC) $(CFLAGS) $(WARNS) -MMD -MP -c $< -o $@
+
+%.o: %.cpp Makefile
+	$(CXX) $(CXXFLAGS) $(WARNS) -MMD -MP -c $< -o $@

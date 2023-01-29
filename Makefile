@@ -27,8 +27,9 @@ INCLUDES	:=  src lib
 # options for code generation
 #---------------------------------------------------------------------------------
 
-override CFLAGS += -Ofast -Wall -fno-exceptions -std=c2x $(MACHDEP) $(INCLUDE)
-CXXFLAGS = $(CFLAGS) -std=c++2a
+override XFLAGS += -Ofast -Wall -fno-exceptions $(MACHDEP) $(INCLUDE)
+CFLAGS = $(XFLAGS) -std=c2x
+CXXFLAGS = $(XFLAGS) -std=c++2a
 
 LDFLAGS	= $(MACHDEP) -Wl,-Map,$(notdir $@).map
 
@@ -99,7 +100,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) \
 					-L$(LIBOGC_LIB)
 
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
-.PHONY: $(BUILD) clean run
+.PHONY: $(BUILD) clean run run_emu
 
 #---------------------------------------------------------------------------------
 $(BUILD):
@@ -113,6 +114,9 @@ clean:
 #---------------------------------------------------------------------------------
 run: $(BUILD)
 	wiiload $(OUTPUT).dol
+
+run_emu: $(BUILD)
+	dolphin-emu-nogui -e $(OUTPUT).dol
 
 #---------------------------------------------------------------------------------
 else

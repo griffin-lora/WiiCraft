@@ -9,6 +9,33 @@
 #include "face_mesh_generation.inl"
 #include "log.hpp"
 
+/*
+The idea of how I'm going to optimize this is to layout the cache like this
+[
+block types
+-
+-
+-
+display lists
+]
+This will avoid any fighting over space in the cache and will mean that the amount of unnecessary cache misses will be 0
+I am also going to try to optimize this by not using the stack anywhere within the update_core_mesh function since this will mean that I can position the block memory and display lists anywhere in the cache without having to worry about where the stack will be in the cache, should that not be possible I will use a layout roughly like this
+[
+block types
+-
+-
+stack
+-
+-
+display lists
+]
+
+Ways to optimize for avoiding stack usage will be to not use the should_add_face loop computed values. The original intent behind this optimization was to reduce the number of comparison operations, however it is the branch that is expensive and so this isnt really a worthwhile optimization and takes up valuable register space.
+*/
+
+// Possible future optimization is to stop generating the mesh after we reach the end of blocks to generate meshes from
+
+
 using namespace game;
 
 typedef block::type block_type_t;
@@ -146,32 +173,6 @@ static size_t add_cube_face_mesh_if_needed(size_t quads_index, const block_type_
 
     return quads_index;
 }
-
-/*
-The idea of how I'm going to optimize this is to layout the cache like this
-[
-block types
--
--
--
-display lists
-]
-This will avoid any fighting over space in the cache and will mean that the amount of unnecessary cache misses will be 0
-I am also going to try to optimize this by not using the stack anywhere within the update_core_mesh function since this will mean that I can position the block memory and display lists anywhere in the cache without having to worry about where the stack will be in the cache, should that not be possible I will use a layout roughly like this
-[
-block types
--
--
-stack
--
--
-display lists
-]
-
-Ways to optimize for avoiding stack usage will be to not use the should_add_face loop computed values. The original intent behind this optimization was to reduce the number of comparison operations, however it is the branch that is expensive and so this isnt really a worthwhile optimization and takes up valuable register space.
-*/
-
-// Possible future optimization is to stop generating the mesh after we reach the end of blocks to generate meshes from
 
 static size_t generate_block_meshes_into_building_mesh(
     const block_type_t block_types[],
