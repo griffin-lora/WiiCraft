@@ -59,7 +59,7 @@ static_assert(sizeof(chunk_mesh_quad_t) == 4 * 5);
 
 alignas(32768) static chunk_mesh_quad_t building_quads[NUM_BUILDING_QUADS + 0x20];
 
-typedef enum {
+typedef enum : u8 {
     block_mesh_category_invisible,
     block_mesh_category_cube,
     block_mesh_category_transparent_cube,
@@ -67,6 +67,8 @@ typedef enum {
     block_mesh_category_slab_bottom,
     block_mesh_category_slab_top
 } block_mesh_category_t;
+
+static_assert(sizeof(block_mesh_category_t) == 1);
 
 static block_mesh_category_t get_block_mesh_category(block_type_t type) {
     switch (type) {
@@ -103,10 +105,13 @@ static u8 get_cube_face_tex_x(block_type_t type, block_face_t face) {
         case block::type::dirt: return 8;
         case block::type::sand: return 24;
         case block::type::wood_planks: return 40;
+        case block::type::stone_slab_bottom:
+        case block::type::stone_slab_top:
         case block::type::stone_slab_both: switch (face) {
             default: return 32;
             case block::face::top: return 36;
         }
+        case block::type::water: return 28;
     }
 }
 
@@ -144,7 +149,7 @@ static size_t get_neighbor_blocks_index(block_face_t face, size_t neighbor_index
     }
 }
 
-static size_t add_cube_face_mesh_if_needed(size_t quads_index, const block_type_t block_types[], const block_type_t neighbor_block_types[], u32 x, u32 y, u32 z, block_type_t type, block_face_t face, size_t neighbor_index, get_face_quad_function_t get_face_quad_function) {
+static size_t add_cube_face_mesh_if_needed(size_t quads_index, const block_type_t block_types[], const block_type_t neighbor_block_types[], u32 x, u32 y, u32 z, block_type_t type, block_mesh_category_t category, block_face_t face, size_t neighbor_index, get_face_quad_function_t get_face_quad_function) {
     block_type_t neighbor_block_type;
     if (is_out_of_bounds(x, y, face, neighbor_index)) {
         if (neighbor_block_types == NULL) {
@@ -155,8 +160,10 @@ static size_t add_cube_face_mesh_if_needed(size_t quads_index, const block_type_
         neighbor_block_type = block_types[neighbor_index];
     }
     block_mesh_category_t neighbor_mesh_category = get_block_mesh_category(neighbor_block_type);
-    if (neighbor_mesh_category == block_mesh_category_cube) {
-        return quads_index;
+    switch (category) {
+        case block_mesh_category_cube: if (neighbor_mesh_category == block_mesh_category_cube) { return quads_index; } break;
+        case block_mesh_category_transparent_cube: if (neighbor_mesh_category == block_mesh_category_cube || neighbor_mesh_category == block_mesh_category_transparent_cube) { return quads_index; } break;
+        default: break;
     }
     u8 px = x * 4;
     u8 py = y * 4;
@@ -192,11 +199,14 @@ static size_t generate_block_meshes_into_building_mesh(
             for (u32 x = 0; x < chunk::size; x++) {
                 block_type_t type = block_types[blocks_index];
 
-                block_mesh_category_t mesh_category = get_block_mesh_category(type);
-                switch (mesh_category) {
+                block_mesh_category_t category = get_block_mesh_category(type);
+                switch (category) {
                     default: break;
-                    case block_mesh_category_cube: {
-                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, front_block_types, x, y, z, type, block::face::front, blocks_index + X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                    case block_mesh_category_cube:
+                    case block_mesh_category_transparent_cube:
+                    case block_mesh_category_slab_bottom:
+                    case block_mesh_category_slab_top: {
+                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, front_block_types, x, y, z, type, category, block::face::front, blocks_index + X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
                             return chunk_mesh_quad_t{{
                                 { pox,poy, pz, tx,ty },
                                 { pox,py, pz, tx, toy },
@@ -204,7 +214,7 @@ static size_t generate_block_meshes_into_building_mesh(
                                 { pox,poy,poz, tox, ty }
                             }};
                         });
-                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, back_block_types, x, y, z, type, block::face::back, blocks_index - X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, back_block_types, x, y, z, type, category, block::face::back, blocks_index - X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
                             return chunk_mesh_quad_t{{
                                 {  px, poy, pz, tx,ty },	// Top Left of the quad (top)
                                 { px, poy, poz, tox,ty },	// Top Right of the quad (top)
@@ -212,7 +222,7 @@ static size_t generate_block_meshes_into_building_mesh(
                                 { px, py, pz, tx,toy }		// Bottom Left of the quad (top)
                             }};
                         });
-                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, top_block_types, x, y, z, type, block::face::top, blocks_index + Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, top_block_types, x, y, z, type, category, block::face::top, blocks_index + Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
                             return chunk_mesh_quad_t{{
                                 { px, poy, poz, tx, ty },	// Bottom Left Of The Quad (Back)
                                 { px, poy, pz, tox, ty },	// Bottom Right Of The Quad (Back)
@@ -220,7 +230,7 @@ static size_t generate_block_meshes_into_building_mesh(
                                 { pox, poy, poz, tx, toy }	// Top Left Of The Quad (Back)
                             }};
                         });
-                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, bottom_block_types, x, y, z, type, block::face::bottom, blocks_index - Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, bottom_block_types, x, y, z, type, category, block::face::bottom, blocks_index - Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
                             return chunk_mesh_quad_t{{
                                 { px, py, poz, tx, ty },		// Top Right Of The Quad (Front)
                                 { pox, py, poz, tox, ty },	// Top Left Of The Quad (Front)
@@ -228,7 +238,7 @@ static size_t generate_block_meshes_into_building_mesh(
                                 { px, py, pz, tx, toy }	// Bottom Right Of The Quad (Front)
                             }};
                         });
-                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, right_block_types, x, y, z, type, block::face::right, blocks_index + Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, right_block_types, x, y, z, type, category, block::face::right, blocks_index + Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
                             return chunk_mesh_quad_t{{
                                 { pox, py,poz, tx,toy },	// Top Right Of The Quad (Right)
                                 { px, py, poz, tox,toy },		// Top Left Of The Quad (Right)
@@ -236,7 +246,7 @@ static size_t generate_block_meshes_into_building_mesh(
                                 { pox,poy,poz, tx,ty }	// Bottom Right Of The Quad (Right)
                             }};
                         });
-                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, left_block_types, x, y, z, type, block::face::left, blocks_index - Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_index = add_cube_face_mesh_if_needed(quads_index, block_types, left_block_types, x, y, z, type, category, block::face::left, blocks_index - Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
                             return chunk_mesh_quad_t{{
                                 { pox, py, pz, tx,toy },	// Top Right Of The Quad (Left)
                                 { pox, poy,pz, tx,ty },	// Top Left Of The Quad (Left)
