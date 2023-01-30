@@ -45,15 +45,14 @@ typedef struct {
     u8 px;
     u8 py;
     u8 pz;
-    u8 tx;
-    u8 ty;
+    u8 txy;
 } block_vertex_t;
 
 typedef struct {
     block_vertex_t verts[4];
 } block_quad_t;
 
-static_assert(sizeof(block_quad_t) == 4 * 5);
+static_assert(sizeof(block_quad_t) == 4 * 4);
 
 #define NUM_SOLID_BUILDING_QUADS 0x800
 #define NUM_TRANSPARENT_BUILDING_QUADS 0x400
@@ -105,38 +104,30 @@ static block_mesh_category_t get_block_mesh_category(block_type_t type) {
     }
 }
 
-static u8 get_face_tex_x(block_type_t type, block_face_t face) {
+static u8 get_face_tex(block_type_t type, block_face_t face) {
     switch (type) {
         case block::type::debug: return 0;
         case block::type::grass: switch (face) {
-            default: return 16;
+            default: return 4;
             case block::face::top: return 0;
-            case block::face::bottom: return 8;
+            case block::face::bottom: return 2;
         }
-        case block::type::stone: return 4;
-        case block::type::dirt: return 8;
-        case block::type::sand: return 24;
-        case block::type::wood_planks: return 40;
+        case block::type::stone: return 1;
+        case block::type::dirt: return 2;
+        case block::type::sand: return 6;
+        case block::type::wood_planks: return 10;
         case block::type::stone_slab_bottom:
         case block::type::stone_slab_top:
         case block::type::stone_slab_both: switch (face) {
-            default: return 32;
-            case block::face::top: return 36;
+            default: return 8;
+            case block::face::top: return 9;
         }
-        case block::type::water: return 28;
+        case block::type::water: return 7;
     }
 }
 
-static u8 get_face_tex_y(block_type_t type, block_face_t face) {
-    return 0;
-}
-
-static u8 get_tex_x(block_type_t type) {
-    return 20;
-}
-
-static u8 get_tex_y(block_type_t type) {
-    return 0;
+static u8 get_tex(block_type_t type) {
+    return 5;
 }
 
 #define NUM_BLOCKS (32 * 32 * 32)
@@ -144,7 +135,7 @@ static u8 get_tex_y(block_type_t type) {
 #define Y_OFFSET 32
 #define X_OFFSET 1
 
-typedef block_quad_t (*get_face_quad_function_t)(u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy);
+typedef block_quad_t (*get_face_quad_function_t)(u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy);
 
 static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_index) {
     switch (face) {
@@ -199,12 +190,12 @@ static face_quads_indices_t add_face_quad_if_needed(
     u8 pox = px + 4;
     u8 poy = py + 4;
     u8 poz = pz + 4;
-    u8 tx = get_face_tex_x(type, face);
-    u8 ty = get_face_tex_y(type, face);
-    u8 tox = tx + 4;
-    u8 toy = ty + 4;
+    u8 txy = get_face_tex(type, face);
+    u8 toxy = txy + 1;
+    u8 txoy = txy | 0b10000000;
+    u8 toxoy = toxy | 0b10000000;
     
-    block_quad_t face_quad = get_face_quad_function(px, py, pz, pox, poy, poz, tx, ty, tox, toy);
+    block_quad_t face_quad = get_face_quad_function(px, py, pz, pox, poy, poz, txy, toxy, txoy, toxoy);
     switch (category) {
         case block_mesh_category_cube:
         case block_mesh_category_slab_bottom:
@@ -249,52 +240,52 @@ static quads_indices_t generate_block_meshes_into_building_mesh(
                     case block_mesh_category_transparent_cube:
                     case block_mesh_category_slab_bottom:
                     case block_mesh_category_slab_top: {
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, front_block_types, x, y, z, type, category, block::face::front, blocks_index + X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, front_block_types, x, y, z, type, category, block::face::front, blocks_index + X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
-                                { pox,poy, pz, tx,ty },
-                                { pox,py, pz, tx, toy },
-                                { pox,py,poz, tox,toy },
-                                { pox,poy,poz, tox, ty }
+                                { pox, poy, pz, txy },
+                                { pox, py, pz, txoy },
+                                { pox, py,poz, toxoy },
+                                { pox, poy,poz, toxy }
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, back_block_types, x, y, z, type, category, block::face::back, blocks_index - X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, back_block_types, x, y, z, type, category, block::face::back, blocks_index - X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
-                                {  px, poy, pz, tx,ty },	// Top Left of the quad (top)
-                                { px, poy, poz, tox,ty },	// Top Right of the quad (top)
-                                { px, py, poz, tox,toy },	// Bottom Right of the quad (top)
-                                { px, py, pz, tx,toy }		// Bottom Left of the quad (top)
+                                { px, poy, pz, txy },	// Top Left of the quad (top)
+                                { px, poy, poz, toxy },	// Top Right of the quad (top)
+                                { px, py, poz, toxoy },	// Bottom Right of the quad (top)
+                                { px, py, pz, txoy }		// Bottom Left of the quad (top)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, top_block_types, x, y, z, type, category, block::face::top, blocks_index + Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, top_block_types, x, y, z, type, category, block::face::top, blocks_index + Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
-                                { px, poy, poz, tx, ty },	// Bottom Left Of The Quad (Back)
-                                { px, poy, pz, tox, ty },	// Bottom Right Of The Quad (Back)
-                                { pox, poy, pz, tox, toy },	// Top Right Of The Quad (Back)
-                                { pox, poy, poz, tx, toy }	// Top Left Of The Quad (Back)
+                                { px, poy, poz, txy },	// Bottom Left Of The Quad (Back)
+                                { px, poy, pz, toxy },	// Bottom Right Of The Quad (Back)
+                                { pox, poy, pz, toxoy },	// Top Right Of The Quad (Back)
+                                { pox, poy, poz, txoy }	// Top Left Of The Quad (Back)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, bottom_block_types, x, y, z, type, category, block::face::bottom, blocks_index - Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, bottom_block_types, x, y, z, type, category, block::face::bottom, blocks_index - Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
-                                { px, py, poz, tx, ty },		// Top Right Of The Quad (Front)
-                                { pox, py, poz, tox, ty },	// Top Left Of The Quad (Front)
-                                { pox, py, pz, tox, toy },	// Bottom Left Of The Quad (Front)
-                                { px, py, pz, tx, toy }	// Bottom Right Of The Quad (Front)
+                                { px, py, poz, txy },		// Top Right Of The Quad (Front)
+                                { pox, py, poz, toxy },	// Top Left Of The Quad (Front)
+                                { pox, py, pz, toxoy },	// Bottom Left Of The Quad (Front)
+                                { px, py, pz, txoy }	// Bottom Right Of The Quad (Front)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, right_block_types, x, y, z, type, category, block::face::right, blocks_index + Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, right_block_types, x, y, z, type, category, block::face::right, blocks_index + Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
-                                { pox, py,poz, tx,toy },	// Top Right Of The Quad (Right)
-                                { px, py, poz, tox,toy },		// Top Left Of The Quad (Right)
-                                { px,poy, poz, tox,ty },	// Bottom Left Of The Quad (Right)
-                                { pox,poy,poz, tx,ty }	// Bottom Right Of The Quad (Right)
+                                { pox, py, poz, txoy },	// Top Right Of The Quad (Right)
+                                { px, py, poz, toxoy },		// Top Left Of The Quad (Right)
+                                { px, poy, poz, toxy },	// Bottom Left Of The Quad (Right)
+                                { pox, poy, poz, txy }	// Bottom Right Of The Quad (Right)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, left_block_types, x, y, z, type, category, block::face::left, blocks_index - Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 tx, u8 ty, u8 tox, u8 toy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, left_block_types, x, y, z, type, category, block::face::left, blocks_index - Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
-                                { pox, py, pz, tx,toy },	// Top Right Of The Quad (Left)
-                                { pox, poy,pz, tx,ty },	// Top Left Of The Quad (Left)
-                                { px,poy,pz, tox,ty },	// Bottom Left Of The Quad (Left)
-                                { px,py, pz, tox,toy }	// Bottom Right Of The Quad (Left)
+                                { pox, py, pz, txoy },	// Top Right Of The Quad (Left)
+                                { pox, poy, pz, txy },	// Top Left Of The Quad (Left)
+                                { px, poy, pz, toxy },	// Bottom Left Of The Quad (Left)
+                                { px, py, pz, toxoy }	// Bottom Right Of The Quad (Left)
                             }};
                         });
                     } break;
@@ -305,21 +296,21 @@ static quads_indices_t generate_block_meshes_into_building_mesh(
                         u8 pox = px + 4;
                         u8 poy = py + 4;
                         u8 poz = pz + 4;
-                        u8 tx = get_tex_x(type);
-                        u8 ty = get_tex_y(type);
-                        u8 tox = tx + 4;
-                        u8 toy = ty + 4;
+                        u8 txy = get_tex(type);
+                        u8 toxy = txy + 1;
+                        u8 txoy = txy | 0b10000000;
+                        u8 toxoy = toxy | 0b10000000;
                         building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
-                            { px, py, pz, tx, toy },
-                            { pox, py, poz, tox, toy },
-                            { pox, poy, poz, tox, ty },
-                            { px, poy, pz, tx, ty }
+                            { px, py, pz, txoy },
+                            { pox, py, poz, toxoy },
+                            { pox, poy, poz, toxy },
+                            { px, poy, pz, txy }
                         }};
                         building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
-                            { pox, py, pz, tx, toy },
-                            { px, py, poz, tox, toy },
-                            { px, poy, poz, tox, ty },
-                            { pox, poy, pz, tx, ty }
+                            { pox, py, pz, txoy },
+                            { px, py, poz, toxoy },
+                            { px, poy, poz, toxy },
+                            { pox, poy, pz, txy }
                         }};
                     } break;
                 }
@@ -355,16 +346,24 @@ static void write_quads_into_display_list(size_t num_quads, const block_quad_t q
             const block_quad_t* quad = &quads[i];
             
             GX_Position3u8(quad->verts[0].px, quad->verts[0].py, quad->verts[0].pz);
-            GX_TexCoord2u8(quad->verts[0].tx, quad->verts[0].ty);
+            u8 tx = quad->verts[0].txy & ~0b10000000;
+            u8 ty = (quad->verts[0].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
 
             GX_Position3u8(quad->verts[1].px, quad->verts[1].py, quad->verts[1].pz);
-            GX_TexCoord2u8(quad->verts[1].tx, quad->verts[1].ty);
+            tx = quad->verts[1].txy & ~0b10000000;
+            ty = (quad->verts[1].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
 
             GX_Position3u8(quad->verts[2].px, quad->verts[2].py, quad->verts[2].pz);
-            GX_TexCoord2u8(quad->verts[2].tx, quad->verts[2].ty);
+            tx = quad->verts[2].txy & ~0b10000000;
+            ty = (quad->verts[2].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
 
             GX_Position3u8(quad->verts[3].px, quad->verts[3].py, quad->verts[3].pz);
-            GX_TexCoord2u8(quad->verts[3].tx, quad->verts[3].ty);
+            tx = quad->verts[3].txy & ~0b10000000;
+            ty = (quad->verts[3].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
         }
         
         GX_End();

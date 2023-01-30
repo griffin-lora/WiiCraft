@@ -32,7 +32,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 	// Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
 	// I dont think that information is acccurate
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 6);
+	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 
 	if (cam.update_view) { // This may be a mostly useless micro-optimization, matrix multiplication vs a branch ehhh (we are using a very expensive for loop though so yeah)
 		for (auto& [ pos, chunk ] : chunks) {
