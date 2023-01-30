@@ -34,9 +34,9 @@
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
-static constexpr s32 chunk_generation_radius = 3;
+static constexpr s32 chunk_generation_radius = 6;
 
-static constexpr s32 chunk_erasure_radius = 4;
+static constexpr s32 chunk_erasure_radius = 7;
 
 int main(int argc, char** argv) {
 

@@ -130,18 +130,18 @@ static u8 get_tex(block_type_t type) {
     return 5;
 }
 
-#define NUM_BLOCKS (32 * 32 * 32)
-#define Z_OFFSET (32 * 32)
-#define Y_OFFSET 32
+#define NUM_BLOCKS (16 * 16 * 16)
+#define Z_OFFSET (16 * 16)
+#define Y_OFFSET 16
 #define X_OFFSET 1
 
 typedef block_quad_t (*get_face_quad_function_t)(u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy);
 
 static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_index) {
     switch (face) {
-        case block::face::front: if (x == 31) { return true; } break;
+        case block::face::front: if (x == 15) { return true; } break;
         case block::face::back: if (x == 0) { return true; } break;
-        case block::face::top: if (y == 31) { return true; } break;
+        case block::face::top: if (y == 15) { return true; } break;
         case block::face::bottom: if (y == 0) { return true; } break;
         case block::face::left:
         case block::face::right: if (neighbor_index >= NUM_BLOCKS) { return true; } break;

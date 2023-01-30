@@ -137,17 +137,24 @@ void game::manage_chunks_around_camera(
         chunk_positions_to_erase.clear();
 
         // Add to chunk_positions_to_generate_blocks positions around the sphere of radius chunk_generation_radius
-        iterate_positions_in_sphere(chunk_generation_radius, [view, &chunks, &chunk_positions_to_create_blocks, &cam_chunk_pos](auto& offset) {
-            auto chunk_pos = cam_chunk_pos + offset;
-            if (!chunks.contains(chunk_pos)) {
-                chunk_positions_to_create_blocks.insert(chunk_pos);
+        for (s32 x = -chunk_generation_radius; x <= chunk_generation_radius; x++) {
+            for (s32 y = -3; y <= 3; y++) {
+                for (s32 z = -chunk_generation_radius; z <= chunk_generation_radius; z++) {
+                    const math::vector3s32 pos = {x, y, z};
+                    if (math::length_squared(pos) <= (chunk_generation_radius * chunk_generation_radius)) {
+                        auto chunk_pos = cam_chunk_pos + pos;
+                        if (!chunks.contains(chunk_pos)) {
+                            chunk_positions_to_create_blocks.insert(chunk_pos);
+                        }
+                    }
+                }
             }
-        });
+        }
 
         last_cam_chunk_pos = cam_chunk_pos;
     }
 
-    if (chunk_positions_to_create_blocks.size() > 0) {
+    while (chunk_positions_to_create_blocks.size() > 0) {
         auto pos_it = chunk_positions_to_create_blocks.begin();
 
         auto chunk_pos = *pos_it;
@@ -158,6 +165,7 @@ void game::manage_chunks_around_camera(
 
         auto& chunk = chunk_it->second;
         auto stored_chunk_it = stored_chunks.find(pos);
+        mesh_update_state state = mesh_update_state::should_break;
         if (stored_chunk_it != stored_chunks.end()) {
             auto& stored_chunk = stored_chunk_it->second;
             chunk.blocks = std::move(stored_chunk.blocks);
@@ -165,12 +173,16 @@ void game::manage_chunks_around_camera(
         } else {
             chunk.blocks.resize_without_copying(chunk::blocks_count);
             auto start = chrono::get_current_us();
-            generate_blocks(chunk, pos);
+            state = generate_blocks(chunk, pos);
             total_block_gen_time += chrono::get_current_us() - start;
         }
 
         chunk_positions_to_update_neighborhood_and_mesh.insert(pos);
         chunk_positions_to_create_blocks.erase(pos_it);
+
+        if (state == mesh_update_state::should_break) {
+            break;
+        }
     }
 
     // Once all the chunk blocks have been generated/retrieved, update the neighborhood and mesh of all the chunks in the chunk_positions_to_create_blocks set

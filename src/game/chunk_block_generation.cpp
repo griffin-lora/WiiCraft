@@ -97,12 +97,15 @@ static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos)
     get_block_count_ref(chunk, block) = chunk.blocks.size();
 }
 
-void game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+mesh_update_state game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     if (chunk_pos.y > 0) {
         generate_high_blocks(chunk, chunk_pos);
+        return mesh_update_state::should_continue;
     } else if (chunk_pos.y < 0) {
         generate_low_blocks(chunk, chunk_pos);
+        return mesh_update_state::should_continue;
     } else {
         generate_middle_blocks(chunk, chunk_pos);
+        return mesh_update_state::should_break;
     }
 }
