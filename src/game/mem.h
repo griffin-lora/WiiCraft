@@ -26,9 +26,9 @@ typedef block_type_t block_chunk_t[16 * 16 * 16];
 _Static_assert(sizeof(block_chunk_t) == 4096, "");
 
 typedef struct {
-    display_list_chunk_t secondary_display_list_chunks[3]; // These take up the same location in cache as the building quads and thus are the secondary choice in the event of running out of display list chunks
-    display_list_chunk_t primary_display_list_chunks[4];
-    block_chunk_t block_chunk;
+    _Alignas(4096) display_list_chunk_t secondary_display_list_chunks[3]; // These take up the same location in cache as the building quads and thus are the secondary choice in the event of running out of display list chunks
+    _Alignas(4096) display_list_chunk_t primary_display_list_chunks[4];
+    _Alignas(4096) block_chunk_t block_chunk;
 } game_cache_chunk_t;
 
 _Static_assert(sizeof(game_cache_chunk_t) == 32768, "");
