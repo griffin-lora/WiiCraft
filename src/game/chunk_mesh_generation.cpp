@@ -8,6 +8,7 @@
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
 #include "log.hpp"
+#include "mem.hpp"
 
 /*
 The idea of how I'm going to optimize this is to layout the cache like this
@@ -37,34 +38,6 @@ Ways to optimize for avoiding stack usage will be to not use the should_add_face
 
 
 using namespace game;
-
-typedef block::type block_type_t;
-typedef block::face block_face_t;
-
-typedef struct {
-    u8 px;
-    u8 py;
-    u8 pz;
-    u8 txy;
-} block_vertex_t;
-
-typedef struct {
-    block_vertex_t verts[4];
-} block_quad_t;
-
-static_assert(sizeof(block_quad_t) == 4 * 4);
-
-#define NUM_SOLID_BUILDING_QUADS 0x100
-#define NUM_TRANSPARENT_BUILDING_QUADS 0x100
-#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x100
-
-alignas(32768) static struct {
-    block_quad_t solid[NUM_SOLID_BUILDING_QUADS];
-    alignas(32) block_quad_t transparent[NUM_TRANSPARENT_BUILDING_QUADS];
-    alignas(32) block_quad_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS];
-} building_quads;
-
-static_assert(sizeof(building_quads) == 4096*3);
 
 typedef struct {
     size_t solid;
@@ -111,9 +84,9 @@ static void write_quads_into_display_list(size_t num_quads, const block_quad_t q
 }
 
 static void write_into_display_lists(std::vector<gfx::display_list>* solid_display_lists, std::vector<gfx::display_list>* transparent_display_lists, std::vector<gfx::display_list>* transparent_double_sided_lists, quads_indices_t indices) {
-    write_quads_into_display_list(indices.solid, building_quads.solid, &solid_display_lists->emplace_back());
-    write_quads_into_display_list(indices.transparent, building_quads.transparent, &transparent_display_lists->emplace_back());
-    write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided, &transparent_double_sided_lists->emplace_back());
+    write_quads_into_display_list(indices.solid, gmem.building_quads.solid, &solid_display_lists->emplace_back());
+    write_quads_into_display_list(indices.transparent, gmem.building_quads.transparent, &transparent_display_lists->emplace_back());
+    write_quads_into_display_list(indices.transparent_double_sided, gmem.building_quads.transparent_double_sided, &transparent_double_sided_lists->emplace_back());
 }
 
 typedef enum : u8 {
@@ -131,44 +104,44 @@ static block_mesh_category_t get_block_mesh_category(block_type_t type) {
     switch (type) {
         default:
             return block_mesh_category_invisible;
-        case block::type::debug:
-        case block::type::grass:
-        case block::type::stone:
-        case block::type::dirt:
-        case block::type::sand:
-        case block::type::wood_planks:
-        case block::type::stone_slab_both:
+        case block_type_debug:
+        case block_type_grass:
+        case block_type_stone:
+        case block_type_dirt:
+        case block_type_sand:
+        case block_type_wood_planks:
+        case block_type_stone_slab_both:
             return block_mesh_category_cube;
-        case block::type::water:
+        case block_type_water:
             return block_mesh_category_transparent_cube;
-        case block::type::tall_grass:
+        case block_type_tall_grass:
             return block_mesh_category_cross;
-        case block::type::stone_slab_bottom:
+        case block_type_stone_slab_bottom:
             return block_mesh_category_slab_bottom;
-        case block::type::stone_slab_top:
+        case block_type_stone_slab_top:
             return block_mesh_category_slab_top;
     }
 }
 
 static u8 get_face_tex(block_type_t type, block_face_t face) {
     switch (type) {
-        case block::type::debug: return 0;
-        case block::type::grass: switch (face) {
+        case block_type_debug: return 0;
+        case block_type_grass: switch (face) {
             default: return 4;
-            case block::face::top: return 0;
-            case block::face::bottom: return 2;
+            case block_face_top: return 0;
+            case block_face_bottom: return 2;
         }
-        case block::type::stone: return 1;
-        case block::type::dirt: return 2;
-        case block::type::sand: return 6;
-        case block::type::wood_planks: return 10;
-        case block::type::stone_slab_bottom:
-        case block::type::stone_slab_top:
-        case block::type::stone_slab_both: switch (face) {
+        case block_type_stone: return 1;
+        case block_type_dirt: return 2;
+        case block_type_sand: return 6;
+        case block_type_wood_planks: return 10;
+        case block_type_stone_slab_bottom:
+        case block_type_stone_slab_top:
+        case block_type_stone_slab_both: switch (face) {
             default: return 8;
-            case block::face::top: return 9;
+            case block_face_top: return 9;
         }
-        case block::type::water: return 7;
+        case block_type_water: return 7;
     }
 }
 
@@ -185,24 +158,24 @@ typedef block_quad_t (*get_face_quad_function_t)(u8 px, u8 py, u8 pz, u8 pox, u8
 
 static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_index) {
     switch (face) {
-        case block::face::front: if (x == 15) { return true; } break;
-        case block::face::back: if (x == 0) { return true; } break;
-        case block::face::top: if (y == 15) { return true; } break;
-        case block::face::bottom: if (y == 0) { return true; } break;
-        case block::face::left:
-        case block::face::right: if (neighbor_index >= NUM_BLOCKS) { return true; } break;
+        case block_face_front: if (x == 15) { return true; } break;
+        case block_face_back: if (x == 0) { return true; } break;
+        case block_face_top: if (y == 15) { return true; } break;
+        case block_face_bottom: if (y == 0) { return true; } break;
+        case block_face_left:
+        case block_face_right: if (neighbor_index >= NUM_BLOCKS) { return true; } break;
     }
     return false;
 }
 
 static size_t get_neighbor_blocks_index(block_face_t face, size_t neighbor_index) {
     switch (face) {
-        case block::face::front: return neighbor_index - Y_OFFSET;
-        case block::face::back: return neighbor_index + Y_OFFSET;
-        case block::face::top: return neighbor_index - Z_OFFSET;
-        case block::face::bottom: return neighbor_index + Z_OFFSET;
-        case block::face::right: return neighbor_index - NUM_BLOCKS;
-        case block::face::left: return neighbor_index + NUM_BLOCKS;
+        case block_face_front: return neighbor_index - Y_OFFSET;
+        case block_face_back: return neighbor_index + Y_OFFSET;
+        case block_face_top: return neighbor_index - Z_OFFSET;
+        case block_face_bottom: return neighbor_index + Z_OFFSET;
+        case block_face_right: return neighbor_index - NUM_BLOCKS;
+        case block_face_left: return neighbor_index + NUM_BLOCKS;
     }
 }
 
@@ -245,8 +218,8 @@ static face_quads_indices_t add_face_quad_if_needed(
     switch (category) {
         case block_mesh_category_cube:
         case block_mesh_category_slab_bottom:
-        case block_mesh_category_slab_top: building_quads.solid[quads_indices.solid++] = face_quad; break;
-        case block_mesh_category_transparent_cube: building_quads.transparent[quads_indices.transparent++] = face_quad; break;
+        case block_mesh_category_slab_top: gmem.building_quads.solid[quads_indices.solid++] = face_quad; break;
+        case block_mesh_category_transparent_cube: gmem.building_quads.transparent[quads_indices.transparent++] = face_quad; break;
     }
 
     return quads_indices;
@@ -289,7 +262,7 @@ static void generate_block_meshes(
                     case block_mesh_category_transparent_cube:
                     case block_mesh_category_slab_bottom:
                     case block_mesh_category_slab_top: {
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, front_block_types, x, y, z, type, category, block::face::front, blocks_index + X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, front_block_types, x, y, z, type, category, block_face_front, blocks_index + X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
                                 { pox, poy, pz, txy },
                                 { pox, py, pz, txoy },
@@ -297,7 +270,7 @@ static void generate_block_meshes(
                                 { pox, poy,poz, toxy }
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, back_block_types, x, y, z, type, category, block::face::back, blocks_index - X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, back_block_types, x, y, z, type, category, block_face_back, blocks_index - X_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
                                 { px, poy, pz, txy },	// Top Left of the quad (top)
                                 { px, poy, poz, toxy },	// Top Right of the quad (top)
@@ -305,7 +278,7 @@ static void generate_block_meshes(
                                 { px, py, pz, txoy }		// Bottom Left of the quad (top)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, top_block_types, x, y, z, type, category, block::face::top, blocks_index + Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, top_block_types, x, y, z, type, category, block_face_top, blocks_index + Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
                                 { px, poy, poz, txy },	// Bottom Left Of The Quad (Back)
                                 { px, poy, pz, toxy },	// Bottom Right Of The Quad (Back)
@@ -313,7 +286,7 @@ static void generate_block_meshes(
                                 { pox, poy, poz, txoy }	// Top Left Of The Quad (Back)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, bottom_block_types, x, y, z, type, category, block::face::bottom, blocks_index - Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, bottom_block_types, x, y, z, type, category, block_face_bottom, blocks_index - Y_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
                                 { px, py, poz, txy },		// Top Right Of The Quad (Front)
                                 { pox, py, poz, toxy },	// Top Left Of The Quad (Front)
@@ -321,7 +294,7 @@ static void generate_block_meshes(
                                 { px, py, pz, txoy }	// Bottom Right Of The Quad (Front)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, right_block_types, x, y, z, type, category, block::face::right, blocks_index + Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, right_block_types, x, y, z, type, category, block_face_right, blocks_index + Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
                                 { pox, py, poz, txoy },	// Top Right Of The Quad (Right)
                                 { px, py, poz, toxoy },		// Top Left Of The Quad (Right)
@@ -329,7 +302,7 @@ static void generate_block_meshes(
                                 { pox, poy, poz, txy }	// Bottom Right Of The Quad (Right)
                             }};
                         });
-                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, left_block_types, x, y, z, type, category, block::face::left, blocks_index - Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
+                        quads_indices.face = add_face_quad_if_needed(quads_indices.face, block_types, left_block_types, x, y, z, type, category, block_face_left, blocks_index - Z_OFFSET, [](u8 px, u8 py, u8 pz, u8 pox, u8 poy, u8 poz, u8 txy, u8 toxy, u8 txoy, u8 toxoy) {
                             return block_quad_t{{
                                 { pox, py, pz, txoy },	// Top Right Of The Quad (Left)
                                 { pox, poy, pz, txy },	// Top Left Of The Quad (Left)
@@ -349,13 +322,13 @@ static void generate_block_meshes(
                         u8 toxy = txy + 1;
                         u8 txoy = txy | 0b10000000;
                         u8 toxoy = toxy | 0b10000000;
-                        building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        gmem.building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { px, py, pz, txoy },
                             { pox, py, poz, toxoy },
                             { pox, poy, poz, toxy },
                             { px, poy, pz, txy }
                         }};
-                        building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        gmem.building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { pox, py, pz, txoy },
                             { px, py, poz, toxoy },
                             { px, poy, poz, toxy },
