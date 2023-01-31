@@ -54,21 +54,67 @@ typedef struct {
 
 static_assert(sizeof(block_quad_t) == 4 * 4);
 
-#define NUM_SOLID_BUILDING_QUADS 0x800
-#define NUM_TRANSPARENT_BUILDING_QUADS 0x400
-#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x400
+#define NUM_SOLID_BUILDING_QUADS 0x100
+#define NUM_TRANSPARENT_BUILDING_QUADS 0x100
+#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x100
 
 alignas(32768) static struct {
-    block_quad_t solid[NUM_SOLID_BUILDING_QUADS + 0x20];
-    alignas(32) block_quad_t transparent[NUM_TRANSPARENT_BUILDING_QUADS + 0x20];
-    alignas(32) block_quad_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS + 0x20];
+    block_quad_t solid[NUM_SOLID_BUILDING_QUADS];
+    alignas(32) block_quad_t transparent[NUM_TRANSPARENT_BUILDING_QUADS];
+    alignas(32) block_quad_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS];
 } building_quads;
+
+static_assert(sizeof(building_quads) == 4096*3);
 
 typedef struct {
     size_t solid;
     size_t transparent;
     size_t transparent_double_sided;
 } quads_indices_t;
+
+static void write_quads_into_display_list(size_t num_quads, const block_quad_t quads[], gfx::display_list* disp_list) {
+    size_t num_verts = num_quads * 4;
+    disp_list->resize(
+        gfx::get_begin_instruction_size(num_verts) +
+        gfx::get_vector_instruction_size<3, u8>(num_verts) + // Position
+        gfx::get_vector_instruction_size<2, u8>(num_verts) // Tex Coords
+    );
+    disp_list->write_into([num_quads, num_verts, quads]() {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
+
+        for (size_t i = 0; i < num_quads; i++) {
+            const block_quad_t* quad = &quads[i];
+            
+            GX_Position3u8(quad->verts[0].px, quad->verts[0].py, quad->verts[0].pz);
+            u8 tx = quad->verts[0].txy & ~0b10000000;
+            u8 ty = (quad->verts[0].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
+
+            GX_Position3u8(quad->verts[1].px, quad->verts[1].py, quad->verts[1].pz);
+            tx = quad->verts[1].txy & ~0b10000000;
+            ty = (quad->verts[1].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
+
+            GX_Position3u8(quad->verts[2].px, quad->verts[2].py, quad->verts[2].pz);
+            tx = quad->verts[2].txy & ~0b10000000;
+            ty = (quad->verts[2].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
+
+            GX_Position3u8(quad->verts[3].px, quad->verts[3].py, quad->verts[3].pz);
+            tx = quad->verts[3].txy & ~0b10000000;
+            ty = (quad->verts[3].txy & 0b10000000) / 8;
+            GX_TexCoord2u8(tx, ty);
+        }
+        
+        GX_End();
+    });
+}
+
+static void write_into_display_lists(std::vector<gfx::display_list>* solid_display_lists, std::vector<gfx::display_list>* transparent_display_lists, std::vector<gfx::display_list>* transparent_double_sided_lists, quads_indices_t indices) {
+    write_quads_into_display_list(indices.solid, building_quads.solid, &solid_display_lists->emplace_back());
+    write_quads_into_display_list(indices.transparent, building_quads.transparent, &transparent_display_lists->emplace_back());
+    write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided, &transparent_double_sided_lists->emplace_back());
+}
 
 typedef enum : u8 {
     block_mesh_category_invisible,
@@ -206,7 +252,10 @@ static face_quads_indices_t add_face_quad_if_needed(
     return quads_indices;
 }
 
-static quads_indices_t generate_block_meshes_into_building_mesh(
+static void generate_block_meshes(
+    std::vector<gfx::display_list>* solid_display_lists,
+    std::vector<gfx::display_list>* transparent_display_lists,
+    std::vector<gfx::display_list>* transparent_double_sided_display_lists,
     const block_type_t block_types[],
     const block_type_t front_block_types[],
     const block_type_t back_block_types[],
@@ -316,12 +365,16 @@ static quads_indices_t generate_block_meshes_into_building_mesh(
                 }
 
                 if (
-                    quads_indices.all.solid >= NUM_SOLID_BUILDING_QUADS ||
-                    quads_indices.all.transparent >= NUM_TRANSPARENT_BUILDING_QUADS ||
-                    quads_indices.all.transparent_double_sided >= NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS
+                    quads_indices.all.solid >= (NUM_SOLID_BUILDING_QUADS - 6) ||
+                    quads_indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_QUADS - 6) ||
+                    quads_indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS - 1)
                 ) [[unlikely]] {
-                    lprintf("Too many building quads\n");
-                    return quads_indices.all;
+                    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, quads_indices.all);
+                    quads_indices.all = {
+                        .solid = 0,
+                        .transparent = 0,
+                        .transparent_double_sided = 0
+                    };
                 }
 
                 blocks_index++;
@@ -329,59 +382,29 @@ static quads_indices_t generate_block_meshes_into_building_mesh(
         }
     }
 
-    return quads_indices.all;
-}
-
-static void write_quads_into_display_list(size_t num_quads, const block_quad_t quads[], gfx::display_list* disp_list) {
-    size_t num_verts = num_quads * 4;
-    disp_list->resize(
-        gfx::get_begin_instruction_size(num_verts) +
-        gfx::get_vector_instruction_size<3, u8>(num_verts) + // Position
-        gfx::get_vector_instruction_size<2, u8>(num_verts) // Tex Coords
-    );
-    disp_list->write_into([num_quads, num_verts, quads]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
-
-        for (size_t i = 0; i < num_quads; i++) {
-            const block_quad_t* quad = &quads[i];
-            
-            GX_Position3u8(quad->verts[0].px, quad->verts[0].py, quad->verts[0].pz);
-            u8 tx = quad->verts[0].txy & ~0b10000000;
-            u8 ty = (quad->verts[0].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
-
-            GX_Position3u8(quad->verts[1].px, quad->verts[1].py, quad->verts[1].pz);
-            tx = quad->verts[1].txy & ~0b10000000;
-            ty = (quad->verts[1].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
-
-            GX_Position3u8(quad->verts[2].px, quad->verts[2].py, quad->verts[2].pz);
-            tx = quad->verts[2].txy & ~0b10000000;
-            ty = (quad->verts[2].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
-
-            GX_Position3u8(quad->verts[3].px, quad->verts[3].py, quad->verts[3].pz);
-            tx = quad->verts[3].txy & ~0b10000000;
-            ty = (quad->verts[3].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
-        }
-        
-        GX_End();
-    });
+    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, quads_indices.all);
+    quads_indices.all = {
+        .solid = 0,
+        .transparent = 0,
+        .transparent_double_sided = 0
+    };
 }
 
 mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
+    chunk.solid_display_lists.clear();
+    chunk.transparent_display_lists.clear();
+    chunk.transparent_double_sided_display_lists.clear();
     if (
         chunk.invisible_block_count == chunk::blocks_count ||
         chunk.fully_opaque_block_count == chunk::blocks_count
     ) {
-        chunk.solid_disp_list.clear();
-        chunk.transparent_disp_list.clear();
-        chunk.transparent_double_sided_disp_list.clear();
         return mesh_update_state::should_continue;
     }
 
-    quads_indices_t indices = generate_block_meshes_into_building_mesh(
+    generate_block_meshes(
+        &chunk.solid_display_lists,
+        &chunk.transparent_display_lists,
+        &chunk.transparent_double_sided_display_lists,
         (const block_type_t*)chunk.blocks.data(),
         chunk.nh.front.has_value() ? (const block_type_t*)chunk.nh.front->get().blocks.data() : NULL,
         chunk.nh.back.has_value() ? (const block_type_t*)chunk.nh.back->get().blocks.data() : NULL,
@@ -390,12 +413,6 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         chunk.nh.right.has_value() ? (const block_type_t*)chunk.nh.right->get().blocks.data() : NULL,
         chunk.nh.left.has_value() ? (const block_type_t*)chunk.nh.left->get().blocks.data() : NULL
     );
-    write_quads_into_display_list(indices.solid, building_quads.solid, &chunk.solid_disp_list);
-    write_quads_into_display_list(indices.transparent, building_quads.transparent, &chunk.transparent_disp_list);
-    write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided, &chunk.transparent_double_sided_disp_list);
-    
-    // u8 stack_var;
-    // lprintf("%p, %p, %p, %p\n", &stack_var, building_quads, chunk.blocks.data(), chunk.disp_list.data());
 
     return mesh_update_state::should_break;
 }

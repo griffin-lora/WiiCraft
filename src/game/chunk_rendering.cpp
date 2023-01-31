@@ -41,12 +41,16 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.update_model_view(view);
 			chunk.tf.load(chunk::mat);
 
-			chunk.solid_disp_list.call();
+			for (auto& disp_list : chunk.solid_display_lists) {
+				disp_list.call();
+			}
 		}
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.load(chunk::mat);
 
-			chunk.transparent_disp_list.call();
+			for (auto& disp_list : chunk.transparent_display_lists) {
+				disp_list.call();
+			}
 		}
 		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 		GX_SetZCompLoc(GX_FALSE);
@@ -54,7 +58,9 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.load(chunk::mat);
 
-			chunk.transparent_double_sided_disp_list.call();
+			for (auto& disp_list : chunk.transparent_double_sided_display_lists) {
+				disp_list.call();
+			}
 		}
 		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
 		GX_SetZCompLoc(GX_TRUE);
@@ -64,13 +70,17 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			set_alpha(chunk.alpha);
 
 			chunk.tf.load(chunk::mat);
-			chunk.solid_disp_list.call();
+			for (auto& disp_list : chunk.solid_display_lists) {
+				disp_list.call();
+			}
 		}
 
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.load(chunk::mat);
 
-			chunk.transparent_disp_list.call();
+			for (auto& disp_list : chunk.transparent_display_lists) {
+				disp_list.call();
+			}
 		}
 		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 		GX_SetZCompLoc(GX_FALSE);
@@ -78,7 +88,9 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.load(chunk::mat);
 
-			chunk.transparent_double_sided_disp_list.call();
+			for (auto& disp_list : chunk.transparent_double_sided_display_lists) {
+				disp_list.call();
+			}
 		}
 		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
 		GX_SetZCompLoc(GX_TRUE);
