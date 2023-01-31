@@ -1,5 +1,5 @@
 #pragma once
-#include "game/block.h"
+#include "block.h"
 #include <gctypes.h>
 #include <assert.h>
 
