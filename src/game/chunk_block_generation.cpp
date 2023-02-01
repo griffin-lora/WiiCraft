@@ -25,8 +25,8 @@ static f32 get_tallgrass_value(glm::vec2 position) {
 
 static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     block block = { .tp = block::type::air };
-    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block);
-    get_block_count_ref(chunk, block) = chunk.blocks.size();
+    std::fill(chunk.blocks, chunk.blocks + 4096, block);
+    get_block_count_ref(chunk, block) = 4096;
 }
 
 static constexpr s32 z_offset = chunk::size * chunk::size;
@@ -34,7 +34,7 @@ static constexpr s32 y_offset = chunk::size;
 static constexpr s32 x_offset = 1;
 
 static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    auto it = chunk.blocks.begin();
+    auto it = chunk.blocks;
 
     f32 world_chunk_x = chunk_pos.x * chunk::size;
     f32 world_chunk_z = chunk_pos.z * chunk::size;
@@ -93,8 +93,8 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
 static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
     block block = { .tp = block::type::stone };
-    std::fill(chunk.blocks.begin(), chunk.blocks.end(), block);
-    get_block_count_ref(chunk, block) = chunk.blocks.size();
+    std::fill(chunk.blocks, chunk.blocks + 4096, block);
+    get_block_count_ref(chunk, block) = 4096;
 }
 
 mesh_update_state game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {

@@ -116,8 +116,8 @@ void game::manage_chunks_around_camera(
             if (chunk.should_erase) {
                 if (chunk.modified) {
                     // If the chunk is modified the chunk in the stored_chunks map
-                    auto stored_pos = pos;
-                    stored_chunks.insert(std::make_pair<math::vector3s32, stored_chunk>(std::move(stored_pos), { .blocks = std::move(chunk.blocks) }));
+                    // auto stored_pos = pos;
+                    // stored_chunks.insert(std::make_pair<math::vector3s32, stored_chunk>(std::move(stored_pos), { .blocks = std::move(chunk.blocks) }));
                 }
                 // Notify neighbor chunks that they need to update their neighborhood (but not their mesh) to avoid a dangling reference
                 add_chunk_neighborhood_update_to_neighbors(chunk);
@@ -133,6 +133,7 @@ void game::manage_chunks_around_camera(
         for (auto pos : chunk_positions_to_erase) {
             auto& chunk = chunks.at(pos);
             // Hacky fix
+            release_pool_chunk(chunk.blocks_chunk_index);
             for (pool_display_list_t disp_list : chunk.solid_display_lists) {
                 release_pool_chunk(disp_list.chunk_index);
             }
@@ -177,16 +178,18 @@ void game::manage_chunks_around_camera(
         auto& chunk = chunk_it->second;
         auto stored_chunk_it = stored_chunks.find(pos);
         mesh_update_state state = mesh_update_state::should_break;
-        if (stored_chunk_it != stored_chunks.end()) {
-            auto& stored_chunk = stored_chunk_it->second;
-            chunk.blocks = std::move(stored_chunk.blocks);
-            stored_chunks.erase(pos);
-        } else {
-            chunk.blocks.resize_without_copying(chunk::blocks_count);
-            auto start = chrono::get_current_us();
-            state = generate_blocks(chunk, pos);
-            total_block_gen_time += chrono::get_current_us() - start;
-        }
+        // if (stored_chunk_it != stored_chunks.end()) {
+        //     auto& stored_chunk = stored_chunk_it->second;
+        //     chunk.blocks = std::move(stored_chunk.blocks);
+        //     stored_chunks.erase(pos);
+        // } else {
+            // chunk.blocks.resize_without_copying(chunk::blocks_count);
+        chunk.blocks_chunk_index = acquire_pool_chunk();
+        chunk.blocks = (block*)&pool_chunks[chunk.blocks_chunk_index];
+        auto start = chrono::get_current_us();
+        state = generate_blocks(chunk, pos);
+        total_block_gen_time += chrono::get_current_us() - start;
+        // }
 
         chunk_positions_to_update_neighborhood_and_mesh.insert(pos);
         chunk_positions_to_create_blocks.erase(pos_it);

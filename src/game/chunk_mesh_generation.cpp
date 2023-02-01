@@ -433,13 +433,13 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         &chunk.solid_display_lists,
         &chunk.transparent_display_lists,
         &chunk.transparent_double_sided_display_lists,
-        (const block_type_t*)chunk.blocks.data(),
-        chunk.nh.front.has_value() ? (const block_type_t*)chunk.nh.front->get().blocks.data() : NULL,
-        chunk.nh.back.has_value() ? (const block_type_t*)chunk.nh.back->get().blocks.data() : NULL,
-        chunk.nh.top.has_value() ? (const block_type_t*)chunk.nh.top->get().blocks.data() : NULL,
-        chunk.nh.bottom.has_value() ? (const block_type_t*)chunk.nh.bottom->get().blocks.data() : NULL,
-        chunk.nh.right.has_value() ? (const block_type_t*)chunk.nh.right->get().blocks.data() : NULL,
-        chunk.nh.left.has_value() ? (const block_type_t*)chunk.nh.left->get().blocks.data() : NULL
+        (const block_type_t*)chunk.blocks,
+        chunk.nh.front.has_value() ? (const block_type_t*)chunk.nh.front->get().blocks : NULL,
+        chunk.nh.back.has_value() ? (const block_type_t*)chunk.nh.back->get().blocks : NULL,
+        chunk.nh.top.has_value() ? (const block_type_t*)chunk.nh.top->get().blocks : NULL,
+        chunk.nh.bottom.has_value() ? (const block_type_t*)chunk.nh.bottom->get().blocks : NULL,
+        chunk.nh.right.has_value() ? (const block_type_t*)chunk.nh.right->get().blocks : NULL,
+        chunk.nh.left.has_value() ? (const block_type_t*)chunk.nh.left->get().blocks : NULL
     );
 
     return mesh_update_state::should_break;

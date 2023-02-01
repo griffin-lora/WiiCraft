@@ -35,7 +35,8 @@ namespace game {
             opt_ref left;
         };
 
-        ext::data_array<block> blocks;
+        size_t blocks_chunk_index;
+        block* blocks;
         neighborhood nh;
 
         u8 alpha = 0;
