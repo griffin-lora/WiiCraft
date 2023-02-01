@@ -54,21 +54,14 @@ static_assert(sizeof(block_quad_t) == 4 * 4, "");
 
 #define NUM_BUILDING_QUADS 202
 
-typedef block_quad_t building_quads_t[NUM_BUILDING_QUADS];
-// static_assert(sizeof(building_quads_t) == 4096, "");
+static_assert(NUM_BUILDING_QUADS * sizeof(block_quad_t) <= 4096, "");
 
 // typedef block_type_t block_chunk_t[16 * 16 * 16];
 // static_assert(sizeof(block_chunk_t) == 4096, "");
 
-typedef struct {
-    alignas(32) building_quads_t solid;
-    alignas(32) building_quads_t transparent;
-    alignas(32) building_quads_t transparent_double_sided;
-} building_quads_arrays_t;
-
-static_assert(sizeof(building_quads_arrays_t) <= 4096*3, "");
-
-static building_quads_arrays_t building_quads_arrays;
+static block_quad_t* solid_building_quads;
+static block_quad_t* transparent_building_quads;
+static block_quad_t* transparent_double_sided_building_quads;
 
 using namespace game;
 
@@ -127,9 +120,9 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
 }
 
 static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, quads_indices_t indices) {
-    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, building_quads_arrays.solid));
-    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, building_quads_arrays.transparent));
-    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, building_quads_arrays.transparent_double_sided));
+    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, solid_building_quads));
+    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, transparent_building_quads));
+    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, transparent_double_sided_building_quads));
 }
 
 typedef enum : u8 {
@@ -261,8 +254,8 @@ static face_quads_indices_t add_face_quad_if_needed(
     switch (category) {
         case block_mesh_category_cube:
         case block_mesh_category_slab_bottom:
-        case block_mesh_category_slab_top: building_quads_arrays.solid[quads_indices.solid++] = face_quad; break;
-        case block_mesh_category_transparent_cube: building_quads_arrays.transparent[quads_indices.transparent++] = face_quad; break;
+        case block_mesh_category_slab_top: solid_building_quads[quads_indices.solid++] = face_quad; break;
+        case block_mesh_category_transparent_cube: transparent_building_quads[quads_indices.transparent++] = face_quad; break;
     }
 
     return quads_indices;
@@ -365,13 +358,13 @@ static void generate_block_meshes(
                         u8 toxy = txy + 1;
                         u8 txoy = txy | 0b10000000;
                         u8 toxoy = toxy | 0b10000000;
-                        building_quads_arrays.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        transparent_double_sided_building_quads[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { px, py, pz, txoy },
                             { pox, py, poz, toxoy },
                             { pox, poy, poz, toxy },
                             { px, poy, pz, txy }
                         }};
-                        building_quads_arrays.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        transparent_double_sided_building_quads[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { pox, py, pz, txoy },
                             { px, py, poz, toxoy },
                             { px, poy, poz, toxy },
@@ -427,6 +420,13 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         return mesh_update_state::should_continue;
     }
 
+    size_t solid_building_quads_index = acquire_pool_chunk();
+    size_t transparent_building_quads_index = acquire_pool_chunk();
+    size_t transparent_double_sided_building_quads_index = acquire_pool_chunk();
+    solid_building_quads = (block_quad_t*)&pool_chunks[solid_building_quads_index];
+    transparent_building_quads = (block_quad_t*)&pool_chunks[transparent_building_quads_index];
+    transparent_double_sided_building_quads = (block_quad_t*)&pool_chunks[transparent_double_sided_building_quads_index];
+
     generate_block_meshes(
         &chunk.solid_display_lists,
         &chunk.transparent_display_lists,
@@ -439,6 +439,10 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         chunk.nh.right.has_value() ? (const block_type_t*)chunk.nh.right->get().blocks : NULL,
         chunk.nh.left.has_value() ? (const block_type_t*)chunk.nh.left->get().blocks : NULL
     );
+
+    release_pool_chunk(solid_building_quads_index);
+    release_pool_chunk(transparent_building_quads_index);
+    release_pool_chunk(transparent_double_sided_building_quads_index);
 
     return mesh_update_state::should_break;
 }
