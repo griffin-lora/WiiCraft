@@ -39,32 +39,30 @@ static constexpr s32 chunk_generation_radius = 6;
 static constexpr s32 chunk_erasure_radius = 7;
 
 int main(int argc, char** argv) {
-
-	gfx::console_state con;
-
 	if (!log_init()) {
-		dbg::freeze();
+		return 1;
 	}
 
 	lprintf("Log started\n");
 
+	if (!gfx_init()) {
+		return 1;
+	}
+
 	game_textures_t textures = load_game_textures();
 
-	input::init(con.rmode->viWidth, con.rmode->viHeight);
+	input::init(rmode->viWidth, rmode->viHeight);
 
-	gfx::draw_state draw{ {0xFF, 0xFF, 0xFF, 0xFF} };
+	input::set_resolution(rmode->viWidth, rmode->viHeight);
 
-	input::set_resolution(draw.rmode->viWidth, draw.rmode->viHeight);
+	GX_InitTexObjFilterMode(&textures.chunk, GX_NEAR, GX_NEAR);
+	GX_InitTexObjFilterMode(&textures.icons, GX_NEAR, GX_NEAR);
+	GX_InitTexObjFilterMode(&textures.font, GX_NEAR, GX_NEAR);
 
-	gfx::set_filtering_mode(textures.chunk, GX_NEAR, GX_NEAR);
-	gfx::set_filtering_mode(textures.icons, GX_NEAR, GX_NEAR);
-	gfx::set_filtering_mode(textures.font, GX_NEAR, GX_NEAR);
-
-
-	gfx::load(textures.chunk, GX_TEXMAP0);
-	gfx::load(textures.icons, GX_TEXMAP1);
-	gfx::load(textures.skybox, GX_TEXMAP2);
-	gfx::load(textures.font, GX_TEXMAP3);
+	GX_LoadTexObj(&textures.chunk, GX_TEXMAP0);
+	GX_LoadTexObj(&textures.icons, GX_TEXMAP1);
+	GX_LoadTexObj(&textures.skybox, GX_TEXMAP2);
+	GX_LoadTexObj(&textures.font, GX_TEXMAP3);
 
 	math::matrix44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
@@ -81,7 +79,7 @@ int main(int argc, char** argv) {
 		.position = {0.0f, 0.0f, -10.0f},
 		.up = {0.0f, 1.0f, 0.0f},
 		.look = {0.0f, 0.0f, 1.0f},
-		.aspect = (f32)((f32)draw.rmode->viWidth / (f32)draw.rmode->viHeight),
+		.aspect = (f32)((f32)rmode->viWidth / (f32)rmode->viHeight),
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
@@ -94,7 +92,6 @@ int main(int argc, char** argv) {
 
 	game::update_perspective(cam, perspective_3d);
 
-	bool first_frame = true;
 	#ifdef PC_PORT
 	u16 frame_count = 0;
 	#endif
@@ -119,7 +116,7 @@ int main(int argc, char** argv) {
 
 	game::block_selection bl_sel;
 
-	gfx::set_z_buffer_mode(true, GX_LEQUAL, true);
+	GX_SetZMode(true, GX_LEQUAL, true);
 	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
@@ -157,7 +154,7 @@ int main(int argc, char** argv) {
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
 		auto pointer_pos = input::get_pointer_position(chan);
-		cursor.update_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, pointer_pos);
+		cursor.update_from_pointer_position(rmode->viWidth, rmode->viHeight, pointer_pos);
 
 		#ifndef PC_PORT
     	auto wpad_accel = input::get_accel(chan);
@@ -179,7 +176,7 @@ int main(int argc, char** argv) {
 		character.handle_input(cam, { 0, 0, 0 }, { 0, 0, 0 }, now, frame_delta, { 512, 512, 512 }, { 96.0f, 96.0f }, 0, { 512, 512, 512 });
 		#endif
 
-		auto raycast_dir = game::get_raycast_direction_from_pointer_position(draw.rmode->viWidth, draw.rmode->viHeight, cam, pointer_pos);
+		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
 		auto raycast = game::get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), []<typename BF>(game::bl_st st) {
 			return BF::get_selection_boxes(st);
 		}, [](auto&) {});
@@ -220,19 +217,7 @@ int main(int argc, char** argv) {
 
 		game::reset_update_params(cam);
 
-		// Frame drawing is done at this point.
-		gfx::copy_framebuffer(draw.frame_buffers[draw.fb_index], true);
-
-		gfx::draw_done();
-
-		VIDEO_SetNextFramebuffer(draw.frame_buffers[draw.fb_index]);
-		if (first_frame) {
-			first_frame = false;
-			VIDEO_SetBlack(FALSE);
-		}
-		VIDEO_Flush();
-		VIDEO_WaitVSync();
-		draw.fb_index ^= 1;
+		gfx_update_video();
 		
 		#ifdef PC_PORT
 		if (++frame_count == 1200) {

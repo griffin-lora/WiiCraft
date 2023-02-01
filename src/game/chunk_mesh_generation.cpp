@@ -3,12 +3,11 @@
 #include "chunk_math.hpp"
 #include "chunk_core.hpp"
 #include "chunk_math.hpp"
-#include "dbg.hpp"
 #include "block_functionality.hpp"
 #include "face_mesh_generation.hpp"
 #include "face_mesh_generation.inl"
 #include "log.hpp"
-#include "mem.hpp"
+#include "block_new.hpp"
 
 /*
 The idea of how I'm going to optimize this is to layout the cache like this
@@ -36,6 +35,7 @@ Ways to optimize for avoiding stack usage will be to not use the should_add_face
 
 // Possible future optimization is to stop generating the mesh after we reach the end of blocks to generate meshes from
 
+static building_quads_t building_quads;
 
 using namespace game;
 
@@ -84,9 +84,9 @@ static void write_quads_into_display_list(size_t num_quads, const block_quad_t q
 }
 
 static void write_into_display_lists(std::vector<gfx::display_list>* solid_display_lists, std::vector<gfx::display_list>* transparent_display_lists, std::vector<gfx::display_list>* transparent_double_sided_lists, quads_indices_t indices) {
-    write_quads_into_display_list(indices.solid, gmem.building_quads.solid, &solid_display_lists->emplace_back());
-    write_quads_into_display_list(indices.transparent, gmem.building_quads.transparent, &transparent_display_lists->emplace_back());
-    write_quads_into_display_list(indices.transparent_double_sided, gmem.building_quads.transparent_double_sided, &transparent_double_sided_lists->emplace_back());
+    write_quads_into_display_list(indices.solid, building_quads.solid, &solid_display_lists->emplace_back());
+    write_quads_into_display_list(indices.transparent, building_quads.transparent, &transparent_display_lists->emplace_back());
+    write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided, &transparent_double_sided_lists->emplace_back());
 }
 
 typedef enum : u8 {
@@ -218,8 +218,8 @@ static face_quads_indices_t add_face_quad_if_needed(
     switch (category) {
         case block_mesh_category_cube:
         case block_mesh_category_slab_bottom:
-        case block_mesh_category_slab_top: gmem.building_quads.solid[quads_indices.solid++] = face_quad; break;
-        case block_mesh_category_transparent_cube: gmem.building_quads.transparent[quads_indices.transparent++] = face_quad; break;
+        case block_mesh_category_slab_top: building_quads.solid[quads_indices.solid++] = face_quad; break;
+        case block_mesh_category_transparent_cube: building_quads.transparent[quads_indices.transparent++] = face_quad; break;
     }
 
     return quads_indices;
@@ -322,13 +322,13 @@ static void generate_block_meshes(
                         u8 toxy = txy + 1;
                         u8 txoy = txy | 0b10000000;
                         u8 toxoy = toxy | 0b10000000;
-                        gmem.building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { px, py, pz, txoy },
                             { pox, py, poz, toxoy },
                             { pox, poy, poz, toxy },
                             { px, poy, pz, txy }
                         }};
-                        gmem.building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { pox, py, pz, txoy },
                             { px, py, poz, toxoy },
                             { px, poy, poz, toxy },
