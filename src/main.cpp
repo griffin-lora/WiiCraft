@@ -30,6 +30,7 @@
 #include "common.hpp"
 #include "log.hpp"
 #include "gfx/texture_load.hpp"
+#include "pool.h"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -47,6 +48,8 @@ int main(int argc, char** argv) {
 	if (!gfx_init()) {
 		return 1;
 	}
+
+	pool_init();
 
 	game_textures_t textures = load_game_textures();
 

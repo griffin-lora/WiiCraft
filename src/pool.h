@@ -20,7 +20,7 @@ _Static_assert(sizeof(pool_chunks) == 0x1300000, "");
 
 #define NULL_POOL_CHUNK_INDEX UINT32_MAX
 
-void init_pool_chunks_info(void);
+void pool_init(void);
 
 size_t acquire_pool_chunk(void);
 void release_pool_chunk(size_t index);

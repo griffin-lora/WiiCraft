@@ -131,6 +131,17 @@ void game::manage_chunks_around_camera(
 
         // Erase all chunks in the erasure list
         for (auto pos : chunk_positions_to_erase) {
+            auto& chunk = chunks.at(pos);
+            // Hacky fix
+            for (pool_display_list_t disp_list : chunk.solid_display_lists) {
+                release_pool_chunk(disp_list.chunk_index);
+            }
+            for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
+                release_pool_chunk(disp_list.chunk_index);
+            }
+            for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
+                release_pool_chunk(disp_list.chunk_index);
+            }
             chunks.erase(pos);
         }
 

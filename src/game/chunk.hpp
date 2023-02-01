@@ -4,9 +4,10 @@
 #include "common.hpp"
 #include "math.hpp"
 #include "ext/data_array.hpp"
-#include "gfx/display_list.hpp"
+#include "gfx/display_list_new.hpp"
 #include "math/transform_3d.hpp"
 #include "chrono.hpp"
+#include "pool.hpp"
 #include <unordered_map>
 #include <unordered_set>
 #include <optional>
@@ -37,13 +38,11 @@ namespace game {
         ext::data_array<block> blocks;
         neighborhood nh;
 
-        using display_list_layers = block_mesh_layers<single_type_container<gfx::display_list>>;
-
         u8 alpha = 0;
         // TODO: this is stupid
-        std::vector<gfx::display_list> solid_display_lists;
-        std::vector<gfx::display_list> transparent_display_lists;
-        std::vector<gfx::display_list> transparent_double_sided_display_lists;
+        std::vector<pool_display_list_t> solid_display_lists;
+        std::vector<pool_display_list_t> transparent_display_lists;
+        std::vector<pool_display_list_t> transparent_double_sided_display_lists;
 
         math::transform_3d tf;
 

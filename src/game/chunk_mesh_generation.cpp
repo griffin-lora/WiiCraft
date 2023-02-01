@@ -8,6 +8,11 @@
 #include "face_mesh_generation.inl"
 #include "log.hpp"
 #include "block_new.hpp"
+#include "pool.hpp"
+#include "gfx/instruction_size.hpp"
+#include "util.h"
+#include <string.h>
+#include <ogc/cache.h>
 
 /*
 The idea of how I'm going to optimize this is to layout the cache like this
@@ -47,20 +52,20 @@ typedef struct {
 } block_quad_t;
 static_assert(sizeof(block_quad_t) == 4 * 4, "");
 
+typedef block_quad_t display_list_chunk_t[0x100];
+static_assert(sizeof(display_list_chunk_t) == 4096, "");
+
+// typedef block_type_t block_chunk_t[16 * 16 * 16];
+// static_assert(sizeof(block_chunk_t) == 4096, "");
+
 #define NUM_SOLID_BUILDING_QUADS 0x100
 #define NUM_TRANSPARENT_BUILDING_QUADS 0x100
 #define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x100
 
-typedef block_quad_t display_list_chunk_t[0x100];
-static_assert(sizeof(display_list_chunk_t) == 4096, "");
-
-typedef block_type_t block_chunk_t[16 * 16 * 16];
-static_assert(sizeof(block_chunk_t) == 4096, "");
-
 typedef struct {
-    alignas(32) block_quad_t solid[NUM_SOLID_BUILDING_QUADS];
-    alignas(32) block_quad_t transparent[NUM_TRANSPARENT_BUILDING_QUADS];
-    alignas(32) block_quad_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS];
+    alignas(32) display_list_chunk_t solid;
+    alignas(32) display_list_chunk_t transparent;
+    alignas(32) display_list_chunk_t transparent_double_sided;
 } building_quads_t;
 
 static_assert(sizeof(building_quads_t) == 4096*3, "");
@@ -75,48 +80,58 @@ typedef struct {
     size_t transparent_double_sided;
 } quads_indices_t;
 
-static void write_quads_into_display_list(size_t num_quads, const block_quad_t quads[], gfx::display_list* disp_list) {
+static pool_display_list_t write_quads_into_display_list(size_t num_quads, const block_quad_t quads[]) {
     size_t num_verts = num_quads * 4;
-    disp_list->resize(
-        gfx::get_begin_instruction_size(num_verts) +
-        gfx::get_vector_instruction_size<3, u8>(num_verts) + // Position
-        gfx::get_vector_instruction_size<2, u8>(num_verts) // Tex Coords
-    );
-    disp_list->write_into([num_quads, num_verts, quads]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
 
-        for (size_t i = 0; i < num_quads; i++) {
-            const block_quad_t* quad = &quads[i];
-            
-            GX_Position3u8(quad->verts[0].px, quad->verts[0].py, quad->verts[0].pz);
-            u8 tx = quad->verts[0].txy & ~0b10000000;
-            u8 ty = (quad->verts[0].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
+    pool_display_list_t disp_list = {
+        .size = align_to_32(
+            get_begin_instruction_size(num_verts) +
+            get_vector_instruction_size<u8>(3, num_verts) + 
+            get_vector_instruction_size<u8>(2, num_verts)
+        ),
+        .chunk_index = acquire_pool_chunk()
+    };
+    disp_list.chunk = &pool_chunks[disp_list.chunk_index];
+    memset(disp_list.chunk, 0, disp_list.size);
+    DCInvalidateRange(disp_list.chunk, disp_list.size);
 
-            GX_Position3u8(quad->verts[1].px, quad->verts[1].py, quad->verts[1].pz);
-            tx = quad->verts[1].txy & ~0b10000000;
-            ty = (quad->verts[1].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
+    GX_BeginDispList(disp_list.chunk, disp_list.size);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
 
-            GX_Position3u8(quad->verts[2].px, quad->verts[2].py, quad->verts[2].pz);
-            tx = quad->verts[2].txy & ~0b10000000;
-            ty = (quad->verts[2].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
-
-            GX_Position3u8(quad->verts[3].px, quad->verts[3].py, quad->verts[3].pz);
-            tx = quad->verts[3].txy & ~0b10000000;
-            ty = (quad->verts[3].txy & 0b10000000) / 8;
-            GX_TexCoord2u8(tx, ty);
-        }
+    for (size_t i = 0; i < num_quads; i++) {
+        const block_quad_t* quad = &quads[i];
         
-        GX_End();
-    });
+        GX_Position3u8(quad->verts[0].px, quad->verts[0].py, quad->verts[0].pz);
+        u8 tx = quad->verts[0].txy & ~0b10000000;
+        u8 ty = (quad->verts[0].txy & 0b10000000) / 8;
+        GX_TexCoord2u8(tx, ty);
+
+        GX_Position3u8(quad->verts[1].px, quad->verts[1].py, quad->verts[1].pz);
+        tx = quad->verts[1].txy & ~0b10000000;
+        ty = (quad->verts[1].txy & 0b10000000) / 8;
+        GX_TexCoord2u8(tx, ty);
+
+        GX_Position3u8(quad->verts[2].px, quad->verts[2].py, quad->verts[2].pz);
+        tx = quad->verts[2].txy & ~0b10000000;
+        ty = (quad->verts[2].txy & 0b10000000) / 8;
+        GX_TexCoord2u8(tx, ty);
+
+        GX_Position3u8(quad->verts[3].px, quad->verts[3].py, quad->verts[3].pz);
+        tx = quad->verts[3].txy & ~0b10000000;
+        ty = (quad->verts[3].txy & 0b10000000) / 8;
+        GX_TexCoord2u8(tx, ty);
+    }
+    
+    GX_End();
+    disp_list.size = GX_EndDispList(); // idk why i set the size
+
+    return disp_list;
 }
 
-static void write_into_display_lists(std::vector<gfx::display_list>* solid_display_lists, std::vector<gfx::display_list>* transparent_display_lists, std::vector<gfx::display_list>* transparent_double_sided_lists, quads_indices_t indices) {
-    write_quads_into_display_list(indices.solid, building_quads.solid, &solid_display_lists->emplace_back());
-    write_quads_into_display_list(indices.transparent, building_quads.transparent, &transparent_display_lists->emplace_back());
-    write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided, &transparent_double_sided_lists->emplace_back());
+static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, quads_indices_t indices) {
+    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, building_quads.solid));
+    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, building_quads.transparent));
+    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided));
 }
 
 typedef enum : u8 {
@@ -256,9 +271,9 @@ static face_quads_indices_t add_face_quad_if_needed(
 }
 
 static void generate_block_meshes(
-    std::vector<gfx::display_list>* solid_display_lists,
-    std::vector<gfx::display_list>* transparent_display_lists,
-    std::vector<gfx::display_list>* transparent_double_sided_display_lists,
+    std::vector<pool_display_list_t>* solid_display_lists,
+    std::vector<pool_display_list_t>* transparent_display_lists,
+    std::vector<pool_display_list_t>* transparent_double_sided_display_lists,
     const block_type_t block_types[],
     const block_type_t front_block_types[],
     const block_type_t back_block_types[],
@@ -394,6 +409,16 @@ static void generate_block_meshes(
 }
 
 mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
+    for (pool_display_list_t disp_list : chunk.solid_display_lists) {
+        release_pool_chunk(disp_list.chunk_index);
+    }
+    for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
+        release_pool_chunk(disp_list.chunk_index);
+    }
+    for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
+        release_pool_chunk(disp_list.chunk_index);
+    }
+
     chunk.solid_display_lists.clear();
     chunk.transparent_display_lists.clear();
     chunk.transparent_double_sided_display_lists.clear();

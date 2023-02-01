@@ -8,7 +8,7 @@ _Alignas(32) pool_chunks_info_t pool_chunks_info = {
 // Aligned to beginning of L2 cache, along with L1 cache
 _Alignas(0x40000) pool_chunk_t pool_chunks[NUM_POOL_CHUNKS];
 
-void init_pool_chunks_info(void) {
+void pool_init(void) {
     memset(pool_chunks_info.free, 1, sizeof(pool_chunks_info.free));
 }
 
