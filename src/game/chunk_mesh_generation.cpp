@@ -52,25 +52,23 @@ typedef struct {
 } block_quad_t;
 static_assert(sizeof(block_quad_t) == 4 * 4, "");
 
-typedef block_quad_t display_list_chunk_t[0x100];
-static_assert(sizeof(display_list_chunk_t) == 4096, "");
+#define NUM_BUILDING_QUADS 202
+
+typedef block_quad_t building_quads_t[NUM_BUILDING_QUADS];
+// static_assert(sizeof(building_quads_t) == 4096, "");
 
 // typedef block_type_t block_chunk_t[16 * 16 * 16];
 // static_assert(sizeof(block_chunk_t) == 4096, "");
 
-#define NUM_SOLID_BUILDING_QUADS 0x100
-#define NUM_TRANSPARENT_BUILDING_QUADS 0x100
-#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x100
-
 typedef struct {
-    alignas(32) display_list_chunk_t solid;
-    alignas(32) display_list_chunk_t transparent;
-    alignas(32) display_list_chunk_t transparent_double_sided;
-} building_quads_t;
+    alignas(32) building_quads_t solid;
+    alignas(32) building_quads_t transparent;
+    alignas(32) building_quads_t transparent_double_sided;
+} building_quads_arrays_t;
 
-static_assert(sizeof(building_quads_t) == 4096*3, "");
+static_assert(sizeof(building_quads_arrays_t) <= 4096*3, "");
 
-static building_quads_t building_quads;
+static building_quads_arrays_t building_quads_arrays;
 
 using namespace game;
 
@@ -129,9 +127,9 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
 }
 
 static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, quads_indices_t indices) {
-    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, building_quads.solid));
-    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, building_quads.transparent));
-    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, building_quads.transparent_double_sided));
+    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, building_quads_arrays.solid));
+    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, building_quads_arrays.transparent));
+    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, building_quads_arrays.transparent_double_sided));
 }
 
 typedef enum : u8 {
@@ -263,8 +261,8 @@ static face_quads_indices_t add_face_quad_if_needed(
     switch (category) {
         case block_mesh_category_cube:
         case block_mesh_category_slab_bottom:
-        case block_mesh_category_slab_top: building_quads.solid[quads_indices.solid++] = face_quad; break;
-        case block_mesh_category_transparent_cube: building_quads.transparent[quads_indices.transparent++] = face_quad; break;
+        case block_mesh_category_slab_top: building_quads_arrays.solid[quads_indices.solid++] = face_quad; break;
+        case block_mesh_category_transparent_cube: building_quads_arrays.transparent[quads_indices.transparent++] = face_quad; break;
     }
 
     return quads_indices;
@@ -367,13 +365,13 @@ static void generate_block_meshes(
                         u8 toxy = txy + 1;
                         u8 txoy = txy | 0b10000000;
                         u8 toxoy = toxy | 0b10000000;
-                        building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        building_quads_arrays.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { px, py, pz, txoy },
                             { pox, py, poz, toxoy },
                             { pox, poy, poz, toxy },
                             { px, poy, pz, txy }
                         }};
-                        building_quads.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
+                        building_quads_arrays.transparent_double_sided[quads_indices.all.transparent_double_sided++] = block_quad_t{{
                             { pox, py, pz, txoy },
                             { px, py, poz, toxoy },
                             { px, poy, poz, toxy },
@@ -383,9 +381,9 @@ static void generate_block_meshes(
                 }
 
                 if (
-                    quads_indices.all.solid >= (NUM_SOLID_BUILDING_QUADS - 6) ||
-                    quads_indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_QUADS - 6) ||
-                    quads_indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS - 1)
+                    quads_indices.all.solid >= (NUM_BUILDING_QUADS - 6) ||
+                    quads_indices.all.transparent >= (NUM_BUILDING_QUADS - 6) ||
+                    quads_indices.all.transparent_double_sided >= (NUM_BUILDING_QUADS - 1)
                 ) [[unlikely]] {
                     write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, quads_indices.all);
                     quads_indices.all = {
