@@ -35,6 +35,36 @@ Ways to optimize for avoiding stack usage will be to not use the should_add_face
 
 // Possible future optimization is to stop generating the mesh after we reach the end of blocks to generate meshes from
 
+typedef struct {
+    u8 px;
+    u8 py;
+    u8 pz;
+    u8 txy;
+} block_vertex_t;
+
+typedef struct {
+    block_vertex_t verts[4];
+} block_quad_t;
+static_assert(sizeof(block_quad_t) == 4 * 4, "");
+
+#define NUM_SOLID_BUILDING_QUADS 0x100
+#define NUM_TRANSPARENT_BUILDING_QUADS 0x100
+#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x100
+
+typedef block_quad_t display_list_chunk_t[0x100];
+static_assert(sizeof(display_list_chunk_t) == 4096, "");
+
+typedef block_type_t block_chunk_t[16 * 16 * 16];
+static_assert(sizeof(block_chunk_t) == 4096, "");
+
+typedef struct {
+    alignas(32) block_quad_t solid[NUM_SOLID_BUILDING_QUADS];
+    alignas(32) block_quad_t transparent[NUM_TRANSPARENT_BUILDING_QUADS];
+    alignas(32) block_quad_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS];
+} building_quads_t;
+
+static_assert(sizeof(building_quads_t) == 4096*3, "");
+
 static building_quads_t building_quads;
 
 using namespace game;

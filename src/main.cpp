@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <cstring>
-#include <malloc.h>
 #include <cmath>
 #include <cstdio>
 #include <gccore.h>

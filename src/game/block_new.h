@@ -29,33 +29,3 @@ typedef enum __attribute__((__packed__)) {
 
 _Static_assert(sizeof(block_type_t) == 1, "");
 _Static_assert(sizeof(block_face_t) == 1, "");
-
-typedef struct {
-    u8 px;
-    u8 py;
-    u8 pz;
-    u8 txy;
-} block_vertex_t;
-
-typedef struct {
-    block_vertex_t verts[4];
-} block_quad_t;
-_Static_assert(sizeof(block_quad_t) == 4 * 4, "");
-
-#define NUM_SOLID_BUILDING_QUADS 0x100
-#define NUM_TRANSPARENT_BUILDING_QUADS 0x100
-#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS 0x100
-
-typedef block_quad_t display_list_chunk_t[0x100];
-_Static_assert(sizeof(display_list_chunk_t) == 4096, "");
-
-typedef block_type_t block_chunk_t[16 * 16 * 16];
-_Static_assert(sizeof(block_chunk_t) == 4096, "");
-
-typedef struct {
-    _Alignas(32) block_quad_t solid[NUM_SOLID_BUILDING_QUADS];
-    _Alignas(32) block_quad_t transparent[NUM_TRANSPARENT_BUILDING_QUADS];
-    _Alignas(32) block_quad_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_QUADS];
-} building_quads_t;
-
-_Static_assert(sizeof(building_quads_t) == 4096*3, "");
