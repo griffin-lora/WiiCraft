@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #define NUM_POOL_CHUNKS 4864
+#define NUM_POOL_CHUNKS_PER_L1_CACHE 8
 
 typedef struct {
     size_t head;
@@ -23,4 +24,5 @@ _Static_assert(sizeof(pool_chunks) == 0x1300000, "");
 void pool_init(void);
 
 size_t acquire_pool_chunk(void);
+size_t acquire_pool_chunk_with_excluded_indices(size_t num_indices, const size_t indices[]);
 void release_pool_chunk(size_t index);

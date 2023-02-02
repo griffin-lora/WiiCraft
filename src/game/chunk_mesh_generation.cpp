@@ -71,7 +71,7 @@ typedef struct {
     size_t transparent_double_sided;
 } quads_indices_t;
 
-static pool_display_list_t write_quads_into_display_list(size_t num_quads, const block_quad_t quads[]) {
+static pool_display_list_t write_quads_into_display_list(size_t num_quads, const block_quad_t quads[], const size_t excluded_indices[4]) {
     size_t num_verts = num_quads * 4;
 
     pool_display_list_t disp_list = {
@@ -80,7 +80,7 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
             get_vector_instruction_size<u8>(3, num_verts) + 
             get_vector_instruction_size<u8>(2, num_verts)
         ),
-        .chunk_index = acquire_pool_chunk()
+        .chunk_index = acquire_pool_chunk_with_excluded_indices(4, excluded_indices)
     };
     disp_list.chunk = &pool_chunks[disp_list.chunk_index];
     memset(disp_list.chunk, 0, disp_list.size);
@@ -119,10 +119,10 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
     return disp_list;
 }
 
-static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, quads_indices_t indices) {
-    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, solid_building_quads));
-    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, transparent_building_quads));
-    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, transparent_double_sided_building_quads));
+static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, const size_t excluded_indices[4], quads_indices_t indices) {
+    solid_display_lists->push_back(write_quads_into_display_list(indices.solid, solid_building_quads, excluded_indices));
+    transparent_display_lists->push_back(write_quads_into_display_list(indices.transparent, transparent_building_quads, excluded_indices));
+    transparent_double_sided_lists->push_back(write_quads_into_display_list(indices.transparent_double_sided, transparent_double_sided_building_quads, excluded_indices));
 }
 
 typedef enum : u8 {
@@ -265,6 +265,7 @@ static void generate_block_meshes(
     std::vector<pool_display_list_t>* solid_display_lists,
     std::vector<pool_display_list_t>* transparent_display_lists,
     std::vector<pool_display_list_t>* transparent_double_sided_display_lists,
+    const size_t excluded_indices[4],
     const block_type_t block_types[],
     const block_type_t front_block_types[],
     const block_type_t back_block_types[],
@@ -378,7 +379,7 @@ static void generate_block_meshes(
                     quads_indices.all.transparent >= (NUM_BUILDING_QUADS - 6) ||
                     quads_indices.all.transparent_double_sided >= (NUM_BUILDING_QUADS - 1)
                 ) [[unlikely]] {
-                    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, quads_indices.all);
+                    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, excluded_indices, quads_indices.all);
                     quads_indices.all = {
                         .solid = 0,
                         .transparent = 0,
@@ -391,7 +392,7 @@ static void generate_block_meshes(
         }
     }
 
-    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, quads_indices.all);
+    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, excluded_indices, quads_indices.all);
     quads_indices.all = {
         .solid = 0,
         .transparent = 0,
@@ -420,9 +421,19 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         return mesh_update_state::should_continue;
     }
 
-    size_t solid_building_quads_index = acquire_pool_chunk();
-    size_t transparent_building_quads_index = acquire_pool_chunk();
-    size_t transparent_double_sided_building_quads_index = acquire_pool_chunk();
+    size_t excluded_indices[4];
+
+    excluded_indices[0] = chunk.blocks_chunk_index % NUM_POOL_CHUNKS_PER_L1_CACHE;
+
+    size_t solid_building_quads_index = acquire_pool_chunk_with_excluded_indices(1, excluded_indices);
+    excluded_indices[1] = solid_building_quads_index % NUM_POOL_CHUNKS_PER_L1_CACHE;
+
+    size_t transparent_building_quads_index = acquire_pool_chunk_with_excluded_indices(2, excluded_indices);
+    excluded_indices[2] = solid_building_quads_index % NUM_POOL_CHUNKS_PER_L1_CACHE;
+
+    size_t transparent_double_sided_building_quads_index = acquire_pool_chunk_with_excluded_indices(3, excluded_indices);
+    excluded_indices[3] = solid_building_quads_index % NUM_POOL_CHUNKS_PER_L1_CACHE;
+
     solid_building_quads = (block_quad_t*)&pool_chunks[solid_building_quads_index];
     transparent_building_quads = (block_quad_t*)&pool_chunks[transparent_building_quads_index];
     transparent_double_sided_building_quads = (block_quad_t*)&pool_chunks[transparent_double_sided_building_quads_index];
@@ -431,6 +442,7 @@ mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& c
         &chunk.solid_display_lists,
         &chunk.transparent_display_lists,
         &chunk.transparent_double_sided_display_lists,
+        excluded_indices,
         (const block_type_t*)chunk.blocks,
         chunk.nh.front.has_value() ? (const block_type_t*)chunk.nh.front->get().blocks : NULL,
         chunk.nh.back.has_value() ? (const block_type_t*)chunk.nh.back->get().blocks : NULL,
