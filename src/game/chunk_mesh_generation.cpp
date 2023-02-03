@@ -14,30 +14,6 @@
 #include <string.h>
 #include <ogc/cache.h>
 
-/*
-The idea of how I'm going to optimize this is to layout the cache like this
-[
-block types
--
--
--
-display lists
-]
-This will avoid any fighting over space in the cache and will mean that the amount of unnecessary cache misses will be 0
-I am also going to try to optimize this by not using the stack anywhere within the update_core_mesh function since this will mean that I can position the block memory and display lists anywhere in the cache without having to worry about where the stack will be in the cache, should that not be possible I will use a layout roughly like this
-[
-block types
--
--
-stack
--
--
-display lists
-]
-
-Ways to optimize for avoiding stack usage will be to not use the should_add_face loop computed values. The original intent behind this optimization was to reduce the number of comparison operations, however it is the branch that is expensive and so this isnt really a worthwhile optimization and takes up valuable register space.
-*/
-
 // Possible future optimization is to stop generating the mesh after we reach the end of blocks to generate meshes from
 
 typedef struct {

@@ -8,7 +8,7 @@
 
 typedef struct {
     size_t head;
-    bool free[NUM_POOL_CHUNKS];
+    u8 used[(NUM_POOL_CHUNKS / 8) + 1];
 } pool_chunks_info_t;
 
 extern pool_chunks_info_t pool_chunks_info;
