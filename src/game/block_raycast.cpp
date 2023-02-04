@@ -6,32 +6,22 @@
 
 using namespace game;
 
-static block_raycast_wrap_t closest_raycast;
-
-static void handle_box_raycast(glm::vec3 world_block_pos, std::optional<world_location>& world_loc, box_raycast_wrap_t& box_raycast) {
-    if (box_raycast.success && box_raycast.val.near_hit_time < 1.0f) {
-        if (closest_raycast.success) {
-            if (box_raycast.val.near_hit_time < closest_raycast.val.box_raycast.near_hit_time) {
-                closest_raycast = block_raycast_wrap_t{
-                    .success = true,
-                    .val = {
-                        .location = *world_loc,
-                        .box_raycast = box_raycast.val,
-                        .world_block_position = world_block_pos
-                    }
-                };
-            }
-        } else {
-            closest_raycast = block_raycast_wrap_t{
-                .success = true,
-                .val = {
-                    .location = *world_loc,
-                    .box_raycast = box_raycast.val,
-                    .world_block_position = world_block_pos
-                }
-            };
-        }
+static block_raycast_wrap_t get_closest_raycast(block_raycast_wrap_t closest_raycast, glm::vec3 world_block_pos, std::optional<world_location>& world_loc, box_raycast_wrap_t& box_raycast) {
+    if (
+        !box_raycast.success ||
+        box_raycast.val.near_hit_time >= 1.0f ||
+        (closest_raycast.success && box_raycast.val.near_hit_time >= closest_raycast.val.box_raycast.near_hit_time)
+    ) {
+        return closest_raycast;
     }
+    return block_raycast_wrap_t{
+        .success = true,
+        .val = {
+            .location = *world_loc,
+            .box_raycast = box_raycast.val,
+            .world_block_position = world_block_pos
+        }
+    };
 }
 
 static box_raycast_wrap_t get_box_raycast_for_block(glm::vec3 origin, glm::vec3 dir, glm::vec3 dir_inv, glm::vec3 box_transform, block_box_type_t box_type, glm::vec3 world_block_pos, block_type_t block_type) {
@@ -65,7 +55,9 @@ static box_raycast_wrap_t get_box_raycast_for_block(glm::vec3 origin, glm::vec3 
     return get_box_raycast(origin, dir, dir_inv, box);
 }
 
-static void handle_block_raycasts_in_region(chunk::map& chunks, glm::vec3 origin, glm::vec3 dir, glm::vec3 begin, glm::vec3 end, glm::vec3 box_transform, block_box_type_t box_type) {
+block_raycast_wrap_t get_block_raycast(chunk::map& chunks, glm::vec3 origin, glm::vec3 dir, glm::vec3 begin, glm::vec3 end, glm::vec3 box_transform, block_box_type_t box_type) {
+    block_raycast_wrap_t closest_raycast = { false };
+
     auto dir_inv = 1.0f / dir;
 
     auto floored_begin = floor_float_position<f32>(begin);
@@ -90,17 +82,11 @@ static void handle_block_raycasts_in_region(chunk::map& chunks, glm::vec3 origin
                 auto world_loc = get_world_location_at_world_position(chunks, world_block_pos);
                 if (world_loc.has_value()) {
                     box_raycast_wrap_t box_raycast = get_box_raycast_for_block(origin, dir, dir_inv, box_transform, box_type, world_block_pos, (block_type_t)world_loc->bl->tp);
-                    handle_box_raycast(world_block_pos, world_loc, box_raycast);
+                    closest_raycast = get_closest_raycast(closest_raycast, world_block_pos, world_loc, box_raycast);
                 }
             }
         }
     }
-}
-
-block_raycast_wrap_t get_block_raycast(chunk::map& chunks, glm::vec3 origin, glm::vec3 dir, glm::vec3 begin, glm::vec3 end, glm::vec3 box_transform, block_box_type_t box_type) {
-    closest_raycast.success = false;
-
-    handle_block_raycasts_in_region(chunks, origin, dir, begin, end, box_transform, box_type);
 
     return closest_raycast;
 }
