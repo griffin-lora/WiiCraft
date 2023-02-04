@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 	
 	cursor_init();
 
-	game::block_selection bl_sel;
+	block_selection_init();
 
 	GX_SetZMode(true, GX_LEQUAL, true);
 	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
 		auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
-		bl_sel.handle_raycast(view, quad_building_arrays.standard, raycast);
+		block_selection_handle_raycast(view, quad_building_arrays.standard, raycast);
 
 		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
 		character.apply_physics(chunks, frame_delta);
@@ -196,8 +196,8 @@ int main(int argc, char** argv) {
 
 		if (cam.update_view) {
 			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);
+			block_selection_update(view);
 		}
-		bl_sel.update_if_needed(view, cam);
 		debug_ui.update(buttons_down);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
 		game::draw_chunks(view, cam, chunks);
 		
 		if (raycast.success) {
-			bl_sel.draw(now);
+			block_selection_draw(now);
 		}
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);

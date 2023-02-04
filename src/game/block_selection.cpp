@@ -7,14 +7,22 @@
 
 using namespace game;
 
-void block_selection::update_if_needed(const math::matrix view, const camera& cam) {
-    if (cam.update_view) {
-        tf.update_model_view(view);
-        tf.load(mat);
-    }
+#define MATRIX_INDEX GX_PNMTX4
+
+static std::optional<math::vector3s32> last_block_pos;
+static std::optional<block> last_block;
+
+static gfx::display_list disp_list;
+static math::transform_3d tf;
+
+static bool cull_back = true;
+
+void block_selection_update(const Mtx view) {
+    tf.update_model_view(view);
+    tf.load(MATRIX_INDEX);
 }
 
-void block_selection::draw(chrono::us now) const {
+void block_selection_draw(chrono::us now) {
     GX_SetNumTevStages(1);
     GX_SetNumChans(1);
     GX_SetNumTexGens(0);
@@ -36,7 +44,7 @@ void block_selection::draw(chrono::us now) const {
 
     GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 
-    GX_SetCurrentMtx(mat);
+    GX_SetCurrentMtx(MATRIX_INDEX);
 
     GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
     GX_SetZCompLoc(GX_TRUE);
@@ -66,9 +74,9 @@ struct block_selection_mesh_state {
     }
 };
 
-void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_t& raycast) {
+static void update_mesh(const Mtx view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_t& raycast) {
     tf.set_position(view, raycast.location.ch_pos.x * chunk::size, raycast.location.ch_pos.y * chunk::size, raycast.location.ch_pos.z * chunk::size);
-    tf.load(mat);
+    tf.load(MATRIX_INDEX);
 
     auto begin = (block_selection_quad*)building_array.data();
 
@@ -118,7 +126,7 @@ void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_b
     });
 }
 
-void block_selection::handle_raycast(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_wrap_t& raycast) {
+void block_selection_handle_raycast(const Mtx view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_wrap_t& raycast) {
     if (raycast.success) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast.val.location.bl_pos != last_block_pos || *raycast.val.location.bl != *last_block) {
