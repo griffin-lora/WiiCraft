@@ -12,7 +12,6 @@
 #include "input.hpp"
 #include "chrono.hpp"
 #include "game/block_raycast.hpp"
-#include "game/block_raycast.inl"
 #include "game/camera.hpp"
 #include "game/chunk_core.hpp"
 #include "game/chunk_management.hpp"
@@ -180,9 +179,7 @@ int main(int argc, char** argv) {
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		auto raycast = game::get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), []<typename BF>(game::bl_st st) {
-			return BF::get_selection_boxes(st);
-		}, [](auto&) {});
+		auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
 		bl_sel.handle_raycast(view, quad_building_arrays.standard, raycast);
 
 		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
@@ -210,7 +207,9 @@ int main(int argc, char** argv) {
 
 		game::draw_chunks(view, cam, chunks);
 		
-		bl_sel.draw(now, raycast);
+		if (raycast.success) {
+			bl_sel.draw(now);
+		}
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();

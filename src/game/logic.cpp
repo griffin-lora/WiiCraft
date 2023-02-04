@@ -29,18 +29,18 @@ glm::vec3 game::get_raycast_direction_from_pointer_position(u16 v_width, u16 v_h
     // }
 }
 
-void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, std::optional<block_raycast>& raycast) {
+void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, block_raycast_wrap_t& raycast) {
     // TODO: Ugly garbage code. Refactor.
-    if (raycast.has_value()) {
+    if (raycast.success) {
         if (buttons_down & WPAD_BUTTON_A) {
-            get_block_count_ref(*raycast->location.ch, *raycast->location.bl)--;
-            *raycast->location.bl = { .tp = block::type::air };
-            get_block_count_ref(*raycast->location.ch, *raycast->location.bl)++;
-            raycast->location.ch->modified = true;
-            add_important_chunk_mesh_update(*raycast->location.ch, raycast->location.bl_pos);
+            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl)--;
+            *raycast.val.location.bl = { .tp = block::type::air };
+            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl)++;
+            raycast.val.location.ch->modified = true;
+            add_important_chunk_mesh_update(*raycast.val.location.ch, raycast.val.location.bl_pos);
         }
         if (buttons_down & WPAD_BUTTON_B) {
-            auto normal_offset_loc = get_world_location_at_world_position(chunks, raycast->world_block_position + raycast->box_raycast.normal);
+            auto normal_offset_loc = get_world_location_at_world_position(chunks, raycast.val.world_block_position + raycast.val.box_raycast.normal);
             if (normal_offset_loc.has_value()) {
                 get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl)--;
                 *normal_offset_loc->bl = { .tp = block::type::stone_slab_bottom };

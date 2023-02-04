@@ -1,7 +1,6 @@
 #include "character.hpp"
 #include "block_core.hpp"
 #include "block_raycast.hpp"
-#include "block_raycast.inl"
 #include "chunk_core.hpp"
 #include "common.hpp"
 #include "input.hpp"
@@ -128,15 +127,10 @@ bool character::apply_collision(chunk::map& chunks, f32 delta) {
         end.z = next_end.z;
     }
 
-    auto raycast = get_block_raycast(chunks, position, direction, begin, end, []<typename BF>(game::bl_st st) {
-        return BF::get_collision_boxes(st);
-    }, [](auto& box) {
-        box.lesser_corner -= half_size;
-        box.greater_corner += half_size;
-    });
+    auto raycast = get_block_raycast(chunks, position, direction, begin, end, half_size, block_box_type_collision);
 
-    if (raycast.has_value()) {
-        auto& normal = raycast->box_raycast.normal;
+    if (raycast.success) {
+        auto& normal = raycast.val.box_raycast.normal;
         if (math::is_non_zero(normal)) {
             if (normal.y == 1.0f) {
                 grounded = true;

@@ -11,7 +11,7 @@ typedef struct {
 
 typedef struct {
     bool success;
-    box_raycast_t raycast;
+    box_raycast_t val;
 } box_raycast_wrap_t;
 
 box_raycast_wrap_t get_box_raycast(glm::vec3 origin, glm::vec3 direction, glm::vec3 direction_inverse, box_t box);

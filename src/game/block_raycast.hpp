@@ -5,16 +5,20 @@
 #include "block.hpp"
 #include <vector>
 
-namespace game {
-    struct block_raycast {
-        world_location location;
-        box_raycast_t box_raycast;
-        glm::vec3 world_block_position;
-    };
+typedef struct {
+    game::world_location location;
+    box_raycast_t box_raycast;
+    glm::vec3 world_block_position;
+} block_raycast_t;
 
-    template<typename F1, typename F2, typename F3>
-    void handle_block_raycasts_in_region(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box, F3 handle_box_raycast);
+typedef struct {
+    bool success;
+    block_raycast_t val;
+} block_raycast_wrap_t;
 
-    template<typename F1, typename F2>
-    std::optional<block_raycast> get_block_raycast(chunk::map& chunks, const glm::vec3& origin, const glm::vec3& direction, const glm::vec3& begin, const glm::vec3& end, F1 get_boxes, F2 transform_box);
-};
+typedef enum {
+    block_box_type_collision,
+    block_box_type_selection
+} block_box_type_t;
+
+block_raycast_wrap_t get_block_raycast(game::chunk::map& chunks, glm::vec3 origin, glm::vec3 direction, glm::vec3 begin, glm::vec3 end, glm::vec3 box_transform, block_box_type_t box_type);

@@ -24,10 +24,10 @@ namespace game {
         inline block_selection() { }
 
         void update_if_needed(const math::matrix view, const camera& cam);
-        void draw(chrono::us now, const std::optional<block_raycast>& raycast) const;
-        void handle_raycast(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const std::optional<block_raycast>& raycast);
+        void draw(chrono::us now) const;
+        void handle_raycast(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_wrap_t& raycast);
 
         private:
-            void update_mesh(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast& raycast);
+            void update_mesh(const math::matrix view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_t& raycast);
     };
 }

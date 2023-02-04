@@ -31,7 +31,7 @@ box_raycast_wrap_t get_box_raycast(glm::vec3 origin, glm::vec3 direction, glm::v
 
     return box_raycast_wrap_t{
         .success = true,
-        .raycast = {
+        .val = {
             .intersection_position = intersection_position,
             .normal = [&direction_inverse, &t_near]() -> glm::vec3 {
                 if (t_near.x > t_near.y && t_near.x > t_near.z) { return { direction_inverse.x < 0 ? 1 : -1, 0, 0 }; }

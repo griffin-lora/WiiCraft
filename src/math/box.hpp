@@ -4,7 +4,6 @@
 typedef struct {
     glm::vec3 lesser_corner;
     glm::vec3 greater_corner;
-
 } box_t;
 
 bool is_inside_box(box_t box, glm::vec3 pos);
