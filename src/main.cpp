@@ -99,9 +99,6 @@ int main(int argc, char** argv) {
 
 	game::chunk::map chunks;
 
-	// This is a variable whose lifetime is bound to mesh updating functions normally. However, since it takes up quite a bit of memory, it is stored here.
-	game::chunk_quad_building_arrays quad_building_arrays;
-
 	game::stored_chunk::map stored_chunks;
 
 	// This is a variable whose lifetime is bound to the manage_chunks_around_camera function normally. However, reallocation is expensive, it is stored here.
@@ -180,7 +177,7 @@ int main(int argc, char** argv) {
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
 		auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
-		block_selection_handle_raycast(view, quad_building_arrays.standard, raycast);
+		block_selection_handle_raycast(view, raycast);
 
 		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
 		character.apply_physics(chunks, frame_delta);
@@ -192,7 +189,7 @@ int main(int argc, char** argv) {
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunk_visuals(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now);
+		game::update_chunk_visuals(chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		if (cam.update_view) {
 			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);

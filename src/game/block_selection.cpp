@@ -4,6 +4,9 @@
 #include "block_functionality.hpp"
 #include "block_mesh_generation.hpp"
 #include "rendering.hpp"
+#include "gfx/instruction_size.h"
+#include "util.h"
+#include "block_new.hpp"
 
 using namespace game;
 
@@ -12,14 +15,80 @@ using namespace game;
 static std::optional<math::vector3s32> last_block_pos;
 static std::optional<block> last_block;
 
-static gfx::display_list disp_list;
-static math::transform_3d tf;
+static Mtx model;
+static Mtx model_view;
 
+static size_t disp_list_size = 0;
 static bool cull_back = true;
+static void* disp_list;
 
-void block_selection_update(const Mtx view) {
-    tf.update_model_view(view);
-    tf.load(MATRIX_INDEX);
+#define CUBE_VERTEX_COUNT 24
+
+#define CUBE_DISP_LIST_SIZE (ALIGN_TO_32( \
+    GET_BEGIN_INSTRUCTION_SIZE(CUBE_VERTEX_COUNT) + \
+    GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CUBE_VERTEX_COUNT) \
+))
+alignas(32) static u8 cube_disp_list[CUBE_DISP_LIST_SIZE];
+
+#define CROSS_VERTEX_COUNT 8
+
+#define CROSS_DISP_LIST_SIZE (ALIGN_TO_32( \
+    GET_BEGIN_INSTRUCTION_SIZE(CROSS_VERTEX_COUNT) + \
+    GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CROSS_VERTEX_COUNT) \
+))
+alignas(32) static u8 cross_disp_list[CROSS_DISP_LIST_SIZE];
+
+void block_selection_init(void) {
+    GX_BeginDispList(cube_disp_list, CUBE_DISP_LIST_SIZE);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, CUBE_VERTEX_COUNT);
+
+    GX_Position3u8(4, 4, 0);
+    GX_Position3u8(4, 0, 0);
+    GX_Position3u8(4, 0, 4);
+    GX_Position3u8(4, 4, 4);
+    GX_Position3u8(0, 4, 0);	// Top Left of the quad (top)
+    GX_Position3u8(0, 4, 4);	// Top Right of the quad (top)
+    GX_Position3u8(0, 0, 4);	// Bottom Right of the quad (top)
+    GX_Position3u8(0, 0, 0);		// Bottom Left of the quad (top)
+    GX_Position3u8(0, 4, 4);	// Bottom Left Of The Quad (Back)
+    GX_Position3u8(0, 4, 0);	// Bottom Right Of The Quad (Back)
+    GX_Position3u8(4, 4, 0);	// Top Right Of The Quad (Back)
+    GX_Position3u8(4, 4, 4);	// Top Left Of The Quad (Back)
+    GX_Position3u8(0, 0, 4);		// Top Right Of The Quad (Front)
+    GX_Position3u8(4, 0, 4);	// Top Left Of The Quad (Front)
+    GX_Position3u8(4, 0, 0);	// Bottom Left Of The Quad (Front)
+    GX_Position3u8(0, 0, 0);	// Bottom Right Of The Quad (Front)
+    GX_Position3u8(4, 0, 4);	// Top Right Of The Quad (Right)
+    GX_Position3u8(0, 0, 4);		// Top Left Of The Quad (Right)
+    GX_Position3u8(0, 4, 4);	// Bottom Left Of The Quad (Right)
+    GX_Position3u8(4, 4, 4);	// Bottom Right Of The Quad (Right)
+    GX_Position3u8(4, 0, 0);	// Top Right Of The Quad (Left)
+    GX_Position3u8(4, 4, 0);	// Top Left Of The Quad (Left)
+    GX_Position3u8(0, 4, 0);	// Bottom Left Of The Quad (Left)
+    GX_Position3u8(0, 0, 0);	// Bottom Right Of The Quad (Left)
+    
+    GX_End();
+    GX_EndDispList();
+
+    GX_BeginDispList(cross_disp_list, CROSS_DISP_LIST_SIZE);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, CROSS_VERTEX_COUNT);
+
+    GX_Position3u8(0, 0, 0);
+    GX_Position3u8(4, 0, 4);
+    GX_Position3u8(4, 4, 4);
+    GX_Position3u8(0, 4, 0);
+    GX_Position3u8(4, 0, 0);
+    GX_Position3u8(0, 0, 4);
+    GX_Position3u8(0, 4, 4);
+    GX_Position3u8(4, 4, 0);
+
+    GX_End();
+    GX_EndDispList();
+}
+
+void block_selection_update(Mtx view) {
+    guMtxConcat(view, model, model_view);
+    GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 }
 
 void block_selection_draw(chrono::us now) {
@@ -50,87 +119,52 @@ void block_selection_draw(chrono::us now) {
     GX_SetZCompLoc(GX_TRUE);
 
     GX_SetCullMode(cull_back ? GX_CULL_BACK : GX_CULL_NONE);
-    disp_list.call();
 
     if (!cull_back) {
-        GX_SetCullMode(GX_CULL_BACK);
+        GX_SetCullMode(GX_CULL_NONE);
     }
+    
+    if (disp_list_size != 0) {
+        GX_CallDispList(disp_list, disp_list_size);
+    }
+
+    GX_SetCullMode(GX_CULL_BACK);
 }
 
-struct block_selection_quad {
-    std::array<math::vector3u8, 4> verts;
-    
-    template<typename T>
-    inline block_selection_quad(const T& quad) : verts({ quad.vert0.pos, quad.vert1.pos, quad.vert2.pos, quad.vert3.pos }) { }
-};
-
-struct block_selection_mesh_state {
-    block_selection_quad* back_cull_it;
-    block_selection_quad* no_cull_it;
-
-    template<typename L>
-    inline void add_quad(const L::chunk_quad& quad) {
-        *back_cull_it++ = quad;
-    }
-};
-
-static void update_mesh(const Mtx view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_t& raycast) {
-    tf.set_position(view, raycast.location.ch_pos.x * chunk::size, raycast.location.ch_pos.y * chunk::size, raycast.location.ch_pos.z * chunk::size);
-    tf.load(MATRIX_INDEX);
-
-    auto begin = (block_selection_quad*)building_array.data();
-
-    block_selection_mesh_state ms_st = {
-        .back_cull_it = begin,
-        .no_cull_it = begin
-    };
-
-    // TODO: actually use real block data
-    block air_block = { .tp = block::type::air };
-
-    const auto& block = *raycast.location.bl;
+static void update_mesh(Mtx view, const block_raycast_t& raycast) {
+    math::vector3s32 chunk_pos = raycast.location.ch_pos;
     math::vector3u8 block_pos = raycast.location.bl_pos;
+
+    guMtxIdentity(model);
+    guMtxTransApply(model, model, (chunk_pos.x * chunk::size) + block_pos.x, (chunk_pos.y * chunk::size) + block_pos.y, (chunk_pos.z * chunk::size) + block_pos.z);
+    guMtxConcat(view, model, model_view);
     
-    call_with_block_functionality(block.tp, [&ms_st, &air_block, &block, block_pos]<typename BF>() {
-        add_block_vertices<BF>(ms_st, [&air_block]<block::face FACE>() { return &air_block; }, (game::block::state)game::block::slab_state::bottom, block_pos);
-    });
+    GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 
-    cull_back = true;
-    auto end = ms_st.back_cull_it;
-    std::size_t vert_count = 4 * (end - begin);
-    if (vert_count == 0) {
-        cull_back = false;
-        end = ms_st.no_cull_it;
-        vert_count = 4 * (end - begin);
+    block_type_t block_type = (block_type_t)raycast.location.bl->tp;
+
+    switch (block_type) {
+        default:
+            disp_list_size = CUBE_DISP_LIST_SIZE;
+            cull_back = true;
+            disp_list = cube_disp_list;
+            break;
+        case block_type_air:
+            disp_list_size = 0;
+            break;
+        case block_type_tall_grass:
+            disp_list_size = CROSS_DISP_LIST_SIZE;
+            cull_back = false;
+            disp_list = cross_disp_list;
+            break;
     }
-
-    disp_list.resize(
-        gfx::get_begin_instruction_size(vert_count) +
-        gfx::get_vector_instruction_size<3, u8>(vert_count) + // Position
-        gfx::get_vector_instruction_size<4, u8>(vert_count) // Color
-    );
-
-    constexpr auto write_vertex = [](auto& vert) {
-        GX_Position3u8(vert.x, vert.y, vert.z);
-    };
-
-    disp_list.write_into([begin, end, vert_count, write_vertex]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vert_count);
-        for (auto it = begin; it != end; ++it) {
-            write_vertex(it->verts[0]);
-            write_vertex(it->verts[1]);
-            write_vertex(it->verts[2]);
-            write_vertex(it->verts[3]);
-        }
-        GX_End();
-    });
 }
 
-void block_selection_handle_raycast(const Mtx view, decltype(chunk_quad_building_arrays::standard)& building_array, const block_raycast_wrap_t& raycast) {
+void block_selection_handle_raycast(Mtx view, const block_raycast_wrap_t& raycast) {
     if (raycast.success) {
         // Check if we have a new selected block
         if (!last_block_pos.has_value() || raycast.val.location.bl_pos != last_block_pos || *raycast.val.location.bl != *last_block) {
-            update_mesh(view, building_array, raycast.val);
+            update_mesh(view, raycast.val);
         }
 
         last_block_pos = raycast.val.location.bl_pos;

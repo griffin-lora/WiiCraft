@@ -9,7 +9,7 @@
 #include "math/transform_3d.hpp"
 #include <optional>
 
-inline void block_selection_init() {}
-void block_selection_update(const Mtx view);
+void block_selection_init(void);
+void block_selection_update(Mtx view);
 void block_selection_draw(chrono::us now);
-void block_selection_handle_raycast(const Mtx view, decltype(game::chunk_quad_building_arrays::standard)& building_array, const block_raycast_wrap_t& raycast);
+void block_selection_handle_raycast(Mtx view, const block_raycast_wrap_t& raycast);

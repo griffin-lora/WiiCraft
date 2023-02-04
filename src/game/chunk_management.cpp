@@ -19,7 +19,7 @@ void game::update_chunk_neighborhoods(chunk::map& chunks) {
     }
 }
 
-void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
+void game::update_chunk_visuals(chunk::map& chunks, chrono::us& total_mesh_gen_time, chrono::us& last_mesh_gen_time, chrono::us now) {
     bool did_important_mesh_update = false;
     for (auto& [ pos, chunk ] : chunks) {
         if (chunk.update_core_mesh_important || chunk.update_shell_mesh_important) {
@@ -33,7 +33,7 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
             chunk.fade_in_when_mesh_is_updated = false;
             chunk.fade_st = chunk::fade_state::none;
             auto start = chrono::get_current_us();
-            update_core_mesh(building_arrays, chunk);
+            update_core_mesh(chunk);
             total_mesh_gen_time += chrono::get_current_us() - start;
             last_mesh_gen_time = chrono::get_current_us() - start;
         }
@@ -47,7 +47,7 @@ void game::update_chunk_visuals(chunk_quad_building_arrays& building_arrays, chu
                 chunk.update_shell_mesh_important = false;
                 chunk.update_shell_mesh_unimportant = false;
                 auto start = chrono::get_current_us();
-                auto mesh_update_state = update_core_mesh(building_arrays, chunk);
+                auto mesh_update_state = update_core_mesh(chunk);
                 auto now = chrono::get_current_us();
                 total_mesh_gen_time += now - start;
                 last_mesh_gen_time = now - start;

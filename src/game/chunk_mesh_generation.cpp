@@ -382,7 +382,7 @@ static void generate_block_meshes(
     };
 }
 
-mesh_update_state game::update_core_mesh(chunk_quad_building_arrays& _, chunk& chunk) {
+mesh_update_state game::update_core_mesh(chunk& chunk) {
     for (pool_display_list_t disp_list : chunk.solid_display_lists) {
         release_pool_chunk(disp_list.chunk_index);
     }
