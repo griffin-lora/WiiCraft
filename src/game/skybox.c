@@ -110,7 +110,6 @@ void skybox_init(Mtx view, f32 x, f32 y, f32 z) {
     GX_Position3s8(N, P, N);
     GX_TexCoord2u8(2, 1);
 
-
     GX_End();
     GX_EndDispList();
 
@@ -124,7 +123,7 @@ void skybox_update(Mtx view, f32 x, f32 y, f32 z) {
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 }
 
-void skybox_draw() {
+void skybox_draw(void) {
     GX_SetNumTevStages(1);
     // set number of rasterized color channels
 	GX_SetNumChans(1);

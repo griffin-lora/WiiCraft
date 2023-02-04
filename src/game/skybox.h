@@ -1,5 +1,4 @@
 #pragma once
-#include "gfx/display_list_new.h"
 #include <gctypes.h>
 #include <ogc/gu.h>
 

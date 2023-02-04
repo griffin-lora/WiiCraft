@@ -114,7 +114,8 @@ int main(int argc, char** argv) {
 	
 	game::water_overlay water_overlay;
 	game::debug_ui debug_ui;
-	game::cursor cursor;
+	
+	cursor_init();
 
 	game::block_selection bl_sel;
 
@@ -156,7 +157,7 @@ int main(int argc, char** argv) {
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
 		auto pointer_pos = input::get_pointer_position(chan);
-		cursor.update_from_pointer_position(rmode->viWidth, rmode->viHeight, pointer_pos);
+		cursor_update(rmode->viWidth, rmode->viHeight);
 
 		#ifndef PC_PORT
     	auto wpad_accel = input::get_accel(chan);
@@ -214,7 +215,7 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();
 		water_overlay.draw(cam, chunks);
-		cursor.draw();
+		cursor_draw();
 
 		game::init_text_rendering();
 		debug_ui.draw(character.position, cam.look, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::ceil(fps));
