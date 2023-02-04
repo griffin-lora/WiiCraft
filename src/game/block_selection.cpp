@@ -7,6 +7,7 @@
 #include "gfx/instruction_size.h"
 #include "util.h"
 #include "block_new.hpp"
+#include <string.h>
 
 using namespace game;
 
@@ -20,7 +21,6 @@ static Mtx model_view;
 
 static size_t disp_list_size = 0;
 static bool cull_back = true;
-static void* disp_list;
 
 #define CUBE_VERTEX_COUNT 24
 
@@ -28,7 +28,6 @@ static void* disp_list;
     GET_BEGIN_INSTRUCTION_SIZE(CUBE_VERTEX_COUNT) + \
     GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CUBE_VERTEX_COUNT) \
 ))
-alignas(32) static u8 cube_disp_list[CUBE_DISP_LIST_SIZE];
 
 #define CROSS_VERTEX_COUNT 8
 
@@ -36,54 +35,10 @@ alignas(32) static u8 cube_disp_list[CUBE_DISP_LIST_SIZE];
     GET_BEGIN_INSTRUCTION_SIZE(CROSS_VERTEX_COUNT) + \
     GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CROSS_VERTEX_COUNT) \
 ))
-alignas(32) static u8 cross_disp_list[CROSS_DISP_LIST_SIZE];
+
+alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
 
 void block_selection_init(void) {
-    GX_BeginDispList(cube_disp_list, CUBE_DISP_LIST_SIZE);
-    GX_Begin(GX_QUADS, GX_VTXFMT0, CUBE_VERTEX_COUNT);
-
-    GX_Position3u8(4, 4, 0);
-    GX_Position3u8(4, 0, 0);
-    GX_Position3u8(4, 0, 4);
-    GX_Position3u8(4, 4, 4);
-    GX_Position3u8(0, 4, 0);	// Top Left of the quad (top)
-    GX_Position3u8(0, 4, 4);	// Top Right of the quad (top)
-    GX_Position3u8(0, 0, 4);	// Bottom Right of the quad (top)
-    GX_Position3u8(0, 0, 0);		// Bottom Left of the quad (top)
-    GX_Position3u8(0, 4, 4);	// Bottom Left Of The Quad (Back)
-    GX_Position3u8(0, 4, 0);	// Bottom Right Of The Quad (Back)
-    GX_Position3u8(4, 4, 0);	// Top Right Of The Quad (Back)
-    GX_Position3u8(4, 4, 4);	// Top Left Of The Quad (Back)
-    GX_Position3u8(0, 0, 4);		// Top Right Of The Quad (Front)
-    GX_Position3u8(4, 0, 4);	// Top Left Of The Quad (Front)
-    GX_Position3u8(4, 0, 0);	// Bottom Left Of The Quad (Front)
-    GX_Position3u8(0, 0, 0);	// Bottom Right Of The Quad (Front)
-    GX_Position3u8(4, 0, 4);	// Top Right Of The Quad (Right)
-    GX_Position3u8(0, 0, 4);		// Top Left Of The Quad (Right)
-    GX_Position3u8(0, 4, 4);	// Bottom Left Of The Quad (Right)
-    GX_Position3u8(4, 4, 4);	// Bottom Right Of The Quad (Right)
-    GX_Position3u8(4, 0, 0);	// Top Right Of The Quad (Left)
-    GX_Position3u8(4, 4, 0);	// Top Left Of The Quad (Left)
-    GX_Position3u8(0, 4, 0);	// Bottom Left Of The Quad (Left)
-    GX_Position3u8(0, 0, 0);	// Bottom Right Of The Quad (Left)
-    
-    GX_End();
-    GX_EndDispList();
-
-    GX_BeginDispList(cross_disp_list, CROSS_DISP_LIST_SIZE);
-    GX_Begin(GX_QUADS, GX_VTXFMT0, CROSS_VERTEX_COUNT);
-
-    GX_Position3u8(0, 0, 0);
-    GX_Position3u8(4, 0, 4);
-    GX_Position3u8(4, 4, 4);
-    GX_Position3u8(0, 4, 0);
-    GX_Position3u8(4, 0, 0);
-    GX_Position3u8(0, 0, 4);
-    GX_Position3u8(0, 4, 4);
-    GX_Position3u8(4, 4, 0);
-
-    GX_End();
-    GX_EndDispList();
 }
 
 void block_selection_update(Mtx view) {
@@ -136,18 +91,58 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
     math::vector3u8 block_pos = raycast.location.bl_pos;
 
     guMtxIdentity(model);
-    guMtxTransApply(model, model, (chunk_pos.x * chunk::size) + block_pos.x, (chunk_pos.y * chunk::size) + block_pos.y, (chunk_pos.z * chunk::size) + block_pos.z);
+    guMtxTransApply(model, model, chunk_pos.x * chunk::size, chunk_pos.y * chunk::size, chunk_pos.z * chunk::size);
     guMtxConcat(view, model, model_view);
     
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 
     block_type_t block_type = (block_type_t)raycast.location.bl->tp;
 
+    u8 px = block_pos.x * 4;
+    u8 py = block_pos.y * 4;
+    u8 pz = block_pos.z * 4;
+    u8 pox = px + 4;
+    u8 poy = py + 4;
+    u8 poz = pz + 4;
+
     switch (block_type) {
         default:
             disp_list_size = CUBE_DISP_LIST_SIZE;
             cull_back = true;
-            disp_list = cube_disp_list;
+
+            memset(disp_list, 0, sizeof(disp_list));
+            
+            GX_BeginDispList(disp_list, CUBE_DISP_LIST_SIZE);
+            GX_Begin(GX_QUADS, GX_VTXFMT0, CUBE_VERTEX_COUNT);
+
+            GX_Position3u8(pox, poy, pz);
+            GX_Position3u8(pox, py, pz);
+            GX_Position3u8(pox, py,poz);
+            GX_Position3u8(pox, poy,poz);
+            GX_Position3u8(px, poy, pz);	// Top Left of the quad (top)
+            GX_Position3u8(px, poy, poz);	// Top Right of the quad (top)
+            GX_Position3u8(px, py, poz);	// Bottom Right of the quad (top)
+            GX_Position3u8(px, py, pz);		// Bottom Left of the quad (top)
+            GX_Position3u8(px, poy, poz);	// Bottom Left Of The Quad (Back)
+            GX_Position3u8(px, poy, pz);	// Bottom Right Of The Quad (Back)
+            GX_Position3u8(pox, poy, pz);	// Top Right Of The Quad (Back)
+            GX_Position3u8(pox, poy, poz);	// Top Left Of The Quad (Back)
+            GX_Position3u8(px, py, poz);		// Top Right Of The Quad (Front)
+            GX_Position3u8(pox, py, poz);	// Top Left Of The Quad (Front)
+            GX_Position3u8(pox, py, pz);	// Bottom Left Of The Quad (Front)
+            GX_Position3u8(px, py, pz);	// Bottom Right Of The Quad (Front)
+            GX_Position3u8(pox, py, poz);	// Top Right Of The Quad (Right)
+            GX_Position3u8(px, py, poz);		// Top Left Of The Quad (Right)
+            GX_Position3u8(px, poy, poz);	// Bottom Left Of The Quad (Right)
+            GX_Position3u8(pox, poy, poz);	// Bottom Right Of The Quad (Right)
+            GX_Position3u8(pox, py, pz);	// Top Right Of The Quad (Left)
+            GX_Position3u8(pox, poy, pz);	// Top Left Of The Quad (Left)
+            GX_Position3u8(px, poy, pz);	// Bottom Left Of The Quad (Left)
+            GX_Position3u8(px, py, pz);	// Bottom Right Of The Quad (Left)
+            
+            GX_End();
+            GX_EndDispList();
+
             break;
         case block_type_air:
             disp_list_size = 0;
@@ -155,7 +150,24 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
         case block_type_tall_grass:
             disp_list_size = CROSS_DISP_LIST_SIZE;
             cull_back = false;
-            disp_list = cross_disp_list;
+            
+            memset(disp_list, 0, sizeof(disp_list));
+
+            GX_BeginDispList(disp_list, CROSS_DISP_LIST_SIZE);
+            GX_Begin(GX_QUADS, GX_VTXFMT0, CROSS_VERTEX_COUNT);
+
+            GX_Position3u8(px, py, pz);
+            GX_Position3u8(pox, py, poz);
+            GX_Position3u8(pox, poy, poz);
+            GX_Position3u8(px, poy, pz);
+            GX_Position3u8(pox, py, pz);
+            GX_Position3u8(px, py, poz);
+            GX_Position3u8(px, poy, poz);
+            GX_Position3u8(pox, poy, pz);
+
+            GX_End();
+            GX_EndDispList();
+
             break;
     }
 }
