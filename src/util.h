@@ -1,6 +1,4 @@
 #pragma once
 #include <stddef.h>
 
-inline size_t align_to_32(size_t n) {
-    return (n | 31) + 33;
-}
+#define ALIGN_TO_32(N) (((N) | 31) + 33)

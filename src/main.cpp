@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
 	game::chunk::pos_set chunk_positions_to_generate_blocks;
 	game::chunk::pos_set chunk_positions_to_update_neighborhood_and_mesh;
 
-	game::skybox skybox{view, cam};
+	skybox_init(view, cam.position.x, cam.position.y, cam.position.z);
 	
 	game::water_overlay water_overlay;
 	game::debug_ui debug_ui;
@@ -196,12 +196,14 @@ int main(int argc, char** argv) {
 
 		game::update_chunk_visuals(quad_building_arrays, chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
-		skybox.update_if_needed(view, cam);
+		if (cam.update_view) {
+			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);
+		}
 		bl_sel.update_if_needed(view, cam);
 		debug_ui.update(buttons_down);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
-		skybox.draw();
+		skybox_draw();
 
 		GX_SetCurrentMtx(game::chunk::mat);
 
