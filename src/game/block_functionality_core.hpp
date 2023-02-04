@@ -20,8 +20,8 @@ namespace game {
         template<typename M, typename F>
         BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
-        BF_MB std::array<math::box, 0> get_selection_boxes(bl_st) { return {}; }
-        BF_MB std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
+        BF_MB std::array<box_t, 0> get_selection_boxes(bl_st) { return {}; }
+        BF_MB std::array<box_t, 0> get_collision_boxes(bl_st) { return {}; }
 
         BF_MB block_counting_type get_block_counting_type(bl_st) { return block_counting_type::invisible; }
     };
@@ -68,9 +68,9 @@ namespace game {
         template<typename M, typename F>
         BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
-        BF_MB std::array<math::box, 1> get_boxes() {
+        BF_MB std::array<box_t, 1> get_boxes() {
             return {
-                math::box{
+                box_t{
                     { 0.0f, 0.0f, 0.0f },
                     { 1.0f, 1.0f, 1.0f }
                 }
@@ -178,9 +178,9 @@ namespace game {
             }
         }
 
-        BF_MB std::array<math::box, 1> get_boxes(bl_st st) {
+        BF_MB std::array<box_t, 1> get_boxes(bl_st st) {
             return {
-                math::box{
+                box_t{
                     { 0.0f, (st.slab == state::top ? 0.5f : 0.0f), 0.0f },
                     { 1.0f, (st.slab == state::bottom ? 0.5f : 1.0f), 1.0f }
                 }
@@ -215,15 +215,15 @@ namespace game {
             add_foliage_vertices(ms_st, pos, offset_pos, uv, offset_uv);
         }
 
-        BF_MB std::array<math::box, 1> get_selection_boxes(bl_st) {
+        BF_MB std::array<box_t, 1> get_selection_boxes(bl_st) {
             return {
-                math::box{
+                box_t{
                     { 0.2f, 0.0f, 0.2f },
                     { 0.8f, 0.8f, 0.8f }
                 }
             };
         }
-        BF_MB std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
+        BF_MB std::array<box_t, 0> get_collision_boxes(bl_st) { return {}; }
 
         BF_MB block_counting_type get_block_counting_type(bl_st) { return block_counting_type::partially_opaque; }
     };
@@ -358,14 +358,14 @@ namespace game {
         template<typename M, typename F>
         BF_MB void add_general_vertices(M&, const F&, bl_st, math::vector3u8) {}
 
-        BF_MB std::array<math::box, 1> get_selection_boxes(bl_st) { return {
-            math::box{
+        BF_MB std::array<box_t, 1> get_selection_boxes(bl_st) { return {
+            box_t{
                 { 0.0f, 0.0f, 0.0f },
                 { 1.0f, 1.0f, 1.0f }
             }
         }; }
 
-        BF_MB std::array<math::box, 0> get_collision_boxes(bl_st) { return {}; }
+        BF_MB std::array<box_t, 0> get_collision_boxes(bl_st) { return {}; }
 
         BF_MB block_counting_type get_block_counting_type(bl_st) { return block_counting_type::partially_opaque; }
     };

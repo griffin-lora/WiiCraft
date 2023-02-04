@@ -1,13 +1,11 @@
 #pragma once
 #include "math.hpp"
 
-namespace math {
-    struct box {
-        glm::vec3 lesser_corner;
-        glm::vec3 greater_corner;
+typedef struct {
+    glm::vec3 lesser_corner;
+    glm::vec3 greater_corner;
 
-        bool is_inside(const glm::vec3& pos) const;
-    };
+} box_t;
 
-    bool do_boxes_collide(const box& box_a, const box& box_b);
-}
+bool is_inside_box(box_t box, glm::vec3 pos);
+bool do_boxes_collide(box_t box_a, box_t box_b);

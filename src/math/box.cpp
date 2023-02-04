@@ -1,12 +1,10 @@
 #include "box.hpp"
 
-using namespace math;
-
-bool box::is_inside(const glm::vec3& pos) const {
-    return pos.x >= lesser_corner.x && pos.y >= lesser_corner.y && pos.z >= lesser_corner.z && pos.x <= greater_corner.x && pos.y <= greater_corner.y && pos.z <= greater_corner.z;
+bool is_inside_box(box_t box, glm::vec3 pos) {
+    return pos.x >= box.lesser_corner.x && pos.y >= box.lesser_corner.y && pos.z >= box.lesser_corner.z && pos.x <= box.greater_corner.x && pos.y <= box.greater_corner.y && pos.z <= box.greater_corner.z;
 }
 
-bool math::do_boxes_collide(const box& box_a, const box& box_b) {
+bool do_boxes_collide(box_t box_a, box_t box_b) {
     return
         (box_a.lesser_corner.x <= box_b.greater_corner.x && box_a.greater_corner.x >= box_b.lesser_corner.x) &&
         (box_a.lesser_corner.y <= box_b.greater_corner.y && box_a.greater_corner.y >= box_b.lesser_corner.y) &&
