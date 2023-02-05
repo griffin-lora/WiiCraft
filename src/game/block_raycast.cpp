@@ -1,7 +1,7 @@
 #include "block_raycast.hpp"
 #include "chunk_core.hpp"
 #include "util.hpp"
-#include "block_new.hpp"
+#include "block.hpp"
 
 using namespace game;
 
@@ -80,7 +80,7 @@ block_raycast_wrap_t get_block_raycast(chunk::map& chunks, glm::vec3 origin, glm
                 
                 auto world_loc = get_world_location_at_world_position(chunks, world_block_pos);
                 if (world_loc.has_value()) {
-                    box_raycast_wrap_t box_raycast = get_box_raycast_for_block(origin, dir, dir_inv, box_transform, box_type, world_block_pos, (block_type_t)world_loc->bl->tp);
+                    box_raycast_wrap_t box_raycast = get_box_raycast_for_block(origin, dir, dir_inv, box_transform, box_type, world_block_pos, *world_loc->bl_tp);
                     closest_raycast = get_closest_raycast(closest_raycast, world_block_pos, world_loc, box_raycast);
                 }
             }

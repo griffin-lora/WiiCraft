@@ -5,7 +5,7 @@
 #include "chrono.hpp"
 
 namespace game {
-    template<block::face FACE>
+    template<block_face_t FACE>
     constexpr chunk::const_opt_ref get_neighbor(const chunk::neighborhood& nh) {
         return call_face_func_for<FACE, chunk::const_opt_ref>(
             [&]() { return nh.front; },
@@ -17,7 +17,7 @@ namespace game {
         );
     }
 
-    template<block::face FACE>
+    template<block_face_t FACE>
     constexpr chunk::opt_ref get_neighbor(chunk::neighborhood& nh) {
         return call_face_func_for<FACE, chunk::opt_ref>(
             [&]() { return nh.front; },
@@ -31,7 +31,7 @@ namespace game {
 
     void update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk);
 
-    template<block::face FACE, typename T>
+    template<block_face_t FACE, typename T>
     constexpr bool is_block_position_at_face_edge(T pos) {
         constexpr auto edge_coord = (chunk::size - 1);
         return call_face_func_for<FACE, bool>(
@@ -47,7 +47,7 @@ namespace game {
     void add_chunk_neighborhood_update_to_neighbors(chunk& chunk);
     void add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk);
     
-    std::size_t& get_block_count_ref(chunk& chunk, const block& block);
+    std::size_t& get_block_count_ref(chunk& chunk, block_type_t type);
 
     void add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& block_position);
 
@@ -55,7 +55,7 @@ namespace game {
         math::vector3s32 ch_pos;
         math::vector3s32 bl_pos;
         chunk* ch;
-        block* bl;
+        block_type_t* bl_tp;
     };
 
     template<typename T>
@@ -73,7 +73,7 @@ namespace game {
                 .ch_pos = chunk_pos,
                 .bl_pos = block_pos,
                 .ch = &chunk,
-                .bl = &block
+                .bl_tp = &block
             };
         }
         return {};
@@ -85,7 +85,7 @@ namespace game {
     }
 
     template<typename T>
-    inline std::optional<std::reference_wrapper<block>> get_block_from_world_position(chunk::map& chunks, const T& position) {
+    inline std::optional<std::reference_wrapper<const block_type_t>> get_block_from_world_position(chunk::map& chunks, const T& position) {
         auto loc = get_world_location_at_world_position(chunks, position);
         if (loc.has_value()) {
             return *loc->bl;
@@ -94,7 +94,7 @@ namespace game {
     }
 
     template<typename T>
-    inline std::optional<std::reference_wrapper<const block>> get_block_from_world_position(const chunk::map& chunks, const T& position) {
+    inline std::optional<std::reference_wrapper<const block_type_t>> get_block_from_world_position(const chunk::map& chunks, const T& position) {
         return get_block_from_world_position(const_cast<chunk::map&>(chunks), position);
     }
 

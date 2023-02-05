@@ -35,7 +35,7 @@ namespace game {
         };
 
         size_t blocks_chunk_index;
-        block* blocks;
+        block_type_t* blocks;
         neighborhood nh;
 
         u8 alpha = 0;

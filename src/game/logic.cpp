@@ -33,18 +33,18 @@ void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_d
     // TODO: Ugly garbage code. Refactor.
     if (raycast.success) {
         if (buttons_down & WPAD_BUTTON_A) {
-            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl)--;
-            *raycast.val.location.bl = { .tp = block::type::air };
-            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl)++;
+            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl_tp)--;
+            *raycast.val.location.bl_tp = block_type_air;
+            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl_tp)++;
             raycast.val.location.ch->modified = true;
             add_important_chunk_mesh_update(*raycast.val.location.ch, raycast.val.location.bl_pos);
         }
         if (buttons_down & WPAD_BUTTON_B) {
             auto normal_offset_loc = get_world_location_at_world_position(chunks, raycast.val.world_block_position + raycast.val.box_raycast.normal);
             if (normal_offset_loc.has_value()) {
-                get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl)--;
-                *normal_offset_loc->bl = { .tp = block::type::stone_slab_bottom };
-                get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl)++;
+                get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl_tp)--;
+                *normal_offset_loc->bl_tp = block_type_wood_planks;
+                get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl_tp)++;
                 normal_offset_loc->ch->modified = true;
                 add_important_chunk_mesh_update(*normal_offset_loc->ch, normal_offset_loc->bl_pos);
             }

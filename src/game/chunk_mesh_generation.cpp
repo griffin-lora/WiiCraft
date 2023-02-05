@@ -4,7 +4,7 @@
 #include "chunk_core.hpp"
 #include "chunk_math.hpp"
 #include "log.hpp"
-#include "block_new.hpp"
+#include "block.hpp"
 #include "pool.hpp"
 #include "gfx/instruction_size.hpp"
 #include "util.h"
@@ -404,13 +404,13 @@ mesh_update_state game::update_core_mesh(chunk& chunk) {
         &chunk.solid_display_lists,
         &chunk.transparent_display_lists,
         &chunk.transparent_double_sided_display_lists,
-        (const block_type_t*)chunk.blocks,
-        chunk.nh.front.has_value() ? (const block_type_t*)chunk.nh.front->get().blocks : NULL,
-        chunk.nh.back.has_value() ? (const block_type_t*)chunk.nh.back->get().blocks : NULL,
-        chunk.nh.top.has_value() ? (const block_type_t*)chunk.nh.top->get().blocks : NULL,
-        chunk.nh.bottom.has_value() ? (const block_type_t*)chunk.nh.bottom->get().blocks : NULL,
-        chunk.nh.right.has_value() ? (const block_type_t*)chunk.nh.right->get().blocks : NULL,
-        chunk.nh.left.has_value() ? (const block_type_t*)chunk.nh.left->get().blocks : NULL
+        chunk.blocks,
+        chunk.nh.front.has_value() ? chunk.nh.front->get().blocks : NULL,
+        chunk.nh.back.has_value() ? chunk.nh.back->get().blocks : NULL,
+        chunk.nh.top.has_value() ? chunk.nh.top->get().blocks : NULL,
+        chunk.nh.bottom.has_value() ? chunk.nh.bottom->get().blocks : NULL,
+        chunk.nh.right.has_value() ? chunk.nh.right->get().blocks : NULL,
+        chunk.nh.left.has_value() ? chunk.nh.left->get().blocks : NULL
     );
 
     return mesh_update_state::should_break;

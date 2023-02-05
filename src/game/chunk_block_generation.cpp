@@ -1,5 +1,6 @@
 #include "chunk_block_generation.hpp"
 #include "chunk_core.hpp"
+#include <string.h>
 
 using namespace game;
 using math::get_noise_at;
@@ -24,9 +25,8 @@ static f32 get_tallgrass_value(glm::vec2 position) {
 }
 
 static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    block block = { .tp = block::type::air };
-    std::fill(chunk.blocks, chunk.blocks + 4096, block);
-    get_block_count_ref(chunk, block) = 4096;
+    memset(chunk.blocks, block_type_air, 4096);
+    get_block_count_ref(chunk, block_type_air) = 4096;
 }
 
 static constexpr s32 z_offset = chunk::size * chunk::size;
@@ -52,35 +52,33 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
             s32 gen_y = (height * 12) + 1;
 
             for (s32 y = 0; y < chunk::size; y++) {
-                auto& block = *it;
-
                 if (y > gen_y) {
                     if (y < 7) {
-                        block = { .tp = block::type::water };
+                        *it = block_type_water;
                     } else if (y == (gen_y + 1) && gen_y >= 7 && tallgrass_value > 0.97f) {
-                        block = { .tp = block::type::tall_grass };
+                        *it = block_type_tall_grass;
                     } else {
-                        block = { .tp = block::type::air };
+                        *it = block_type_air;
                     }
                 } else {
                     if (gen_y < 7) {
                         if (y < (gen_y - 2)) {
-                            block = { .tp = block::type::stone };
+                            *it = block_type_stone;
                         } else {
-                            block = { .tp = block::type::sand };
+                            *it = block_type_sand;
                         }
                     } else if (y < gen_y) {
                         if (y < (gen_y - 2)) {
-                            block = { .tp = block::type::stone };
+                            *it = block_type_stone;
                         } else {
-                            block = { .tp = block::type::dirt };
+                            *it = block_type_dirt;
                         }
                     } else {
-                        block = { .tp = block::type::grass };
+                        *it = block_type_grass;
                     }
                 }
 
-                get_block_count_ref(chunk, block)++;
+                get_block_count_ref(chunk, *it)++;
 
                 it += y_offset;
             }
@@ -92,9 +90,8 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 }
 
 static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    block block = { .tp = block::type::stone };
-    std::fill(chunk.blocks, chunk.blocks + 4096, block);
-    get_block_count_ref(chunk, block) = 4096;
+    memset(chunk.blocks, block_type_stone, 4096);
+    get_block_count_ref(chunk, block_type_stone) = 4096;
 }
 
 mesh_update_state game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {

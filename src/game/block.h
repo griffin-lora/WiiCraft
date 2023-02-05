@@ -1,7 +1,5 @@
 #pragma once
-#include <assert.h>
-#include <gctypes.h>
-#include <assert.h>
+#include <sys/cdefs.h> // TODO: compiler stuff
 
 typedef enum __attribute__((__packed__)) {
     block_type_air,

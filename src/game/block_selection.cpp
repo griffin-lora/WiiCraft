@@ -2,7 +2,7 @@
 #include "rendering.hpp"
 #include "gfx/instruction_size.h"
 #include "util.h"
-#include "block_new.hpp"
+#include "block.hpp"
 #include <string.h>
 
 using namespace game;
@@ -10,7 +10,7 @@ using namespace game;
 #define MATRIX_INDEX GX_PNMTX4
 
 static std::optional<math::vector3s32> last_block_pos;
-static std::optional<block> last_block;
+static std::optional<block_type_t> last_block_type;
 
 static Mtx model;
 static Mtx model_view;
@@ -92,7 +92,7 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
     
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 
-    block_type_t block_type = (block_type_t)raycast.location.bl->tp;
+    block_type_t block_type = *raycast.location.bl_tp;
 
     u8 px = block_pos.x * 4;
     u8 py = block_pos.y * 4;
@@ -171,11 +171,11 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
 void block_selection_handle_raycast(Mtx view, const block_raycast_wrap_t& raycast) {
     if (raycast.success) {
         // Check if we have a new selected block
-        if (!last_block_pos.has_value() || raycast.val.location.bl_pos != last_block_pos || *raycast.val.location.bl != *last_block) {
+        if (!last_block_pos.has_value() || raycast.val.location.bl_pos != last_block_pos || *raycast.val.location.bl_tp != *last_block_type) {
             update_mesh(view, raycast.val);
         }
 
         last_block_pos = raycast.val.location.bl_pos;
-        last_block = *raycast.val.location.bl;
+        last_block_type = *raycast.val.location.bl_tp;
     }
 }

@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace game {
-    template<block::face FACE, typename T>
+    template<block_face_t FACE, typename T>
     constexpr T get_face_offset_position(T pos) {
         call_face_func_for<FACE, void>(
             [&]() { pos.x += 1; },
