@@ -1,5 +1,4 @@
 #include "block_raycast.hpp"
-#include "block_functionality.hpp"
 #include "chunk_core.hpp"
 #include "util.hpp"
 #include "block_new.hpp"

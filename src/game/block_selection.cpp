@@ -1,8 +1,4 @@
 #include "block_selection.hpp"
-#include "face_mesh_generation.hpp"
-#include "face_mesh_generation.inl"
-#include "block_functionality.hpp"
-#include "block_mesh_generation.hpp"
 #include "rendering.hpp"
 #include "gfx/instruction_size.h"
 #include "util.h"

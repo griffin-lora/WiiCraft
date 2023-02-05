@@ -2,8 +2,6 @@
 #include "chunk.hpp"
 #include "block_core.hpp"
 #include "chunk_math.hpp"
-#include "block_mesh_generation.hpp"
-#include "block_util.hpp"
 #include "chrono.hpp"
 
 namespace game {

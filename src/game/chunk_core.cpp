@@ -3,7 +3,8 @@
 #include "chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "glm/gtc/noise.hpp"
-#include "block_functionality.hpp"
+#include "block_new.hpp"
+#include "block_util.hpp"
 #include <algorithm>
 using namespace game;
 
@@ -43,13 +44,11 @@ void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32&
 }
 
 std::size_t& game::get_block_count_ref(chunk& chunk, const block& block) {
-    auto counting_type = get_with_block_functionality<block_counting_type>(block.tp, [&block]<typename BF>() {
-        return BF::get_block_counting_type((game::block::state)game::block::slab_state::bottom);
-    });
-    switch (counting_type) {
-        case block_counting_type::invisible: return chunk.invisible_block_count;
-        case block_counting_type::fully_opaque: return chunk.fully_opaque_block_count;
-        case block_counting_type::partially_opaque: return chunk.partially_opaque_block_count;
+    switch ((block_type_t)block.tp) {
+        default: return chunk.fully_opaque_block_count;
+        case block_type_air: return chunk.invisible_block_count;
+        case block_type_tall_grass:
+        case block_type_water: return chunk.partially_opaque_block_count;
     }
     // Compiler complains despite this being unreachable
     return chunk.invisible_block_count;
