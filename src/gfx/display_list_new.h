@@ -2,12 +2,11 @@
 #include <stddef.h>
 
 typedef struct {
-    size_t size;
+    u16 size;
     void* data;
 } display_list_t;
 
 typedef struct {
-    size_t size;
-    void* chunk;
-    size_t chunk_index;
+    u16 size;
+    u16 chunk_index;
 } pool_display_list_t;

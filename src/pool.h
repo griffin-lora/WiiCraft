@@ -7,7 +7,7 @@
 #define NUM_POOL_CHUNKS 4864
 
 typedef struct {
-    size_t head;
+    u16 head;
     u8 used[(NUM_POOL_CHUNKS / 8) + 1];
 } pool_chunks_info_t;
 

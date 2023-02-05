@@ -62,11 +62,11 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
         ),
         .chunk_index = acquire_pool_chunk()
     };
-    disp_list.chunk = &pool_chunks[disp_list.chunk_index];
-    memset(disp_list.chunk, 0, disp_list.size);
-    DCInvalidateRange(disp_list.chunk, disp_list.size);
+    void* chunk = &pool_chunks[disp_list.chunk_index];
+    memset(chunk, 0, disp_list.size);
+    DCInvalidateRange(chunk, disp_list.size);
 
-    GX_BeginDispList(disp_list.chunk, disp_list.size);
+    GX_BeginDispList(chunk, disp_list.size);
     GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
 
     for (size_t i = 0; i < num_quads; i++) {

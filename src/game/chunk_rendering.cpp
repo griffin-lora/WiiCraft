@@ -44,14 +44,14 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.load(chunk::mat);
 
 			for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-				GX_CallDispList(disp_list.chunk, disp_list.size);
+				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
 			}
 		}
 		for (auto& [ pos, chunk ] : chunks) {
 			chunk.tf.load(chunk::mat);
 
 			for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-				GX_CallDispList(disp_list.chunk, disp_list.size);
+				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
 			}
 		}
 		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
@@ -61,7 +61,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.load(chunk::mat);
 
 			for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-				GX_CallDispList(disp_list.chunk, disp_list.size);
+				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
 			}
 		}
 		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
@@ -73,7 +73,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 
 			chunk.tf.load(chunk::mat);
 			for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-				GX_CallDispList(disp_list.chunk, disp_list.size);
+				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
 			}
 		}
 
@@ -81,7 +81,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.load(chunk::mat);
 
 			for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-				GX_CallDispList(disp_list.chunk, disp_list.size);
+				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
 			}
 		}
 		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
@@ -91,7 +91,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 			chunk.tf.load(chunk::mat);
 
 			for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-				GX_CallDispList(disp_list.chunk, disp_list.size);
+				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
 			}
 		}
 		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
