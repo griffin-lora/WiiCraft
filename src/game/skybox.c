@@ -14,6 +14,7 @@
     GET_VECTOR_INSTRUCTION_SIZE(2, sizeof(u8), VERTEX_COUNT) \
 ))
 _Alignas(32) static u8 disp_list[DISP_LIST_SIZE];
+static size_t disp_list_size;
 
 static Mtx model;
 static Mtx model_view;
@@ -111,7 +112,7 @@ void skybox_init(Mtx view, f32 x, f32 y, f32 z) {
     GX_TexCoord2u8(2, 1);
 
     GX_End();
-    GX_EndDispList();
+    disp_list_size = GX_EndDispList();
 
     skybox_update(view, x, y, z);
 }
@@ -159,5 +160,5 @@ void skybox_draw(void) {
     
     GX_SetCurrentMtx(MATRIX_INDEX);
 
-    GX_CallDispList(disp_list, DISP_LIST_SIZE);
+    GX_CallDispList(disp_list, disp_list_size);
 }

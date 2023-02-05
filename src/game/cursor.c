@@ -13,6 +13,7 @@
     GET_VECTOR_INSTRUCTION_SIZE(2, sizeof(u8), VERTEX_COUNT) \
 ))
 _Alignas(32) static u8 disp_list[DISP_LIST_SIZE];
+static size_t disp_list_size;
 
 static Mtx model_view;
 
@@ -32,7 +33,7 @@ void cursor_init(void) {
 
     GX_End();
 
-    GX_EndDispList();
+    disp_list_size = GX_EndDispList();
 }
 
 void cursor_update(u16 v_width, u16 v_height) {
@@ -47,7 +48,7 @@ void cursor_draw(void) {
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR0A0);
     
 	GX_SetCurrentMtx(MATRIX_INDEX);
-    GX_CallDispList(disp_list, DISP_LIST_SIZE);
+    GX_CallDispList(disp_list, disp_list_size);
 
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_U16, 0); // hacky fix
 }
