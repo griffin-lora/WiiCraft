@@ -107,10 +107,10 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
 
     switch (block_type) {
         default:
-            disp_list_size = CUBE_DISP_LIST_SIZE;
             cull_back = true;
 
-            memset(disp_list, 0, sizeof(disp_list));
+            memset(disp_list, 0, CUBE_DISP_LIST_SIZE);
+            DCInvalidateRange(disp_list, CUBE_DISP_LIST_SIZE);
             
             GX_BeginDispList(disp_list, CUBE_DISP_LIST_SIZE);
             GX_Begin(GX_QUADS, GX_VTXFMT0, CUBE_VERTEX_COUNT);
@@ -141,17 +141,17 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
             GX_Position3u8(px, py, pz);	// Bottom Right Of The Quad (Left)
             
             GX_End();
-            GX_EndDispList();
+            disp_list_size = GX_EndDispList();
 
             break;
         case block_type_air:
             disp_list_size = 0;
             break;
         case block_type_tall_grass:
-            disp_list_size = CROSS_DISP_LIST_SIZE;
             cull_back = false;
             
-            memset(disp_list, 0, sizeof(disp_list));
+            memset(disp_list, 0, CROSS_DISP_LIST_SIZE);
+            DCInvalidateRange(disp_list, CROSS_DISP_LIST_SIZE);
 
             GX_BeginDispList(disp_list, CROSS_DISP_LIST_SIZE);
             GX_Begin(GX_QUADS, GX_VTXFMT0, CROSS_VERTEX_COUNT);
@@ -166,7 +166,7 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
             GX_Position3u8(pox, poy, pz);
 
             GX_End();
-            GX_EndDispList();
+            disp_list_size = GX_EndDispList();
 
             break;
     }

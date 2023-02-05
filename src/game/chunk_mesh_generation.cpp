@@ -58,7 +58,7 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
     size_t num_verts = num_quads * 4;
 
     pool_display_list_t disp_list = {
-        .size = ALIGN_TO_32(
+        .size = align_to_32(
             get_begin_instruction_size(num_verts) +
             get_vector_instruction_size<u8>(3, num_verts) + 
             get_vector_instruction_size<u8>(2, num_verts)
@@ -97,7 +97,7 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
     }
     
     GX_End();
-    disp_list.size = GX_EndDispList(); // idk why i set the size
+    disp_list.size = GX_EndDispList();
 
     return disp_list;
 }
