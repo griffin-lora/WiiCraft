@@ -248,9 +248,15 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
 }
 
 static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, meshes_indices_t indices) {
-    solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.solid, building_meshes_arrays.solid));
-    transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.transparent, building_meshes_arrays.transparent));
-    transparent_double_sided_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+    if (indices.solid != 0) {
+        solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.solid, building_meshes_arrays.solid));
+    }
+    if (indices.transparent != 0) {
+        transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.transparent, building_meshes_arrays.transparent));
+    }
+    if (indices.transparent_double_sided != 0) {
+        transparent_double_sided_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+    }
 }
 
 #define NUM_BLOCKS (16 * 16 * 16)
