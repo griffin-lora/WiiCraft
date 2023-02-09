@@ -22,13 +22,9 @@ typedef struct {
 
 static_assert(sizeof(block_mesh_t) == 4, "");
 
-#define NUM_BUILDING_MESHES 202
-
-typedef block_mesh_t building_meshes_t[NUM_BUILDING_MESHES];
-// static_assert(sizeof(building_quads_t) == 4096, "");
-
-// typedef block_type_t block_chunk_t[16 * 16 * 16];
-// static_assert(sizeof(block_chunk_t) == 4096, "");
+#define NUM_SOLID_BUILDING_MESHES 204
+#define NUM_TRANSPARENT_BUILDING_MESHES 204
+#define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES 102
 
 typedef enum {
     building_meshes_type_solid,
@@ -37,9 +33,9 @@ typedef enum {
 } building_meshes_type_t;
 
 typedef struct {
-    alignas(32) building_meshes_t solid;
-    alignas(32) building_meshes_t transparent;
-    alignas(32) building_meshes_t transparent_double_sided;
+    alignas(32) block_mesh_t solid[NUM_SOLID_BUILDING_MESHES];
+    alignas(32) block_mesh_t transparent[NUM_TRANSPARENT_BUILDING_MESHES];
+    alignas(32) block_mesh_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES];
 } building_meshes_arrays_t;
 
 static_assert(sizeof(building_meshes_arrays_t) <= 4096*3, "");
@@ -104,14 +100,11 @@ static u8 get_face_tex(block_type_t type, block_face_t face) {
     }
 }
 
+static u8 get_tex(block_type_t type) {
+    return 5;
+}
+
 static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t type, size_t num_meshes, const block_mesh_t meshes[]) {
-    // TODO: Temp fix
-    if (type == building_meshes_type_transparent_double_sided) {
-        return {
-            .size = 0,
-            .chunk_index = acquire_pool_chunk()
-        };
-    }
     size_t num_verts = num_meshes * ((type != building_meshes_type_transparent_double_sided) ? 4 : 8);
 
     pool_display_list_t disp_list = {
@@ -122,9 +115,6 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
         ),
         .chunk_index = acquire_pool_chunk()
     };
-    if (disp_list.size > 4096) {
-        lprintf("%d\n", disp_list.size);
-    }
     void* chunk = &pool_chunks[disp_list.chunk_index];
     memset(chunk, 0, disp_list.size);
     DCInvalidateRange(chunk, disp_list.size);
@@ -132,84 +122,123 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
     GX_BeginDispList(chunk, disp_list.size);
     GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
 
-    for (size_t i = 0; i < num_meshes; i++) {
-        block_mesh_t mesh = meshes[i];
+    switch (type) {
+        case building_meshes_type_solid:
+        case building_meshes_type_transparent:
+            for (size_t i = 0; i < num_meshes; i++) {
+                block_mesh_t mesh = meshes[i];
 
-        block_type_t block_type = (block_type_t)(mesh.type / 8);
-        block_face_t block_face = (block_face_t)(mesh.type % 8);
-        u8 px = mesh.x * 4;
-        u8 py = mesh.y * 4;
-        u8 pz = mesh.z * 4;
-        u8 pox = px + 4;
-        u8 poy = py + 4;
-        u8 poz = pz + 4;
-        u8 tx = get_face_tex(block_type, block_face);
-        u8 tox = tx + 1;
-        u8 ty = 0;
-        u8 toy = 16;
+                block_type_t block_type = (block_type_t)(mesh.type / 8);
+                block_face_t block_face = (block_face_t)(mesh.type % 8);
+                u8 px = mesh.x * 4;
+                u8 py = mesh.y * 4;
+                u8 pz = mesh.z * 4;
+                u8 pox = px + 4;
+                u8 poy = py + 4;
+                u8 poz = pz + 4;
+                u8 tx = get_face_tex(block_type, block_face);
+                u8 tox = tx + 1;
+                u8 ty = 0;
+                u8 toy = 16;
 
-        switch (block_face) {
-            case block_face_front:
-                GX_Position3u8(pox, poy, pz);
+                switch (block_face) {
+                    case block_face_front:
+                        GX_Position3u8(pox, poy, pz);
+                        GX_TexCoord2u8(tx, ty);
+                        GX_Position3u8(pox, py, pz);
+                        GX_TexCoord2u8(tx, toy);
+                        GX_Position3u8(pox, py,poz);
+                        GX_TexCoord2u8(tox, toy);
+                        GX_Position3u8(pox, poy,poz);
+                        GX_TexCoord2u8(tox, ty);
+                        break;
+                    case block_face_back:
+                        GX_Position3u8(px, poy, pz);
+                        GX_TexCoord2u8(tx, ty);	// Top Left of the quad (top)
+                        GX_Position3u8(px, poy, poz);
+                        GX_TexCoord2u8(tox, ty);	// Top Right of the quad (top)
+                        GX_Position3u8(px, py, poz);
+                        GX_TexCoord2u8(tox, toy);	// Bottom Right of the quad (top)
+                        GX_Position3u8(px, py, pz);
+                        GX_TexCoord2u8(tx, toy);		// Bottom Left of the quad (top)
+                        break;
+                    case block_face_top:
+                        GX_Position3u8(px, poy, poz);
+                        GX_TexCoord2u8(tx, ty);	// Bottom Left Of The Quad (Back)
+                        GX_Position3u8(px, poy, pz);
+                        GX_TexCoord2u8(tox, ty);	// Bottom Right Of The Quad (Back)
+                        GX_Position3u8(pox, poy, pz); 
+                        GX_TexCoord2u8(tox, toy);	// Top Right Of The Quad (Back)
+                        GX_Position3u8(pox, poy, poz);
+                        GX_TexCoord2u8(tx, toy);	// Top Left Of The Quad (Back)
+                        break;
+                    case block_face_bottom:
+                        GX_Position3u8(px, py, poz);
+                        GX_TexCoord2u8(tx, ty);		// Top Right Of The Quad (Front)
+                        GX_Position3u8(pox, py, poz);
+                        GX_TexCoord2u8(tox, ty);	// Top Left Of The Quad (Front)
+                        GX_Position3u8(pox, py, pz);
+                        GX_TexCoord2u8(tox, toy);	// Bottom Left Of The Quad (Front)
+                        GX_Position3u8(px, py, pz); 
+                        GX_TexCoord2u8(tx, toy);	// Bottom Right Of The Quad (Front)
+                        break;
+                    case block_face_right:
+                        GX_Position3u8(pox, py, poz);
+                        GX_TexCoord2u8(tx, toy);	// Top Right Of The Quad (Right)
+                        GX_Position3u8(px, py, poz);
+                        GX_TexCoord2u8(tox, toy);		// Top Left Of The Quad (Right)
+                        GX_Position3u8(px, poy, poz);
+                        GX_TexCoord2u8(tox, ty);	// Bottom Left Of The Quad (Right)
+                        GX_Position3u8(pox, poy, poz);
+                        GX_TexCoord2u8(tx, ty);	// Bottom Right Of The Quad (Right)
+                        break;
+                    case block_face_left:
+                        GX_Position3u8(pox, py, pz);
+                        GX_TexCoord2u8(tx, toy);	// Top Right Of The Quad (Left)
+                        GX_Position3u8(pox, poy, pz); 
+                        GX_TexCoord2u8(tx, ty);	// Top Left Of The Quad (Left)
+                        GX_Position3u8(px, poy, pz);
+                        GX_TexCoord2u8(tox, ty);	// Bottom Left Of The Quad (Left)
+                        GX_Position3u8(px, py, pz);
+                        GX_TexCoord2u8(tox, toy);	// Bottom Right Of The Quad (Left)
+                        break;
+                }
+            }
+            break;
+        case building_meshes_type_transparent_double_sided:
+            for (size_t i = 0; i < num_meshes; i++) {
+                block_mesh_t mesh = meshes[i];
+
+                u8 px = mesh.x * 4;
+                u8 py = mesh.y * 4;
+                u8 pz = mesh.z * 4;
+                u8 pox = px + 4;
+                u8 poy = py + 4;
+                u8 poz = pz + 4;
+                u8 tx = get_tex((block_type_t)mesh.type);
+                u8 tox = tx + 1;
+                u8 ty = 0;
+                u8 toy = 16;
+
+                GX_Position3u8(px, py, pz);
+                GX_TexCoord2u8(tx, toy);
+                GX_Position3u8(pox, py, poz);
+                GX_TexCoord2u8(tox, toy);
+                GX_Position3u8(pox, poy, poz);
+                GX_TexCoord2u8(tox, ty);
+                GX_Position3u8(px, poy, pz);
                 GX_TexCoord2u8(tx, ty);
+
                 GX_Position3u8(pox, py, pz);
                 GX_TexCoord2u8(tx, toy);
-                GX_Position3u8(pox, py,poz);
+                GX_Position3u8(px, py, poz);
                 GX_TexCoord2u8(tox, toy);
-                GX_Position3u8(pox, poy,poz);
+                GX_Position3u8(px, poy, poz);
                 GX_TexCoord2u8(tox, ty);
-                break;
-            case block_face_back:
-                GX_Position3u8(px, poy, pz);
-                GX_TexCoord2u8(tx, ty);	// Top Left of the quad (top)
-                GX_Position3u8(px, poy, poz);
-                GX_TexCoord2u8(tox, ty);	// Top Right of the quad (top)
-                GX_Position3u8(px, py, poz);
-                GX_TexCoord2u8(tox, toy);	// Bottom Right of the quad (top)
-                GX_Position3u8(px, py, pz);
-                GX_TexCoord2u8(tx, toy);		// Bottom Left of the quad (top)
-                break;
-            case block_face_top:
-                GX_Position3u8(px, poy, poz);
-                GX_TexCoord2u8(tx, ty);	// Bottom Left Of The Quad (Back)
-                GX_Position3u8(px, poy, pz);
-                GX_TexCoord2u8(tox, ty);	// Bottom Right Of The Quad (Back)
-                GX_Position3u8(pox, poy, pz); 
-                GX_TexCoord2u8(tox, toy);	// Top Right Of The Quad (Back)
-                GX_Position3u8(pox, poy, poz);
-                GX_TexCoord2u8(tx, toy);	// Top Left Of The Quad (Back)
-                break;
-            case block_face_bottom:
-                GX_Position3u8(px, py, poz);
-                GX_TexCoord2u8(tx, ty);		// Top Right Of The Quad (Front)
-                GX_Position3u8(pox, py, poz);
-                GX_TexCoord2u8(tox, ty);	// Top Left Of The Quad (Front)
-                GX_Position3u8(pox, py, pz);
-                GX_TexCoord2u8(tox, toy);	// Bottom Left Of The Quad (Front)
-                GX_Position3u8(px, py, pz); 
-                GX_TexCoord2u8(tx, toy);	// Bottom Right Of The Quad (Front)
-                break;
-            case block_face_right:
-                GX_Position3u8(pox, py, poz);
-                GX_TexCoord2u8(tx, toy);	// Top Right Of The Quad (Right)
-                GX_Position3u8(px, py, poz);
-                GX_TexCoord2u8(tox, toy);		// Top Left Of The Quad (Right)
-                GX_Position3u8(px, poy, poz);
-                GX_TexCoord2u8(tox, ty);	// Bottom Left Of The Quad (Right)
-                GX_Position3u8(pox, poy, poz);
-                GX_TexCoord2u8(tx, ty);	// Bottom Right Of The Quad (Right)
-                break;
-            case block_face_left:
-                GX_Position3u8(pox, py, pz);
-                GX_TexCoord2u8(tx, toy);	// Top Right Of The Quad (Left)
-                GX_Position3u8(pox, poy, pz); 
-                GX_TexCoord2u8(tx, ty);	// Top Left Of The Quad (Left)
-                GX_Position3u8(px, poy, pz);
-                GX_TexCoord2u8(tox, ty);	// Bottom Left Of The Quad (Left)
-                GX_Position3u8(px, py, pz);
-                GX_TexCoord2u8(tox, toy);	// Bottom Right Of The Quad (Left)
-                break;
-        }
+                GX_Position3u8(pox, poy, pz);
+                GX_TexCoord2u8(tx, ty);
+            }
+            break;
     }
     
     GX_End();
@@ -222,10 +251,6 @@ static void write_into_display_lists(std::vector<pool_display_list_t>* solid_dis
     solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.solid, building_meshes_arrays.solid));
     transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.transparent, building_meshes_arrays.transparent));
     transparent_double_sided_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
-}
-
-static u8 get_tex(block_type_t type) {
-    return 5;
 }
 
 #define NUM_BLOCKS (16 * 16 * 16)
@@ -344,30 +369,18 @@ static void generate_block_meshes(
                     } break;
                     case block_mesh_category_cross: {
                         building_meshes_arrays.transparent_double_sided[indices.all.transparent_double_sided++] = (block_mesh_t){
-                            .type = (u8)(type * 8),
+                            .type = (u8)type,
                             .x = (u8)x,
                             .y = (u8)y,
                             .z = (u8)z
                         };
-                        // building_meshes_arrays.transparent_double_sided[indices.all.transparent_double_sided++] = block_quad_t{{
-                        //     { px, py, pz, txoy },
-                        //     { pox, py, poz, toxoy },
-                        //     { pox, poy, poz, toxy },
-                        //     { px, poy, pz, txy }
-                        // }};
-                        // building_meshes_arrays.transparent_double_sided[indices.all.transparent_double_sided++] = block_quad_t{{
-                        //     { pox, py, pz, txoy },
-                        //     { px, py, poz, toxoy },
-                        //     { px, poy, poz, toxy },
-                        //     { pox, poy, pz, txy }
-                        // }};
                     } break;
                 }
 
                 if (
-                    indices.all.solid >= (NUM_BUILDING_MESHES - 6) ||
-                    indices.all.transparent >= (NUM_BUILDING_MESHES - 6) ||
-                    indices.all.transparent_double_sided >= (NUM_BUILDING_MESHES - 1)
+                    indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6) ||
+                    indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6) ||
+                    indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)
                 ) [[unlikely]] {
                     write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, indices.all);
                     indices.all = {
