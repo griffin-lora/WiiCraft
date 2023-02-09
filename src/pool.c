@@ -12,8 +12,8 @@ void pool_init(void) {
     memset(pool_chunks_info.used, 0, sizeof(pool_chunks_info.used));
 }
 
-size_t acquire_pool_chunk(void) {
-    size_t head = pool_chunks_info.head;
+u16 acquire_pool_chunk(void) {
+    u16 head = pool_chunks_info.head;
     for (;;) {
         u32 bit_index = head % 8;
         if (!((pool_chunks_info.used[head / 8] >> bit_index) & 0x1)) {
@@ -33,7 +33,7 @@ size_t acquire_pool_chunk(void) {
     }
 }
 
-void release_pool_chunk(size_t index) {
+void release_pool_chunk(u16 index) {
     pool_chunks_info.used[index / 8] ^= 0x1 << (index % 8);
     pool_chunks_info.head = index;
 }

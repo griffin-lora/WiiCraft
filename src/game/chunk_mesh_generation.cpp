@@ -55,7 +55,7 @@ static pool_display_list_t write_quads_into_display_list(size_t num_quads, const
     size_t num_verts = num_quads * 4;
 
     pool_display_list_t disp_list = {
-        .size = align_to_32(
+        .size = (u16)align_to_32(
             get_begin_instruction_size(num_verts) +
             get_vector_instruction_size<u8>(3, num_verts) + 
             get_vector_instruction_size<u8>(2, num_verts)

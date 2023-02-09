@@ -18,9 +18,9 @@ typedef u8 pool_chunk_t[4096];
 extern pool_chunk_t pool_chunks[NUM_POOL_CHUNKS];
 _Static_assert(sizeof(pool_chunks) == 0x1300000, "");
 
-#define NULL_POOL_CHUNK_INDEX UINT32_MAX
+#define NULL_POOL_CHUNK_INDEX UINT16_MAX
 
 void pool_init(void);
 
-size_t acquire_pool_chunk(void);
-void release_pool_chunk(size_t index);
+u16 acquire_pool_chunk(void);
+void release_pool_chunk(u16 index);
