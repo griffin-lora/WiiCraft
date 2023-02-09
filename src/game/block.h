@@ -9,11 +9,9 @@ typedef enum __attribute__((__packed__)) {
     block_type_dirt,
     block_type_sand,
     block_type_wood_planks,
-    block_type_stone_slab_bottom,
-    block_type_stone_slab_top,
     block_type_stone_slab_both,
-    block_type_tall_grass,
-    block_type_water
+    block_type_water,
+    block_type_tall_grass
 } block_type_t;
 
 typedef enum __attribute__((__packed__)) {
