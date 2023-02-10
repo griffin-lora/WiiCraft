@@ -1,28 +1,26 @@
-#include "chunk_rendering.hpp"
-#include "gfx.hpp"
-#include "pool.hpp"
+#include "chunk_rendering.h"
+#include "pool.h"
+#include <ogc/gx.h>
 
-using namespace game;
-
-static void draw_pool(const math::matrix view, block_display_list_pool_t* pool) {
+static void draw_pool(Mtx view, block_display_list_pool_t* pool) {
 	const block_display_list_t* disp_lists = pool->disp_lists;
-	pool_chunk_t* chunks = pool->chunks;
+	block_display_list_chunk_t* chunks = pool->chunks;
 	for (size_t i = 0; i < pool->head; i++) {
 		const block_display_list_t* disp_list = &disp_lists[i];
 
-		math::matrix model;
-		math::matrix model_view;
+		Mtx model;
+		Mtx model_view;
 		guMtxIdentity(model);
 		guMtxTransApply(model, model, disp_list->x, disp_list->y, disp_list->z);
-		guMtxConcat(const_cast<f32(*)[4]>(view), model, model_view);
+		guMtxConcat(view, model, model_view);
 
-		GX_LoadPosMtxImm(model_view, chunk::mat);
+		GX_LoadPosMtxImm(model_view, GX_PNMTX5);
 
 		GX_CallDispList(chunks[disp_list->chunk_index], disp_list->size);
 	}
 }
 
-void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
+void draw_block_display_lists(Mtx view) {
 	GX_SetNumTevStages(2);
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
@@ -49,7 +47,7 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 	// I dont think that information is acccurate
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 
-	GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, 0xff }); // Set alpha
+	GX_SetTevColor(GX_TEVREG1, (GXColor){ 0xff, 0xff, 0xff, 0xff }); // Set alpha
 
 	draw_pool(view, &solid_display_list_pool);
 	draw_pool(view, &transparent_display_list_pool);

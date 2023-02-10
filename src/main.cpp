@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
 
 		GX_SetCurrentMtx(game::chunk::mat);
 
-		game::draw_chunks(view, cam, chunks);
+		draw_block_display_lists(view);
 		
 		if (raycast.success) {
 			block_selection_draw(now);
