@@ -247,18 +247,6 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
     return disp_list;
 }
 
-static void write_into_display_lists(std::vector<pool_display_list_t>* solid_display_lists, std::vector<pool_display_list_t>* transparent_display_lists, std::vector<pool_display_list_t>* transparent_double_sided_lists, meshes_indices_t indices) {
-    if (indices.solid != 0) {
-        solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.solid, building_meshes_arrays.solid));
-    }
-    if (indices.transparent != 0) {
-        transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.transparent, building_meshes_arrays.transparent));
-    }
-    if (indices.transparent_double_sided != 0) {
-        transparent_double_sided_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
-    }
-}
-
 #define NUM_BLOCKS (16 * 16 * 16)
 #define Z_OFFSET (16 * 16)
 #define Y_OFFSET 16
@@ -383,17 +371,17 @@ static void generate_block_meshes(
                     } break;
                 }
 
-                if (
-                    indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6) ||
-                    indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6) ||
-                    indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)
-                ) [[unlikely]] {
-                    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, indices.all);
-                    indices.all = {
-                        .solid = 0,
-                        .transparent = 0,
-                        .transparent_double_sided = 0
-                    };
+                if (indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6)) {
+                    solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.all.solid, building_meshes_arrays.solid));
+                    indices.all.solid = 0;
+                }
+                if (indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6)) {
+                    transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.all.transparent, building_meshes_arrays.transparent));
+                    indices.all.transparent = 0;
+                }
+                if (indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)) {
+                    transparent_double_sided_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+                    indices.all.transparent_double_sided = 0;
                 }
 
                 blocks_index++;
@@ -401,12 +389,15 @@ static void generate_block_meshes(
         }
     }
 
-    write_into_display_lists(solid_display_lists, transparent_display_lists, transparent_double_sided_display_lists, indices.all);
-    indices.all = {
-        .solid = 0,
-        .transparent = 0,
-        .transparent_double_sided = 0
-    };
+    if (indices.all.solid > 0) {
+        solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.all.solid, building_meshes_arrays.solid));
+    }
+    if (indices.all.transparent > 0) {
+        transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.all.transparent, building_meshes_arrays.transparent));
+    }
+    if (indices.all.transparent_double_sided > 0) {
+        transparent_double_sided_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+    }
 }
 
 mesh_update_state game::update_core_mesh(chunk& chunk) {
