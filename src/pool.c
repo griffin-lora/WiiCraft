@@ -9,31 +9,30 @@ _Alignas(32) pool_chunks_info_t pool_chunks_info = {
 _Alignas(0x40000) pool_chunk_t pool_chunks[NUM_POOL_CHUNKS];
 
 void pool_init(void) {
-    memset(pool_chunks_info.used, 0, sizeof(pool_chunks_info.used));
-}
-
-u16 acquire_pool_chunk(void) {
-    u16 head = pool_chunks_info.head;
-    for (;;) {
-        u32 bit_index = head % 8;
-        if (!((pool_chunks_info.used[head / 8] >> bit_index) & 0x1)) {
-            pool_chunks_info.used[head / 8] |= 0x1 << bit_index;
-            pool_chunks_info.head = head + 1;
-            pool_chunks_info.head %= NUM_POOL_CHUNKS;
-
-            return head;
-        }
-
-        head++;
-        head %= NUM_POOL_CHUNKS;
-
-        if (head == pool_chunks_info.head) {
-            return NULL_POOL_CHUNK_INDEX;
-        }
+    u16* chunk_indices = pool_chunks_info.chunk_indices;
+    for (u16 i = 0; i < NUM_POOL_CHUNKS; i++) {
+        chunk_indices[i] = i;
     }
 }
 
-void release_pool_chunk(u16 index) {
-    pool_chunks_info.used[index / 8] ^= 0x1 << (index % 8);
-    pool_chunks_info.head = index;
+u16 acquire_pool_chunk(void) {
+    return pool_chunks_info.chunk_indices[pool_chunks_info.head++];
+}
+
+void release_pool_chunk(u16 chunk_index) {
+    // This is pretty slow unfortunately
+    u16 head = pool_chunks_info.head;
+    u16* chunk_indices = pool_chunks_info.chunk_indices;
+    
+    for (u16 i = 0; i < NUM_POOL_CHUNKS; i++) {
+        if (chunk_indices[i] == chunk_index) {
+            memmove(&chunk_indices[i], &chunk_indices[i + 1], (head - i - 1) * sizeof(u16));
+            head--;
+            chunk_indices[head] = chunk_index;
+            
+            break;
+        }
+    }
+
+    pool_chunks_info.head = head;
 }

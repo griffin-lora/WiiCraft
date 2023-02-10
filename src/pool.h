@@ -8,7 +8,8 @@
 
 typedef struct {
     u16 head;
-    u8 used[(NUM_POOL_CHUNKS / 8) + 1];
+    // Every index before the head is used, every index after the head is unused
+    u16 chunk_indices[NUM_POOL_CHUNKS];
 } pool_chunks_info_t;
 
 extern pool_chunks_info_t pool_chunks_info;
@@ -23,4 +24,4 @@ _Static_assert(sizeof(pool_chunks) == 0x1300000, "");
 void pool_init(void);
 
 u16 acquire_pool_chunk(void);
-void release_pool_chunk(u16 index);
+void release_pool_chunk(u16 chunk_index);
