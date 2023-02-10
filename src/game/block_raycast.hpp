@@ -16,7 +16,7 @@ typedef struct {
     block_raycast_t val;
 } block_raycast_wrap_t;
 
-typedef enum {
+typedef enum __attribute__((__packed__)) {
     block_box_type_collision,
     block_box_type_selection
 } block_box_type_t;

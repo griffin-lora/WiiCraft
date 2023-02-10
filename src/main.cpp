@@ -29,6 +29,7 @@
 #include "common.hpp"
 #include "log.hpp"
 #include "pool.h"
+#include "game/block_world_management.hpp"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -85,14 +86,9 @@ int main(int argc, char** argv) {
 	u16 frame_count = 0;
 	#endif
 
-	game::chunk::map chunks;
+	// game::chunk::map chunks;
 
-	game::stored_chunk::map stored_chunks;
-
-	// This is a variable whose lifetime is bound to the manage_chunks_around_camera function normally. However, reallocation is expensive, it is stored here.
-	std::vector<math::vector3s32> chunk_positions_to_erase;
-	game::chunk::pos_set chunk_positions_to_generate_blocks;
-	game::chunk::pos_set chunk_positions_to_update_neighborhood_and_mesh;
+	// game::stored_chunk::map stored_chunks;
 
 	skybox_init(view, cam.position.x, cam.position.y, cam.position.z);
 	
@@ -164,20 +160,21 @@ int main(int argc, char** argv) {
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
-		block_selection_handle_raycast(view, raycast);
+		// auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
+		// block_selection_handle_raycast(view, raycast);
 
-		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
-		character.apply_physics(chunks, frame_delta);
+		// game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
+		// character.apply_physics(chunks, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time, now);
-		game::update_chunk_neighborhoods(chunks);
+		// game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time, now);
+		// game::update_chunk_neighborhoods(chunks);
+		manage_block_world();
 
 		game::update_needed(view, perspective_3d, cam);
 
-		game::update_chunk_visuals(chunks, total_mesh_gen_time, last_mesh_gen_time, now);
+		// game::update_chunk_visuals(chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		if (cam.update_view) {
 			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);
@@ -192,13 +189,13 @@ int main(int argc, char** argv) {
 
 		draw_block_display_lists(view);
 		
-		if (raycast.success) {
-			block_selection_draw(now);
-		}
+		// if (raycast.success) {
+		// 	block_selection_draw(now);
+		// }
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();
-		water_overlay.draw(cam, chunks);
+		// water_overlay.draw(cam, chunks);
 		cursor_draw();
 
 		game::init_text_rendering();

@@ -37,6 +37,7 @@ block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t
         case block_display_list_type_transparent: return &transparent_display_list_pool;
         case block_display_list_type_transparent_double_sided: return &transparent_double_sided_display_list_pool;
     }
+    return NULL;
 }
 
 block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type) {
@@ -67,7 +68,7 @@ void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 c
 }
 
 u16 acquire_block_pool_chunk(void) {
-    return block_pool.chunk_indices[block_pool.head++];
+    return block_pool.head++;
 }
 
 void release_block_pool_chunk(u16 chunk_index) {
