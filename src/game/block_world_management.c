@@ -1,5 +1,6 @@
 #include "block_world_management.h"
 #include "block_world_mesh_generation.h"
+#include "block_world_procedural_generation.h"
 #include "pool.h"
 #include <stdbool.h>
 #include <string.h>
@@ -12,12 +13,14 @@ void manage_block_world(void) {
     }
     x = true;
 
-    u16 index = acquire_block_pool_chunk();
-    block_pool.positions[index] = (vec3_s32_t){
+    vec3_s32_t pos = {
         .x = 0,
-        .y = 1,
+        .y = 0,
         .z = 0
     };
+
+    u16 index = acquire_block_pool_chunk();
+    block_pool.positions[index] = pos;
     
     u16 chunk_index = block_pool.chunk_indices[index];
     block_chunk_t* chunk = &block_pool.chunks[chunk_index];
@@ -29,8 +32,7 @@ void manage_block_world(void) {
     chunk->right_chunk_index = NULL_CHUNK_INDEX;
     chunk->left_chunk_index = NULL_CHUNK_INDEX;
 
-    memset(chunk->blocks, block_type_air, sizeof(chunk->blocks));
-    memset(chunk->blocks + 64, block_type_stone, 64);
+    generate_procedural_blocks(pos, chunk->blocks);
 
     update_block_chunk_visuals((vec3s){ 0, 16, 0 }, chunk);
 }

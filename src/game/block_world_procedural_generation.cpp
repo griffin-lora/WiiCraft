@@ -1,4 +1,4 @@
-#include "chunk_block_generation.hpp"
+#include "block_world_procedural_generation.hpp"
 #include "chunk_core.hpp"
 #include <string.h>
 
@@ -24,17 +24,16 @@ static f32 get_tallgrass_value(glm::vec2 position) {
     );
 }
 
-static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    memset(chunk.blocks, block_type_air, 4096);
-    get_block_count_ref(chunk, block_type_air) = 4096;
+static void generate_high_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
+    memset(block_types, block_type_air, 4096);
 }
 
 static constexpr s32 z_offset = chunk::size * chunk::size;
 static constexpr s32 y_offset = chunk::size;
 static constexpr s32 x_offset = 1;
 
-static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    auto it = chunk.blocks;
+static void generate_middle_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
+    auto it = block_types;
 
     f32 world_chunk_x = chunk_pos.x * chunk::size;
     f32 world_chunk_z = chunk_pos.z * chunk::size;
@@ -78,8 +77,6 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
                     }
                 }
 
-                get_block_count_ref(chunk, *it)++;
-
                 it += y_offset;
             }
 
@@ -89,20 +86,17 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
     }
 }
 
-static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    memset(chunk.blocks, block_type_stone, 4096);
-    get_block_count_ref(chunk, block_type_stone) = 4096;
+static void generate_low_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
+    memset(block_types, block_type_stone, 4096);
 }
 
-mesh_update_state game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+void generate_procedural_blocks(vec3_s32_t pos, block_type_t block_types[]) {
+    math::vector3s32 chunk_pos = { pos.x, pos.y, pos.z };
     if (chunk_pos.y > 0) {
-        generate_high_blocks(chunk, chunk_pos);
-        return mesh_update_state::should_continue;
+        generate_high_blocks(chunk_pos, block_types);
     } else if (chunk_pos.y < 0) {
-        generate_low_blocks(chunk, chunk_pos);
-        return mesh_update_state::should_continue;
+        generate_low_blocks(chunk_pos, block_types);
     } else {
-        generate_middle_blocks(chunk, chunk_pos);
-        return mesh_update_state::should_break;
+        generate_middle_blocks(chunk_pos, block_types);
     }
 }
