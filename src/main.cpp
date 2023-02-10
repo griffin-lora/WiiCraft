@@ -28,7 +28,6 @@
 #include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "log.hpp"
-#include "gfx/texture_load.hpp"
 #include "pool.h"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
@@ -50,20 +49,9 @@ int main(int argc, char** argv) {
 
 	pool_init();
 
-	game_textures_t textures = load_game_textures();
-
 	input::init(rmode->viWidth, rmode->viHeight);
 
 	input::set_resolution(rmode->viWidth, rmode->viHeight);
-
-	GX_InitTexObjFilterMode(&textures.chunk, GX_NEAR, GX_NEAR);
-	GX_InitTexObjFilterMode(&textures.icons, GX_NEAR, GX_NEAR);
-	GX_InitTexObjFilterMode(&textures.font, GX_NEAR, GX_NEAR);
-
-	GX_LoadTexObj(&textures.chunk, GX_TEXMAP0);
-	GX_LoadTexObj(&textures.icons, GX_TEXMAP1);
-	GX_LoadTexObj(&textures.skybox, GX_TEXMAP2);
-	GX_LoadTexObj(&textures.font, GX_TEXMAP3);
 
 	math::matrix44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
