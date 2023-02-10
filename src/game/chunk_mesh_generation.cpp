@@ -101,11 +101,11 @@ static u8 get_tex(block_type_t type) {
 static u16 write_meshes_into_display_list(block_display_list_type_t type, glm::vec3 world_pos, size_t num_meshes, const block_mesh_t meshes[]) {
     size_t num_verts = num_meshes * ((type != block_display_list_type_transparent_double_sided) ? 4 : 8);
 
-    block_display_list_chunk_descriptor_t* descriptor = acquire_block_display_list_pool_chunk(type);
-    descriptor->x = world_pos.x;
-    descriptor->y = world_pos.y;
-    descriptor->z = world_pos.z;
-    u16 chunk_index = descriptor->chunk_index;
+    block_display_list_t* disp_list = acquire_block_display_list_pool_chunk(type);
+    disp_list->x = world_pos.x;
+    disp_list->y = world_pos.y;
+    disp_list->z = world_pos.z;
+    u16 chunk_index = disp_list->chunk_index;
     u16 display_list_size = (u16)align_to_32(
         get_begin_instruction_size(num_verts) +
         get_vector_instruction_size<u8>(3, num_verts) + 
@@ -240,7 +240,7 @@ static u16 write_meshes_into_display_list(block_display_list_type_t type, glm::v
     }
     
     GX_End();
-    descriptor->size = GX_EndDispList();
+    disp_list->size = GX_EndDispList();
 
     return chunk_index;
 }

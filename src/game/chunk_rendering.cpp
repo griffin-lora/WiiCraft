@@ -5,20 +5,20 @@
 using namespace game;
 
 static void draw_pool(const math::matrix view, block_display_list_pool_t* pool) {
-	const block_display_list_chunk_descriptor_t* descriptors = pool->descriptors;
+	const block_display_list_t* disp_lists = pool->disp_lists;
 	pool_chunk_t* chunks = pool->chunks;
 	for (size_t i = 0; i < pool->head; i++) {
-		const block_display_list_chunk_descriptor_t* descriptor = &descriptors[i];
+		const block_display_list_t* disp_list = &disp_lists[i];
 
 		math::matrix model;
 		math::matrix model_view;
 		guMtxIdentity(model);
-		guMtxTransApply(model, model, descriptor->x, descriptor->y, descriptor->z);
+		guMtxTransApply(model, model, disp_list->x, disp_list->y, disp_list->z);
 		guMtxConcat(const_cast<f32(*)[4]>(view), model, model_view);
 
 		GX_LoadPosMtxImm(model_view, chunk::mat);
 
-		GX_CallDispList(chunks[descriptor->chunk_index], descriptor->size);
+		GX_CallDispList(chunks[disp_list->chunk_index], disp_list->size);
 	}
 }
 

@@ -15,9 +15,9 @@ _Alignas(32) block_pool_t block_pool = {
 };
 
 static void init_display_list_pool(block_display_list_pool_t* pool) {
-    block_display_list_chunk_descriptor_t* descriptors = pool->descriptors;
+    block_display_list_t* disp_lists = pool->disp_lists;
     for (u16 i = 0; i < NUM_BLOCK_DISPLAY_LIST_CHUNKS; i++) {
-        descriptors[i].chunk_index = i;
+        disp_lists[i].chunk_index = i;
     }
 }
 
@@ -25,9 +25,9 @@ void pool_init(void) {
     init_display_list_pool(&solid_display_list_pool);
     init_display_list_pool(&transparent_display_list_pool);
     init_display_list_pool(&transparent_double_sided_display_list_pool);
-    block_chunk_descriptor_t* descriptors = block_pool.descriptors;
+    u16* chunk_indices = block_pool.chunk_indices;
     for (u16 i = 0; i < NUM_BLOCK_CHUNKS; i++) {
-        descriptors[i].chunk_index = i;
+        chunk_indices[i] = i;
     }
 }
 
@@ -39,9 +39,9 @@ block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t
     }
 }
 
-block_display_list_chunk_descriptor_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type) {
+block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type) {
     block_display_list_pool_t* pool = get_block_display_list_pool(type);
-    return &pool->descriptors[pool->head++];
+    return &pool->disp_lists[pool->head++];
 }
 
 void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index) {
@@ -51,13 +51,13 @@ void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 c
     // 87.5% of cacheline is wasted when erasing, this needs work
 
     u16 head = pool->head;
-    block_display_list_chunk_descriptor_t* descriptors = pool->descriptors;
+    block_display_list_t* disp_lists = pool->disp_lists;
     
     for (u16 i = 0; i < NUM_BLOCK_DISPLAY_LIST_CHUNKS; i++) {
-        if (descriptors[i].chunk_index == chunk_index) {
-            memmove(&descriptors[i], &descriptors[i + 1], (head - i - 1) * sizeof(block_display_list_chunk_descriptor_t));
+        if (disp_lists[i].chunk_index == chunk_index) {
+            memmove(&disp_lists[i], &disp_lists[i + 1], (head - i - 1) * sizeof(block_display_list_t));
             head--;
-            descriptors[head].chunk_index = chunk_index;
+            disp_lists[head].chunk_index = chunk_index;
             
             break;
         }
@@ -66,20 +66,20 @@ void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 c
     pool->head = head;
 }
 
-block_chunk_descriptor_t acquire_block_pool_chunk(void) {
-    return block_pool.descriptors[block_pool.head++];
+u16 acquire_block_pool_chunk(void) {
+    return block_pool.chunk_indices[block_pool.head++];
 }
 
 void release_block_pool_chunk(u16 chunk_index) {
     // This is pretty slow unfortunately
     u16 head = block_pool.head;
-    block_chunk_descriptor_t* descriptors = block_pool.descriptors;
+    u16* chunk_indices = block_pool.chunk_indices;
     
     for (u16 i = 0; i < NUM_BLOCK_CHUNKS; i++) {
-        if (descriptors[i].chunk_index == chunk_index) {
-            memmove(&descriptors[i], &descriptors[i + 1], (head - i - 1) * sizeof(block_chunk_descriptor_t));
+        if (chunk_indices[i] == chunk_index) {
+            memmove(&chunk_indices[i], &chunk_indices[i + 1], (head - i - 1) * sizeof(u16));
             head--;
-            descriptors[head].chunk_index = chunk_index;
+            chunk_indices[head] = chunk_index;
             
             break;
         }

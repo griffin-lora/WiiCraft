@@ -184,7 +184,7 @@ void game::manage_chunks_around_camera(
         //     stored_chunks.erase(pos);
         // } else {
             // chunk.blocks.resize_without_copying(chunk::blocks_count);
-        chunk.blocks_chunk_index = acquire_block_pool_chunk().chunk_index;
+        chunk.blocks_chunk_index = acquire_block_pool_chunk();
         chunk.blocks = (block_type_t*)&block_pool.chunks[chunk.blocks_chunk_index];
         auto start = chrono::get_current_us();
         state = generate_blocks(chunk, pos);
