@@ -133,15 +133,15 @@ void game::manage_chunks_around_camera(
         for (auto pos : chunk_positions_to_erase) {
             auto& chunk = chunks.at(pos);
             // Hacky fix
-            release_pool_chunk(chunk.blocks_chunk_index);
-            for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-                release_pool_chunk(disp_list.chunk_index);
+            release_block_pool_chunk(chunk.blocks_chunk_index);
+            for (u16 chunk_index : chunk.solid_display_list_indices) {
+                release_block_display_list_pool_chunk(block_display_list_type_solid, chunk_index);
             }
-            for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-                release_pool_chunk(disp_list.chunk_index);
+            for (u16 chunk_index : chunk.transparent_display_list_indices) {
+                release_block_display_list_pool_chunk(block_display_list_type_transparent, chunk_index);
             }
-            for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-                release_pool_chunk(disp_list.chunk_index);
+            for (u16 chunk_index : chunk.transparent_double_sided_display_list_indices) {
+                release_block_display_list_pool_chunk(block_display_list_type_transparent_double_sided, chunk_index);
             }
             chunks.erase(pos);
         }
@@ -184,8 +184,8 @@ void game::manage_chunks_around_camera(
         //     stored_chunks.erase(pos);
         // } else {
             // chunk.blocks.resize_without_copying(chunk::blocks_count);
-        chunk.blocks_chunk_index = acquire_pool_chunk();
-        chunk.blocks = (block_type_t*)&pool_chunks[chunk.blocks_chunk_index];
+        chunk.blocks_chunk_index = acquire_block_pool_chunk().chunk_index;
+        chunk.blocks = (block_type_t*)&block_pool.chunks[chunk.blocks_chunk_index];
         auto start = chrono::get_current_us();
         state = generate_blocks(chunk, pos);
         total_block_gen_time += chrono::get_current_us() - start;

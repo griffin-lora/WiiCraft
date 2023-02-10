@@ -1,12 +1,25 @@
 #include "chunk_rendering.hpp"
 #include "gfx.hpp"
-#include "gfx/display_list_new.hpp"
 #include "pool.hpp"
 
 using namespace game;
 
-static void set_alpha(u8 alpha) {
-	GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });
+static void draw_pool(const math::matrix view, block_display_list_pool_t* pool) {
+	const block_display_list_chunk_descriptor_t* descriptors = pool->descriptors;
+	pool_chunk_t* chunks = pool->chunks;
+	for (size_t i = 0; i < pool->head; i++) {
+		const block_display_list_chunk_descriptor_t* descriptor = &descriptors[i];
+
+		math::matrix model;
+		math::matrix model_view;
+		guMtxIdentity(model);
+		guMtxTransApply(model, model, descriptor->x, descriptor->y, descriptor->z);
+		guMtxConcat(const_cast<f32(*)[4]>(view), model, model_view);
+
+		GX_LoadPosMtxImm(model_view, chunk::mat);
+
+		GX_CallDispList(chunks[descriptor->chunk_index], descriptor->size);
+	}
 }
 
 void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& chunks) {
@@ -36,66 +49,15 @@ void game::draw_chunks(const math::matrix view, const camera& cam, chunk::map& c
 	// I dont think that information is acccurate
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 
-	if (cam.update_view) { // This may be a mostly useless micro-optimization, matrix multiplication vs a branch ehhh (we are using a very expensive for loop though so yeah)
-		for (auto& [ pos, chunk ] : chunks) {
-			set_alpha(chunk.alpha);
+	GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, 0xff }); // Set alpha
 
-			chunk.tf.update_model_view(view);
-			chunk.tf.load(chunk::mat);
-
-			for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
-			}
-		}
-		for (auto& [ pos, chunk ] : chunks) {
-			chunk.tf.load(chunk::mat);
-
-			for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
-			}
-		}
-		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
-		GX_SetZCompLoc(GX_FALSE);
-		GX_SetCullMode(GX_CULL_NONE);
-		for (auto& [ pos, chunk ] : chunks) {
-			chunk.tf.load(chunk::mat);
-
-			for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
-			}
-		}
-		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
-		GX_SetZCompLoc(GX_TRUE);
-		GX_SetCullMode(GX_CULL_BACK);
-	} else {
-		for (auto& [ pos, chunk ] : chunks) {
-			set_alpha(chunk.alpha);
-
-			chunk.tf.load(chunk::mat);
-			for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
-			}
-		}
-
-		for (auto& [ pos, chunk ] : chunks) {
-			chunk.tf.load(chunk::mat);
-
-			for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
-			}
-		}
-		GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
-		GX_SetZCompLoc(GX_FALSE);
-		GX_SetCullMode(GX_CULL_NONE);
-		for (auto& [ pos, chunk ] : chunks) {
-			chunk.tf.load(chunk::mat);
-
-			for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-				GX_CallDispList(&pool_chunks[disp_list.chunk_index], disp_list.size);
-			}
-		}
-		GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
-		GX_SetZCompLoc(GX_TRUE);
-		GX_SetCullMode(GX_CULL_BACK);
-	}
+	draw_pool(view, &solid_display_list_pool);
+	draw_pool(view, &transparent_display_list_pool);
+	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
+	GX_SetZCompLoc(GX_FALSE);
+	GX_SetCullMode(GX_CULL_NONE);
+	draw_pool(view, &transparent_double_sided_display_list_pool);
+	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+	GX_SetZCompLoc(GX_TRUE);
+	GX_SetCullMode(GX_CULL_BACK);
 }

@@ -3,7 +3,6 @@
 #include "common.hpp"
 #include "math.hpp"
 #include "ext/data_array.hpp"
-#include "gfx/display_list_new.hpp"
 #include "math/transform_3d.hpp"
 #include "chrono.hpp"
 #include "pool.hpp"
@@ -34,17 +33,17 @@ namespace game {
             opt_ref left;
         };
 
-        size_t blocks_chunk_index;
+        u16 blocks_chunk_index;
         block_type_t* blocks;
         neighborhood nh;
 
         u8 alpha = 0;
         // TODO: this is stupid
-        std::vector<pool_display_list_t> solid_display_lists;
-        std::vector<pool_display_list_t> transparent_display_lists;
-        std::vector<pool_display_list_t> transparent_double_sided_display_lists;
+        std::vector<u16> solid_display_list_indices;
+        std::vector<u16> transparent_display_list_indices;
+        std::vector<u16> transparent_double_sided_display_list_indices;
 
-        math::transform_3d tf;
+        glm::vec3 pos;
 
         std::size_t invisible_block_count = 0;
         std::size_t fully_opaque_block_count = 0;
@@ -75,8 +74,10 @@ namespace game {
         fade_state fade_st = fade_state::none;
         chrono::us fade_start;
         
-        inline chunk(const math::matrix view, const math::vector3s32& pos) {
-            tf.set_position(view, pos.x * chunk::size, pos.y * chunk::size, pos.z * chunk::size);
+        inline chunk(const math::matrix view, math::vector3s32 in_pos) {
+            pos.x = in_pos.x * size;
+            pos.y = in_pos.y * size;
+            pos.z = in_pos.z * size;
         }
     };
 }

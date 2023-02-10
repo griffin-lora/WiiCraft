@@ -26,12 +26,6 @@ static_assert(sizeof(block_mesh_t) == 4, "");
 #define NUM_TRANSPARENT_BUILDING_MESHES 204
 #define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES 102
 
-typedef enum {
-    building_meshes_type_solid,
-    building_meshes_type_transparent,
-    building_meshes_type_transparent_double_sided
-} building_meshes_type_t;
-
 typedef struct {
     alignas(32) block_mesh_t solid[NUM_SOLID_BUILDING_MESHES];
     alignas(32) block_mesh_t transparent[NUM_TRANSPARENT_BUILDING_MESHES];
@@ -104,27 +98,31 @@ static u8 get_tex(block_type_t type) {
     return 5;
 }
 
-static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t type, size_t num_meshes, const block_mesh_t meshes[]) {
-    size_t num_verts = num_meshes * ((type != building_meshes_type_transparent_double_sided) ? 4 : 8);
+static u16 write_meshes_into_display_list(block_display_list_type_t type, glm::vec3 world_pos, size_t num_meshes, const block_mesh_t meshes[]) {
+    size_t num_verts = num_meshes * ((type != block_display_list_type_transparent_double_sided) ? 4 : 8);
 
-    pool_display_list_t disp_list = {
-        .size = (u16)align_to_32(
-            get_begin_instruction_size(num_verts) +
-            get_vector_instruction_size<u8>(3, num_verts) + 
-            get_vector_instruction_size<u8>(2, num_verts)
-        ),
-        .chunk_index = acquire_pool_chunk()
-    };
-    void* chunk = &pool_chunks[disp_list.chunk_index];
-    memset(chunk, 0, disp_list.size);
-    DCInvalidateRange(chunk, disp_list.size);
+    block_display_list_chunk_descriptor_t* descriptor = acquire_block_display_list_pool_chunk(type);
+    descriptor->x = world_pos.x;
+    descriptor->y = world_pos.y;
+    descriptor->z = world_pos.z;
+    u16 chunk_index = descriptor->chunk_index;
+    u16 display_list_size = (u16)align_to_32(
+        get_begin_instruction_size(num_verts) +
+        get_vector_instruction_size<u8>(3, num_verts) + 
+        get_vector_instruction_size<u8>(2, num_verts)
+    );
 
-    GX_BeginDispList(chunk, disp_list.size);
+    pool_chunk_t* chunks = get_block_display_list_pool(type)->chunks;
+    void* chunk = &chunks[chunk_index];
+    memset(chunk, 0, display_list_size);
+    DCInvalidateRange(chunk, display_list_size);
+
+    GX_BeginDispList(chunk, display_list_size);
     GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
 
     switch (type) {
-        case building_meshes_type_solid:
-        case building_meshes_type_transparent:
+        case block_display_list_type_solid:
+        case block_display_list_type_transparent:
             for (size_t i = 0; i < num_meshes; i++) {
                 block_mesh_t mesh = meshes[i];
 
@@ -205,7 +203,7 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
                 }
             }
             break;
-        case building_meshes_type_transparent_double_sided:
+        case block_display_list_type_transparent_double_sided:
             for (size_t i = 0; i < num_meshes; i++) {
                 block_mesh_t mesh = meshes[i];
 
@@ -242,9 +240,9 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
     }
     
     GX_End();
-    disp_list.size = GX_EndDispList();
+    descriptor->size = GX_EndDispList();
 
-    return disp_list;
+    return chunk_index;
 }
 
 #define NUM_BLOCKS (16 * 16 * 16)
@@ -320,9 +318,10 @@ static face_meshes_indices_t add_face_mesh_if_needed(
 }
 
 static void generate_block_meshes(
-    std::vector<pool_display_list_t>* solid_display_lists,
-    std::vector<pool_display_list_t>* transparent_display_lists,
-    std::vector<pool_display_list_t>* transparent_double_sided_display_lists,
+    glm::vec3 world_pos,
+    std::vector<u16>* solid_display_list_indices,
+    std::vector<u16>* transparent_display_list_indices,
+    std::vector<u16>* transparent_double_sided_display_list_indices,
     const block_type_t block_types[],
     const block_type_t front_block_types[],
     const block_type_t back_block_types[],
@@ -372,15 +371,15 @@ static void generate_block_meshes(
                 }
 
                 if (indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6)) {
-                    solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.all.solid, building_meshes_arrays.solid));
+                    solid_display_list_indices->push_back(write_meshes_into_display_list(block_display_list_type_solid, world_pos, indices.all.solid, building_meshes_arrays.solid));
                     indices.all.solid = 0;
                 }
                 if (indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6)) {
-                    transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.all.transparent, building_meshes_arrays.transparent));
+                    transparent_display_list_indices->push_back(write_meshes_into_display_list(block_display_list_type_transparent, world_pos, indices.all.transparent, building_meshes_arrays.transparent));
                     indices.all.transparent = 0;
                 }
                 if (indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)) {
-                    transparent_double_sided_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+                    transparent_double_sided_display_list_indices->push_back(write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
                     indices.all.transparent_double_sided = 0;
                 }
 
@@ -390,30 +389,30 @@ static void generate_block_meshes(
     }
 
     if (indices.all.solid > 0) {
-        solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.all.solid, building_meshes_arrays.solid));
+        solid_display_list_indices->push_back(write_meshes_into_display_list(block_display_list_type_solid, world_pos, indices.all.solid, building_meshes_arrays.solid));
     }
     if (indices.all.transparent > 0) {
-        transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.all.transparent, building_meshes_arrays.transparent));
+        transparent_display_list_indices->push_back(write_meshes_into_display_list(block_display_list_type_transparent, world_pos, indices.all.transparent, building_meshes_arrays.transparent));
     }
     if (indices.all.transparent_double_sided > 0) {
-        transparent_double_sided_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+        transparent_double_sided_display_list_indices->push_back(write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
     }
 }
 
 mesh_update_state game::update_core_mesh(chunk& chunk) {
-    for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-        release_pool_chunk(disp_list.chunk_index);
+    for (u16 chunk_index : chunk.solid_display_list_indices) {
+        release_block_display_list_pool_chunk(block_display_list_type_solid, chunk_index);
     }
-    for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-        release_pool_chunk(disp_list.chunk_index);
+    for (u16 chunk_index : chunk.transparent_display_list_indices) {
+        release_block_display_list_pool_chunk(block_display_list_type_transparent, chunk_index);
     }
-    for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-        release_pool_chunk(disp_list.chunk_index);
+    for (u16 chunk_index : chunk.transparent_double_sided_display_list_indices) {
+        release_block_display_list_pool_chunk(block_display_list_type_transparent_double_sided, chunk_index);
     }
 
-    chunk.solid_display_lists.clear();
-    chunk.transparent_display_lists.clear();
-    chunk.transparent_double_sided_display_lists.clear();
+    chunk.solid_display_list_indices.clear();
+    chunk.transparent_display_list_indices.clear();
+    chunk.transparent_double_sided_display_list_indices.clear();
     if (
         chunk.invisible_block_count == chunk::blocks_count ||
         chunk.fully_opaque_block_count == chunk::blocks_count
@@ -422,9 +421,10 @@ mesh_update_state game::update_core_mesh(chunk& chunk) {
     }
 
     generate_block_meshes(
-        &chunk.solid_display_lists,
-        &chunk.transparent_display_lists,
-        &chunk.transparent_double_sided_display_lists,
+        chunk.pos,
+        &chunk.solid_display_list_indices,
+        &chunk.transparent_display_list_indices,
+        &chunk.transparent_double_sided_display_list_indices,
         chunk.blocks,
         chunk.nh.front.has_value() ? chunk.nh.front->get().blocks : NULL,
         chunk.nh.back.has_value() ? chunk.nh.back->get().blocks : NULL,
