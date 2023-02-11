@@ -75,12 +75,17 @@ void release_block_pool_chunk(u16 chunk_index) {
     // This is pretty slow unfortunately
     u16 head = block_pool.head;
     u16* chunk_indices = block_pool.chunk_indices;
+    vec3_s32_t* positions = block_pool.positions;
     
     for (u16 i = 0; i < NUM_BLOCK_CHUNKS; i++) {
         if (chunk_indices[i] == chunk_index) {
+            vec3_s32_t position = positions[i];
+
             memmove(&chunk_indices[i], &chunk_indices[i + 1], (head - i - 1) * sizeof(u16));
+            memmove(&positions[i], &positions[i + 1], (head - i - 1) * sizeof(vec3_s32_t));
             head--;
             chunk_indices[head] = chunk_index;
+            positions[head] = position;
             
             break;
         }
