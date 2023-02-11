@@ -6,7 +6,6 @@
 #include "util.hpp"
 #include "chrono.hpp"
 #include "chunk_mesh_generation.hpp"
-#include "chunk_block_generation.hpp"
 
 using namespace game;
 
@@ -187,7 +186,7 @@ void game::manage_chunks_around_camera(
         chunk.blocks_chunk_index = acquire_block_pool_chunk();
         chunk.blocks = block_pool.chunks[chunk.blocks_chunk_index].blocks;
         auto start = chrono::get_current_us();
-        state = generate_blocks(chunk, pos);
+        // state = generate_blocks(chunk, pos);
         total_block_gen_time += chrono::get_current_us() - start;
         // }
 
