@@ -25,7 +25,7 @@ _Alignas(32) static block_chunk_update_t visuals_update_queue[NUM_BLOCK_CHUNKS];
 
 _Alignas(32) static u16 local_chunk_indices[NUM_TO_GENERATE];
 
-static void fill_local_chunk_indices(void) {
+static void fill_local_chunk_indices(vec3_s32_t center_pos) {
     memset(local_chunk_indices, 0xff, sizeof(local_chunk_indices));
 
     u16* chunk_indices = block_pool.chunk_indices;
@@ -33,15 +33,16 @@ static void fill_local_chunk_indices(void) {
     
     for (size_t i = 0; i < block_pool.head; i++) {
         vec3_s32_t pos = positions[i];
+        vec3_s32_t rel_pos = { pos.x - center_pos.x, 0, pos.z - center_pos.z };
         // TODO: Make relative to management position
-        if (pos.x >= 0 && pos.x < NUM_PER_GENERATION_ROW && pos.z >= 0 && pos.z < NUM_PER_GENERATION_ROW) {
-            local_chunk_indices[(pos.z * Z_OFFSET) + (pos.x * X_OFFSET)] = chunk_indices[i];
+        if (rel_pos.x >= 0 && rel_pos.x < NUM_PER_GENERATION_ROW && rel_pos.z >= 0 && rel_pos.z < NUM_PER_GENERATION_ROW) {
+            local_chunk_indices[(rel_pos.z * Z_OFFSET) + (rel_pos.x * X_OFFSET)] = chunk_indices[i];
         }
     }
 }
 
-void manage_block_world(void) {
-    fill_local_chunk_indices();
+void manage_block_world(vec3_s32_t center_pos) {
+    fill_local_chunk_indices(center_pos);
 
     u16* chunk_indices = block_pool.chunk_indices;
     vec3_s32_t* positions = block_pool.positions;
@@ -58,9 +59,9 @@ void manage_block_world(void) {
             }
 
             vec3_s32_t pos = {
-                .x = x,
+                .x = center_pos.x + x,
                 .y = 0,
-                .z = z
+                .z = center_pos.z + z
             };
 
             u16 index = acquire_block_pool_chunk();
