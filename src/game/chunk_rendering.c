@@ -5,7 +5,8 @@
 static void draw_pool(Mtx view, block_display_list_pool_t* pool) {
 	const block_display_list_t* disp_lists = pool->disp_lists;
 	block_display_list_chunk_t* chunks = pool->chunks;
-	for (size_t i = 0; i < pool->head; i++) {
+	u16 head = pool->head;
+	for (size_t i = 0; i < head; i++) {
 		const block_display_list_t* disp_list = &disp_lists[i];
 
 		Mtx model;

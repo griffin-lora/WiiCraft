@@ -25,8 +25,6 @@ _Alignas(32) static block_chunk_update_t visuals_update_queue[NUM_BLOCK_CHUNKS];
 
 _Alignas(32) static u16 local_chunk_indices[NUM_TO_GENERATE];
 
-_Alignas(32) static u16 chunk_indices_to_release[NUM_TO_GENERATE];
-
 static void remove_chunks_outside_of_range_from_queue(vec3_s32_t center_pos, size_t num_items, block_chunk_update_t queue[]) {
     for (size_t i = 0; i < num_items; i++) {
         block_chunk_update_t* update = &queue[i];
@@ -42,43 +40,43 @@ static void remove_chunks_outside_of_range_from_queue(vec3_s32_t center_pos, siz
 }
 
 static void fill_local_chunk_indices(vec3_s32_t center_pos) {
-    size_t num_chunk_indices_to_release = 0;
-
     memset(local_chunk_indices, 0xff, sizeof(local_chunk_indices));
 
     u16* chunk_indices = block_pool.chunk_indices;
     vec3_s32_t* positions = block_pool.positions;
+    block_chunk_t* chunks = block_pool.chunks;
     
     for (size_t i = 0; i < block_pool.head; i++) {
+        u16 chunk_index = chunk_indices[i];
         vec3_s32_t pos = positions[i];
         vec3_s32_t rel_pos = { pos.x - center_pos.x, 0, pos.z - center_pos.z };
+
         if (rel_pos.x >= 0 && rel_pos.x < NUM_PER_GENERATION_ROW && rel_pos.z >= 0 && rel_pos.z < NUM_PER_GENERATION_ROW) {
-            local_chunk_indices[(rel_pos.z * Z_OFFSET) + (rel_pos.x * X_OFFSET)] = chunk_indices[i];
+            local_chunk_indices[(rel_pos.z * Z_OFFSET) + (rel_pos.x * X_OFFSET)] = chunk_index;
         } else {
-            chunk_indices_to_release[num_chunk_indices_to_release++] = chunk_indices[i];
+            block_chunk_t* chunk = &chunks[chunk_index];
+
+            block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
+            for (size_t i = 0; descriptors[i].type != 0xff; i++) {
+                release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
+            }
+            
+            if (chunk->front_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->front_chunk_index].back_chunk_index = NULL_CHUNK_INDEX; }
+            if (chunk->back_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->back_chunk_index].front_chunk_index = NULL_CHUNK_INDEX; }
+            if (chunk->top_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->top_chunk_index].bottom_chunk_index = NULL_CHUNK_INDEX; }
+            if (chunk->bottom_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->bottom_chunk_index].top_chunk_index = NULL_CHUNK_INDEX; }
+            if (chunk->right_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->right_chunk_index].left_chunk_index = NULL_CHUNK_INDEX; }
+            if (chunk->left_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->left_chunk_index].right_chunk_index = NULL_CHUNK_INDEX; }
+
+            release_block_pool_chunk(chunk_index);
+
+            // Extra check to make sure lol
+            if (i + 1 >= block_pool.head) {
+                break;
+            }
+
+            i--; // Keep i fixed since we moved everything around after the releasing of the pool chunk
         }
-    }
-
-    block_chunk_t* chunks = block_pool.chunks;
-
-    for (size_t i = 0; i < num_chunk_indices_to_release; i++) {
-        u16 chunk_index = chunk_indices_to_release[i];
-
-        block_chunk_t* chunk = &chunks[chunk_index];
-
-        block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
-        for (size_t i = 0; descriptors[i].type != 0xff; i++) {
-            release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
-        }
-        
-        if (chunk->front_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->front_chunk_index].back_chunk_index = NULL_CHUNK_INDEX; }
-        if (chunk->back_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->back_chunk_index].front_chunk_index = NULL_CHUNK_INDEX; }
-        if (chunk->top_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->top_chunk_index].bottom_chunk_index = NULL_CHUNK_INDEX; }
-        if (chunk->bottom_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->bottom_chunk_index].top_chunk_index = NULL_CHUNK_INDEX; }
-        if (chunk->right_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->right_chunk_index].left_chunk_index = NULL_CHUNK_INDEX; }
-        if (chunk->left_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->left_chunk_index].right_chunk_index = NULL_CHUNK_INDEX; }
-
-        release_block_pool_chunk(chunk_index);
     }
 
     remove_chunks_outside_of_range_from_queue(center_pos, num_procedural_generate_queue_items, procedural_generate_queue);
