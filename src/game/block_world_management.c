@@ -59,15 +59,24 @@ static void fill_local_chunk_indices(vec3_s32_t center_pos) {
         }
     }
 
+    block_chunk_t* chunks = block_pool.chunks;
+
     for (size_t i = 0; i < num_chunk_indices_to_release; i++) {
         u16 chunk_index = chunk_indices_to_release[i];
 
-        block_chunk_t* chunk = &block_pool.chunks[chunk_index];
+        block_chunk_t* chunk = &chunks[chunk_index];
 
         block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
         for (size_t i = 0; descriptors[i].type != 0xff; i++) {
             release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
         }
+        
+        if (chunk->front_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->front_chunk_index].back_chunk_index = NULL_CHUNK_INDEX; }
+        if (chunk->back_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->back_chunk_index].front_chunk_index = NULL_CHUNK_INDEX; }
+        if (chunk->top_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->top_chunk_index].bottom_chunk_index = NULL_CHUNK_INDEX; }
+        if (chunk->bottom_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->bottom_chunk_index].top_chunk_index = NULL_CHUNK_INDEX; }
+        if (chunk->right_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->right_chunk_index].left_chunk_index = NULL_CHUNK_INDEX; }
+        if (chunk->left_chunk_index != NULL_CHUNK_INDEX) { chunks[chunk->left_chunk_index].right_chunk_index = NULL_CHUNK_INDEX; }
 
         release_block_pool_chunk(chunk_index);
     }
