@@ -74,6 +74,13 @@ void manage_block_world(void) {
             block_chunk_t* chunk = &block_pool.chunks[chunk_index];
 
             memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));
+
+            chunk->front_chunk_index = NULL_CHUNK_INDEX;
+            chunk->back_chunk_index = NULL_CHUNK_INDEX;
+            chunk->top_chunk_index = NULL_CHUNK_INDEX;
+            chunk->bottom_chunk_index = NULL_CHUNK_INDEX;
+            chunk->right_chunk_index = NULL_CHUNK_INDEX;
+            chunk->left_chunk_index = NULL_CHUNK_INDEX;
             
             *procedural_generate_queue_end = (block_chunk_update_t){ pos, chunk_index };
             procedural_generate_queue_end++;
@@ -87,9 +94,6 @@ void manage_block_world(void) {
     for (s32 z = 0; z < NUM_PER_GENERATION_ROW; z++) {
         for (s32 x = 0; x < NUM_PER_GENERATION_ROW; x++) {
             block_chunk_t* chunk = &block_pool.chunks[local_chunk_indices[gen_index]];
-
-            chunk->top_chunk_index = NULL_CHUNK_INDEX;
-            chunk->bottom_chunk_index = NULL_CHUNK_INDEX;
 
             if (x != (NUM_PER_GENERATION_ROW - 1) && chunk->front_chunk_index == NULL_CHUNK_INDEX) {
                 chunk->front_chunk_index = local_chunk_indices[gen_index + X_OFFSET];
