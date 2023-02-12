@@ -27,12 +27,12 @@ _Alignas(32) static u16 local_chunk_indices[NUM_TO_GENERATE];
 
 _Alignas(32) static bool local_update_neighborhood[NUM_TO_GENERATE];
 
-static void remove_chunks_outside_of_range_from_queue(vec3_s32_t center_pos, size_t num_items, block_chunk_update_t queue[]) {
+static void remove_chunks_outside_of_range_from_queue(vec3_s32_t corner_pos, size_t num_items, block_chunk_update_t queue[]) {
     for (size_t i = 0; i < num_items; i++) {
         block_chunk_update_t* update = &queue[i];
 
         vec3_s32_t pos = update->position;
-        vec3_s32_t rel_pos = { pos.x - center_pos.x, 0, pos.z - center_pos.z };
+        vec3_s32_t rel_pos = { pos.x - corner_pos.x, 0, pos.z - corner_pos.z };
         if (rel_pos.x >= 0 && rel_pos.x < NUM_PER_GENERATION_ROW && rel_pos.z >= 0 && rel_pos.z < NUM_PER_GENERATION_ROW) {
             continue;
         }
@@ -41,7 +41,7 @@ static void remove_chunks_outside_of_range_from_queue(vec3_s32_t center_pos, siz
     }
 }
 
-static void fill_local_chunk_indices(vec3_s32_t center_pos) {
+static void fill_local_chunk_indices(vec3_s32_t corner_pos) {
     memset(local_chunk_indices, 0xff, sizeof(local_chunk_indices));
     memset(local_update_neighborhood, false, sizeof(local_update_neighborhood));
 
@@ -52,7 +52,7 @@ static void fill_local_chunk_indices(vec3_s32_t center_pos) {
     for (size_t i = 0; i < block_pool.head; i++) {
         u16 chunk_index = chunk_indices[i];
         vec3_s32_t pos = positions[i];
-        vec3_s32_t rel_pos = { pos.x - center_pos.x, 0, pos.z - center_pos.z };
+        vec3_s32_t rel_pos = { pos.x - corner_pos.x, 0, pos.z - corner_pos.z };
 
         if (rel_pos.x >= 0 && rel_pos.x < NUM_PER_GENERATION_ROW && rel_pos.z >= 0 && rel_pos.z < NUM_PER_GENERATION_ROW) {
             local_chunk_indices[(rel_pos.z * Z_OFFSET) + (rel_pos.x * X_OFFSET)] = chunk_index;
@@ -82,12 +82,18 @@ static void fill_local_chunk_indices(vec3_s32_t center_pos) {
         }
     }
 
-    remove_chunks_outside_of_range_from_queue(center_pos, num_procedural_generate_queue_items, procedural_generate_queue);
-    remove_chunks_outside_of_range_from_queue(center_pos, num_visuals_update_queue_items, visuals_update_queue);
+    remove_chunks_outside_of_range_from_queue(corner_pos, num_procedural_generate_queue_items, procedural_generate_queue);
+    remove_chunks_outside_of_range_from_queue(corner_pos, num_visuals_update_queue_items, visuals_update_queue);
 }
 
 void manage_block_world(vec3_s32_t center_pos) {
-    fill_local_chunk_indices(center_pos);
+    vec3_s32_t corner_pos = {
+        .x = center_pos.x - 4,
+        .y = 0,
+        .z = center_pos.z - 4
+    };
+
+    fill_local_chunk_indices(corner_pos);
 
     u16* chunk_indices = block_pool.chunk_indices;
     vec3_s32_t* positions = block_pool.positions;
@@ -136,9 +142,9 @@ void manage_block_world(vec3_s32_t center_pos) {
             }
 
             vec3_s32_t pos = {
-                .x = center_pos.x + x,
+                .x = corner_pos.x + x,
                 .y = 0,
-                .z = center_pos.z + z
+                .z = corner_pos.z + z
             };
 
             u16 index = acquire_block_pool_chunk();
@@ -177,9 +183,9 @@ void manage_block_world(vec3_s32_t center_pos) {
             u16 chunk_index = local_chunk_indices[gen_index];
 
             vec3_s32_t pos = {
-                .x = center_pos.x + x,
+                .x = corner_pos.x + x,
                 .y = 0,
-                .z = center_pos.z + z
+                .z = corner_pos.z + z
             };
 
             block_chunk_t* chunk = &chunks[chunk_index];
@@ -222,7 +228,7 @@ void manage_block_world(vec3_s32_t center_pos) {
                 continue;
             }
 
-            vec3s world_pos = { update->position.x * 16, 20, update->position.z * 16 };
+            vec3s world_pos = { update->position.x * 16, 0, update->position.z * 16 };
 
             update_block_chunk_visuals(world_pos, &chunks[update->chunk_index]);
             break;
