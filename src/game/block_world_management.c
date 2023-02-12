@@ -17,13 +17,11 @@ typedef struct {
     u16 chunk_index;
 } block_chunk_update_t;
 
+static size_t num_procedural_generate_queue_items = 0;
 _Alignas(32) static block_chunk_update_t procedural_generate_queue[NUM_BLOCK_CHUNKS];
-block_chunk_update_t* procedural_generate_queue_begin = procedural_generate_queue;
-block_chunk_update_t* procedural_generate_queue_end = procedural_generate_queue;
 
-_Alignas(32) static block_chunk_update_t mesh_generate_queue[NUM_BLOCK_CHUNKS];
-block_chunk_update_t* mesh_generate_queue_begin = mesh_generate_queue;
-block_chunk_update_t* mesh_generate_queue_end = mesh_generate_queue;
+static size_t num_visuals_update_queue_items = 0;
+_Alignas(32) static block_chunk_update_t visuals_update_queue[NUM_BLOCK_CHUNKS];
 
 _Alignas(32) static u16 local_chunk_indices[NUM_TO_GENERATE];
 
@@ -47,6 +45,7 @@ void manage_block_world(void) {
 
     u16* chunk_indices = block_pool.chunk_indices;
     vec3_s32_t* positions = block_pool.positions;
+    block_chunk_t* chunks = block_pool.chunks;
 
     size_t gen_index = 0;
 
@@ -71,7 +70,7 @@ void manage_block_world(void) {
 
             local_chunk_indices[gen_index] = chunk_index;
 
-            block_chunk_t* chunk = &block_pool.chunks[chunk_index];
+            block_chunk_t* chunk = &chunks[chunk_index];
 
             memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));
 
@@ -82,8 +81,7 @@ void manage_block_world(void) {
             chunk->right_chunk_index = NULL_CHUNK_INDEX;
             chunk->left_chunk_index = NULL_CHUNK_INDEX;
             
-            *procedural_generate_queue_end = (block_chunk_update_t){ pos, chunk_index };
-            procedural_generate_queue_end++;
+            procedural_generate_queue[num_procedural_generate_queue_items++] = (block_chunk_update_t){ pos, chunk_index };
 
             gen_index++;
         }
@@ -93,7 +91,7 @@ void manage_block_world(void) {
     gen_index = 0;
     for (s32 z = 0; z < NUM_PER_GENERATION_ROW; z++) {
         for (s32 x = 0; x < NUM_PER_GENERATION_ROW; x++) {
-            block_chunk_t* chunk = &block_pool.chunks[local_chunk_indices[gen_index]];
+            block_chunk_t* chunk = &chunks[local_chunk_indices[gen_index]];
 
             if (x != (NUM_PER_GENERATION_ROW - 1) && chunk->front_chunk_index == NULL_CHUNK_INDEX) {
                 chunk->front_chunk_index = local_chunk_indices[gen_index + X_OFFSET];
@@ -110,5 +108,19 @@ void manage_block_world(void) {
 
             gen_index++;
         }
+    }
+
+    if (num_procedural_generate_queue_items > 0) {
+        block_chunk_update_t update = procedural_generate_queue[--num_procedural_generate_queue_items];
+
+        visuals_update_queue[num_visuals_update_queue_items++] = update;
+        
+        generate_procedural_blocks(update.position, chunks[update.chunk_index].blocks);
+    } else if (num_visuals_update_queue_items > 0) { // Bit of a hacky fix, only start dealing with this queue once we don't need to do any procedural generation. This is to allow all procedural generation to finish before visuals updates.
+        block_chunk_update_t* update = &visuals_update_queue[--num_visuals_update_queue_items];
+
+        vec3s world_pos = { update->position.x * 16, 20, update->position.z * 16 };
+
+        update_block_chunk_visuals(world_pos, &chunks[update->chunk_index]);
     }
 }
