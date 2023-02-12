@@ -168,13 +168,12 @@ int main(int argc, char** argv) {
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 
-		// game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time, now);
-		// game::update_chunk_neighborhoods(chunks);
-		manage_block_world((vec3_s32_t){ floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) });
+		if (cam.update_view) {
+			manage_block_world((vec3_s32_t){ floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) });
+		}
+		handle_world_queues();
 
 		game::update_needed(view, perspective_3d, cam);
-
-		// game::update_chunk_visuals(chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		if (cam.update_view) {
 			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);

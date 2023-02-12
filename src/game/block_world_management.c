@@ -12,16 +12,11 @@
 #define NUM_PER_GENERATION_ROW 8
 #define NUM_TO_GENERATE (NUM_PER_GENERATION_ROW * NUM_PER_GENERATION_ROW)
 
-typedef struct {
-    u16 chunk_index;
-    vec3_s32_t position;
-} block_chunk_update_t;
+size_t num_procedural_generate_queue_items = 0;
+_Alignas(32) block_chunk_update_t procedural_generate_queue[NUM_WORLD_QUEUE_ITEMS];
 
-static size_t num_procedural_generate_queue_items = 0;
-_Alignas(32) static block_chunk_update_t procedural_generate_queue[NUM_BLOCK_CHUNKS];
-
-static size_t num_visuals_update_queue_items = 0;
-_Alignas(32) static block_chunk_update_t visuals_update_queue[NUM_BLOCK_CHUNKS];
+size_t num_visuals_update_queue_items = 0;
+_Alignas(32) block_chunk_update_t visuals_update_queue[NUM_WORLD_QUEUE_ITEMS];
 
 _Alignas(32) static u16 local_chunk_indices[NUM_TO_GENERATE];
 
@@ -164,6 +159,12 @@ void manage_block_world(vec3_s32_t center_pos) {
             chunk->bottom_chunk_index = NULL_CHUNK_INDEX;
             chunk->right_chunk_index = NULL_CHUNK_INDEX;
             chunk->left_chunk_index = NULL_CHUNK_INDEX;
+
+            if (num_procedural_generate_queue_items >= NUM_WORLD_QUEUE_ITEMS) {
+                // TODO: Implement error logic here
+                lprintf("Procedural generate queue is full");
+                for (;;);
+            }
             
             procedural_generate_queue[num_procedural_generate_queue_items++] = (block_chunk_update_t){ chunk_index, pos };
 
@@ -208,6 +209,10 @@ void manage_block_world(vec3_s32_t center_pos) {
             gen_index++;
         }
     }
+}
+
+void handle_world_queues(void) {
+    block_chunk_t* chunks = block_pool.chunks;
 
     if (num_procedural_generate_queue_items > 0) {
         while (num_procedural_generate_queue_items > 0) {
