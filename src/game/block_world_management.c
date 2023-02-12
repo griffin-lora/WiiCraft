@@ -25,6 +25,8 @@ _Alignas(32) static block_chunk_update_t visuals_update_queue[NUM_BLOCK_CHUNKS];
 
 _Alignas(32) static u16 local_chunk_indices[NUM_TO_GENERATE];
 
+_Alignas(32) static bool local_update_neighborhood[NUM_TO_GENERATE];
+
 static void remove_chunks_outside_of_range_from_queue(vec3_s32_t center_pos, size_t num_items, block_chunk_update_t queue[]) {
     for (size_t i = 0; i < num_items; i++) {
         block_chunk_update_t* update = &queue[i];
@@ -41,6 +43,7 @@ static void remove_chunks_outside_of_range_from_queue(vec3_s32_t center_pos, siz
 
 static void fill_local_chunk_indices(vec3_s32_t center_pos) {
     memset(local_chunk_indices, 0xff, sizeof(local_chunk_indices));
+    memset(local_update_neighborhood, false, sizeof(local_update_neighborhood));
 
     u16* chunk_indices = block_pool.chunk_indices;
     vec3_s32_t* positions = block_pool.positions;
@@ -92,6 +95,38 @@ void manage_block_world(vec3_s32_t center_pos) {
 
     size_t gen_index = 0;
 
+    // Schedule neighborhood updates
+    for (s32 z = 0; z < NUM_PER_GENERATION_ROW; z++) {
+        for (s32 x = 0; x < NUM_PER_GENERATION_ROW; x++) {
+            if (local_chunk_indices[gen_index] != NULL_CHUNK_INDEX) {
+                gen_index++;
+                continue;
+            }
+
+            local_update_neighborhood[gen_index] = true;
+
+            if (x != (NUM_PER_GENERATION_ROW - 1) && local_chunk_indices[gen_index + X_OFFSET] != NULL_CHUNK_INDEX) {
+                local_update_neighborhood[gen_index + X_OFFSET] = true;
+            }
+
+            if (x != 0 && local_chunk_indices[gen_index - X_OFFSET] != NULL_CHUNK_INDEX) {
+                local_update_neighborhood[gen_index - X_OFFSET] = true;
+            }
+
+            if (z != (NUM_PER_GENERATION_ROW - 1) && local_chunk_indices[gen_index + Z_OFFSET] != NULL_CHUNK_INDEX) {
+                local_update_neighborhood[gen_index + Z_OFFSET] = true;
+            }
+
+            if (z != 0 && local_chunk_indices[gen_index - Z_OFFSET] != NULL_CHUNK_INDEX) {
+                local_update_neighborhood[gen_index - Z_OFFSET] = true;
+            }
+
+            gen_index++;
+        }
+    }
+
+    gen_index = 0;
+
     // Allocate new block chunks
     for (s32 z = 0; z < NUM_PER_GENERATION_ROW; z++) {
         for (s32 x = 0; x < NUM_PER_GENERATION_ROW; x++) {
@@ -130,11 +165,24 @@ void manage_block_world(vec3_s32_t center_pos) {
         }
     }
 
-    // Update neighborhoods of block chunks
+    // Update neighborhoods and push visuals updates of block chunks
     gen_index = 0;
     for (s32 z = 0; z < NUM_PER_GENERATION_ROW; z++) {
         for (s32 x = 0; x < NUM_PER_GENERATION_ROW; x++) {
-            block_chunk_t* chunk = &chunks[local_chunk_indices[gen_index]];
+            if (!local_update_neighborhood[gen_index]) {
+                gen_index++;
+                continue;
+            }
+
+            u16 chunk_index = local_chunk_indices[gen_index];
+
+            vec3_s32_t pos = {
+                .x = center_pos.x + x,
+                .y = 0,
+                .z = center_pos.z + z
+            };
+
+            block_chunk_t* chunk = &chunks[chunk_index];
 
             if (x != (NUM_PER_GENERATION_ROW - 1) && chunk->front_chunk_index == NULL_CHUNK_INDEX) {
                 chunk->front_chunk_index = local_chunk_indices[gen_index + X_OFFSET];
@@ -149,21 +197,21 @@ void manage_block_world(vec3_s32_t center_pos) {
                 chunk->left_chunk_index = local_chunk_indices[gen_index - Z_OFFSET];
             }
 
+            visuals_update_queue[num_visuals_update_queue_items++] = (block_chunk_update_t){ chunk_index, pos };
+
             gen_index++;
         }
     }
 
     if (num_procedural_generate_queue_items > 0) {
         while (num_procedural_generate_queue_items > 0) {
-            block_chunk_update_t update = procedural_generate_queue[--num_procedural_generate_queue_items];
+            block_chunk_update_t* update = &procedural_generate_queue[--num_procedural_generate_queue_items];
 
-            if (update.chunk_index == NULL_CHUNK_INDEX) {
+            if (update->chunk_index == NULL_CHUNK_INDEX) {
                 continue;
             }
 
-            visuals_update_queue[num_visuals_update_queue_items++] = update;
-            
-            generate_procedural_blocks(update.position, chunks[update.chunk_index].blocks);
+            generate_procedural_blocks(update->position, chunks[update->chunk_index].blocks);
             break;
         }
     } else if (num_visuals_update_queue_items > 0) { // Bit of a hacky fix, only start dealing with this queue once we don't need to do any procedural generation. This is to allow all procedural generation to finish before visuals updates.
@@ -174,7 +222,7 @@ void manage_block_world(vec3_s32_t center_pos) {
                 continue;
             }
 
-            vec3s world_pos = { update->position.x * 16, 0, update->position.z * 16 };
+            vec3s world_pos = { update->position.x * 16, 20, update->position.z * 16 };
 
             update_block_chunk_visuals(world_pos, &chunks[update->chunk_index]);
             break;
