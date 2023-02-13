@@ -13,6 +13,7 @@ _Alignas(32) block_display_list_pool_t transparent_double_sided_display_list_poo
 };
 
 _Alignas(32) u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+_Alignas(32) u8 block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 _Alignas(32) block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
 
 static void init_display_list_pool(block_display_list_pool_t* pool) {
@@ -30,6 +31,7 @@ void pool_init(void) {
     for (size_t i = 0; i < NUM_BLOCK_CHUNKS; i++) {
         chunk_indices[i] = (u8)i;
     }
+    memset(block_pool_chunk_bitfields, 0, sizeof(block_pool_chunk_bitfields));
 }
 
 block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t type) {

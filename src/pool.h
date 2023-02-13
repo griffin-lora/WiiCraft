@@ -53,14 +53,19 @@ typedef struct {
 } block_display_list_chunk_descriptor_t;
 
 typedef struct {
-    block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[15];
-    bool has_trivial_visuals;
+    block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[16];
     _Alignas(32) block_type_t block_types[4096];
 } block_chunk_t;
 
 _Static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 64, "");
 
+#define BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT 0b00000001
+#define BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED 0b00000010
+#define BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS 0b00000100
+#define BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS 0b00001000
+
 extern u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+extern u8 block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 extern block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
 
 extern block_display_list_pool_t solid_display_list_pool;

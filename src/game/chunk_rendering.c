@@ -1,5 +1,6 @@
 #include "chunk_rendering.h"
 #include "pool.h"
+#include "log.h"
 #include <ogc/gx.h>
 
 static void draw_pool(Mtx view, block_display_list_pool_t* pool) {

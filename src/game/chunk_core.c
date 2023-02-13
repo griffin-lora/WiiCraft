@@ -71,11 +71,7 @@ bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_po
     // if (chunk_rel_pos.y != NUM_Y_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
     // if (chunk_rel_pos.y != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
 
-    if (num_visuals_update_queue_items + 7 > NUM_WORLD_QUEUE_ITEMS) {
-        return false;
-    }
-
-    visuals_update_queue[num_visuals_update_queue_items++] = chunk_pos;
+    // visuals_update_queue[num_visuals_update_queue_items++] = chunk_pos;
     // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x + 1, chunk_pos.y, chunk_pos.z };
     // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x - 1, chunk_pos.y, chunk_pos.z };
     // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y + 1, chunk_pos.z };
