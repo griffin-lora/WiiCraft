@@ -33,90 +33,72 @@ _Alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
 _Alignas(32) u8 temp_block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 
 void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
-    // vec3_s32_t move_dir = {
-    //     .x = last_corner_pos.x - corner_pos.x,
-    //     .y = last_corner_pos.y - corner_pos.y,
-    //     .z = last_corner_pos.z - corner_pos.z
-    // };
+    vec3_s32_t move_dir = {
+        .x = last_corner_pos.x - corner_pos.x,
+        .y = last_corner_pos.y - corner_pos.y,
+        .z = last_corner_pos.z - corner_pos.z
+    };
 
-    // size_t i = 0;
-    // for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
-    //     for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
-    //         for (s32 x = 0; x < NUM_XZ_ROW_BLOCK_CHUNKS; x++, i++) {
-    //             size_t chunk_index = block_pool_chunk_indices[i];
+    size_t i = 0;
+    for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
+        for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
+            for (s32 x = 0; x < NUM_XZ_ROW_BLOCK_CHUNKS; x++, i++) {
+                size_t chunk_index = block_pool_chunk_indices[i];
+                size_t chunk_bitfield = block_pool_chunk_bitfields[i];
 
-    //             vec3_s32_t new_pos = {
-    //                 .x = x + move_dir.x,
-    //                 .y = y + move_dir.y,
-    //                 .z = z + move_dir.z
-    //             };
+                vec3_s32_t new_pos = {
+                    .x = x + move_dir.x,
+                    .y = y + move_dir.y,
+                    .z = z + move_dir.z
+                };
 
-    //             if (new_pos.x < 0 || new_pos.x >= NUM_XZ_ROW_BLOCK_CHUNKS || new_pos.y < 0 || new_pos.y >= NUM_Y_ROW_BLOCK_CHUNKS || new_pos.z < 0 || new_pos.z >= NUM_XZ_ROW_BLOCK_CHUNKS) {
-    //                 new_pos.x = mod_s32(new_pos.x, NUM_XZ_ROW_BLOCK_CHUNKS);
-    //                 new_pos.y = mod_s32(new_pos.y, NUM_Y_ROW_BLOCK_CHUNKS);
-    //                 new_pos.z = mod_s32(new_pos.z, NUM_XZ_ROW_BLOCK_CHUNKS);
+                if (new_pos.x < 0 || new_pos.x >= NUM_XZ_ROW_BLOCK_CHUNKS || new_pos.y < 0 || new_pos.y >= NUM_Y_ROW_BLOCK_CHUNKS || new_pos.z < 0 || new_pos.z >= NUM_XZ_ROW_BLOCK_CHUNKS) {
+                    new_pos.x = mod_s32(new_pos.x, NUM_XZ_ROW_BLOCK_CHUNKS);
+                    new_pos.y = mod_s32(new_pos.y, NUM_Y_ROW_BLOCK_CHUNKS);
+                    new_pos.z = mod_s32(new_pos.z, NUM_XZ_ROW_BLOCK_CHUNKS);
 
-    //                 vec3_s32_t update_pos = {
-    //                     .x = new_pos.x + corner_pos.x,
-    //                     .y = new_pos.y + corner_pos.y,
-    //                     .z = new_pos.z + corner_pos.z
-    //                 };
+                    // Erase the old chunk and add a new one
+                    block_chunk_t* chunk = &block_pool_chunks[chunk_index];
 
-    //                 // Erase the old chunk and add a new one
-    //                 block_chunk_t* chunk = &block_pool_chunks[chunk_index];
+                    block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
+                    for (size_t i = 0; descriptors[i].type != 0xff; i++) {
+                        if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
+                            lprintf("block_world_management.c:97\n");
+                        }
+                    }
 
-    //                 block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
-    //                 for (size_t i = 0; descriptors[i].type != 0xff; i++) {
-    //                     if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
-    //                         lprintf("block_world_management.c:97\n");
-    //                     }
-    //                 }
+                    memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));
 
-    //                 memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));
-
-    //                 chunk->has_trivial_visuals = update_pos.y != 0;
-
-    //                 if (num_procedural_generate_queue_items >= NUM_WORLD_QUEUE_ITEMS || num_visuals_update_queue_items >= NUM_WORLD_QUEUE_ITEMS) {
-    //                     lprintf("Too many queue items\n");
-    //                     for (;;);
-    //                 }
-
-    //                 procedural_generate_queue[num_procedural_generate_queue_items++] = update_pos;
-    //                 visuals_update_queue[num_visuals_update_queue_items++] = update_pos;
-    //             } else {
-    //                 vec3_s32_t neighbor_pos = {
-    //                     .x = x - move_dir.x,
-    //                     .y = y - move_dir.y,
-    //                     .z = z - move_dir.z
-    //                 };
+                    chunk_bitfield = 0;
+                    chunk_bitfield |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED;
+                    if (new_pos.y + corner_pos.y != 0) {
+                        chunk_bitfield |= BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS;
+                    }
+                } else {
+                    vec3_s32_t neighbor_pos = {
+                        .x = x - move_dir.x,
+                        .y = y - move_dir.y,
+                        .z = z - move_dir.z
+                    };
                     
-    //                 if (neighbor_pos.x < 0 || neighbor_pos.x >= NUM_XZ_ROW_BLOCK_CHUNKS || neighbor_pos.y < 0 || neighbor_pos.y >= NUM_Y_ROW_BLOCK_CHUNKS || neighbor_pos.z < 0 || neighbor_pos.z >= NUM_XZ_ROW_BLOCK_CHUNKS) {
-    //                     // Update because our neighbor is new
-    //                     vec3_s32_t update_pos = {
-    //                         .x = new_pos.x + corner_pos.x,
-    //                         .y = new_pos.y + corner_pos.y,
-    //                         .z = new_pos.z + corner_pos.z
-    //                     };
+                    if (neighbor_pos.x < 0 || neighbor_pos.x >= NUM_XZ_ROW_BLOCK_CHUNKS || neighbor_pos.y < 0 || neighbor_pos.y >= NUM_Y_ROW_BLOCK_CHUNKS || neighbor_pos.z < 0 || neighbor_pos.z >= NUM_XZ_ROW_BLOCK_CHUNKS) {
+                        // Update because our neighbor is new
+                        chunk_bitfield |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED;
+                    }
+                }
 
-    //                     if (num_procedural_generate_queue_items >= NUM_WORLD_QUEUE_ITEMS || num_visuals_update_queue_items >= NUM_WORLD_QUEUE_ITEMS) {
-    //                         lprintf("Too many queue items\n");
-    //                         for (;;);
-    //                     }
+                size_t index = (new_pos.z * Z_OFFSET) + (new_pos.y * Y_OFFSET) + (new_pos.x * X_OFFSET);
+                temp_block_pool_chunk_indices[index] = chunk_index;
+                temp_block_pool_chunk_bitfields[index] = chunk_bitfield;
+            }
+        }
+    }
 
-    //                     procedural_generate_queue[num_procedural_generate_queue_items++] = update_pos;
-    //                     visuals_update_queue[num_visuals_update_queue_items++] = update_pos;
-    //                 }
-    //             }
-
-    //             temp_block_pool_chunk_indices[(new_pos.z * Z_OFFSET) + (new_pos.y * Y_OFFSET) + (new_pos.x * X_OFFSET)] = chunk_index;
-    //         }
-    //     }
-    // }
-
-    // // Set the real indices
-    // for (size_t i = 0; i < NUM_BLOCK_CHUNKS; i++) {
-    //     block_pool_chunk_indices[i] = temp_block_pool_chunk_indices[i];
-    // }
+    // Set the real indices
+    for (size_t i = 0; i < NUM_BLOCK_CHUNKS; i++) {
+        block_pool_chunk_indices[i] = temp_block_pool_chunk_indices[i];
+        block_pool_chunk_bitfields[i] = temp_block_pool_chunk_bitfields[i];
+    }
 }
 
 static bool handle_procedural_generation(vec3_s32_t corner_pos) {
