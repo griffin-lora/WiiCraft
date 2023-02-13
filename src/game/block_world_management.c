@@ -93,7 +93,9 @@ void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
 
                     block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
                     for (size_t i = 0; descriptors[i].type != 0xff; i++) {
-                        release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
+                        if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
+                            lprintf("block_world_management.c:97\n");
+                        }
                     }
 
                     memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));

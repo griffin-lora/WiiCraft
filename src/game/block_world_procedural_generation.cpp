@@ -1,6 +1,7 @@
 #include "block_world_procedural_generation.hpp"
 #include "math.hpp"
 #include "pool.hpp"
+#include "log.hpp"
 #include <string.h>
 
 using math::get_noise_at;

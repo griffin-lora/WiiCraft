@@ -15,4 +15,4 @@ typedef struct {
 } world_location_wrap_t;
 
 world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos, vec3s pos);
-void update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_pos);
+bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_pos);

@@ -326,15 +326,10 @@ void update_block_chunk_visuals(
     const block_type_t left_block_types[]
 ) {
     for (size_t i = 0; descriptors[i].type != 0xff; i++) {
-        release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
+        if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
+            lprintf("block_world_mesh_generation.c:330\n");
+        }
     }
-
-    // if (
-    //     chunk.invisible_block_count == chunk::blocks_count ||
-    //     chunk.fully_opaque_block_count == chunk::blocks_count
-    // ) {
-    //     return mesh_update_state::should_continue;
-    // }
 
     union {
         meshes_indices_t all;

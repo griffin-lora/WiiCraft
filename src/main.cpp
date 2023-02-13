@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 	chrono::us_tp<s64> program_start = chrono::get_current_us();
 	chrono::us start = 0;
 
-	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4 };
+	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
 
 	init_block_world(last_corner_pos);
 
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
-		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4 };
+		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
 		if (corner_pos.x != last_corner_pos.x || corner_pos.y != last_corner_pos.y || corner_pos.z != last_corner_pos.z) {
 			manage_block_world(last_corner_pos, corner_pos);
 		}

@@ -1,4 +1,5 @@
 #include "pool.h"
+#include "log.h"
 #include <string.h>
 
 _Alignas(32) block_display_list_pool_t solid_display_list_pool = {
@@ -16,8 +17,8 @@ _Alignas(32) block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
 
 static void init_display_list_pool(block_display_list_pool_t* pool) {
     block_display_list_t* disp_lists = pool->disp_lists;
-    for (u16 i = 0; i < NUM_BLOCK_DISPLAY_LIST_CHUNKS; i++) {
-        disp_lists[i].chunk_index = i;
+    for (size_t i = 0; i < NUM_BLOCK_DISPLAY_LIST_CHUNKS; i++) {
+        disp_lists[i].chunk_index = (u16)i;
     }
 }
 
@@ -45,7 +46,7 @@ block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_t
     return &pool->disp_lists[pool->head++];
 }
 
-void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index) {
+bool release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index) {
     block_display_list_pool_t* pool = get_block_display_list_pool(type);
     
     // This is really slow unfortunately
@@ -54,15 +55,18 @@ void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 c
     u16 head = pool->head;
     block_display_list_t* disp_lists = pool->disp_lists;
     
-    for (u16 i = 0; i < NUM_BLOCK_DISPLAY_LIST_CHUNKS; i++) {
+    for (size_t i = 0; i < head; i++) {
         if (disp_lists[i].chunk_index == chunk_index) {
             memmove(&disp_lists[i], &disp_lists[i + 1], (head - i - 1) * sizeof(block_display_list_t));
             head--;
             disp_lists[head].chunk_index = chunk_index;
+
+            pool->head = head;
             
-            break;
+            return true;
         }
     }
-
-    pool->head = head;
+    // We should never reach here, report an error if we do
+    lprintf("block_display_list_pool on chunk_index: %d double release occurred.\n", chunk_index);
+    return false;
 }

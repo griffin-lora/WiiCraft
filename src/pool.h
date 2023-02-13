@@ -39,12 +39,12 @@ typedef struct {
 #define BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET 16
 #define BLOCKS_PER_BLOCK_CHUNK_X_OFFSET 1
 
-#define NUM_XZ_ROW_BLOCK_CHUNKS 8
-#define NUM_Y_ROW_BLOCK_CHUNKS 4
+#define NUM_XZ_ROW_BLOCK_CHUNKS 7
+#define NUM_Y_ROW_BLOCK_CHUNKS 5
 #define NUM_BLOCK_CHUNKS (NUM_XZ_ROW_BLOCK_CHUNKS * NUM_Y_ROW_BLOCK_CHUNKS * NUM_XZ_ROW_BLOCK_CHUNKS)
 
-#define BLOCK_POOL_CHUNK_INDICES_Z_OFFSET (4 * 8)
-#define BLOCK_POOL_CHUNK_INDICES_Y_OFFSET 8
+#define BLOCK_POOL_CHUNK_INDICES_Z_OFFSET (5 * 7)
+#define BLOCK_POOL_CHUNK_INDICES_Y_OFFSET 7
 #define BLOCK_POOL_CHUNK_INDICES_X_OFFSET 1
 
 typedef struct {
@@ -71,4 +71,4 @@ void pool_init(void);
 
 block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t type);
 block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type);
-void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index);
+bool release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index);
