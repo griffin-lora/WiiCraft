@@ -186,9 +186,9 @@ int main(int argc, char** argv) {
 
 		draw_block_display_lists(view);
 		
-		// if (raycast.success) {
-		// 	block_selection_draw(now);
-		// }
+		if (raycast.success) {
+			block_selection_draw(now);
+		}
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();
