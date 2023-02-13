@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::character character = {
-		.position = { 0.0f, 100.0f, 0.0f },
+		.position = { 0.0f, 30.0f, 0.0f },
 		.velocity = { 0.0f, 0.0f, 0.0f }
 	};
 
@@ -106,9 +106,11 @@ int main(int argc, char** argv) {
 	chrono::us_tp<s64> program_start = chrono::get_current_us();
 	chrono::us start = 0;
 
-	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / 16.0f) - 4, (s32)floorf(cam.position.y / 16.0f) - 4, (s32)floorf(cam.position.z / 16.0f) - 4 };
+	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4 };
 
 	init_block_world(last_corner_pos);
+
+	bool has_first_gen_happened = false;
 
 	for (;;) {
         chrono::us now = chrono::get_current_us() - program_start;
@@ -132,11 +134,14 @@ int main(int argc, char** argv) {
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
-		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / 16.0f) - 4, (s32)floorf(cam.position.y / 16.0f) - 4, (s32)floorf(cam.position.z / 16.0f) - 4 };
-		if (corner_pos.x != last_corner_pos.x || corner_pos.z != last_corner_pos.z) {
+		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 4 };
+		if (corner_pos.x != last_corner_pos.x || corner_pos.y != last_corner_pos.y || corner_pos.z != last_corner_pos.z) {
 			manage_block_world(last_corner_pos, corner_pos);
 		}
 		handle_world_queues(corner_pos);
+		if (!has_first_gen_happened && num_procedural_generate_queue_items == 0) {
+			has_first_gen_happened = true;
+		}
 		last_corner_pos = corner_pos;
 
 		auto pointer_pos = input::get_pointer_position(chan);
@@ -167,7 +172,9 @@ int main(int argc, char** argv) {
 		block_selection_handle_raycast(view, raycast);
 
 		game::update_world_from_raycast_and_input(corner_pos, buttons_down, raycast);
-		character.apply_physics(corner_pos, frame_delta);
+		if (has_first_gen_happened) {
+			character.apply_physics(corner_pos, frame_delta);
+		}
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 

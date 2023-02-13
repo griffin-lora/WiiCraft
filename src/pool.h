@@ -35,10 +35,16 @@ typedef struct {
 #define NUM_ROW_BLOCKS_PER_BLOCK_CHUNK 16
 #define NUM_BLOCKS_PER_BLOCK_CHUNK 4096
 
-#define NUM_ROW_BLOCK_CHUNKS 8
-#define NUM_BLOCK_CHUNKS (NUM_ROW_BLOCK_CHUNKS * NUM_ROW_BLOCK_CHUNKS)
+#define BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET (16 * 16)
+#define BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET 16
+#define BLOCKS_PER_BLOCK_CHUNK_X_OFFSET 1
 
-#define BLOCK_POOL_CHUNK_INDICES_Z_OFFSET 8
+#define NUM_XZ_ROW_BLOCK_CHUNKS 8
+#define NUM_Y_ROW_BLOCK_CHUNKS 4
+#define NUM_BLOCK_CHUNKS (NUM_XZ_ROW_BLOCK_CHUNKS * NUM_Y_ROW_BLOCK_CHUNKS * NUM_XZ_ROW_BLOCK_CHUNKS)
+
+#define BLOCK_POOL_CHUNK_INDICES_Z_OFFSET (4 * 8)
+#define BLOCK_POOL_CHUNK_INDICES_Y_OFFSET 8
 #define BLOCK_POOL_CHUNK_INDICES_X_OFFSET 1
 
 typedef struct {
@@ -47,7 +53,8 @@ typedef struct {
 } block_display_list_chunk_descriptor_t;
 
 typedef struct {
-    block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[16];
+    block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[15];
+    bool has_trivial_visuals;
     _Alignas(32) block_type_t blocks[4096];
 } block_chunk_t;
 

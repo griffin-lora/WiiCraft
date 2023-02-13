@@ -35,14 +35,14 @@ void game::update_world_from_raycast_and_input(vec3_s32_t corner_pos, u32 button
         if (buttons_down & WPAD_BUTTON_A) {
             *raycast.val.location.bl_tp = block_type_air;
             auto ch_pos = raycast.val.location.ch_pos;
-            visuals_update_queue[num_visuals_update_queue_items++] = { ch_pos.x, 0, ch_pos.z };
+            visuals_update_queue[num_visuals_update_queue_items++] = { ch_pos.x, ch_pos.y, ch_pos.z };
         }
         if (buttons_down & WPAD_BUTTON_B) {
             auto normal_offset_loc = get_world_location_at_world_position(corner_pos, raycast.val.world_block_position + raycast.val.box_raycast.normal);
             if (normal_offset_loc.success) {
                 *normal_offset_loc.val.bl_tp = block_type_wood_planks;
                 auto ch_pos = normal_offset_loc.val.ch_pos;
-                visuals_update_queue[num_visuals_update_queue_items++] = { ch_pos.x, 0, ch_pos.z };
+                visuals_update_queue[num_visuals_update_queue_items++] = { ch_pos.x, ch_pos.y, ch_pos.z };
             }
         }
     }

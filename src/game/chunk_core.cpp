@@ -10,13 +10,9 @@ world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos
 
     math::vector3s32 chunk_rel_pos = {
         chunk_pos.x - corner_pos.x,
-        chunk_pos.y /*- corner_pos.y ok?? */,
+        chunk_pos.y - corner_pos.y,
         chunk_pos.z - corner_pos.z
     };
-
-    if (chunk_rel_pos.x < 0 || chunk_rel_pos.x >= NUM_ROW_BLOCK_CHUNKS || chunk_rel_pos.y != 0 || chunk_rel_pos.z < 0 || chunk_rel_pos.z >= NUM_ROW_BLOCK_CHUNKS) {
-        return world_location_wrap_t{ false };
-    }
 
     math::vector3u8 block_rel_pos = {
         mod_s32(pos.x, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
@@ -24,9 +20,13 @@ world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos
         mod_s32(pos.z, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
     };
 
-    u8 chunk_index = block_pool_chunk_indices[(chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET)];
+    size_t chunk_index = block_pool_chunk_indices[(chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET)];
 
-    block_type_t* bl_tp = &block_pool_chunks[chunk_index].blocks[(block_rel_pos.z * 16 * 16) + (block_rel_pos.y * 16) + block_rel_pos.x];
+    if (chunk_index >= NUM_BLOCK_CHUNKS) {
+        return world_location_wrap_t{ false };
+    }
+
+    block_type_t* bl_tp = &block_pool_chunks[chunk_index].blocks[(block_rel_pos.z * BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET) + (block_rel_pos.y * BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET) + (block_rel_pos.x * BLOCKS_PER_BLOCK_CHUNK_X_OFFSET)];
 
     return world_location_wrap_t{
         .success = true,

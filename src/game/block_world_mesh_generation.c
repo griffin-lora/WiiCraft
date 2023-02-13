@@ -240,12 +240,12 @@ static u16 write_meshes_into_display_list(block_display_list_type_t type, vec3s 
     return chunk_index;
 }
 
-#define NUM_BLOCKS (16 * 16 * 16)
-#define Z_OFFSET (16 * 16)
-#define Y_OFFSET 16
-#define X_OFFSET 1
+#define NUM_BLOCKS NUM_BLOCKS_PER_BLOCK_CHUNK
+#define Z_OFFSET BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET
+#define Y_OFFSET BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET
+#define X_OFFSET BLOCKS_PER_BLOCK_CHUNK_X_OFFSET
 
-#define NUM_ROW_BLOCKS 16
+#define NUM_ROW_BLOCKS NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
 
 static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_index) {
     switch (face) {

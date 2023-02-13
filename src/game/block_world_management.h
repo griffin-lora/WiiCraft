@@ -2,7 +2,7 @@
 #include "math/vector.h"
 #include <stddef.h>
 
-#define NUM_WORLD_QUEUE_ITEMS 128
+#define NUM_WORLD_QUEUE_ITEMS 1024
 
 extern size_t num_procedural_generate_queue_items;
 extern vec3_s32_t procedural_generate_queue[NUM_WORLD_QUEUE_ITEMS];

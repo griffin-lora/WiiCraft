@@ -26,8 +26,8 @@ void pool_init(void) {
     init_display_list_pool(&transparent_display_list_pool);
     init_display_list_pool(&transparent_double_sided_display_list_pool);
     u8* chunk_indices = block_pool_chunk_indices;
-    for (u8 i = 0; i < NUM_BLOCK_CHUNKS; i++) {
-        chunk_indices[i] = i;
+    for (size_t i = 0; i < NUM_BLOCK_CHUNKS; i++) {
+        chunk_indices[i] = (u8)i;
     }
 }
 
