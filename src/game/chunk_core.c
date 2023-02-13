@@ -30,7 +30,7 @@ world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos
 
     size_t chunk_index = block_pool_chunk_indices[index];
 
-    block_type_t* bl_tp = &block_pool_chunks[chunk_index].blocks[(block_rel_pos.z * BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET) + (block_rel_pos.y * BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET) + (block_rel_pos.x * BLOCKS_PER_BLOCK_CHUNK_X_OFFSET)];
+    block_type_t* bl_tp = &block_pool_chunks[chunk_index].block_types[(block_rel_pos.z * BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET) + (block_rel_pos.y * BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET) + (block_rel_pos.x * BLOCKS_PER_BLOCK_CHUNK_X_OFFSET)];
 
     return (world_location_wrap_t){
         .success = true,

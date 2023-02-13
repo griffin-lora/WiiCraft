@@ -55,7 +55,7 @@ typedef struct {
 typedef struct {
     block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[15];
     bool has_trivial_visuals;
-    _Alignas(32) block_type_t blocks[4096];
+    _Alignas(32) block_type_t block_types[4096];
 } block_chunk_t;
 
 _Static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 64, "");

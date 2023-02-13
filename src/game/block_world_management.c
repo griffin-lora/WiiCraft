@@ -162,7 +162,7 @@ void handle_world_queues(vec3_s32_t corner_pos) {
             };
             
             size_t index = (rel_pos.z * Z_OFFSET) + (rel_pos.y * Y_OFFSET) + (rel_pos.x * X_OFFSET);
-            generate_procedural_blocks(pos, chunks[chunk_indices[index]].blocks);
+            generate_procedural_blocks(pos, chunks[chunk_indices[index]].block_types);
 
             if (pos.y == 0) {
                 break;
@@ -198,13 +198,13 @@ void handle_world_queues(vec3_s32_t corner_pos) {
             update_block_chunk_visuals(
                 world_pos,
                 chunk->disp_list_chunk_descriptors,
-                chunk->blocks,
-                rel_pos.x == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + X_OFFSET]].blocks,
-                rel_pos.x == 0 ? NULL : chunks[chunk_indices[index - X_OFFSET]].blocks,
-                rel_pos.y == NUM_Y_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + Y_OFFSET]].blocks,
-                rel_pos.y == 0 ? NULL : chunks[chunk_indices[index - Y_OFFSET]].blocks,
-                rel_pos.z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + Z_OFFSET]].blocks,
-                rel_pos.z == 0 ? NULL : chunks[chunk_indices[index - Z_OFFSET]].blocks
+                chunk->block_types,
+                rel_pos.x == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + X_OFFSET]].block_types,
+                rel_pos.x == 0 ? NULL : chunks[chunk_indices[index - X_OFFSET]].block_types,
+                rel_pos.y == NUM_Y_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + Y_OFFSET]].block_types,
+                rel_pos.y == 0 ? NULL : chunks[chunk_indices[index - Y_OFFSET]].block_types,
+                rel_pos.z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + Z_OFFSET]].block_types,
+                rel_pos.z == 0 ? NULL : chunks[chunk_indices[index - Z_OFFSET]].block_types
             );
 
             break;
