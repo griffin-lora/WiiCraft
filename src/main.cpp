@@ -114,6 +114,10 @@ int main(int argc, char** argv) {
 	chrono::us_tp<s64> program_start = chrono::get_current_us();
 	chrono::us start = 0;
 
+	vec3_s32_t last_corner_pos = { floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) };
+
+	init_block_world(last_corner_pos);
+
 	for (;;) {
         chrono::us now = chrono::get_current_us() - program_start;
 
@@ -168,10 +172,12 @@ int main(int argc, char** argv) {
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 
-		if (cam.update_view) {
-			manage_block_world((vec3_s32_t){ floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) });
-		}
-		handle_world_queues();
+		vec3_s32_t corner_pos = { floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) };
+		// if (cam.update_view) {
+			manage_block_world(last_corner_pos, corner_pos);
+		// }
+		handle_world_queues(corner_pos);
+		last_corner_pos = corner_pos;
 
 		game::update_needed(view, perspective_3d, cam);
 

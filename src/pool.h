@@ -32,7 +32,11 @@ typedef struct {
     _Alignas(32) block_display_list_chunk_t chunks[NUM_BLOCK_DISPLAY_LIST_CHUNKS];
 } block_display_list_pool_t;
 
-#define NUM_BLOCK_CHUNKS 2048
+#define NUM_ROW_BLOCKS_PER_BLOCK_CHUNK 16
+#define NUM_BLOCKS_PER_BLOCK_CHUNK 4096
+
+#define NUM_ROW_BLOCK_CHUNKS 8
+#define NUM_BLOCK_CHUNKS (NUM_ROW_BLOCK_CHUNKS * NUM_ROW_BLOCK_CHUNKS)
 
 typedef struct {
     block_display_list_type_t type;
@@ -41,23 +45,13 @@ typedef struct {
 
 typedef struct {
     block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[16];
-
-    _Alignas(32) u16 front_chunk_index;
-    u16 back_chunk_index;
-    u16 top_chunk_index;
-    u16 bottom_chunk_index;
-    u16 right_chunk_index;
-    u16 left_chunk_index;
-    
     _Alignas(32) block_type_t blocks[4096];
 } block_chunk_t;
 
-_Static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 96, "");
+_Static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 64, "");
 
 typedef struct {
-    u16 head;
-    u16 chunk_indices[NUM_BLOCK_CHUNKS];
-    _Alignas(32) vec3_s32_t positions[NUM_BLOCK_CHUNKS];
+    u8 chunk_indices[NUM_BLOCK_CHUNKS];
     _Alignas(32) block_chunk_t chunks[NUM_BLOCK_CHUNKS];
 } block_pool_t;
 
@@ -71,6 +65,3 @@ void pool_init(void);
 block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t type);
 block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type);
 void release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index);
-
-u16 acquire_block_pool_chunk(void);
-void release_block_pool_chunk(u16 chunk_index);

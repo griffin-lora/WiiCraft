@@ -314,9 +314,9 @@ static face_meshes_indices_t add_face_mesh_if_needed(
     return indices;
 }
 
-static void generate_block_meshes(
+void update_block_chunk_visuals(
     vec3s world_pos,
-    block_display_list_chunk_descriptor_t* descriptors,
+    block_display_list_chunk_descriptor_t descriptors[],
     const block_type_t block_types[],
     const block_type_t front_block_types[],
     const block_type_t back_block_types[],
@@ -325,6 +325,17 @@ static void generate_block_meshes(
     const block_type_t right_block_types[],
     const block_type_t left_block_types[]
 ) {
+    for (size_t i = 0; descriptors[i].type != 0xff; i++) {
+        release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
+    }
+
+    // if (
+    //     chunk.invisible_block_count == chunk::blocks_count ||
+    //     chunk.fully_opaque_block_count == chunk::blocks_count
+    // ) {
+    //     return mesh_update_state::should_continue;
+    // }
+
     union {
         meshes_indices_t all;
         face_meshes_indices_t face;
@@ -412,30 +423,4 @@ static void generate_block_meshes(
             .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided)
         };
     }
-}
-
-void update_block_chunk_visuals(vec3s world_pos, block_chunk_t* chunk) {
-    block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
-    for (size_t i = 0; descriptors[i].type != 0xff; i++) {
-        release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index);
-    }
-
-    // if (
-    //     chunk.invisible_block_count == chunk::blocks_count ||
-    //     chunk.fully_opaque_block_count == chunk::blocks_count
-    // ) {
-    //     return mesh_update_state::should_continue;
-    // }
-
-    generate_block_meshes(
-        world_pos,
-        descriptors,
-        chunk->blocks,
-        chunk->front_chunk_index == NULL_CHUNK_INDEX ? NULL : block_pool.chunks[chunk->front_chunk_index].blocks,
-        chunk->back_chunk_index == NULL_CHUNK_INDEX ? NULL : block_pool.chunks[chunk->back_chunk_index].blocks,
-        chunk->top_chunk_index == NULL_CHUNK_INDEX ? NULL : block_pool.chunks[chunk->top_chunk_index].blocks,
-        chunk->bottom_chunk_index == NULL_CHUNK_INDEX ? NULL : block_pool.chunks[chunk->bottom_chunk_index].blocks,
-        chunk->right_chunk_index == NULL_CHUNK_INDEX ? NULL : block_pool.chunks[chunk->right_chunk_index].blocks,
-        chunk->left_chunk_index == NULL_CHUNK_INDEX ? NULL : block_pool.chunks[chunk->left_chunk_index].blocks
-    );
 }

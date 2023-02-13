@@ -132,7 +132,7 @@ void game::manage_chunks_around_camera(
         for (auto pos : chunk_positions_to_erase) {
             auto& chunk = chunks.at(pos);
             // Hacky fix
-            release_block_pool_chunk(chunk.blocks_chunk_index);
+            // release_block_pool_chunk(chunk.blocks_chunk_index);
             for (u16 chunk_index : chunk.solid_display_list_indices) {
                 release_block_display_list_pool_chunk(block_display_list_type_solid, chunk_index);
             }
@@ -183,7 +183,7 @@ void game::manage_chunks_around_camera(
         //     stored_chunks.erase(pos);
         // } else {
             // chunk.blocks.resize_without_copying(chunk::blocks_count);
-        chunk.blocks_chunk_index = acquire_block_pool_chunk();
+        // chunk.blocks_chunk_index = acquire_block_pool_chunk();
         chunk.blocks = block_pool.chunks[chunk.blocks_chunk_index].blocks;
         auto start = chrono::get_current_us();
         // state = generate_blocks(chunk, pos);
