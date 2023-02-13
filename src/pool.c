@@ -10,7 +10,9 @@ _Alignas(32) block_display_list_pool_t transparent_display_list_pool = {
 _Alignas(32) block_display_list_pool_t transparent_double_sided_display_list_pool = {
     .head = 0
 };
-_Alignas(32) block_pool_t block_pool = {};
+
+_Alignas(32) u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+_Alignas(32) block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
 
 static void init_display_list_pool(block_display_list_pool_t* pool) {
     block_display_list_t* disp_lists = pool->disp_lists;
@@ -23,7 +25,7 @@ void pool_init(void) {
     init_display_list_pool(&solid_display_list_pool);
     init_display_list_pool(&transparent_display_list_pool);
     init_display_list_pool(&transparent_double_sided_display_list_pool);
-    u8* chunk_indices = block_pool.chunk_indices;
+    u8* chunk_indices = block_pool_chunk_indices;
     for (u8 i = 0; i < NUM_BLOCK_CHUNKS; i++) {
         chunk_indices[i] = i;
     }

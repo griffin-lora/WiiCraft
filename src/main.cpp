@@ -140,6 +140,13 @@ int main(int argc, char** argv) {
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
+		vec3_s32_t corner_pos = { floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) };
+		if (corner_pos.x != last_corner_pos.x || corner_pos.z != last_corner_pos.z) {
+			manage_block_world(last_corner_pos, corner_pos);
+		}
+		handle_world_queues(corner_pos);
+		last_corner_pos = corner_pos;
+
 		auto pointer_pos = input::get_pointer_position(chan);
 		cursor_update(rmode->viWidth, rmode->viHeight);
 
@@ -171,13 +178,6 @@ int main(int argc, char** argv) {
 		// character.apply_physics(chunks, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
-
-		vec3_s32_t corner_pos = { floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) };
-		// if (cam.update_view) {
-			manage_block_world(last_corner_pos, corner_pos);
-		// }
-		handle_world_queues(corner_pos);
-		last_corner_pos = corner_pos;
 
 		game::update_needed(view, perspective_3d, cam);
 

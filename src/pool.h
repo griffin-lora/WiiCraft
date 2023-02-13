@@ -50,15 +50,12 @@ typedef struct {
 
 _Static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 64, "");
 
-typedef struct {
-    u8 chunk_indices[NUM_BLOCK_CHUNKS];
-    _Alignas(32) block_chunk_t chunks[NUM_BLOCK_CHUNKS];
-} block_pool_t;
+extern u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+extern block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
 
 extern block_display_list_pool_t solid_display_list_pool;
 extern block_display_list_pool_t transparent_display_list_pool;
 extern block_display_list_pool_t transparent_double_sided_display_list_pool;
-extern block_pool_t block_pool;
 
 void pool_init(void);
 
