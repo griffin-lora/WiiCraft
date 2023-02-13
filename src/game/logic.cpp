@@ -1,8 +1,8 @@
 #include "logic.hpp"
-#include "chunk_core.hpp"
 #include "cursor.hpp"
 #include "input.hpp"
 #include "dbg.hpp"
+#include "block_world_management.hpp"
 
 using namespace game;
 
@@ -29,24 +29,20 @@ glm::vec3 game::get_raycast_direction_from_pointer_position(u16 v_width, u16 v_h
     // }
 }
 
-void game::update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, block_raycast_wrap_t& raycast) {
+void game::update_world_from_raycast_and_input(vec3_s32_t corner_pos, u32 buttons_down, block_raycast_wrap_t& raycast) {
     // TODO: Ugly garbage code. Refactor.
     if (raycast.success) {
         if (buttons_down & WPAD_BUTTON_A) {
-            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl_tp)--;
             *raycast.val.location.bl_tp = block_type_air;
-            get_block_count_ref(*raycast.val.location.ch, *raycast.val.location.bl_tp)++;
-            raycast.val.location.ch->modified = true;
-            add_important_chunk_mesh_update(*raycast.val.location.ch, raycast.val.location.bl_pos);
+            auto ch_pos = raycast.val.location.ch_pos;
+            visuals_update_queue[num_visuals_update_queue_items++] = { ch_pos.x, 0, ch_pos.z };
         }
         if (buttons_down & WPAD_BUTTON_B) {
-            auto normal_offset_loc = get_world_location_at_world_position(chunks, raycast.val.world_block_position + raycast.val.box_raycast.normal);
-            if (normal_offset_loc.has_value()) {
-                get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl_tp)--;
-                *normal_offset_loc->bl_tp = block_type_wood_planks;
-                get_block_count_ref(*normal_offset_loc->ch, *normal_offset_loc->bl_tp)++;
-                normal_offset_loc->ch->modified = true;
-                add_important_chunk_mesh_update(*normal_offset_loc->ch, normal_offset_loc->bl_pos);
+            auto normal_offset_loc = get_world_location_at_world_position(corner_pos, raycast.val.world_block_position + raycast.val.box_raycast.normal);
+            if (normal_offset_loc.success) {
+                *normal_offset_loc.val.bl_tp = block_type_wood_planks;
+                auto ch_pos = normal_offset_loc.val.ch_pos;
+                visuals_update_queue[num_visuals_update_queue_items++] = { ch_pos.x, 0, ch_pos.z };
             }
         }
     }

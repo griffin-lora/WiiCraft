@@ -1,8 +1,8 @@
 #include "block_world_procedural_generation.hpp"
-#include "chunk_core.hpp"
+#include "math.hpp"
+#include "pool.hpp"
 #include <string.h>
 
-using namespace game;
 using math::get_noise_at;
 
 static f32 get_hills_height(glm::vec2 position) {
@@ -28,18 +28,18 @@ static void generate_high_blocks(math::vector3s32 chunk_pos, block_type_t block_
     memset(block_types, block_type_air, 4096);
 }
 
-static constexpr s32 z_offset = chunk::size * chunk::size;
-static constexpr s32 y_offset = chunk::size;
+static constexpr s32 z_offset = NUM_ROW_BLOCKS_PER_BLOCK_CHUNK * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
+static constexpr s32 y_offset = NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
 static constexpr s32 x_offset = 1;
 
 static void generate_middle_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
     auto it = block_types;
 
-    f32 world_chunk_x = chunk_pos.x * chunk::size;
-    f32 world_chunk_z = chunk_pos.z * chunk::size;
+    f32 world_chunk_x = chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
+    f32 world_chunk_z = chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
 
-    for (f32 z = 0; z < chunk::size; z++) {
-        for (f32 x = 0; x < chunk::size; x++) {
+    for (f32 z = 0; z < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; z++) {
+        for (f32 x = 0; x < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; x++) {
             f32 world_x = world_chunk_x + x;
             f32 world_z = world_chunk_z + z;
             glm::vec2 noise_pos = { world_x, world_z };
@@ -50,7 +50,7 @@ static void generate_middle_blocks(math::vector3s32 chunk_pos, block_type_t bloc
 
             s32 gen_y = (height * 12) + 1;
 
-            for (s32 y = 0; y < chunk::size; y++) {
+            for (s32 y = 0; y < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; y++) {
                 if (y > gen_y) {
                     if (y < 7) {
                         *it = block_type_water;

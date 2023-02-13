@@ -3,11 +3,12 @@
 #include "block_world_procedural_generation.h"
 #include "pool.h"
 #include "log.h"
+#include "util.h"
 #include <stdbool.h>
 #include <string.h>
 
-#define Z_OFFSET 8
-#define X_OFFSET 1
+#define Z_OFFSET BLOCK_POOL_CHUNK_INDICES_Z_OFFSET
+#define X_OFFSET BLOCK_POOL_CHUNK_INDICES_X_OFFSET
 
 size_t num_procedural_generate_queue_items = 0;
 _Alignas(32) vec3_s32_t procedural_generate_queue[NUM_WORLD_QUEUE_ITEMS];
@@ -48,11 +49,6 @@ void init_block_world(vec3_s32_t corner_pos) {
 }
 
 _Alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
-
-static s32 mod_s32(s32 a, s32 b) {
-    s32 ret = a % b;
-    return ret >= 0 ? ret : ret + b;
-}
 
 void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
     remove_chunks_outside_of_range_from_queue(corner_pos, num_procedural_generate_queue_items, procedural_generate_queue);
@@ -165,7 +161,7 @@ void handle_world_queues(vec3_s32_t corner_pos) {
 
             vec3s world_pos = {
                 .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
-                .y = 20,
+                .y = 0,
                 .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
             };
 

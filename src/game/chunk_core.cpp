@@ -1,74 +1,40 @@
 #include "chunk_core.hpp"
-#include "chunk_math.hpp"
-#include "chunk_mesh_generation.hpp"
-#include "common.hpp"
-#include "glm/gtc/noise.hpp"
-#include "block.hpp"
-#include "block_util.hpp"
-#include <algorithm>
-using namespace game;
+#include "util.h"
 
-template<block_face_t FACE>
-static chunk::opt_ref get_neighbor_from_map(chunk::map& chunks, const math::vector3s32& pos) {
-    math::vector3s32 offset_pos = get_face_offset_position<FACE>(pos);
-    auto it = chunks.find(offset_pos);
-    if (it != chunks.end()) {
-        return it->second;
-    } else {
-        return {};
-    }
-}
-
-void game::update_chunk_neighborhood(chunk::map& chunks, const math::vector3s32& pos, chunk& chunk) {
-    chunk.nh = {
-        .front = get_neighbor_from_map<block_face_front>(chunks, pos),
-        .back = get_neighbor_from_map<block_face_back>(chunks, pos),
-        .top = get_neighbor_from_map<block_face_top>(chunks, pos),
-        .bottom = get_neighbor_from_map<block_face_bottom>(chunks, pos),
-        .right = get_neighbor_from_map<block_face_right>(chunks, pos),
-        .left = get_neighbor_from_map<block_face_left>(chunks, pos),
+world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos, glm::vec3 pos) {
+    math::vector3s32 chunk_pos = {
+        (s32)floorf(pos.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
+        (s32)floorf(pos.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
+        (s32)floorf(pos.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
     };
-}
 
-void game::add_important_chunk_mesh_update(chunk& chunk, const math::vector3s32& pos) {
-    chunk.update_core_mesh_important = true;
-    chunk.update_shell_mesh_important = true;
-    call_func_on_each_face<void>([&chunk, &pos]<block_face_t FACE>() {
-        if (is_block_position_at_face_edge<FACE>(pos)) {
-            auto nb_chunk = get_neighbor<FACE>(chunk.nh);
-            if (nb_chunk.has_value()) {
-                nb_chunk->get().update_shell_mesh_important = true;
-            }
-        }
-    });
-}
+    math::vector3s32 chunk_rel_pos = {
+        chunk_pos.x - corner_pos.x,
+        chunk_pos.y /*- corner_pos.y ok?? */,
+        chunk_pos.z - corner_pos.z
+    };
 
-std::size_t& game::get_block_count_ref(chunk& chunk, block_type_t type) {
-    switch (type) {
-        default: return chunk.fully_opaque_block_count;
-        case block_type_air: return chunk.invisible_block_count;
-        case block_type_tall_grass:
-        case block_type_water: return chunk.partially_opaque_block_count;
+    if (chunk_rel_pos.x < 0 || chunk_rel_pos.x >= NUM_ROW_BLOCK_CHUNKS || chunk_rel_pos.y != 0 || chunk_rel_pos.z < 0 || chunk_rel_pos.z >= NUM_ROW_BLOCK_CHUNKS) {
+        return world_location_wrap_t{ false };
     }
-    // Compiler complains despite this being unreachable
-    return chunk.invisible_block_count;
-}
 
-void game::add_chunk_mesh_neighborhood_update_to_neighbors(chunk& chunk) {
-    call_func_on_each_face<void>([&chunk]<block_face_t FACE>() {
-        auto nb_chunk = get_neighbor<FACE>(chunk.nh);
-        if (nb_chunk.has_value()) {
-            nb_chunk->get().update_shell_mesh_unimportant = true;
-            nb_chunk->get().update_neighborhood = true;
-        }
-    });
-}
+    math::vector3u8 block_rel_pos = {
+        mod_s32(pos.x, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
+        mod_s32(pos.y, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
+        mod_s32(pos.z, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
+    };
 
-void game::add_chunk_neighborhood_update_to_neighbors(chunk& chunk) {
-    call_func_on_each_face<void>([&chunk]<block_face_t FACE>() {
-        auto nb_chunk = get_neighbor<FACE>(chunk.nh);
-        if (nb_chunk.has_value()) {
-            nb_chunk->get().update_neighborhood = true;
+    u8 chunk_index = block_pool_chunk_indices[(chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET)];
+
+    block_type_t* bl_tp = &block_pool_chunks[chunk_index].blocks[(block_rel_pos.z * 16 * 16) + (block_rel_pos.y * 16) + block_rel_pos.x];
+
+    return world_location_wrap_t{
+        .success = true,
+        .val = {
+            .ch_pos = chunk_pos,
+            .bl_pos = block_rel_pos,
+            .chunk_index = chunk_index,
+            .bl_tp = bl_tp
         }
-    });
+    };
 }

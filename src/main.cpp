@@ -13,10 +13,7 @@
 #include "chrono.hpp"
 #include "game/block_raycast.hpp"
 #include "game/camera.hpp"
-#include "game/chunk_core.hpp"
-#include "game/chunk_management.hpp"
 #include "game/chunk_rendering.hpp"
-#include "game/stored_chunk.hpp"
 #include "game/logic.hpp"
 #include "game/block_selection.hpp"
 #include "game/cursor.hpp"
@@ -25,7 +22,6 @@
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
 #include "game/debug_ui.hpp"
-#include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "log.hpp"
 #include "pool.h"
@@ -61,7 +57,7 @@ int main(int argc, char** argv) {
 	math::matrix44 perspective_3d;
 
 	game::character character = {
-		.position = { 0.0f, 30.0f, 0.0f },
+		.position = { 0.0f, 100.0f, 0.0f },
 		.velocity = { 0.0f, 0.0f, 0.0f }
 	};
 
@@ -85,10 +81,6 @@ int main(int argc, char** argv) {
 	#ifdef PC_PORT
 	u16 frame_count = 0;
 	#endif
-
-	// game::chunk::map chunks;
-
-	// game::stored_chunk::map stored_chunks;
 
 	skybox_init(view, cam.position.x, cam.position.y, cam.position.z);
 	
@@ -114,7 +106,7 @@ int main(int argc, char** argv) {
 	chrono::us_tp<s64> program_start = chrono::get_current_us();
 	chrono::us start = 0;
 
-	vec3_s32_t last_corner_pos = { floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) };
+	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / 16.0f) - 4, (s32)floorf(cam.position.y / 16.0f) - 4, (s32)floorf(cam.position.z / 16.0f) - 4 };
 
 	init_block_world(last_corner_pos);
 
@@ -140,7 +132,7 @@ int main(int argc, char** argv) {
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
-		vec3_s32_t corner_pos = { floorf(cam.position.x / 16.0f), floorf(cam.position.y / 16.0f), floorf(cam.position.z / 16.0f) };
+		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / 16.0f) - 4, (s32)floorf(cam.position.y / 16.0f) - 4, (s32)floorf(cam.position.z / 16.0f) - 4 };
 		if (corner_pos.x != last_corner_pos.x || corner_pos.z != last_corner_pos.z) {
 			manage_block_world(last_corner_pos, corner_pos);
 		}
@@ -171,11 +163,11 @@ int main(int argc, char** argv) {
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		// auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
-		// block_selection_handle_raycast(view, raycast);
+		auto raycast = get_block_raycast(corner_pos, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
+		block_selection_handle_raycast(view, raycast);
 
-		// game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
-		// character.apply_physics(chunks, frame_delta);
+		game::update_world_from_raycast_and_input(corner_pos, buttons_down, raycast);
+		character.apply_physics(corner_pos, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 

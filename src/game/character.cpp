@@ -1,7 +1,5 @@
 #include "character.hpp"
-#include "block_core.hpp"
 #include "block_raycast.hpp"
-#include "chunk_core.hpp"
 #include "common.hpp"
 #include "input.hpp"
 #include "logic.hpp"
@@ -97,7 +95,7 @@ void character::apply_no_movement(chrono::us now, f32 delta) {
 static constexpr glm::vec3 half_size = { 0.35f, 0.9f, 0.35f };
 static constexpr glm::vec3 full_size = half_size * 2.0f;
 
-bool character::apply_collision(chunk::map& chunks, f32 delta) {
+bool character::apply_collision(vec3_s32_t corner_pos, f32 delta) {
     auto direction = velocity * delta;
 
     auto begin = position - half_size;
@@ -127,7 +125,7 @@ bool character::apply_collision(chunk::map& chunks, f32 delta) {
         end.z = next_end.z;
     }
 
-    auto raycast = get_block_raycast(chunks, position, direction, begin, end, half_size, block_box_type_collision);
+    auto raycast = get_block_raycast(corner_pos, position, direction, begin, end, half_size, block_box_type_collision);
 
     if (raycast.success) {
         auto& normal = raycast.val.box_raycast.normal;
@@ -145,16 +143,13 @@ bool character::apply_collision(chunk::map& chunks, f32 delta) {
     return false;
 }
 
-void character::apply_physics(chunk::map& chunks, f32 delta) {
+void character::apply_physics(vec3_s32_t corner_pos, f32 delta) {
     #ifndef PC_PORT
-    auto chunk = get_chunk_from_world_position(chunks, position);
-    if (chunk.has_value()) {
-        velocity.y -= gravity * delta;
+    velocity.y -= gravity * delta;
 
-        grounded = false;
+    grounded = false;
 
-        while (apply_collision(chunks, delta));
-    }
+    while (apply_collision(corner_pos, delta));
     #endif
 }
 
