@@ -56,7 +56,26 @@ void update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_po
         return;
     }
 
-    // size_t chunk_index = block_pool_chunk_indices[index];
-    
+    u8* chunk_indices = block_pool_chunk_indices;
+    block_chunk_t* chunks = block_pool_chunks;
+
+    if (chunk_pos.y != 0) {
+        chunks[chunk_indices[index]].has_trivial_visuals = false;
+
+        if (chunk_rel_pos.x != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
+        if (chunk_rel_pos.x != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
+        if (chunk_rel_pos.z != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
+        if (chunk_rel_pos.z != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
+    }
+
+    if (chunk_rel_pos.y != NUM_Y_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
+    if (chunk_rel_pos.y != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
+
     visuals_update_queue[num_visuals_update_queue_items++] = chunk_pos;
+    visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x + 1, chunk_pos.y, chunk_pos.z };
+    visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x - 1, chunk_pos.y, chunk_pos.z };
+    visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y + 1, chunk_pos.z };
+    visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y - 1, chunk_pos.z };
+    visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y, chunk_pos.z + 1 };
+    visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y, chunk_pos.z - 1 };
 }
