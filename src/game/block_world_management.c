@@ -28,13 +28,18 @@ static void remove_chunks_outside_of_range_from_queue(vec3_s32_t corner_pos, siz
 }
 
 void init_block_world(vec3_s32_t corner_pos) {
+    size_t i = 0;
     for (s32 z = 0; z < NUM_ROW_BLOCK_CHUNKS; z++) {
-        for (s32 x = 0; x < NUM_ROW_BLOCK_CHUNKS; x++) {
+        for (s32 x = 0; x < NUM_ROW_BLOCK_CHUNKS; x++, i++) {
             vec3_s32_t update_pos = {
                 .x = x + corner_pos.x,
                 .y = 0,
                 .z = z + corner_pos.z
             };
+
+            block_chunk_t* chunk = &block_pool_chunks[block_pool_chunk_indices[i]];
+
+            memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));
 
             procedural_generate_queue[num_procedural_generate_queue_items++] = update_pos;
             visuals_update_queue[num_visuals_update_queue_items++] = update_pos;
@@ -92,6 +97,24 @@ void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
 
                 procedural_generate_queue[num_procedural_generate_queue_items++] = update_pos;
                 visuals_update_queue[num_visuals_update_queue_items++] = update_pos;
+            } else {
+                vec3_s32_t neighbor_pos = {
+                    .x = x - move_dir.x,
+                    .y = 0,
+                    .z = z - move_dir.z
+                };
+                
+                if (neighbor_pos.x < 0 || neighbor_pos.x >= NUM_ROW_BLOCK_CHUNKS || neighbor_pos.z < 0 || neighbor_pos.z >= NUM_ROW_BLOCK_CHUNKS) {
+                    // Update because our neighbor is new
+                    vec3_s32_t update_pos = {
+                        .x = new_pos.x + corner_pos.x,
+                        .y = 0,
+                        .z = new_pos.z + corner_pos.z
+                    };
+
+                    procedural_generate_queue[num_procedural_generate_queue_items++] = update_pos;
+                    visuals_update_queue[num_visuals_update_queue_items++] = update_pos;
+                }
             }
 
             temp_block_pool_chunk_indices[(new_pos.z * Z_OFFSET) + (new_pos.x * X_OFFSET)] = chunk_index;
@@ -142,14 +165,12 @@ void handle_world_queues(vec3_s32_t corner_pos) {
 
             vec3s world_pos = {
                 .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
-                .y = 0,
+                .y = 20,
                 .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
             };
 
             u8 index = (rel_pos.z * Z_OFFSET) + (rel_pos.x * X_OFFSET);
             block_chunk_t* chunk = &chunks[chunk_indices[index]];
-
-            memset(chunk->disp_list_chunk_descriptors, 0xff, sizeof(chunk->disp_list_chunk_descriptors));
 
             update_block_chunk_visuals(
                 world_pos,
