@@ -7,6 +7,12 @@ typedef struct {
     s32 z;
 } vec3_s32_t;
 
+typedef struct {
+    u8 x;
+    u8 y;
+    u8 z;
+} vec3_u8_t;
+
 // Temporary
 
 typedef struct {

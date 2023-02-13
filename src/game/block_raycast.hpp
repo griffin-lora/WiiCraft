@@ -4,11 +4,12 @@
 #include "block.hpp"
 #include "math/vector.h"
 #include <vector>
+#include <glm/vec3.hpp>
 
 typedef struct {
     world_location_t location;
     box_raycast_t box_raycast;
-    glm::vec3 world_block_position;
+    vec3s world_block_position;
 } block_raycast_t;
 
 typedef struct {

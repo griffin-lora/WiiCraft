@@ -206,6 +206,8 @@ void handle_world_queues(vec3_s32_t corner_pos) {
                 rel_pos.z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[index + Z_OFFSET]].blocks,
                 rel_pos.z == 0 ? NULL : chunks[chunk_indices[index - Z_OFFSET]].blocks
             );
+
+            break;
         }
     }
 }

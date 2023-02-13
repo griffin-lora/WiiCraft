@@ -10,7 +10,7 @@ using namespace game;
 
 #define MATRIX_INDEX GX_PNMTX4
 
-static std::optional<math::vector3s32> last_block_pos;
+static std::optional<vec3_u8_t> last_block_pos;
 static std::optional<block_type_t> last_block_type;
 
 static Mtx model;
@@ -84,8 +84,8 @@ void block_selection_draw(chrono::us now) {
 }
 
 static void update_mesh(Mtx view, const block_raycast_t& raycast) {
-    math::vector3s32 chunk_pos = raycast.location.ch_pos;
-    math::vector3u8 block_pos = raycast.location.bl_pos;
+    vec3_s32_t chunk_pos = raycast.location.ch_pos;
+    vec3_u8_t block_pos = raycast.location.bl_pos;
 
     guMtxIdentity(model);
     guMtxTransApply(model, model, chunk_pos.x * chunk::size, chunk_pos.y * chunk::size, chunk_pos.z * chunk::size);
@@ -172,7 +172,7 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
 void block_selection_handle_raycast(Mtx view, const block_raycast_wrap_t& raycast) {
     if (raycast.success) {
         // Check if we have a new selected block
-        if (!last_block_pos.has_value() || raycast.val.location.bl_pos != last_block_pos || *raycast.val.location.bl_tp != *last_block_type) {
+        if (!last_block_pos.has_value() || raycast.val.location.bl_pos.x != last_block_pos->x || raycast.val.location.bl_pos.y != last_block_pos->y || raycast.val.location.bl_pos.z != last_block_pos->z || *raycast.val.location.bl_tp != *last_block_type) {
             update_mesh(view, raycast.val);
         }
 
