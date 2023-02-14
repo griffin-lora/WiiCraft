@@ -5,11 +5,11 @@
 #include "chunk.hpp"
 #include "block.hpp"
 #include "cursor.hpp"
-#include "chunk_math.hpp"
+#include "math/vector.h"
 #include <optional>
 #include <tuple>
 
 namespace game {
     glm::vec3 get_raycast_direction_from_pointer_position(u16 v_width, u16 v_height, const camera& cam, const std::optional<glm::vec2>& pointer_pos);
-    void update_world_from_raycast_and_input(chunk::map& chunks, u32 buttons_down, block_raycast_wrap_t& raycast);
+    void update_world_from_raycast_and_input(vec3_s32_t corner_pos, u32 buttons_down, block_raycast_wrap_t& raycast);
 }

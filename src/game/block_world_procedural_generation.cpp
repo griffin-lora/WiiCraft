@@ -1,8 +1,9 @@
-#include "chunk_block_generation.hpp"
-#include "chunk_core.hpp"
+#include "block_world_procedural_generation.hpp"
+#include "math.hpp"
+#include "pool.hpp"
+#include "log.hpp"
 #include <string.h>
 
-using namespace game;
 using math::get_noise_at;
 
 static f32 get_hills_height(glm::vec2 position) {
@@ -24,23 +25,22 @@ static f32 get_tallgrass_value(glm::vec2 position) {
     );
 }
 
-static void generate_high_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    memset(chunk.blocks, block_type_air, 4096);
-    get_block_count_ref(chunk, block_type_air) = 4096;
+static void generate_high_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
+    memset(block_types, block_type_air, 4096);
 }
 
-static constexpr s32 z_offset = chunk::size * chunk::size;
-static constexpr s32 y_offset = chunk::size;
+static constexpr s32 z_offset = NUM_ROW_BLOCKS_PER_BLOCK_CHUNK * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
+static constexpr s32 y_offset = NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
 static constexpr s32 x_offset = 1;
 
-static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    auto it = chunk.blocks;
+static void generate_middle_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
+    auto it = block_types;
 
-    f32 world_chunk_x = chunk_pos.x * chunk::size;
-    f32 world_chunk_z = chunk_pos.z * chunk::size;
+    f32 world_chunk_x = chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
+    f32 world_chunk_z = chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
 
-    for (f32 z = 0; z < chunk::size; z++) {
-        for (f32 x = 0; x < chunk::size; x++) {
+    for (f32 z = 0; z < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; z++) {
+        for (f32 x = 0; x < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; x++) {
             f32 world_x = world_chunk_x + x;
             f32 world_z = world_chunk_z + z;
             glm::vec2 noise_pos = { world_x, world_z };
@@ -51,7 +51,7 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
 
             s32 gen_y = (height * 12) + 1;
 
-            for (s32 y = 0; y < chunk::size; y++) {
+            for (s32 y = 0; y < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; y++) {
                 if (y > gen_y) {
                     if (y < 7) {
                         *it = block_type_water;
@@ -78,8 +78,6 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
                     }
                 }
 
-                get_block_count_ref(chunk, *it)++;
-
                 it += y_offset;
             }
 
@@ -89,20 +87,17 @@ static void generate_middle_blocks(chunk& chunk, const math::vector3s32& chunk_p
     }
 }
 
-static void generate_low_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
-    memset(chunk.blocks, block_type_stone, 4096);
-    get_block_count_ref(chunk, block_type_stone) = 4096;
+static void generate_low_blocks(math::vector3s32 chunk_pos, block_type_t block_types[]) {
+    memset(block_types, block_type_stone, 4096);
 }
 
-mesh_update_state game::generate_blocks(chunk& chunk, const math::vector3s32& chunk_pos) {
+void generate_procedural_blocks(vec3_s32_t pos, block_type_t block_types[]) {
+    math::vector3s32 chunk_pos = { pos.x, pos.y, pos.z };
     if (chunk_pos.y > 0) {
-        generate_high_blocks(chunk, chunk_pos);
-        return mesh_update_state::should_continue;
+        generate_high_blocks(chunk_pos, block_types);
     } else if (chunk_pos.y < 0) {
-        generate_low_blocks(chunk, chunk_pos);
-        return mesh_update_state::should_continue;
+        generate_low_blocks(chunk_pos, block_types);
     } else {
-        generate_middle_blocks(chunk, chunk_pos);
-        return mesh_update_state::should_break;
+        generate_middle_blocks(chunk_pos, block_types);
     }
 }

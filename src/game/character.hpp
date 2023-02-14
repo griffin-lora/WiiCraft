@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "chunk.hpp"
 #include "chrono.hpp"
+#include "math/vector.h"
 
 namespace game {
     struct character {
@@ -19,12 +20,12 @@ namespace game {
         void apply_movement(const camera& cam, chrono::us now, f32 delta, bool shaking, glm::vec3 input_vector);
         void apply_no_movement(chrono::us now, f32 delta);
         
-        void apply_physics(chunk::map& chunks, f32 delta);
+        void apply_physics(vec3_s32_t corner_pos, f32 delta);
         void apply_velocity(f32 delta);
 
         void update_camera(camera& cam, chrono::us now) const;
 
         private:
-            bool apply_collision(chunk::map& chunks, f32 delta);
+            bool apply_collision(vec3_s32_t corner_pos, f32 delta);
     };
 }

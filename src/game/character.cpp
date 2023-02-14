@@ -1,11 +1,10 @@
 #include "character.hpp"
-#include "block_core.hpp"
 #include "block_raycast.hpp"
-#include "chunk_core.hpp"
 #include "common.hpp"
 #include "input.hpp"
 #include "logic.hpp"
 #include "dbg.hpp"
+#include "log.hpp"
 
 using namespace game;
 
@@ -97,7 +96,7 @@ void character::apply_no_movement(chrono::us now, f32 delta) {
 static constexpr glm::vec3 half_size = { 0.35f, 0.9f, 0.35f };
 static constexpr glm::vec3 full_size = half_size * 2.0f;
 
-bool character::apply_collision(chunk::map& chunks, f32 delta) {
+bool character::apply_collision(vec3_s32_t corner_pos, f32 delta) {
     auto direction = velocity * delta;
 
     auto begin = position - half_size;
@@ -127,7 +126,7 @@ bool character::apply_collision(chunk::map& chunks, f32 delta) {
         end.z = next_end.z;
     }
 
-    auto raycast = get_block_raycast(chunks, position, direction, begin, end, half_size, block_box_type_collision);
+    auto raycast = get_block_raycast(corner_pos, position, direction, begin, end, half_size, block_box_type_collision);
 
     if (raycast.success) {
         auto& normal = raycast.val.box_raycast.normal;
@@ -145,16 +144,31 @@ bool character::apply_collision(chunk::map& chunks, f32 delta) {
     return false;
 }
 
-void character::apply_physics(chunk::map& chunks, f32 delta) {
+void character::apply_physics(vec3_s32_t corner_pos, f32 delta) {
     #ifndef PC_PORT
-    auto chunk = get_chunk_from_world_position(chunks, position);
-    if (chunk.has_value()) {
-        velocity.y -= gravity * delta;
+    vec3_s32_t chunk_rel_pos = {
+        (s32)floor(position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.x,
+        (s32)floor(position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.y,
+        (s32)floor(position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.z
+    };
 
-        grounded = false;
+    size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
 
-        while (apply_collision(chunks, delta));
+    if (index >= NUM_BLOCK_CHUNKS) {
+        velocity.y = 0;
+        return;
     }
+
+    if (!(block_pool_chunk_bitfields[index] & BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS)) {
+        velocity.y = 0;
+        return;
+    }
+
+    velocity.y -= gravity * delta;
+
+    grounded = false;
+
+    while (apply_collision(corner_pos, delta));
     #endif
 }
 

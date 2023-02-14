@@ -1,15 +1,12 @@
-#include "chunk_mesh_generation.hpp"
-#include "block_core.hpp"
-#include "chunk_math.hpp"
-#include "chunk_core.hpp"
-#include "chunk_math.hpp"
-#include "log.hpp"
-#include "block.hpp"
-#include "pool.hpp"
-#include "gfx/instruction_size.hpp"
+#include "block_world_mesh_generation.h"
+#include "log.h"
+#include "block.h"
+#include "pool.h"
+#include "gfx/instruction_size.h"
 #include "util.h"
 #include <string.h>
 #include <ogc/cache.h>
+#include <ogc/gx.h>
 
 // Possible future optimization is to stop generating the mesh after we reach the end of blocks to generate meshes from
 
@@ -20,29 +17,21 @@ typedef struct {
     u8 z;
 } block_mesh_t;
 
-static_assert(sizeof(block_mesh_t) == 4, "");
+_Static_assert(sizeof(block_mesh_t) == 4, "");
 
 #define NUM_SOLID_BUILDING_MESHES 204
 #define NUM_TRANSPARENT_BUILDING_MESHES 204
 #define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES 102
 
-typedef enum {
-    building_meshes_type_solid,
-    building_meshes_type_transparent,
-    building_meshes_type_transparent_double_sided
-} building_meshes_type_t;
-
 typedef struct {
-    alignas(32) block_mesh_t solid[NUM_SOLID_BUILDING_MESHES];
-    alignas(32) block_mesh_t transparent[NUM_TRANSPARENT_BUILDING_MESHES];
-    alignas(32) block_mesh_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES];
+    _Alignas(32) block_mesh_t solid[NUM_SOLID_BUILDING_MESHES];
+    _Alignas(32) block_mesh_t transparent[NUM_TRANSPARENT_BUILDING_MESHES];
+    _Alignas(32) block_mesh_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES];
 } building_meshes_arrays_t;
 
-static_assert(sizeof(building_meshes_arrays_t) <= 4096*3, "");
+_Static_assert(sizeof(building_meshes_arrays_t) <= 4096*3, "");
 
 static building_meshes_arrays_t building_meshes_arrays;
-
-using namespace game;
 
 typedef struct {
     size_t solid;
@@ -52,14 +41,14 @@ typedef struct {
 
 
 
-typedef enum : u8 {
+typedef enum __attribute__((__packed__)) {
     block_mesh_category_invisible,
     block_mesh_category_cube,
     block_mesh_category_transparent_cube,
     block_mesh_category_cross
 } block_mesh_category_t;
 
-static_assert(sizeof(block_mesh_category_t) == 1);
+_Static_assert(sizeof(block_mesh_category_t) == 1);
 
 static block_mesh_category_t get_block_mesh_category(block_type_t type) {
     switch (type) {
@@ -104,27 +93,31 @@ static u8 get_tex(block_type_t type) {
     return 5;
 }
 
-static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t type, size_t num_meshes, const block_mesh_t meshes[]) {
-    size_t num_verts = num_meshes * ((type != building_meshes_type_transparent_double_sided) ? 4 : 8);
+static u16 write_meshes_into_display_list(block_display_list_type_t type, guVector world_pos, size_t num_meshes, const block_mesh_t meshes[]) {
+    size_t num_verts = num_meshes * ((type != block_display_list_type_transparent_double_sided) ? 4 : 8);
 
-    pool_display_list_t disp_list = {
-        .size = (u16)align_to_32(
-            get_begin_instruction_size(num_verts) +
-            get_vector_instruction_size<u8>(3, num_verts) + 
-            get_vector_instruction_size<u8>(2, num_verts)
-        ),
-        .chunk_index = acquire_pool_chunk()
-    };
-    void* chunk = &pool_chunks[disp_list.chunk_index];
-    memset(chunk, 0, disp_list.size);
-    DCInvalidateRange(chunk, disp_list.size);
+    block_display_list_t* disp_list = acquire_block_display_list_pool_chunk(type);
+    disp_list->x = world_pos.x;
+    disp_list->y = world_pos.y;
+    disp_list->z = world_pos.z;
+    u16 chunk_index = disp_list->chunk_index;
+    u16 display_list_size = (u16)align_to_32(
+        GET_BEGIN_INSTRUCTION_SIZE(num_verts) +
+        GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), num_verts) + 
+        GET_VECTOR_INSTRUCTION_SIZE(2, sizeof(u8), num_verts)
+    );
 
-    GX_BeginDispList(chunk, disp_list.size);
+    block_display_list_chunk_t* chunks = get_block_display_list_pool(type)->chunks;
+    void* chunk = &chunks[chunk_index];
+    memset(chunk, 0, display_list_size);
+    DCInvalidateRange(chunk, display_list_size);
+
+    GX_BeginDispList(chunk, display_list_size);
     GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
 
     switch (type) {
-        case building_meshes_type_solid:
-        case building_meshes_type_transparent:
+        case block_display_list_type_solid:
+        case block_display_list_type_transparent:
             for (size_t i = 0; i < num_meshes; i++) {
                 block_mesh_t mesh = meshes[i];
 
@@ -205,7 +198,7 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
                 }
             }
             break;
-        case building_meshes_type_transparent_double_sided:
+        case block_display_list_type_transparent_double_sided:
             for (size_t i = 0; i < num_meshes; i++) {
                 block_mesh_t mesh = meshes[i];
 
@@ -242,15 +235,17 @@ static pool_display_list_t write_meshes_into_display_list(building_meshes_type_t
     }
     
     GX_End();
-    disp_list.size = GX_EndDispList();
+    disp_list->size = GX_EndDispList();
 
-    return disp_list;
+    return chunk_index;
 }
 
-#define NUM_BLOCKS (16 * 16 * 16)
-#define Z_OFFSET (16 * 16)
-#define Y_OFFSET 16
-#define X_OFFSET 1
+#define NUM_BLOCKS NUM_BLOCKS_PER_BLOCK_CHUNK
+#define Z_OFFSET BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET
+#define Y_OFFSET BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET
+#define X_OFFSET BLOCKS_PER_BLOCK_CHUNK_X_OFFSET
+
+#define NUM_ROW_BLOCKS NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
 
 static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_index) {
     switch (face) {
@@ -319,10 +314,9 @@ static face_meshes_indices_t add_face_mesh_if_needed(
     return indices;
 }
 
-static void generate_block_meshes(
-    std::vector<pool_display_list_t>* solid_display_lists,
-    std::vector<pool_display_list_t>* transparent_display_lists,
-    std::vector<pool_display_list_t>* transparent_double_sided_display_lists,
+void update_block_chunk_visuals(
+    guVector world_pos,
+    block_display_list_chunk_descriptor_t descriptors[],
     const block_type_t block_types[],
     const block_type_t front_block_types[],
     const block_type_t back_block_types[],
@@ -331,6 +325,12 @@ static void generate_block_meshes(
     const block_type_t right_block_types[],
     const block_type_t left_block_types[]
 ) {
+    for (size_t i = 0; i < 16 && descriptors[i].type != 0xff; i++) {
+        if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
+            lprintf("block_world_mesh_generation.c\n");
+        }
+    }
+
     union {
         meshes_indices_t all;
         face_meshes_indices_t face;
@@ -342,11 +342,13 @@ static void generate_block_meshes(
         }
     };
 
+    size_t descriptor_index = 0;
+
     // Generate mesh for faces that are not neighboring another chunk.
     size_t blocks_index = 0;
-    for (u32 z = 0; z < chunk::size; z++) {
-        for (u32 y = 0; y < chunk::size; y++) {
-            for (u32 x = 0; x < chunk::size; x++) {
+    for (u32 z = 0; z < NUM_ROW_BLOCKS; z++) {
+        for (u32 y = 0; y < NUM_ROW_BLOCKS; y++) {
+            for (u32 x = 0; x < NUM_ROW_BLOCKS; x++) {
                 block_type_t type = block_types[blocks_index];
 
                 block_mesh_category_t category = get_block_mesh_category(type);
@@ -372,15 +374,36 @@ static void generate_block_meshes(
                 }
 
                 if (indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6)) {
-                    solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.all.solid, building_meshes_arrays.solid));
+                    descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
+                        .type = block_display_list_type_solid,
+                        .chunk_index = write_meshes_into_display_list(block_display_list_type_solid, world_pos, indices.all.solid, building_meshes_arrays.solid)
+                    };
+                    if (descriptor_index >= 16) {
+                        lprintf("Too many block display lists\n");
+                        return;
+                    }
                     indices.all.solid = 0;
                 }
                 if (indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6)) {
-                    transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.all.transparent, building_meshes_arrays.transparent));
+                    descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
+                        .type = block_display_list_type_transparent,
+                        .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent, world_pos, indices.all.transparent, building_meshes_arrays.transparent)
+                    };
+                    if (descriptor_index >= 16) {
+                        lprintf("Too many block display lists\n");
+                        return;
+                    }
                     indices.all.transparent = 0;
                 }
                 if (indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)) {
-                    transparent_double_sided_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+                    descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
+                        .type = block_display_list_type_transparent_double_sided,
+                        .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided)
+                    };
+                    if (descriptor_index >= 16) {
+                        lprintf("Too many block display lists\n");
+                        return;
+                    }
                     indices.all.transparent_double_sided = 0;
                 }
 
@@ -390,49 +413,33 @@ static void generate_block_meshes(
     }
 
     if (indices.all.solid > 0) {
-        solid_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_solid, indices.all.solid, building_meshes_arrays.solid));
+        descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
+            .type = block_display_list_type_solid,
+            .chunk_index = write_meshes_into_display_list(block_display_list_type_solid, world_pos, indices.all.solid, building_meshes_arrays.solid)
+        };
+        if (descriptor_index >= 16) {
+            lprintf("Too many block display lists\n");
+            return;
+        }
     }
     if (indices.all.transparent > 0) {
-        transparent_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent, indices.all.transparent, building_meshes_arrays.transparent));
+        descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
+            .type = block_display_list_type_transparent,
+            .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent, world_pos, indices.all.transparent, building_meshes_arrays.transparent)
+        };
+        if (descriptor_index >= 16) {
+            lprintf("Too many block display lists\n");
+            return;
+        }
     }
     if (indices.all.transparent_double_sided > 0) {
-        transparent_double_sided_display_lists->push_back(write_meshes_into_display_list(building_meshes_type_transparent_double_sided, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided));
+        descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
+            .type = block_display_list_type_transparent_double_sided,
+            .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided)
+        };
+        if (descriptor_index >= 16) {
+            lprintf("Too many block display lists\n");
+            return;
+        }
     }
-}
-
-mesh_update_state game::update_core_mesh(chunk& chunk) {
-    for (pool_display_list_t disp_list : chunk.solid_display_lists) {
-        release_pool_chunk(disp_list.chunk_index);
-    }
-    for (pool_display_list_t disp_list : chunk.transparent_display_lists) {
-        release_pool_chunk(disp_list.chunk_index);
-    }
-    for (pool_display_list_t disp_list : chunk.transparent_double_sided_display_lists) {
-        release_pool_chunk(disp_list.chunk_index);
-    }
-
-    chunk.solid_display_lists.clear();
-    chunk.transparent_display_lists.clear();
-    chunk.transparent_double_sided_display_lists.clear();
-    if (
-        chunk.invisible_block_count == chunk::blocks_count ||
-        chunk.fully_opaque_block_count == chunk::blocks_count
-    ) {
-        return mesh_update_state::should_continue;
-    }
-
-    generate_block_meshes(
-        &chunk.solid_display_lists,
-        &chunk.transparent_display_lists,
-        &chunk.transparent_double_sided_display_lists,
-        chunk.blocks,
-        chunk.nh.front.has_value() ? chunk.nh.front->get().blocks : NULL,
-        chunk.nh.back.has_value() ? chunk.nh.back->get().blocks : NULL,
-        chunk.nh.top.has_value() ? chunk.nh.top->get().blocks : NULL,
-        chunk.nh.bottom.has_value() ? chunk.nh.bottom->get().blocks : NULL,
-        chunk.nh.right.has_value() ? chunk.nh.right->get().blocks : NULL,
-        chunk.nh.left.has_value() ? chunk.nh.left->get().blocks : NULL
-    );
-
-    return mesh_update_state::should_break;
 }

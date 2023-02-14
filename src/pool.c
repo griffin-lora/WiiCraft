@@ -1,38 +1,78 @@
 #include "pool.h"
+#include "log.h"
 #include <string.h>
 
-_Alignas(32) pool_chunks_info_t pool_chunks_info = {
+_Alignas(32) block_display_list_pool_t solid_display_list_pool = {
+    .head = 0
+};
+_Alignas(32) block_display_list_pool_t transparent_display_list_pool = {
+    .head = 0
+};
+_Alignas(32) block_display_list_pool_t transparent_double_sided_display_list_pool = {
     .head = 0
 };
 
-// Aligned to beginning of L2 cache, along with L1 cache
-_Alignas(0x40000) pool_chunk_t pool_chunks[NUM_POOL_CHUNKS];
+_Alignas(32) u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+_Alignas(32) u8 block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
+_Alignas(32) block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
+
+static void init_display_list_pool(block_display_list_pool_t* pool) {
+    block_display_list_t* disp_lists = pool->disp_lists;
+    for (size_t i = 0; i < NUM_BLOCK_DISPLAY_LIST_CHUNKS; i++) {
+        disp_lists[i].chunk_index = (u16)i;
+    }
+}
 
 void pool_init(void) {
-    u16* chunk_indices = pool_chunks_info.chunk_indices;
-    for (u16 i = 0; i < NUM_POOL_CHUNKS; i++) {
-        chunk_indices[i] = i;
+    init_display_list_pool(&solid_display_list_pool);
+    init_display_list_pool(&transparent_display_list_pool);
+    init_display_list_pool(&transparent_double_sided_display_list_pool);
+    u8* chunk_indices = block_pool_chunk_indices;
+    for (size_t i = 0; i < NUM_BLOCK_CHUNKS; i++) {
+        chunk_indices[i] = (u8)i;
     }
+    memset(block_pool_chunk_bitfields, 0, sizeof(block_pool_chunk_bitfields));
 }
 
-u16 acquire_pool_chunk(void) {
-    return pool_chunks_info.chunk_indices[pool_chunks_info.head++];
+block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t type) {
+    switch (type) {
+        case block_display_list_type_solid: return &solid_display_list_pool;
+        case block_display_list_type_transparent: return &transparent_display_list_pool;
+        case block_display_list_type_transparent_double_sided: return &transparent_double_sided_display_list_pool;
+    }
+    return NULL;
 }
 
-void release_pool_chunk(u16 chunk_index) {
-    // This is pretty slow unfortunately
-    u16 head = pool_chunks_info.head;
-    u16* chunk_indices = pool_chunks_info.chunk_indices;
+block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type) {
+    block_display_list_pool_t* pool = get_block_display_list_pool(type);
+    if (pool->head >= NUM_BLOCK_DISPLAY_LIST_CHUNKS) {
+        lprintf("Block display list pool of type: %d, has hit allocation limit\n", type);
+        return NULL;
+    }
+    return &pool->disp_lists[pool->head++];
+}
+
+bool release_block_display_list_pool_chunk(block_display_list_type_t type, u16 chunk_index) {
+    block_display_list_pool_t* pool = get_block_display_list_pool(type);
     
-    for (u16 i = 0; i < NUM_POOL_CHUNKS; i++) {
-        if (chunk_indices[i] == chunk_index) {
-            memmove(&chunk_indices[i], &chunk_indices[i + 1], (head - i - 1) * sizeof(u16));
+    // This is really slow unfortunately
+    // 87.5% of cacheline is wasted when erasing, this needs work
+
+    u16 head = pool->head;
+    block_display_list_t* disp_lists = pool->disp_lists;
+    
+    for (size_t i = 0; i < head; i++) {
+        if (disp_lists[i].chunk_index == chunk_index) {
+            memmove(&disp_lists[i], &disp_lists[i + 1], (head - i - 1) * sizeof(block_display_list_t));
             head--;
-            chunk_indices[head] = chunk_index;
+            disp_lists[head].chunk_index = chunk_index;
+
+            pool->head = head;
             
-            break;
+            return true;
         }
     }
-
-    pool_chunks_info.head = head;
+    // We should never reach here, report an error if we do
+    lprintf("block_display_list_pool on chunk_index: %d double release occurred.\n", chunk_index);
+    return false;
 }

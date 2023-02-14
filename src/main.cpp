@@ -13,10 +13,7 @@
 #include "chrono.hpp"
 #include "game/block_raycast.hpp"
 #include "game/camera.hpp"
-#include "game/chunk_core.hpp"
-#include "game/chunk_management.hpp"
 #include "game/chunk_rendering.hpp"
-#include "game/stored_chunk.hpp"
 #include "game/logic.hpp"
 #include "game/block_selection.hpp"
 #include "game/cursor.hpp"
@@ -25,10 +22,10 @@
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
 #include "game/debug_ui.hpp"
-#include "game/chunk_mesh_generation.hpp"
 #include "common.hpp"
 #include "log.hpp"
 #include "pool.h"
+#include "game/block_world_management.hpp"
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -85,15 +82,6 @@ int main(int argc, char** argv) {
 	u16 frame_count = 0;
 	#endif
 
-	game::chunk::map chunks;
-
-	game::stored_chunk::map stored_chunks;
-
-	// This is a variable whose lifetime is bound to the manage_chunks_around_camera function normally. However, reallocation is expensive, it is stored here.
-	std::vector<math::vector3s32> chunk_positions_to_erase;
-	game::chunk::pos_set chunk_positions_to_generate_blocks;
-	game::chunk::pos_set chunk_positions_to_update_neighborhood_and_mesh;
-
 	skybox_init(view, cam.position.x, cam.position.y, cam.position.z);
 	
 	game::water_overlay water_overlay;
@@ -118,6 +106,10 @@ int main(int argc, char** argv) {
 	chrono::us_tp<s64> program_start = chrono::get_current_us();
 	chrono::us start = 0;
 
+	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
+
+	init_block_world(last_corner_pos);
+
 	for (;;) {
         chrono::us now = chrono::get_current_us() - program_start;
 
@@ -139,6 +131,13 @@ int main(int argc, char** argv) {
 		u32 buttons_held = input::get_buttons_held(chan);
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
+
+		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
+		if (corner_pos.x != last_corner_pos.x || corner_pos.y != last_corner_pos.y || corner_pos.z != last_corner_pos.z) {
+			manage_block_world(last_corner_pos, corner_pos);
+		}
+		handle_world_flag_processing(corner_pos);
+		last_corner_pos = corner_pos;
 
 		auto pointer_pos = input::get_pointer_position(chan);
 		cursor_update(rmode->viWidth, rmode->viHeight);
@@ -164,20 +163,15 @@ int main(int argc, char** argv) {
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		auto raycast = get_block_raycast(chunks, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
+		auto raycast = get_block_raycast(corner_pos, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
 		block_selection_handle_raycast(view, raycast);
 
-		game::update_world_from_raycast_and_input(chunks, buttons_down, raycast);
-		character.apply_physics(chunks, frame_delta);
+		game::update_world_from_raycast_and_input(corner_pos, buttons_down, raycast);
+		character.apply_physics(corner_pos, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 
-		game::manage_chunks_around_camera(chunk_erasure_radius, chunk_generation_radius, view, cam, last_cam_chunk_pos, chunks, stored_chunks, chunk_positions_to_erase, chunk_positions_to_generate_blocks, chunk_positions_to_update_neighborhood_and_mesh, total_block_gen_time, now);
-		game::update_chunk_neighborhoods(chunks);
-
 		game::update_needed(view, perspective_3d, cam);
-
-		game::update_chunk_visuals(chunks, total_mesh_gen_time, last_mesh_gen_time, now);
 
 		if (cam.update_view) {
 			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);
@@ -190,7 +184,7 @@ int main(int argc, char** argv) {
 
 		GX_SetCurrentMtx(game::chunk::mat);
 
-		game::draw_chunks(view, cam, chunks);
+		draw_block_display_lists(view);
 		
 		if (raycast.success) {
 			block_selection_draw(now);
@@ -198,7 +192,7 @@ int main(int argc, char** argv) {
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();
-		water_overlay.draw(cam, chunks);
+		// water_overlay.draw(cam, chunks);
 		cursor_draw();
 
 		game::init_text_rendering();
