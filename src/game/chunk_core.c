@@ -43,6 +43,11 @@ world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos
     };
 }
 
+static void set_important_update(size_t index) {
+    block_pool_chunk_bitfields[index] |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT;
+    block_pool_chunk_bitfields[index] &= (~BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS);
+}
+
 bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_pos, vec3_u8_t modification_pos) {
     vec3_s32_t chunk_rel_pos = {
         chunk_pos.x - corner_pos.x,
@@ -60,25 +65,33 @@ bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_po
 
     if (chunk_pos.y != 0) {
         chunk_bitfields[index] &= (~BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS);
-
-        // if (chunk_rel_pos.x != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
-        // if (chunk_rel_pos.x != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
-        // if (chunk_rel_pos.z != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
-        // if (chunk_rel_pos.z != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
     }
 
     chunk_bitfields[index] |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT;
 
-    // if (chunk_rel_pos.y != NUM_Y_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
-    // if (chunk_rel_pos.y != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
+    if (modification_pos.x == NUM_ROW_BLOCKS_PER_BLOCK_CHUNK - 1 && chunk_rel_pos.x != NUM_XZ_ROW_BLOCK_CHUNKS - 1) {
+        set_important_update(index + BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
+    }
 
-    // visuals_update_queue[num_visuals_update_queue_items++] = chunk_pos;
-    // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x + 1, chunk_pos.y, chunk_pos.z };
-    // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x - 1, chunk_pos.y, chunk_pos.z };
-    // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y + 1, chunk_pos.z };
-    // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y - 1, chunk_pos.z };
-    // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y, chunk_pos.z + 1 };
-    // visuals_update_queue[num_visuals_update_queue_items++] = (vec3_s32_t){ chunk_pos.x, chunk_pos.y, chunk_pos.z - 1 };
+    if (modification_pos.x == 0 && chunk_rel_pos.x != 0) {
+        set_important_update(index - BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
+    }
+
+    if (modification_pos.y == NUM_ROW_BLOCKS_PER_BLOCK_CHUNK - 1 && chunk_rel_pos.y != NUM_Y_ROW_BLOCK_CHUNKS - 1) {
+        set_important_update(index + BLOCK_POOL_CHUNK_INDICES_Y_OFFSET);
+    }
+
+    if (modification_pos.y == 0 && chunk_rel_pos.y != 0) {
+        set_important_update(index - BLOCK_POOL_CHUNK_INDICES_Y_OFFSET);
+    }
+
+    if (modification_pos.z == NUM_ROW_BLOCKS_PER_BLOCK_CHUNK - 1 && chunk_rel_pos.z != NUM_XZ_ROW_BLOCK_CHUNKS - 1) {
+        set_important_update(index + BLOCK_POOL_CHUNK_INDICES_Z_OFFSET);
+    }
+
+    if (modification_pos.z == 0 && chunk_rel_pos.z != 0) {
+        set_important_update(index - BLOCK_POOL_CHUNK_INDICES_Z_OFFSET);
+    }
 
     return true;
 }
