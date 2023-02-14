@@ -143,7 +143,7 @@ static bool handle_procedural_generation(vec3_s32_t corner_pos) {
     return num_procedural_generate_items > 0;
 }
 
-static void handle_visuals_updating(vec3_s32_t corner_pos) {
+static void handle_important_visuals_updating(vec3_s32_t corner_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -158,7 +158,7 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                 }
 
                 chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
-                chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED);
+                // Don't get rid of queued visuals update since sometimes there is a good reason for it to update again
 
                 lprintf("Updating visuals important %d, %d, %d\n", x, y, z);
 
@@ -194,8 +194,14 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
             }
         }
     }
+}
 
-    i = 0;
+static void handle_queued_visuals_updating(vec3_s32_t corner_pos) {
+    u8* chunk_indices = block_pool_chunk_indices;
+    u8* chunk_bitfields = block_pool_chunk_bitfields;
+    block_chunk_t* chunks = block_pool_chunks;
+
+    size_t i = 0;
     for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
         for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
             for (s32 x = 0; x < NUM_XZ_ROW_BLOCK_CHUNKS; x++, i++) {
@@ -250,7 +256,9 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
 }
 
 void handle_world_flag_processing(vec3_s32_t corner_pos) {
-    if (!handle_procedural_generation(corner_pos)) { // Only handle visuals updating if we did not see any procedural generation
-        handle_visuals_updating(corner_pos);
+    bool any_procedural_generation = handle_procedural_generation(corner_pos);
+    handle_important_visuals_updating(corner_pos);
+    if (!any_procedural_generation) { // Only handle queued visuals updating if we did not see any procedural generation
+        handle_queued_visuals_updating(corner_pos);
     }
 }
