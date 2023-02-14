@@ -325,9 +325,9 @@ void update_block_chunk_visuals(
     const block_type_t right_block_types[],
     const block_type_t left_block_types[]
 ) {
-    for (size_t i = 0; descriptors[i].type != 0xff; i++) {
+    for (size_t i = 0; i < 16 && descriptors[i].type != 0xff; i++) {
         if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
-            lprintf("block_world_mesh_generation.c:330\n");
+            lprintf("block_world_mesh_generation.c\n");
         }
     }
 
@@ -378,6 +378,10 @@ void update_block_chunk_visuals(
                         .type = block_display_list_type_solid,
                         .chunk_index = write_meshes_into_display_list(block_display_list_type_solid, world_pos, indices.all.solid, building_meshes_arrays.solid)
                     };
+                    if (descriptor_index >= 16) {
+                        lprintf("Too many block display lists\n");
+                        return;
+                    }
                     indices.all.solid = 0;
                 }
                 if (indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6)) {
@@ -385,6 +389,10 @@ void update_block_chunk_visuals(
                         .type = block_display_list_type_transparent,
                         .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent, world_pos, indices.all.transparent, building_meshes_arrays.transparent)
                     };
+                    if (descriptor_index >= 16) {
+                        lprintf("Too many block display lists\n");
+                        return;
+                    }
                     indices.all.transparent = 0;
                 }
                 if (indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)) {
@@ -392,6 +400,10 @@ void update_block_chunk_visuals(
                         .type = block_display_list_type_transparent_double_sided,
                         .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided)
                     };
+                    if (descriptor_index >= 16) {
+                        lprintf("Too many block display lists\n");
+                        return;
+                    }
                     indices.all.transparent_double_sided = 0;
                 }
 
@@ -405,17 +417,29 @@ void update_block_chunk_visuals(
             .type = block_display_list_type_solid,
             .chunk_index = write_meshes_into_display_list(block_display_list_type_solid, world_pos, indices.all.solid, building_meshes_arrays.solid)
         };
+        if (descriptor_index >= 16) {
+            lprintf("Too many block display lists\n");
+            return;
+        }
     }
     if (indices.all.transparent > 0) {
         descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
             .type = block_display_list_type_transparent,
             .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent, world_pos, indices.all.transparent, building_meshes_arrays.transparent)
         };
+        if (descriptor_index >= 16) {
+            lprintf("Too many block display lists\n");
+            return;
+        }
     }
     if (indices.all.transparent_double_sided > 0) {
         descriptors[descriptor_index++] = (block_display_list_chunk_descriptor_t){
             .type = block_display_list_type_transparent_double_sided,
             .chunk_index = write_meshes_into_display_list(block_display_list_type_transparent_double_sided, world_pos, indices.all.transparent_double_sided, building_meshes_arrays.transparent_double_sided)
         };
+        if (descriptor_index >= 16) {
+            lprintf("Too many block display lists\n");
+            return;
+        }
     }
 }

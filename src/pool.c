@@ -45,6 +45,10 @@ block_display_list_pool_t* get_block_display_list_pool(block_display_list_type_t
 
 block_display_list_t* acquire_block_display_list_pool_chunk(block_display_list_type_t type) {
     block_display_list_pool_t* pool = get_block_display_list_pool(type);
+    if (pool->head >= NUM_BLOCK_DISPLAY_LIST_CHUNKS) {
+        lprintf("Block display list pool of type: %d, has hit allocation limit\n", type);
+        return NULL;
+    }
     return &pool->disp_lists[pool->head++];
 }
 
