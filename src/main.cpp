@@ -163,11 +163,11 @@ int main(int argc, char** argv) {
 		#endif
 
 		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		// auto raycast = get_block_raycast(corner_pos, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
-		// block_selection_handle_raycast(view, raycast);
+		auto raycast = get_block_raycast(corner_pos, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
+		block_selection_handle_raycast(view, raycast);
 
-		// game::update_world_from_raycast_and_input(corner_pos, buttons_down, raycast);
-		// character.apply_physics(corner_pos, frame_delta);
+		game::update_world_from_raycast_and_input(corner_pos, buttons_down, raycast);
+		character.apply_physics(corner_pos, frame_delta);
 		character.apply_velocity(frame_delta);
 		character.update_camera(cam, now);
 
@@ -186,9 +186,9 @@ int main(int argc, char** argv) {
 
 		draw_block_display_lists(view);
 		
-		// if (raycast.success) {
-		// 	block_selection_draw(now);
-		// }
+		if (raycast.success) {
+			block_selection_draw(now);
+		}
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();

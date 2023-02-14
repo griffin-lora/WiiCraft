@@ -4,6 +4,7 @@
 #include "input.hpp"
 #include "logic.hpp"
 #include "dbg.hpp"
+#include "log.hpp"
 
 using namespace game;
 
@@ -145,6 +146,24 @@ bool character::apply_collision(vec3_s32_t corner_pos, f32 delta) {
 
 void character::apply_physics(vec3_s32_t corner_pos, f32 delta) {
     #ifndef PC_PORT
+    vec3_s32_t chunk_rel_pos = {
+        (s32)floor(position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.x,
+        (s32)floor(position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.y,
+        (s32)floor(position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.z
+    };
+
+    size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
+
+    if (index >= NUM_BLOCK_CHUNKS) {
+        velocity.y = 0;
+        return;
+    }
+
+    if (!(block_pool_chunk_bitfields[index] & BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS)) {
+        velocity.y = 0;
+        return;
+    }
+
     velocity.y -= gravity * delta;
 
     grounded = false;
