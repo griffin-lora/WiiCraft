@@ -6,7 +6,7 @@
 
 using namespace game;
 
-static block_raycast_wrap_t get_closest_raycast(block_raycast_wrap_t closest_raycast, vec3s world_block_pos, world_location_t world_loc, box_raycast_wrap_t& box_raycast) {
+static block_raycast_wrap_t get_closest_raycast(block_raycast_wrap_t closest_raycast, guVector world_block_pos, world_location_t world_loc, box_raycast_wrap_t& box_raycast) {
     if (
         !box_raycast.success ||
         box_raycast.val.near_hit_time >= 1.0f ||
@@ -24,7 +24,7 @@ static block_raycast_wrap_t get_closest_raycast(block_raycast_wrap_t closest_ray
     };
 }
 
-static box_raycast_wrap_t get_box_raycast_for_block(glm::vec3 origin, glm::vec3 dir, glm::vec3 dir_inv, glm::vec3 box_transform, block_box_type_t box_type, vec3s world_block_pos, block_type_t block_type) {
+static box_raycast_wrap_t get_box_raycast_for_block(glm::vec3 origin, glm::vec3 dir, glm::vec3 dir_inv, glm::vec3 box_transform, block_box_type_t box_type, guVector world_block_pos, block_type_t block_type) {
     box_t box;
     switch (block_type) {
         case block_type_air: return box_raycast_wrap_t{ false };
@@ -81,7 +81,7 @@ block_raycast_wrap_t get_block_raycast(vec3_s32_t corner_pos, glm::vec3 origin, 
     for (f32 x = floored_begin.x; x <= floored_end.x; x++) {
         for (f32 y = floored_begin.y; y <= floored_end.y; y++) {
             for (f32 z = floored_begin.z; z <= floored_end.z; z++) {
-                vec3s world_block_pos = { x, y, z };
+                guVector world_block_pos = { x, y, z };
                 
                 auto world_loc = get_world_location_at_world_position(corner_pos, world_block_pos);
                 if (world_loc.success) {

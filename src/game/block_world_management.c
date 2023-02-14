@@ -167,7 +167,7 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                     .z = z + corner_pos.z
                 };
 
-                vec3s world_pos = {
+                guVector world_pos = {
                     .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
@@ -214,7 +214,7 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                     .z = z + corner_pos.z
                 };
 
-                vec3s world_pos = {
+                guVector world_pos = {
                     .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK

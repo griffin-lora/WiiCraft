@@ -3,7 +3,7 @@
 #include "block_world_management.h"
 #include <math.h>
 
-world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos, vec3s pos) {
+world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos, guVector pos) {
     vec3_s32_t chunk_pos = {
         (s32)floorf(pos.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
         (s32)floorf(pos.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),

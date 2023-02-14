@@ -12,11 +12,3 @@ typedef struct {
     u8 y;
     u8 z;
 } vec3_u8_t;
-
-// Temporary
-
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} vec3s;
