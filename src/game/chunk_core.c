@@ -43,7 +43,7 @@ world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos
     };
 }
 
-bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_pos) {
+bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_pos, vec3_u8_t modification_pos) {
     vec3_s32_t chunk_rel_pos = {
         chunk_pos.x - corner_pos.x,
         chunk_pos.y - corner_pos.y,
@@ -56,17 +56,18 @@ bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_po
         return false;
     }
 
-    u8* chunk_indices = block_pool_chunk_indices;
-    block_chunk_t* chunks = block_pool_chunks;
+    u8* chunk_bitfields = block_pool_chunk_bitfields;
 
-    // if (chunk_pos.y != 0) {
-    //     chunks[chunk_indices[index]].has_trivial_visuals = false;
+    if (chunk_pos.y != 0) {
+        chunk_bitfields[index] &= (~BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS);
 
-    //     if (chunk_rel_pos.x != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
-    //     if (chunk_rel_pos.x != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
-    //     if (chunk_rel_pos.z != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
-    //     if (chunk_rel_pos.z != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
-    // }
+        // if (chunk_rel_pos.x != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
+        // if (chunk_rel_pos.x != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_X_OFFSET]].has_trivial_visuals = false; }
+        // if (chunk_rel_pos.z != NUM_XZ_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
+        // if (chunk_rel_pos.z != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Z_OFFSET]].has_trivial_visuals = false; }
+    }
+
+    chunk_bitfields[index] |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT;
 
     // if (chunk_rel_pos.y != NUM_Y_ROW_BLOCK_CHUNKS - 1) { chunks[chunk_indices[index + BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }
     // if (chunk_rel_pos.y != 0) { chunks[chunk_indices[index - BLOCK_POOL_CHUNK_INDICES_Y_OFFSET]].has_trivial_visuals = false; }

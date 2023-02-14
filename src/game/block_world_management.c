@@ -150,6 +150,49 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
         for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
             for (s32 x = 0; x < NUM_XZ_ROW_BLOCK_CHUNKS; x++, i++) {
                 u8 flags = chunk_bitfields[i];
+                if (!(flags & BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT)) {
+                    continue;
+                }
+
+                chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
+                chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED);
+
+                lprintf("Updating visuals important %d, %d, %d\n", x, y, z);
+
+                block_chunk_t* chunk = &chunks[chunk_indices[i]];
+
+                vec3_s32_t pos = {
+                    .x = x + corner_pos.x,
+                    .y = y + corner_pos.y,
+                    .z = z + corner_pos.z
+                };
+
+                vec3s world_pos = {
+                    .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
+                    .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
+                    .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
+                };
+
+                update_block_chunk_visuals(
+                    world_pos,
+                    chunk->disp_list_chunk_descriptors,
+                    chunk->block_types,
+                    x == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + X_OFFSET]].block_types,
+                    x == 0 ? NULL : chunks[chunk_indices[i - X_OFFSET]].block_types,
+                    y == NUM_Y_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + Y_OFFSET]].block_types,
+                    y == 0 ? NULL : chunks[chunk_indices[i - Y_OFFSET]].block_types,
+                    z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + Z_OFFSET]].block_types,
+                    z == 0 ? NULL : chunks[chunk_indices[i - Z_OFFSET]].block_types
+                );
+            }
+        }
+    }
+
+    i = 0;
+    for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
+        for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
+            for (s32 x = 0; x < NUM_XZ_ROW_BLOCK_CHUNKS; x++, i++) {
+                u8 flags = chunk_bitfields[i];
                 if (!(flags & BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED)) {
                     continue;
                 }
