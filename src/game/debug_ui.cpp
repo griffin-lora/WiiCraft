@@ -38,7 +38,7 @@ void debug_ui::update(u32 buttons_down) {
     }
 }
 
-void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us total_block_gen_time, chrono::us total_mesh_gen_time, chrono::us last_mesh_gen_time, u32 fps) const {
+void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block_gen_time, us_t total_mesh_gen_time, us_t last_mesh_gen_time, u32 fps) const {
     constexpr auto write_text = [](std::string_view str, u16 y_offset) {
         gfx::write_text_vertices<u8>([y_offset](u16 x, u16 y, u8 u, u8 v) {
             GX_Position2u16(x + prefix_width, y + (char_size * y_offset));

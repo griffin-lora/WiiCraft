@@ -63,7 +63,7 @@ namespace game {
         
         bool fade_in_when_mesh_is_updated = false;
 
-        static constexpr chrono::us fade_time = 1500000;
+        static constexpr us_t fade_time = 1500000;
 
         enum class fade_state {
             none,
@@ -72,7 +72,7 @@ namespace game {
         };
 
         fade_state fade_st = fade_state::none;
-        chrono::us fade_start;
+        us_t fade_start;
         
         inline chunk(const math::matrix view, math::vector3s32 in_pos) {
             pos.x = in_pos.x * size;

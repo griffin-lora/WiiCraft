@@ -15,7 +15,7 @@ constexpr f32 movement_decel_factor = 0.005f;
 constexpr f32 gravity = 36.0f;
 constexpr f32 jump_velocity = 10.0f;
 
-void character::handle_input(const camera& cam, const math::vector3u16& last_wpad_accel, const math::vector3u16& last_nunchuk_accel, chrono::us now, f32 delta, const math::vector3u16& wpad_accel, glm::vec2 joystick_input_vector, u8 nunchuk_buttons_down, const math::vector3u16& nunchuk_accel) {
+void character::handle_input(const camera& cam, const math::vector3u16& last_wpad_accel, const math::vector3u16& last_nunchuk_accel, us_t now, f32 delta, const math::vector3u16& wpad_accel, glm::vec2 joystick_input_vector, u8 nunchuk_buttons_down, const math::vector3u16& nunchuk_accel) {
     if ((nunchuk_buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         velocity.y = jump_velocity;
     }
@@ -47,7 +47,7 @@ void character::handle_input(const camera& cam, const math::vector3u16& last_wpa
     }
 }
 
-void character::apply_movement(const camera& cam, chrono::us now, f32 delta, bool shaking, glm::vec3 input_vector) {
+void character::apply_movement(const camera& cam, us_t now, f32 delta, bool shaking, glm::vec3 input_vector) {
     if (shaking && !sprinting) {
         sprinting = true;
         fov_tween_start = now;
@@ -80,7 +80,7 @@ void character::apply_movement(const camera& cam, chrono::us now, f32 delta, boo
     velocity = { move_vector.x, velocity.y, move_vector.z };
 }
 
-void character::apply_no_movement(chrono::us now, f32 delta) {
+void character::apply_no_movement(us_t now, f32 delta) {
     if (sprinting) {
         sprinting = false;
         fov_tween_start = now;
@@ -176,7 +176,7 @@ void character::apply_velocity(f32 delta) {
     position += velocity * delta;
 }
 
-void character::update_camera(camera& cam, chrono::us now) const {
+void character::update_camera(camera& cam, us_t now) const {
     cam.position = { position.x, position.y + 0.9f, position.z };
 
     cam.update_view = true;

@@ -9,5 +9,5 @@
 
 void block_selection_init(void);
 void block_selection_update(Mtx view);
-void block_selection_draw(chrono::us now);
+void block_selection_draw(us_t now);
 void block_selection_handle_raycast(Mtx view, const block_raycast_wrap_t& raycast);

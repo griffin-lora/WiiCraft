@@ -43,7 +43,7 @@ void block_selection_update(Mtx view) {
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 }
 
-void block_selection_draw(chrono::us now) {
+void block_selection_draw(us_t now) {
     GX_SetNumTevStages(1);
     GX_SetNumChans(1);
     GX_SetNumTexGens(0);

@@ -29,6 +29,6 @@ namespace game {
         debug_ui();
 
         void update(u32 buttons_down);
-        void draw(const glm::vec3& pos, const glm::vec3& dir, chrono::us total_block_gen_time, chrono::us total_mesh_gen_time, chrono::us last_mesh_gen_time, u32 fps) const;
+        void draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block_gen_time, us_t total_mesh_gen_time, us_t last_mesh_gen_time, u32 fps) const;
     };
 }

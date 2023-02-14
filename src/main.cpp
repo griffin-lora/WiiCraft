@@ -99,21 +99,17 @@ int main(int argc, char** argv) {
 	math::vector3u16 last_wpad_accel = { 512, 512, 512 };
 	math::vector3u16 last_nunchuk_accel = { 512, 512, 512 };
 
-	chrono::us total_block_gen_time = 0;
-	chrono::us total_mesh_gen_time = 0;
-	chrono::us last_mesh_gen_time = 0;
-
-	chrono::us_tp<s64> program_start = chrono::get_current_us();
-	chrono::us start = 0;
+	s64 program_start = get_current_us();
+	us_t start = 0;
 
 	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
 
 	init_block_world(last_corner_pos);
 
 	for (;;) {
-        chrono::us now = chrono::get_current_us() - program_start;
+        us_t now = get_current_us() - program_start;
 
-		chrono::us delta_time = now - start;
+		us_t delta_time = now - start;
 		f32 frame_delta = delta_time / 1000000.0f;
 		f32 fps = 1000000.0f / delta_time;
 

@@ -4,6 +4,7 @@
 #include "pool.h"
 #include "log.h"
 #include "util.h"
+#include "chrono.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -126,7 +127,9 @@ static bool handle_procedural_generation(vec3_s32_t corner_pos) {
                     .z = z + corner_pos.z
                 };
 
+                s64 start = get_current_us();
                 generate_procedural_blocks(pos, chunks[chunk_indices[i]].block_types);
+                total_block_gen_time += get_current_us() - start;
 
                 if (pos.y != 0) {
                     return true;
@@ -173,6 +176,7 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                     .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
                 };
 
+                s64 start = get_current_us();
                 update_block_chunk_visuals(
                     world_pos,
                     chunk->disp_list_chunk_descriptors,
@@ -184,6 +188,9 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                     z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + Z_OFFSET]].block_types,
                     z == 0 ? NULL : chunks[chunk_indices[i - Z_OFFSET]].block_types
                 );
+                us_t time = get_current_us() - start;
+                total_mesh_gen_time += time;
+                last_mesh_gen_time = time;
             }
         }
     }
@@ -220,6 +227,7 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                     .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
                 };
 
+                s64 start = get_current_us();
                 update_block_chunk_visuals(
                     world_pos,
                     chunk->disp_list_chunk_descriptors,
@@ -231,6 +239,9 @@ static void handle_visuals_updating(vec3_s32_t corner_pos) {
                     z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + Z_OFFSET]].block_types,
                     z == 0 ? NULL : chunks[chunk_indices[i - Z_OFFSET]].block_types
                 );
+                us_t time = get_current_us() - start;
+                total_mesh_gen_time += time;
+                last_mesh_gen_time = time;
 
                 return;
             }
