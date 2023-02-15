@@ -59,8 +59,8 @@ void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
                     block_chunk_t* chunk = &block_pool_chunks[chunk_index];
 
                     block_display_list_chunk_descriptor_t* descriptors = chunk->disp_list_chunk_descriptors;
-                    for (size_t i = 0; i < 16 && descriptors[i].type != 0xff; i++) {
-                        if (!release_block_display_list_pool_chunk(descriptors[i].type, descriptors[i].chunk_index)) {
+                    for (size_t i = 0; i < 16 && descriptors[i].pool_index != 0xff; i++) {
+                        if (!release_block_display_list_pool_chunk(descriptors[i].pool_index, descriptors[i].chunk_index)) {
                             lprintf("block_world_management.c\n");
                         }
                     }

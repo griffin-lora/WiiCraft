@@ -3,10 +3,10 @@
 #include "log.h"
 #include <ogc/gx.h>
 
-static void draw_pool(Mtx view, block_display_list_pool_t* pool) {
-	const block_display_list_t* disp_lists = pool->disp_lists;
-	block_display_list_chunk_t* chunks = pool->chunks;
-	u16 head = pool->head;
+static void draw_pool(Mtx view, size_t pool_index) {
+	const block_display_list_t* disp_lists = block_disp_list_pools_disp_lists[pool_index];
+	block_display_list_chunk_t* chunks = block_disp_list_pools_chunks[pool_index];
+	size_t head = block_disp_list_pools_head[pool_index];
 	for (size_t i = 0; i < head; i++) {
 		const block_display_list_t* disp_list = &disp_lists[i];
 
@@ -51,12 +51,12 @@ void draw_block_display_lists(Mtx view) {
 
 	GX_SetTevColor(GX_TEVREG1, (GXColor){ 0xff, 0xff, 0xff, 0xff }); // Set alpha
 
-	draw_pool(view, &solid_display_list_pool);
-	draw_pool(view, &transparent_display_list_pool);
+	draw_pool(view, 0);
+	draw_pool(view, 1);
 	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 	GX_SetZCompLoc(GX_FALSE);
 	GX_SetCullMode(GX_CULL_NONE);
-	draw_pool(view, &transparent_double_sided_display_list_pool);
+	draw_pool(view, 2);
 	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
 	GX_SetZCompLoc(GX_TRUE);
 	GX_SetCullMode(GX_CULL_BACK);
