@@ -71,6 +71,7 @@ static block_mesh_category_t get_block_mesh_category(block_type_t type) {
 
 static u8 get_face_tex(block_type_t type, block_face_t face) {
     switch (type) {
+        default: break;
         case block_type_debug: return 0;
         case block_type_grass: switch (face) {
             default: return 4;
@@ -87,6 +88,7 @@ static u8 get_face_tex(block_type_t type, block_face_t face) {
         }
         case block_type_water: return 7;
     }
+    return 0;
 }
 
 static u8 get_tex(block_type_t type) {
@@ -268,6 +270,7 @@ static size_t get_neighbor_blocks_index(block_face_t face, size_t neighbor_index
         case block_face_right: return neighbor_index - NUM_BLOCKS;
         case block_face_left: return neighbor_index + NUM_BLOCKS;
     }
+    return 0;
 }
 
 typedef struct {
@@ -289,10 +292,12 @@ static face_meshes_indices_t add_face_mesh_if_needed(
     }
     block_mesh_category_t neighbor_mesh_category = get_block_mesh_category(neighbor_block_type);
     switch (category) {
+        default: break;
         case block_mesh_category_cube: if (neighbor_mesh_category == block_mesh_category_cube) { return indices; } break;
         case block_mesh_category_transparent_cube: if (neighbor_mesh_category == block_mesh_category_cube || neighbor_mesh_category == block_mesh_category_transparent_cube) { return indices; } break;
     }
     switch (category) {
+        default: break;
         case block_mesh_category_cube:
             building_meshes_arrays.solid[indices.solid++] = (block_mesh_t){
                 .type = (u8)((type * 8) + face),
