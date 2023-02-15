@@ -7,6 +7,7 @@ extern "C" {
 #include <wiiuse/wpad.h>
 
 #include "gfx/text.inl"
+#include "game_math.h"
 
 extern vec3s character_position;
 extern vec3s cam_look;

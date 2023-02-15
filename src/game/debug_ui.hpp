@@ -1,7 +1,7 @@
 #pragma once
 #include "gfx/text.hpp"
 #include "math/transform_2d.hpp"
-#include "chrono.hpp"
+#include "chrono.h"
 
 namespace game {
     struct debug_ui {

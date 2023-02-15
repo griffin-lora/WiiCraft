@@ -1,5 +1,4 @@
 #pragma once
-#include "game_math.hpp"
 #include <ogc/gu.h>
 #include <ogc/gx.h>
 
