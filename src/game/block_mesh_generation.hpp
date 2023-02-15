@@ -32,7 +32,8 @@ namespace game {
         struct vertex {
             math::vector3u8 pos;
             math::vector3u8 color;
-            std::array<math::vector2u8, 2> uvs;
+            math::vector2u8 uv_0;
+            math::vector2u8 uv_1;
         };
 
         vertex vert0;

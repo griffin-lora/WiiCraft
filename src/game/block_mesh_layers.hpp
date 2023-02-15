@@ -29,6 +29,8 @@ namespace game {
             static constexpr std::size_t max_quad_count = 0x2000;
             using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
+            static bool is_single_sided();
+
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
 
@@ -41,6 +43,8 @@ namespace game {
             using chunk_quad = tinted_quad;
             static constexpr std::size_t max_quad_count = 0x1000;
             using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+
+            static bool is_single_sided();
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
@@ -55,6 +59,8 @@ namespace game {
             static constexpr std::size_t max_quad_count = 0x500;
             using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
+            static bool is_single_sided();
+
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
 
@@ -68,6 +74,8 @@ namespace game {
             static constexpr std::size_t max_quad_count = 0x1000;
             using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
 
+            static bool is_single_sided();
+
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);
 
@@ -80,6 +88,8 @@ namespace game {
             using chunk_quad = tinted_decal_quad;
             static constexpr std::size_t max_quad_count = 0x1000;
             using chunk_quad_array = block_quad_array<chunk_quad, max_quad_count>;
+            
+            static bool is_single_sided();
 
             static std::size_t get_chunk_display_list_size(std::size_t vert_count);
             static void write_chunk_vertex(const chunk_quad::vertex& vert);

@@ -21,7 +21,6 @@ void block_selection::draw(chrono::us now, const std::optional<block_raycast>& r
         GX_SetNumTexGens(0);
 
         GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-        GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
 
         u8 alpha = 0x5f + (std::sin(now / 150000.0f) * 0x10);
         GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });
@@ -59,12 +58,16 @@ struct block_selection_quad {
 };
 
 struct block_selection_mesh_state {
-    block_selection_quad* back_cull_it;
-    block_selection_quad* no_cull_it;
+    block_selection_quad* single_side_it;
+    block_selection_quad* double_side_it;
 
     template<typename L>
-    inline void add_quad(const L::chunk_quad& quad) {
-        *back_cull_it++ = quad;
+    inline void add_quad(const block_selection_quad& quad) {
+        if (L::is_single_sided()) {
+            *single_side_it++ = quad;
+        } else {
+            *double_side_it++ = quad;
+        }
     }
 };
 
@@ -75,8 +78,8 @@ void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_b
     auto begin = (block_selection_quad*)building_array.data();
 
     block_selection_mesh_state ms_st = {
-        .back_cull_it = begin,
-        .no_cull_it = begin
+        .single_side_it = begin,
+        .double_side_it = begin
     };
 
     // TODO: actually use real block data
@@ -90,11 +93,11 @@ void block_selection::update_mesh(const math::matrix view, decltype(chunk_quad_b
     });
 
     cull_back = true;
-    auto end = ms_st.back_cull_it;
+    auto end = ms_st.single_side_it;
     std::size_t vert_count = 4 * (end - begin);
     if (vert_count == 0) {
         cull_back = false;
-        end = ms_st.no_cull_it;
+        end = ms_st.double_side_it;
         vert_count = 4 * (end - begin);
     }
 
