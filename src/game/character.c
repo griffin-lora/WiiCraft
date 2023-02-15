@@ -14,8 +14,8 @@
 #define SHAKING_ACCEL 100
 #define NUNCHUK_SHAKING_ACCEL 100
 
-vec3s character_position;
-vec3s character_velocity;
+vec3s character_position = { .x = 0.0f, .y = 30.0f, .z = 0.0f };
+vec3s character_velocity = { .z = 0.0f, .y = 0.0f, .z = 0.0f };
 
 bool grounded = false;
 bool sprinting = false;

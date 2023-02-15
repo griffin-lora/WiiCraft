@@ -4,6 +4,12 @@
 #include <ogc/gu.h>
 #include <math.h>
 
+#define CAM_ROTATION_SPEED 1.80f
+
+#define BASE_FOV 90.0f
+#define SPRINT_FOV (BASE_FOV + 10.0f)
+#define FOV_TWEEN_TIME 150000
+
 vec3s cam_position = { .x = 0.0f, .y = 0.0f, .z = 0.0f };
 vec3s cam_up = { .x = 0.0f, .y = 1.0f, .z = 0.0f };
 vec3s cam_look = { .x = 0.0f, .y = 0.0f, .z = 1.0f };
@@ -17,13 +23,13 @@ f32 far_clipping_plane_distance = 300.0f;
 
 us_t fov_tween_start = 0;
 
-void camera_update(f32 delta, f32 cam_rotation_speed, u32 buttons_held) {
+void camera_update(f32 delta, u32 buttons_held) {
     // Rotate camera, update look and view
 
     vec2s pad_input_vector = get_dpad_input_vector(buttons_held);
     if (IS_NON_ZERO_VEC2(pad_input_vector)) {
         glm_vec2_normalize(pad_input_vector.raw);
-        pad_input_vector = glms_vec2_scale(pad_input_vector, cam_rotation_speed * delta);
+        pad_input_vector = glms_vec2_scale(pad_input_vector, CAM_ROTATION_SPEED * delta);
 
         cam_yaw = cam_yaw - pad_input_vector.x;
         cam_pitch = cam_pitch + pad_input_vector.y;

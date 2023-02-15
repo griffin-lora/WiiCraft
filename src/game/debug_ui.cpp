@@ -1,9 +1,15 @@
 #include "debug_ui.hpp"
+extern "C" {
+    #include "debug_ui.h"
+}
 #include <string>
 #include <sstream>
+#include <wiiuse/wpad.h>
 
 #include "gfx/text.inl"
-#include "input.hpp"
+
+extern vec3s character_position;
+extern vec3s cam_look;
 
 using namespace game;
 
@@ -82,4 +88,19 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block
         write_text(fps_str, 0);
         GX_End();
     }
+}
+
+static u8 ui_buf[sizeof(debug_ui)];
+debug_ui* ui;
+
+void debug_ui_init(void) {
+    ui = new (ui_buf) debug_ui();
+}
+
+void debug_ui_update(u32 buttons_down) {
+    ui->update(buttons_down);
+}
+
+void debug_ui_draw(us_t total_block_gen_time, us_t total_mesh_gen_time, us_t last_mesh_gen_time, u32 fps) {
+    ui->draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam_look.raw[0], cam_look.raw[1], cam_look.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, fps);
 }

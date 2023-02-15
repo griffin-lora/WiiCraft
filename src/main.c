@@ -1,21 +1,21 @@
-#include "gfx.hpp"
-#include "game_math.hpp"
-#include "input.hpp"
-#include "chrono.hpp"
-#include "game/block_raycast.hpp"
-#include "game/camera.hpp"
-#include "game/chunk_rendering.hpp"
-#include "game/logic.hpp"
-#include "game/block_selection.hpp"
-#include "game/cursor.hpp"
-#include "game/skybox.hpp"
-#include "game/character.hpp"
-#include "game/rendering.hpp"
-#include "game/water_overlay.hpp"
-#include "game/debug_ui.hpp"
-#include "log.hpp"
-#include "pool.hpp"
-#include "game/block_world_management.hpp"
+#include "gfx.h"
+#include "game_math.h"
+#include "input.h"
+#include "chrono.h"
+#include "game/block_raycast.h"
+#include "game/camera.h"
+#include "game/chunk_rendering.h"
+#include "game/logic.h"
+#include "game/block_selection.h"
+#include "game/cursor.h"
+#include "game/skybox.h"
+#include "game/character.h"
+#include "game/rendering.h"
+#include "game/water_overlay.h"
+#include "game/debug_ui.h"
+#include "log.h"
+#include "pool.h"
+#include "game/block_world_management.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -23,15 +23,9 @@
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 #include <fat.h>
-#include <array>
+#include <math.h>
 
-static constexpr f32 cam_rotation_speed = 1.80f;
-
-static constexpr s32 chunk_generation_radius = 6;
-
-static constexpr s32 chunk_erasure_radius = 7;
-
-static s32vec3s corner_pos_offset = {{ -3, -2, -3 }};
+static s32vec3s corner_pos_offset = { .x = -3, .y =-2, .z = -3 };
 
 int main(int argc, char** argv) {
 	if (!log_init()) {
@@ -53,9 +47,6 @@ int main(int argc, char** argv) {
 	
 	Mtx view;
 	Mtx44 perspective_3d;
-
-	character_position = { 0.0f, 30.0f, 0.0f };
-	character_velocity = { 0.0f, 0.0f, 0.0f };
 	
 	aspect = (f32)((f32)rmode->viWidth / (f32)rmode->viHeight);
 	glm_vec3_normalize(cam_look.raw);
@@ -69,7 +60,7 @@ int main(int argc, char** argv) {
 	skybox_init(view, cam_position);
 	
 	water_overlay_init();
-	game::debug_ui debug_ui;
+	debug_ui_init();
 	
 	cursor_init();
 
@@ -87,7 +78,7 @@ int main(int argc, char** argv) {
 	us_t start = 0;
 	
 	vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
-	s32vec3s last_corner_pos = {{ (s32)floorf(div_pos.raw[0]), (s32)floorf(div_pos.raw[1]), (s32)floorf(div_pos.raw[2]) }};
+	s32vec3s last_corner_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
 	glm_ivec3_add(last_corner_pos.raw, corner_pos_offset.raw, last_corner_pos.raw);
 
 	init_block_world(last_corner_pos);
@@ -108,16 +99,16 @@ int main(int argc, char** argv) {
 		if (buttons_down & WPAD_BUTTON_HOME) {
 			lprintf("BGT: %d\nMGT: %d\nMGL: %d\nLog ended\n", total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time);
 			log_term();
-			std::exit(0);
+			exit(0);
 		}
 		u32 buttons_held = WPAD_ButtonsHeld(chan);
 
-		camera_update(frame_delta, cam_rotation_speed, buttons_held);
+		camera_update(frame_delta, buttons_held);
 
 		vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
-		s32vec3s corner_pos = {{ (s32)floorf(div_pos.raw[0]), (s32)floorf(div_pos.raw[1]), (s32)floorf(div_pos.raw[2]) }};
+		s32vec3s corner_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
 		glm_ivec3_add(corner_pos.raw, corner_pos_offset.raw, corner_pos.raw);
-		if (last_corner_pos.raw[0] != corner_pos.raw[0] || last_corner_pos.raw[1] != corner_pos.raw[1] || last_corner_pos.raw[2] != corner_pos.raw[2]) {
+		if (last_corner_pos.x != corner_pos.x || last_corner_pos.y != corner_pos.y || last_corner_pos.z != corner_pos.z) {
 			manage_block_world(last_corner_pos, corner_pos);
 		}
 		handle_world_flag_processing(corner_pos);
@@ -131,11 +122,11 @@ int main(int argc, char** argv) {
 		expansion_t exp;
 		WPAD_Expansion(chan, &exp);
 		if (exp.type == WPAD_EXP_NUNCHUK) {
-			const auto& nunchuk = exp.nunchuk;
-			auto nunchuk_vector = get_nunchuk_vector(&nunchuk);
-			auto nunchuk_buttons_down = nunchuk.btns;
+			const nunchuk_t* nunchuk = &exp.nunchuk;
+			vec2s nunchuk_vector = get_nunchuk_vector(nunchuk);
+			u8 nunchuk_buttons_down = nunchuk->btns;
 
-			vec3w_t nunchuk_accel = { nunchuk.accel.x, nunchuk.accel.y, nunchuk.accel.z };
+			vec3w_t nunchuk_accel = { nunchuk->accel.x, nunchuk->accel.y, nunchuk->accel.z };
 
 			character_handle_input(last_wpad_accel, last_nunchuk_accel, now, frame_delta, wpad_accel, nunchuk_vector, nunchuk_buttons_down, nunchuk_accel);
 
@@ -144,12 +135,12 @@ int main(int argc, char** argv) {
 		}
 		last_wpad_accel = wpad_accel;
 		#else
-		character_handle_input(cam.look, { 0, 0, 0 }, { 0, 0, 0 }, now, frame_delta, { 512, 512, 512 }, { 96.0f, 96.0f }, 0, { 512, 512, 512 });
+		character_handle_input(cam.look, (vec3w_t){ 0, 0, 0 }, (vec3w_t){ 0, 0, 0 }, now, frame_delta, (vec3w_t){ 512, 512, 512 }, (vec3w_t){ 96.0f, 96.0f }, 0, (vec3w_t){ 512, 512, 512 });
 		#endif
 
 		// auto raycast_dir = get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
 		vec3s raycast_dir = cam_look;
-		block_raycast_wrap_t raycast = get_block_raycast(corner_pos, cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), { 0, 0, 0 }, block_box_type_selection);
+		block_raycast_wrap_t raycast = get_block_raycast(corner_pos, cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, block_box_type_selection);
 
 		if (raycast.success) {
 			block_selection_handle_location(view, raycast.val.location);
@@ -162,7 +153,7 @@ int main(int argc, char** argv) {
 
 		skybox_update(view, cam_position);
 		block_selection_update(view);
-		debug_ui.update(buttons_down);
+		debug_ui_update(buttons_down);
 
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox_draw();
@@ -181,7 +172,7 @@ int main(int argc, char** argv) {
 		cursor_draw();
 
 		init_text_rendering();
-		debug_ui.draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam_look.raw[0], cam_look.raw[1], cam_look.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::ceil(fps));
+		debug_ui_draw(total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, ceilf(fps));
 
 		gfx_update_video();
 		

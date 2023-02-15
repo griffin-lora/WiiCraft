@@ -96,7 +96,7 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
     u8vec3s block_pos = location.bl_pos;
 
     guMtxIdentity(model);
-    guMtxTransApply(model, model, chunk_pos.raw[0] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.raw[1] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.raw[2] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+    guMtxTransApply(model, model, chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
     guMtxConcat(view, model, model_view);
     
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);

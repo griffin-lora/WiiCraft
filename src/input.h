@@ -5,7 +5,7 @@
 void input_init(u32 width, u32 height);
 
 inline vec2s get_nunchuk_vector(const nunchuk_t* nunchuk) {
-    return (vec2s){{ (f32)(nunchuk->js.pos.x - nunchuk->js.center.x), (f32)(nunchuk->js.pos.y - nunchuk->js.center.y) }};
+    return (vec2s){ .x = (f32)(nunchuk->js.pos.x - nunchuk->js.center.x), .y = (f32)(nunchuk->js.pos.y - nunchuk->js.center.y) };
 }
 
 vec2s get_dpad_input_vector(u32 buttons_held);
