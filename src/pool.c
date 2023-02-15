@@ -73,6 +73,6 @@ bool release_block_display_list_pool_chunk(block_display_list_type_t type, u16 c
         }
     }
     // We should never reach here, report an error if we do
-    lprintf("block_display_list_pool on chunk_index: %d double release occurred.\n", chunk_index);
+    lprintf("block_display_list_pool on chunk_index: %d double release occurred on type %d.\n", chunk_index, type);
     return false;
 }

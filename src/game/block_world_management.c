@@ -114,7 +114,7 @@ static bool handle_procedural_generation(s32vec3s corner_pos) {
                     continue;
                 }
 
-                lprintf("Procedural Generation %d, %d, %d\n", x, y, z);
+                // lprintf("Procedural Generation %d, %d, %d\n", x, y, z);
 
                 chunk_bitfields[i] |= BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS;
 
@@ -157,7 +157,7 @@ static void handle_important_visuals_updating(s32vec3s corner_pos) {
                 chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
                 // Don't get rid of queued visuals update since sometimes there is a good reason for it to update again
 
-                lprintf("Updating visuals important %d, %d, %d\n", x, y, z);
+                // lprintf("Updating visuals important %d, %d, %d\n", x, y, z);
 
                 block_chunk_t* chunk = &chunks[chunk_indices[i]];
 
@@ -214,7 +214,7 @@ static void handle_queued_visuals_updating(s32vec3s corner_pos) {
                     continue;
                 }
 
-                lprintf("Updating visuals %d, %d, %d\n", x, y, z);
+                // lprintf("Updating visuals %d, %d, %d\n", x, y, z);
 
                 block_chunk_t* chunk = &chunks[chunk_indices[i]];
 
