@@ -1,9 +1,10 @@
 #pragma once
-#include "math.hpp"
+#include <ogc/gu.h>
+#include <ogc/gx.h>
 
 namespace math {
     class transform_2d {
-        matrix model_view;
+        Mtx model_view;
 
         public:
             transform_2d() = default;

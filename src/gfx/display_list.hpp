@@ -18,13 +18,17 @@ namespace gfx {
             void resize(std::size_t size);
             void clear();
 
+            inline void* data() {
+                return m_data;
+            }
+
             template<typename F>
             inline void write_into(F func) {
                 DCInvalidateRange(m_data, m_size);
                 GX_BeginDispList(m_data, m_size);
                 func();
                 std::size_t new_size = GX_EndDispList();
-                DCFlushRange(m_data, m_size); // This is not necessary afaik and slows things down
+                // DCFlushRange(m_data, m_size); // This is not necessary afaik and slows things down
                 m_size = new_size;
             }
 
