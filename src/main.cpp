@@ -162,10 +162,10 @@ int main(int argc, char** argv) {
 		// auto raycast_dir = get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
 		vec3s raycast_dir = cam.look;
 		block_raycast_wrap_t raycast = get_block_raycast(corner_pos, cam.position, glms_vec3_scale(raycast_dir, 10.0f), cam.position, glms_vec3_add(cam.position, glms_vec3_scale(raycast_dir, 10.0f)), { 0, 0, 0 }, block_box_type_selection);
-		block_selection_handle_raycast(view, raycast);
 
 		if (raycast.success) {
-			update_world_from_raycast_and_input(corner_pos, buttons_down, raycast.val.location, glms_vec3_add(raycast.val.world_block_position, raycast.val.box_raycast.normal));
+			block_selection_handle_location(view, raycast.val.location);
+			update_world_from_location_and_input(corner_pos, buttons_down, raycast.val.location, glms_vec3_add(raycast.val.world_block_position, raycast.val.box_raycast.normal));
 		}
 		character_apply_physics(corner_pos, frame_delta);
 		character_apply_velocity(frame_delta);

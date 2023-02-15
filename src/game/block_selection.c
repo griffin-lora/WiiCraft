@@ -1,19 +1,18 @@
-#include "block_selection.hpp"
-#include "rendering.hpp"
+#include "block_selection.h"
 #include "gfx/instruction_size.h"
 #include "util.h"
-#include "block.hpp"
+#include "block.h"
 #include <ogc/gx.h>
 #include <ogc/cache.h>
-#include <optional>
 #include <string.h>
-
-using namespace game;
+#include <stdbool.h>
+#include <stdalign.h>
 
 #define MATRIX_INDEX GX_PNMTX4
 
-static std::optional<u8vec3s> last_block_pos;
-static std::optional<block_type_t> last_block_type;
+static bool has_last_block = false;
+static u8vec3s last_block_pos;
+static block_type_t last_block_type;
 
 static Mtx model;
 static Mtx model_view;
@@ -35,7 +34,7 @@ static bool cull_back = true;
     GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CROSS_VERTEX_COUNT) \
 ))
 
-alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
+_Alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
 
 void block_selection_init(void) {
 }
@@ -53,8 +52,8 @@ void block_selection_draw(us_t now) {
     GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0A0);
     GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
 
-    u8 alpha = 0x5f + (std::sin(now / 150000.0f) * 0x10);
-    GX_SetTevColor(GX_TEVREG1, { 0xff, 0xff, 0xff, alpha });
+    u8 alpha = 0x5f + (sinf(now / 150000.0f) * 0x10);
+    GX_SetTevColor(GX_TEVREG1, (GXColor){ 0xff, 0xff, 0xff, alpha });
     GX_SetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_C1);
     GX_SetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
     GX_SetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A1);
@@ -85,9 +84,16 @@ void block_selection_draw(us_t now) {
     GX_SetCullMode(GX_CULL_BACK);
 }
 
-static void update_mesh(Mtx view, const block_raycast_t& raycast) {
-    s32vec3s chunk_pos = raycast.location.ch_pos;
-    u8vec3s block_pos = raycast.location.bl_pos;
+void block_selection_handle_location(Mtx view, world_location_t location) {
+    // Check if we have a new selected block
+    if (has_last_block && location.bl_pos.x == last_block_pos.x && location.bl_pos.y == last_block_pos.y && location.bl_pos.z == last_block_pos.z && *location.bl_tp == last_block_type) {
+        last_block_pos = location.bl_pos;
+        last_block_type = *location.bl_tp;
+        return;
+    }
+
+    s32vec3s chunk_pos = location.ch_pos;
+    u8vec3s block_pos = location.bl_pos;
 
     guMtxIdentity(model);
     guMtxTransApply(model, model, chunk_pos.raw[0] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.raw[1] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.raw[2] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
@@ -95,7 +101,7 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
     
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 
-    block_type_t block_type = *raycast.location.bl_tp;
+    block_type_t block_type = *location.bl_tp;
 
     u8 px = block_pos.x * 4;
     u8 py = block_pos.y * 4;
@@ -169,16 +175,7 @@ static void update_mesh(Mtx view, const block_raycast_t& raycast) {
 
             break;
     }
-}
 
-void block_selection_handle_raycast(Mtx view, const block_raycast_wrap_t& raycast) {
-    if (raycast.success) {
-        // Check if we have a new selected block
-        if (!last_block_pos.has_value() || raycast.val.location.bl_pos.x != last_block_pos->x || raycast.val.location.bl_pos.y != last_block_pos->y || raycast.val.location.bl_pos.z != last_block_pos->z || *raycast.val.location.bl_tp != *last_block_type) {
-            update_mesh(view, raycast.val);
-        }
-
-        last_block_pos = raycast.val.location.bl_pos;
-        last_block_type = *raycast.val.location.bl_tp;
-    }
+    last_block_pos = location.bl_pos;
+    last_block_type = *location.bl_tp;
 }
