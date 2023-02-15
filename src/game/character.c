@@ -1,6 +1,7 @@
 #include "character.h"
 #include "block_raycast.h"
 #include "input.h"
+#include "camera.h"
 #include <math.h>
 
 #define MOVEMENT_ACCEL 40.0f
@@ -18,10 +19,6 @@ vec3s character_velocity;
 
 bool grounded = false;
 bool sprinting = false;
-
-us_t fov_tween_start = 0;
-
-
 
 static void apply_movement(vec3s cam_look, us_t now, f32 delta, bool shaking, vec3s input_vector) {
     if (shaking && !sprinting) {
@@ -120,7 +117,7 @@ static bool apply_collision(s32vec3s corner_pos, f32 delta) {
 }
 
 
-void character_handle_input(vec3s cam_look, vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel, us_t now, f32 delta, vec3w_t wpad_accel, vec2s joystick_input_vector, u8 nunchuk_buttons_down, vec3w_t nunchuk_accel) {
+void character_handle_input(vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel, us_t now, f32 delta, vec3w_t wpad_accel, vec2s joystick_input_vector, u8 nunchuk_buttons_down, vec3w_t nunchuk_accel) {
     if ((nunchuk_buttons_down & NUNCHUK_BUTTON_C) && grounded) {
         character_velocity.y = JUMP_VELOCITY;
     }

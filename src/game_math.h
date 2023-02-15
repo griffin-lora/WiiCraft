@@ -26,4 +26,6 @@ typedef struct {
 
 f32 get_eased(f32 x);
 
+f32 lerpf(f32 min, f32 max, f32 alpha);
+
 f32 get_noise_at(vec2s pos);
