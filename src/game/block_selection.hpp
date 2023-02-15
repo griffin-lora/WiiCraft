@@ -2,9 +2,6 @@
 #include "block_raycast.hpp"
 #include "logic.hpp"
 #include "game_math.hpp"
-#include "ext/data_array.hpp"
-#include "gfx/display_list.hpp"
-#include "math/transform_3d.hpp"
 #include <optional>
 
 void block_selection_init(void);
