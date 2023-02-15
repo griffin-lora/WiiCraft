@@ -34,11 +34,8 @@ _Alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
 _Alignas(32) u8 temp_block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 
 void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
-    s32vec3s move_dir = {
-        .x = last_corner_pos.x - corner_pos.x,
-        .y = last_corner_pos.y - corner_pos.y,
-        .z = last_corner_pos.z - corner_pos.z
-    };
+    s32vec3s move_dir;
+    glm_ivec3_sub(last_corner_pos.raw, corner_pos.raw, move_dir.raw);
 
     size_t i = 0;
     for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {

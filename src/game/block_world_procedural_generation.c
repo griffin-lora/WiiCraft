@@ -41,7 +41,7 @@ static void generate_middle_blocks(s32vec3s chunk_pos, block_type_t block_types[
 
     for (f32 z = 0; z < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; z++) {
         for (f32 x = 0; x < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; x++) {
-            vec2s noise_pos = {{ world_chunk_x + x, world_chunk_z + z }};
+            vec2s noise_pos = { .x = world_chunk_x + x, .y = world_chunk_z + z };
 
             f32 height = get_hills_height(noise_pos);
             

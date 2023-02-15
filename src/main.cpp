@@ -32,6 +32,8 @@ static constexpr s32 chunk_generation_radius = 6;
 
 static constexpr s32 chunk_erasure_radius = 7;
 
+static s32vec3s corner_pos_offset = {{ -3, -2, -3 }};
+
 int main(int argc, char** argv) {
 	if (!log_init()) {
 		return 1;
@@ -95,8 +97,10 @@ int main(int argc, char** argv) {
 
 	s64 program_start = get_current_us();
 	us_t start = 0;
-
-	s32vec3s last_corner_pos = { (s32)floorf(cam.position.raw[0] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.raw[1] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.raw[2] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
+	
+	vec3s div_pos = glms_vec3_scale(cam.position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+	s32vec3s last_corner_pos = {{ (s32)floorf(div_pos.raw[0]), (s32)floorf(div_pos.raw[1]), (s32)floorf(div_pos.raw[2]) }};
+	glm_ivec3_add(last_corner_pos.raw, corner_pos_offset.raw, last_corner_pos.raw);
 
 	init_block_world(last_corner_pos);
 
@@ -122,7 +126,9 @@ int main(int argc, char** argv) {
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
-		s32vec3s corner_pos = { (s32)floorf(cam.position.raw[0] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.raw[1] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.raw[2] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
+		vec3s div_pos = glms_vec3_scale(cam.position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+		s32vec3s corner_pos = {{ (s32)floorf(div_pos.raw[0]), (s32)floorf(div_pos.raw[1]), (s32)floorf(div_pos.raw[2]) }};
+		glm_ivec3_add(corner_pos.raw, corner_pos_offset.raw, corner_pos.raw);
 		if (last_corner_pos.raw[0] != corner_pos.raw[0] || last_corner_pos.raw[1] != corner_pos.raw[1] || last_corner_pos.raw[2] != corner_pos.raw[2]) {
 			manage_block_world(last_corner_pos, corner_pos);
 		}

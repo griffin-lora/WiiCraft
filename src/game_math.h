@@ -3,19 +3,18 @@
 #include <math.h>
 #include <cglm/cglm.h>
 #include <cglm/struct.h>
+#include <cglm/types-struct.h>
+#include <cglm/ivec3.h>
+#include <cglm/ivec2.h>
 
 typedef ivec3s s32vec3s;
+typedef ivec2s s32vec2s;
 
 typedef struct {
     u8 x;
     u8 y;
     u8 z;
 } u8vec3s;
-
-typedef struct {
-    s32 x;
-    s32 y;
-} s32vec2s;
 
 #define LOOK_VEC(MAT) (MAT[0])
 #define UP_VEC(MAT) (MAT[1])

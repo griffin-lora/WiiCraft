@@ -41,10 +41,10 @@ box_raycast_wrap_t get_box_raycast(vec3s origin, vec3s direction, vec3s directio
 
     vec3s intersection_position = glms_vec3_add(origin, glms_vec3_scale(direction, t_hit_near));
 
-    vec3s normal = {{ 0, 0, 0 }};
-    if (t_near.x > t_near.y && t_near.x > t_near.z) { normal = (vec3s){{ direction_inverse.x < 0 ? 1 : -1, 0, 0 }}; }
-    else if (t_near.y > t_near.x && t_near.y > t_near.z) { normal = (vec3s){{ 0, direction_inverse.y < 0 ? 1 : -1, 0 }}; }
-    else if (t_near.z > t_near.x && t_near.z > t_near.y) { normal = (vec3s){{ 0, 0, direction_inverse.z < 0 ? 1 : -1 }}; }
+    vec3s normal = { .x = 0, .y = 0, .z = 0 };
+    if (t_near.x > t_near.y && t_near.x > t_near.z) { normal = (vec3s){ .x = direction_inverse.x < 0 ? 1 : -1, .y = 0, .z = 0 }; }
+    else if (t_near.y > t_near.x && t_near.y > t_near.z) { normal = (vec3s){ .x = 0, .y = direction_inverse.y < 0 ? 1 : -1, .z = 0 }; }
+    else if (t_near.z > t_near.x && t_near.z > t_near.y) { normal = (vec3s){ .x = 0, .y = 0, .z = direction_inverse.z < 0 ? 1 : -1 }; }
 
     return (box_raycast_wrap_t){
         .success = true,

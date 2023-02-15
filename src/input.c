@@ -7,7 +7,7 @@ void input_init(u32 width, u32 height) {
 }
 
 vec2s get_dpad_input_vector(u32 buttons_held) {
-    vec2s pad_input_vector = {{ 0.0f, 0.0f }};
+    vec2s pad_input_vector = { .x = 0.0f, .y = 0.0f };
     if (buttons_held & WPAD_BUTTON_RIGHT) {
         pad_input_vector.x += 1.0f;
     }
@@ -27,9 +27,9 @@ vec2s get_pointer_position(s32 chan) {
     ir_t pointer;
     WPAD_IR(chan, &pointer);
     if (pointer.valid) {
-        return (vec2s){{ pointer.x, pointer.y }};
+        return (vec2s){ .x = pointer.x, .y = pointer.y };
     } else {
-        return (vec2s){{ -1, -1 }};
+        return (vec2s){ .x = -1, .y = -1 };
     }
 }
 

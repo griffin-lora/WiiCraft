@@ -4,22 +4,20 @@
 #include <math.h>
 
 world_location_wrap_t get_world_location_at_world_position(s32vec3s corner_pos, vec3s pos) {
-    s32vec3s chunk_pos = {{
-        (s32)floorf(pos.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
-        (s32)floorf(pos.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
-        (s32)floorf(pos.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
-    }};
+	vec3s div_pos = glms_vec3_scale(pos, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+    s32vec3s chunk_pos = {
+        .x = (s32)floorf(div_pos.x),
+        .y = (s32)floorf(div_pos.y),
+        .z = (s32)floorf(div_pos.z)
+    };
 
-    s32vec3s chunk_rel_pos = {{
-        chunk_pos.x - corner_pos.x,
-        chunk_pos.y - corner_pos.y,
-        chunk_pos.z - corner_pos.z
-    }};
+    s32vec3s chunk_rel_pos;
+    glm_ivec3_sub(chunk_pos.raw, corner_pos.raw, chunk_rel_pos.raw);
 
     u8vec3s block_rel_pos = {
-        mod_s32(pos.x, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
-        mod_s32(pos.y, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
-        mod_s32(pos.z, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
+        .x = mod_s32(pos.x, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
+        .y = mod_s32(pos.y, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
+        .z = mod_s32(pos.z, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
     };
 
     size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
@@ -49,11 +47,8 @@ static void set_important_update(size_t index) {
 }
 
 bool update_block_chunk_and_neighbors(s32vec3s corner_pos, s32vec3s chunk_pos, u8vec3s modification_pos) {
-    s32vec3s chunk_rel_pos = {{
-        chunk_pos.x - corner_pos.x,
-        chunk_pos.y - corner_pos.y,
-        chunk_pos.z - corner_pos.z
-    }};
+    s32vec3s chunk_rel_pos;
+    glm_ivec3_sub(chunk_pos.raw, corner_pos.raw, chunk_rel_pos.raw);
 
     size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
 

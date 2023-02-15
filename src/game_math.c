@@ -21,29 +21,35 @@ static f32 lerpf(f32 min, f32 max, f32 alpha) {
 
 f32 get_noise_at(vec2s pos) {
     s32vec2s floor_pos = {
-        (s32)floorf(pos.x),
-        (s32)floorf(pos.y)
+        .x = (s32)floorf(pos.x),
+        .y =(s32)floorf(pos.y)
     };
     s32vec2s ceil_pos = {
-        (s32)ceilf(pos.x),
-        (s32)ceilf(pos.y)
+        .x = (s32)ceilf(pos.x),
+        .y = (s32)ceilf(pos.y)
     };
 
     f32 floor_floor_noise = get_noise_at_grid_position(floor_pos);
     f32 ceil_floor_noise = get_noise_at_grid_position((s32vec2s){
-        ceil_pos.x,
-        floor_pos.y
+        .x = ceil_pos.x,
+        .y = floor_pos.y
     });
 
     f32 floor_ceil_noise = get_noise_at_grid_position((s32vec2s){
-        floor_pos.x,
-        ceil_pos.y
+        .x = floor_pos.x,
+        .y = ceil_pos.y
     });
     f32 ceil_ceil_noise = get_noise_at_grid_position(ceil_pos);
 
-    vec2s dist = {{ pos.x - floor_pos.x, pos.y - floor_pos.y }};
+    vec2s dist = {
+        .x = pos.x - floor_pos.x,
+        .y = pos.y - floor_pos.y
+    };
 
-    vec2s eased_dist = {{ get_eased(dist.x), get_eased(dist.y) }};
+    vec2s eased_dist = {
+        .x = get_eased(dist.x),
+        .y = get_eased(dist.y)
+    };
 
     f32 x_val_a = lerpf(floor_floor_noise, ceil_floor_noise, eased_dist.x);
     f32 x_val_b = lerpf(floor_ceil_noise, ceil_ceil_noise, eased_dist.x);

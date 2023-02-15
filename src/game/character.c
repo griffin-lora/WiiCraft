@@ -42,7 +42,7 @@ static void apply_movement(vec3s cam_look, us_t now, f32 delta, bool shaking, ve
 
     vec3s accel_vector = glms_vec3_scale(input_vector, MOVEMENT_ACCEL);
 
-    vec3s move_vector = {{ character_velocity.x, 0.0f, character_velocity.z }};
+    vec3s move_vector = { .x = character_velocity.x, .y = 0.0f, .z = character_velocity.z };
     move_vector = glms_vec3_add(move_vector, glms_vec3_scale(accel_vector, delta));
 
     if (IS_NON_ZERO_VEC3(move_vector) && IS_NON_ZERO_VEC3(input_vector)) {
@@ -53,7 +53,7 @@ static void apply_movement(vec3s cam_look, us_t now, f32 delta, bool shaking, ve
             move_vector = glms_vec3_scale(move_vector, max);
         }
     }
-    character_velocity = (vec3s){{ move_vector.x, character_velocity.y, move_vector.z }};
+    character_velocity = (vec3s){ .x = move_vector.x, .y = character_velocity.y, .z = move_vector.z };
 }
 
 static void apply_no_movement(us_t now, f32 delta) {
@@ -62,14 +62,14 @@ static void apply_no_movement(us_t now, f32 delta) {
         fov_tween_start = now;
     }
 
-    vec3s move_vector = {{ character_velocity.x, 0.0f, character_velocity.z }};
+    vec3s move_vector = { .x = character_velocity.x, .y = 0.0f, .z = character_velocity.z };
     if (IS_NON_ZERO_VEC3(move_vector)) {
         move_vector = glms_vec3_scale(move_vector, MOVEMENT_DECEL_FACTOR * delta);
-        character_velocity = (vec3s){{ move_vector.x, character_velocity.y, move_vector.z }};
+        character_velocity = (vec3s){ .x = move_vector.x, .y = character_velocity.y, .z = move_vector.z };
     }
 }
 
-static const vec3s half_size = {{ 0.35f, 0.9f, 0.35f }};
+static const vec3s half_size = { .x = 0.35f, .y = 0.9f, .z = 0.35f };
 
 static bool apply_collision(s32vec3s corner_pos, f32 delta) {
     vec3s direction = glms_vec3_scale(character_velocity, delta);
@@ -110,7 +110,7 @@ static bool apply_collision(s32vec3s corner_pos, f32 delta) {
                 grounded = true;
             }
             vec3s absolute_normal = glms_vec3_abs(normal);
-            vec3s inverse_normal = {{ absolute_normal.x != 0 ? 0 : 1, absolute_normal.y != 0 ? 0 : 1, absolute_normal.z != 0 ? 0 : 1 }};
+            vec3s inverse_normal = { .x = absolute_normal.x != 0 ? 0 : 1, .y = absolute_normal.y != 0 ? 0 : 1, .z = absolute_normal.z != 0 ? 0 : 1 };
 
             character_velocity = glms_vec3_mul(character_velocity, inverse_normal);
             return true;
@@ -147,7 +147,7 @@ void character_handle_input(vec3s cam_look, vec3w_t last_wpad_accel, vec3w_t las
         if (joystick_input_vector.x == 0.0f && joystick_input_vector.y == 0.0f) {
             apply_no_movement(now, delta);
         } else {
-            vec3s input_vector = {{ joystick_input_vector.y / 96.0f, 0.0f, joystick_input_vector.x / 96.0f }};
+            vec3s input_vector = { .x = joystick_input_vector.y / 96.0f, .y = 0.0f, .z = joystick_input_vector.x / 96.0f };
             apply_movement(cam_look, now, delta, shaking, input_vector);
         }
     } else {
@@ -157,11 +157,13 @@ void character_handle_input(vec3s cam_look, vec3w_t last_wpad_accel, vec3w_t las
 
 void character_apply_physics(s32vec3s corner_pos, f32 delta) {
     #ifndef PC_PORT
-    s32vec3s chunk_rel_pos = {{
-        (s32)floor(character_position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.x,
-        (s32)floor(character_position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.y,
-        (s32)floor(character_position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - corner_pos.z
-    }};
+	vec3s div_pos = glms_vec3_scale(character_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+    s32vec3s chunk_rel_pos = {
+        .x = (s32)floorf(div_pos.x),
+        .y = (s32)floorf(div_pos.y),
+        .z = (s32)floorf(div_pos.z)
+    };
+    glm_ivec3_sub(chunk_rel_pos.raw, corner_pos.raw, chunk_rel_pos.raw);
 
     size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
 
