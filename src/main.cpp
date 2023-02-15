@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 
 	skybox_init(view, cam.position);
 	
-	game::water_overlay water_overlay;
+	water_overlay_init();
 	game::debug_ui debug_ui;
 	
 	cursor_init();
@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
 		game::init_ui_rendering();
-		// water_overlay.draw(cam, chunks);
+		water_overlay_draw();
 		cursor_draw();
 
 		game::init_text_rendering();
