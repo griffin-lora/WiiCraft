@@ -15,6 +15,6 @@ A Minecraft-like clone for the Nintendo Wii
 
 #### Screenshots
 
-![Screenshot taken of WiiCraft](https://i.imgur.com/oiH79Dh.png)
+![Screenshot taken of WiiCraft](https://i.imgur.com/a/tYsteZE)
 
 All screenshots taken in Dolphin Emulator
