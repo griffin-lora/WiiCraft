@@ -1,5 +1,5 @@
 #pragma once
 #include "block.h"
-#include "math/vector.h"
+#include "game_math.h"
 
-void generate_procedural_blocks(vec3_s32_t pos, block_type_t block_types[]);
+void generate_procedural_blocks(s32vec3s pos, block_type_t block_types[]);

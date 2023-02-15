@@ -1,6 +1,6 @@
-#include "box.hpp"
+#include "box.h"
 
-bool is_inside_box(box_t box, glm::vec3 pos) {
+bool is_inside_box(box_t box, vec3s pos) {
     return pos.x >= box.lesser_corner.x && pos.y >= box.lesser_corner.y && pos.z >= box.lesser_corner.z && pos.x <= box.greater_corner.x && pos.y <= box.greater_corner.y && pos.z <= box.greater_corner.z;
 }
 

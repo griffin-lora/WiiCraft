@@ -1,5 +1,5 @@
 #pragma once
-#include "math/vector.h"
+#include "game_math.h"
 #include "game/block.h"
 #include <gctypes.h>
 #include <assert.h>

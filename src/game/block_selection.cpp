@@ -10,7 +10,7 @@ using namespace game;
 
 #define MATRIX_INDEX GX_PNMTX4
 
-static std::optional<vec3_u8_t> last_block_pos;
+static std::optional<u8vec3s> last_block_pos;
 static std::optional<block_type_t> last_block_type;
 
 static Mtx model;
@@ -84,11 +84,11 @@ void block_selection_draw(us_t now) {
 }
 
 static void update_mesh(Mtx view, const block_raycast_t& raycast) {
-    vec3_s32_t chunk_pos = raycast.location.ch_pos;
-    vec3_u8_t block_pos = raycast.location.bl_pos;
+    s32vec3s chunk_pos = raycast.location.ch_pos;
+    u8vec3s block_pos = raycast.location.bl_pos;
 
     guMtxIdentity(model);
-    guMtxTransApply(model, model, chunk_pos.x * chunk::size, chunk_pos.y * chunk::size, chunk_pos.z * chunk::size);
+    guMtxTransApply(model, model, chunk_pos.raw[0] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.raw[1] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, chunk_pos.raw[2] * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
     guMtxConcat(view, model, model_view);
     
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);

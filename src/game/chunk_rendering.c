@@ -16,7 +16,7 @@ static void draw_pool(Mtx view, block_display_list_pool_t* pool) {
 		guMtxTransApply(model, model, disp_list->x, disp_list->y, disp_list->z);
 		guMtxConcat(view, model, model_view);
 
-		GX_LoadPosMtxImm(model_view, GX_PNMTX5);
+		GX_LoadPosMtxImm(model_view, BLOCK_WORLD_MATRIX_INDEX);
 
 		GX_CallDispList(chunks[disp_list->chunk_index], disp_list->size);
 	}

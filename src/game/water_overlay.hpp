@@ -2,9 +2,8 @@
 #include "gfx.hpp"
 #include "gfx/display_list.hpp"
 #include "math/transform_2d.hpp"
-#include "math.hpp"
+#include "game_math.hpp"
 #include "camera.hpp"
-#include "chunk.hpp"
 
 namespace game {
     struct water_overlay {
@@ -15,6 +14,6 @@ namespace game {
 
         water_overlay();
 
-        void draw(const camera& cam, const chunk::map& chunks) const;
+        void draw(const camera& cam) const;
     };
 }

@@ -1,14 +1,6 @@
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cstdio>
-#include <gccore.h>
-#include <wiiuse/wpad.h>
-#include <fat.h>
-#include <array>
 #include "gfx.hpp"
 #include "dbg.hpp"
-#include "math.hpp"
+#include "game_math.hpp"
 #include "input.hpp"
 #include "chrono.hpp"
 #include "game/block_raycast.hpp"
@@ -22,10 +14,17 @@
 #include "game/rendering.hpp"
 #include "game/water_overlay.hpp"
 #include "game/debug_ui.hpp"
-#include "common.hpp"
 #include "log.hpp"
-#include "pool.h"
+#include "pool.hpp"
 #include "game/block_world_management.hpp"
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <stdio.h>
+#include <gccore.h>
+#include <wiiuse/wpad.h>
+#include <fat.h>
+#include <array>
 
 static constexpr f32 cam_rotation_speed = 1.80f;
 
@@ -46,20 +45,16 @@ int main(int argc, char** argv) {
 
 	pool_init();
 
-	input::init(rmode->viWidth, rmode->viHeight);
+	input_init(rmode->viWidth, rmode->viHeight);
 
-	input::set_resolution(rmode->viWidth, rmode->viHeight);
-
-	math::matrix44 perspective_2d;
+	Mtx44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
 	
-	math::matrix view;
-	math::matrix44 perspective_3d;
+	Mtx view;
+	Mtx44 perspective_3d;
 
-	game::character character = {
-		.position = { 0.0f, 30.0f, 0.0f },
-		.velocity = { 0.0f, 0.0f, 0.0f }
-	};
+	character_position = { 0.0f, 30.0f, 0.0f };
+	character_velocity = { 0.0f, 0.0f, 0.0f };
 
 	game::camera cam = {
 		.position = {0.0f, 0.0f, -10.0f},
@@ -69,9 +64,8 @@ int main(int argc, char** argv) {
 		.near_clipping_plane_distance = 0.1f,
 		.far_clipping_plane_distance = 300.0f
 	};
-	character.update_camera(cam, 0);
-	std::optional<math::vector3s32> last_cam_chunk_pos;
-	math::normalize(cam.look);
+	game::update_camera(cam, 0);
+	glm_vec3_normalize(cam.look.raw);
 
 	game::update_look(cam);
 	game::update_view(cam, view);
@@ -82,7 +76,7 @@ int main(int argc, char** argv) {
 	u16 frame_count = 0;
 	#endif
 
-	skybox_init(view, cam.position.x, cam.position.y, cam.position.z);
+	skybox_init(view, cam.position);
 	
 	game::water_overlay water_overlay;
 	game::debug_ui debug_ui;
@@ -96,13 +90,13 @@ int main(int argc, char** argv) {
 	GX_SetColorUpdate(GX_TRUE);
 	GX_SetAlphaUpdate(GX_TRUE);
 
-	math::vector3u16 last_wpad_accel = { 512, 512, 512 };
-	math::vector3u16 last_nunchuk_accel = { 512, 512, 512 };
+	vec3w_t last_wpad_accel = { 512, 512, 512 };
+	vec3w_t last_nunchuk_accel = { 512, 512, 512 };
 
 	s64 program_start = get_current_us();
 	us_t start = 0;
 
-	vec3_s32_t last_corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
+	s32vec3s last_corner_pos = { (s32)floorf(cam.position.raw[0] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.raw[1] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.raw[2] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
 
 	init_block_world(last_corner_pos);
 
@@ -117,60 +111,62 @@ int main(int argc, char** argv) {
 
 		s32 chan = 0;
 
-		input::scan_pads();
-		u32 buttons_down = input::get_buttons_down(chan);
+		WPAD_ScanPads();
+		u32 buttons_down = WPAD_ButtonsDown(chan);
 		if (buttons_down & WPAD_BUTTON_HOME) {
 			lprintf("BGT: %d\nMGT: %d\nMGL: %d\nLog ended\n", total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time);
 			log_term();
 			std::exit(0);
 		}
-		u32 buttons_held = input::get_buttons_held(chan);
+		u32 buttons_held = WPAD_ButtonsHeld(chan);
 
 		game::update_camera_from_input(cam_rotation_speed, cam, frame_delta, buttons_held);
 
-		vec3_s32_t corner_pos = { (s32)floorf(cam.position.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
-		if (corner_pos.x != last_corner_pos.x || corner_pos.y != last_corner_pos.y || corner_pos.z != last_corner_pos.z) {
+		s32vec3s corner_pos = { (s32)floorf(cam.position.raw[0] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3, (s32)floorf(cam.position.raw[1] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 2, (s32)floorf(cam.position.raw[2] / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK) - 3 };
+		if (last_corner_pos.raw[0] != corner_pos.raw[0] || last_corner_pos.raw[1] != corner_pos.raw[1] || last_corner_pos.raw[2] != corner_pos.raw[2]) {
 			manage_block_world(last_corner_pos, corner_pos);
 		}
 		handle_world_flag_processing(corner_pos);
 		last_corner_pos = corner_pos;
 
-		auto pointer_pos = input::get_pointer_position(chan);
 		cursor_update(rmode->viWidth, rmode->viHeight);
 
 		#ifndef PC_PORT
-    	auto wpad_accel = input::get_accel(chan);
+    	vec3w_t wpad_accel;
+		WPAD_Accel(chan, &wpad_accel);
 		expansion_t exp;
-		if (input::scan_nunchuk(0, exp)) {
+		WPAD_Expansion(chan, &exp);
+		if (exp.type == WPAD_EXP_NUNCHUK) {
 			const auto& nunchuk = exp.nunchuk;
-			auto nunchuk_vector = input::get_nunchuk_vector(nunchuk);
+			auto nunchuk_vector = get_nunchuk_vector(&nunchuk);
 			auto nunchuk_buttons_down = nunchuk.btns;
 
-			math::vector3u16 nunchuk_accel = { nunchuk.accel.x, nunchuk.accel.y, nunchuk.accel.z };
+			vec3w_t nunchuk_accel = { nunchuk.accel.x, nunchuk.accel.y, nunchuk.accel.z };
 
-			character.handle_input(cam, last_wpad_accel, last_nunchuk_accel, now, frame_delta, wpad_accel, nunchuk_vector, nunchuk_buttons_down, nunchuk_accel);
+			character_handle_input(cam.look, last_wpad_accel, last_nunchuk_accel, now, frame_delta, wpad_accel, nunchuk_vector, nunchuk_buttons_down, nunchuk_accel);
 
 			last_nunchuk_accel = nunchuk_accel;
-			// character.velocity.y = input::get_plus_minus_input_scalar(buttons_held) * 15.0f;
+			// character.velocity.y = get_plus_minus_input_scalar(buttons_held) * 15.0f;
 		}
 		last_wpad_accel = wpad_accel;
 		#else
-		character.handle_input(cam, { 0, 0, 0 }, { 0, 0, 0 }, now, frame_delta, { 512, 512, 512 }, { 96.0f, 96.0f }, 0, { 512, 512, 512 });
+		character_handle_input(cam.look, { 0, 0, 0 }, { 0, 0, 0 }, now, frame_delta, { 512, 512, 512 }, { 96.0f, 96.0f }, 0, { 512, 512, 512 });
 		#endif
 
-		auto raycast_dir = game::get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		auto raycast = get_block_raycast(corner_pos, cam.position, raycast_dir * 10.0f, cam.position, cam.position + (raycast_dir * 10.0f), { 0, 0, 0 }, block_box_type_selection);
+		// auto raycast_dir = get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
+		vec3s raycast_dir = cam.look;
+		block_raycast_wrap_t raycast = get_block_raycast(corner_pos, cam.position, glms_vec3_scale(raycast_dir, 10.0f), cam.position, glms_vec3_add(cam.position, glms_vec3_scale(raycast_dir, 10.0f)), { 0, 0, 0 }, block_box_type_selection);
 		block_selection_handle_raycast(view, raycast);
 
 		game::update_world_from_raycast_and_input(corner_pos, buttons_down, raycast);
-		character.apply_physics(corner_pos, frame_delta);
-		character.apply_velocity(frame_delta);
-		character.update_camera(cam, now);
+		character_apply_physics(corner_pos, frame_delta);
+		character_apply_velocity(frame_delta);
+		game::update_camera(cam, now);
 
 		game::update_needed(view, perspective_3d, cam);
 
 		if (cam.update_view) {
-			skybox_update(view, cam.position.x, cam.position.y, cam.position.z);
+			skybox_update(view, cam.position);
 			block_selection_update(view);
 		}
 		debug_ui.update(buttons_down);
@@ -178,7 +174,7 @@ int main(int argc, char** argv) {
 		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
 		skybox_draw();
 
-		GX_SetCurrentMtx(game::chunk::mat);
+		GX_SetCurrentMtx(BLOCK_WORLD_MATRIX_INDEX);
 
 		draw_block_display_lists(view);
 		
@@ -192,7 +188,7 @@ int main(int argc, char** argv) {
 		cursor_draw();
 
 		game::init_text_rendering();
-		debug_ui.draw(character.position, cam.look, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::ceil(fps));
+		debug_ui.draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam.look.raw[0], cam.look.raw[1], cam.look.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::ceil(fps));
 
 		game::reset_update_params(cam);
 

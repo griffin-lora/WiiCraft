@@ -1,15 +1,13 @@
-#include "input.hpp"
+#include "input.h"
 
-using namespace input;
-
-void input::init(u32 width, u32 height) {
+void input_init(u32 width, u32 height) {
     WPAD_Init();
     WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
-    set_resolution(width, height);
+    WPAD_SetVRes(WPAD_CHAN_ALL, width, height);
 }
 
-glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {
-    glm::vec2 pad_input_vector = {0.0f, 0.0f};
+vec2s get_dpad_input_vector(u32 buttons_held) {
+    vec2s pad_input_vector = {{ 0.0f, 0.0f }};
     if (buttons_held & WPAD_BUTTON_RIGHT) {
         pad_input_vector.x += 1.0f;
     }
@@ -25,17 +23,17 @@ glm::vec2 input::get_dpad_input_vector(u32 buttons_held) {
     return pad_input_vector;
 }
 
-std::optional<glm::vec2> input::get_pointer_position(s32 chan) {
+vec2s get_pointer_position(s32 chan) {
     ir_t pointer;
     WPAD_IR(chan, &pointer);
     if (pointer.valid) {
-        return glm::vec2{ pointer.x, pointer.y };
+        return (vec2s){{ pointer.x, pointer.y }};
     } else {
-        return {};
+        return (vec2s){{ -1, -1 }};
     }
 }
 
-f32 input::get_plus_minus_input_scalar(u32 buttons_held) {
+f32 get_plus_minus_input_scalar(u32 buttons_held) {
     f32 scalar = 0.0f;
     if (buttons_held & WPAD_BUTTON_PLUS) {
         scalar += 1.0f;

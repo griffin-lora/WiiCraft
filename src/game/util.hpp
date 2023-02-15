@@ -1,5 +1,5 @@
 #pragma once
-#include "math.hpp"
+#include "game_math.hpp"
 
 namespace game {
     template<typename T, typename F>

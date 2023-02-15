@@ -3,20 +3,20 @@
 #include "block_world_management.h"
 #include <math.h>
 
-world_location_wrap_t get_world_location_at_world_position(vec3_s32_t corner_pos, guVector pos) {
-    vec3_s32_t chunk_pos = {
+world_location_wrap_t get_world_location_at_world_position(s32vec3s corner_pos, vec3s pos) {
+    s32vec3s chunk_pos = {{
         (s32)floorf(pos.x / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
         (s32)floorf(pos.y / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
         (s32)floorf(pos.z / NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
-    };
+    }};
 
-    vec3_s32_t chunk_rel_pos = {
+    s32vec3s chunk_rel_pos = {{
         chunk_pos.x - corner_pos.x,
         chunk_pos.y - corner_pos.y,
         chunk_pos.z - corner_pos.z
-    };
+    }};
 
-    vec3_u8_t block_rel_pos = {
+    u8vec3s block_rel_pos = {
         mod_s32(pos.x, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
         mod_s32(pos.y, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK),
         mod_s32(pos.z, NUM_ROW_BLOCKS_PER_BLOCK_CHUNK)
@@ -48,12 +48,12 @@ static void set_important_update(size_t index) {
     block_pool_chunk_bitfields[index] &= (~BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS);
 }
 
-bool update_block_chunk_and_neighbors(vec3_s32_t corner_pos, vec3_s32_t chunk_pos, vec3_u8_t modification_pos) {
-    vec3_s32_t chunk_rel_pos = {
+bool update_block_chunk_and_neighbors(s32vec3s corner_pos, s32vec3s chunk_pos, u8vec3s modification_pos) {
+    s32vec3s chunk_rel_pos = {{
         chunk_pos.x - corner_pos.x,
         chunk_pos.y - corner_pos.y,
         chunk_pos.z - corner_pos.z
-    };
+    }};
 
     size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
 

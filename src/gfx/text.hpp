@@ -1,6 +1,8 @@
 #pragma once
 #include "gfx/display_list.hpp"
-#include "math.hpp"
+#include "game_math.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec2.hpp"
 #include <string_view>
 
 namespace gfx {

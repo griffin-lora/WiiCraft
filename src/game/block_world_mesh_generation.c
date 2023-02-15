@@ -93,7 +93,7 @@ static u8 get_tex(block_type_t type) {
     return 5;
 }
 
-static u16 write_meshes_into_display_list(block_display_list_type_t type, guVector world_pos, size_t num_meshes, const block_mesh_t meshes[]) {
+static u16 write_meshes_into_display_list(block_display_list_type_t type, vec3s world_pos, size_t num_meshes, const block_mesh_t meshes[]) {
     size_t num_verts = num_meshes * ((type != block_display_list_type_transparent_double_sided) ? 4 : 8);
 
     block_display_list_t* disp_list = acquire_block_display_list_pool_chunk(type);
@@ -315,7 +315,7 @@ static face_meshes_indices_t add_face_mesh_if_needed(
 }
 
 void update_block_chunk_visuals(
-    guVector world_pos,
+    vec3s world_pos,
     block_display_list_chunk_descriptor_t descriptors[],
     const block_type_t block_types[],
     const block_type_t front_block_types[],

@@ -1,10 +1,12 @@
 #pragma once
-#include "math.hpp"
+#include "game_math.hpp"
+#include <ogc/gu.h>
+#include <ogc/gx.h>
 
 namespace math {
     class transform_3d {
-        matrix model;
-        matrix model_view;
+        Mtx model;
+        Mtx model_view;
 
         public:
             transform_3d() = default;
@@ -13,8 +15,8 @@ namespace math {
 
             transform_3d(transform_3d&& other) noexcept;
 
-            void set_position(const matrix view, f32 x, f32 y, f32 z);
-            inline void update_model_view(const matrix view) {
+            void set_position(const Mtx view, f32 x, f32 y, f32 z);
+            inline void update_model_view(const Mtx view) {
                 guMtxConcat(const_cast<f32(*)[4]>(view), model, model_view);
             }
 

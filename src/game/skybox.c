@@ -22,7 +22,7 @@ static Mtx model_view;
 #define N -0x80
 #define P 0x7f
 
-void skybox_init(Mtx view, f32 x, f32 y, f32 z) {
+void skybox_init(Mtx view, vec3s cam_pos) {
     GX_BeginDispList(disp_list, DISP_LIST_SIZE);
 
     GX_Begin(GX_QUADS, GX_VTXFMT0, VERTEX_COUNT);
@@ -114,12 +114,12 @@ void skybox_init(Mtx view, f32 x, f32 y, f32 z) {
     GX_End();
     disp_list_size = GX_EndDispList();
 
-    skybox_update(view, x, y, z);
+    skybox_update(view, cam_pos);
 }
 
-void skybox_update(Mtx view, f32 x, f32 y, f32 z) {
+void skybox_update(Mtx view, vec3s cam_pos) {
     guMtxIdentity(model);
-    guMtxTransApply(model, model, x, y, z);
+    guMtxTransApply(model, model, cam_pos.x, cam_pos.y, cam_pos.z);
     guMtxConcat(view, model, model_view);
     GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
 }

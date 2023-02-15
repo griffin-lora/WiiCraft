@@ -12,7 +12,7 @@
 #define Y_OFFSET BLOCK_POOL_CHUNK_INDICES_Y_OFFSET
 #define X_OFFSET BLOCK_POOL_CHUNK_INDICES_X_OFFSET
 
-void init_block_world(vec3_s32_t corner_pos) {
+void init_block_world(s32vec3s corner_pos) {
     size_t i = 0;
     for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
         for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
@@ -33,8 +33,8 @@ void init_block_world(vec3_s32_t corner_pos) {
 _Alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
 _Alignas(32) u8 temp_block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 
-void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
-    vec3_s32_t move_dir = {
+void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
+    s32vec3s move_dir = {
         .x = last_corner_pos.x - corner_pos.x,
         .y = last_corner_pos.y - corner_pos.y,
         .z = last_corner_pos.z - corner_pos.z
@@ -47,7 +47,7 @@ void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
                 size_t chunk_index = block_pool_chunk_indices[i];
                 size_t chunk_bitfield = block_pool_chunk_bitfields[i];
 
-                vec3_s32_t new_pos = {
+                s32vec3s new_pos = {
                     .x = x + move_dir.x,
                     .y = y + move_dir.y,
                     .z = z + move_dir.z
@@ -76,7 +76,7 @@ void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
                         chunk_bitfield |= BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS;
                     }
                 } else {
-                    vec3_s32_t neighbor_pos = {
+                    s32vec3s neighbor_pos = {
                         .x = x - move_dir.x,
                         .y = y - move_dir.y,
                         .z = z - move_dir.z
@@ -102,7 +102,7 @@ void manage_block_world(vec3_s32_t last_corner_pos, vec3_s32_t corner_pos) {
     }
 }
 
-static bool handle_procedural_generation(vec3_s32_t corner_pos) {
+static bool handle_procedural_generation(s32vec3s corner_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -121,7 +121,7 @@ static bool handle_procedural_generation(vec3_s32_t corner_pos) {
 
                 chunk_bitfields[i] |= BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS;
 
-                vec3_s32_t pos = {
+                s32vec3s pos = {
                     .x = x + corner_pos.x,
                     .y = y + corner_pos.y,
                     .z = z + corner_pos.z
@@ -143,7 +143,7 @@ static bool handle_procedural_generation(vec3_s32_t corner_pos) {
     return num_procedural_generate_items > 0;
 }
 
-static void handle_important_visuals_updating(vec3_s32_t corner_pos) {
+static void handle_important_visuals_updating(s32vec3s corner_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -164,13 +164,13 @@ static void handle_important_visuals_updating(vec3_s32_t corner_pos) {
 
                 block_chunk_t* chunk = &chunks[chunk_indices[i]];
 
-                vec3_s32_t pos = {
+                s32vec3s pos = {
                     .x = x + corner_pos.x,
                     .y = y + corner_pos.y,
                     .z = z + corner_pos.z
                 };
 
-                guVector world_pos = {
+                vec3s world_pos = {
                     .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
@@ -196,7 +196,7 @@ static void handle_important_visuals_updating(vec3_s32_t corner_pos) {
     }
 }
 
-static void handle_queued_visuals_updating(vec3_s32_t corner_pos) {
+static void handle_queued_visuals_updating(s32vec3s corner_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -221,13 +221,13 @@ static void handle_queued_visuals_updating(vec3_s32_t corner_pos) {
 
                 block_chunk_t* chunk = &chunks[chunk_indices[i]];
 
-                vec3_s32_t pos = {
+                s32vec3s pos = {
                     .x = x + corner_pos.x,
                     .y = y + corner_pos.y,
                     .z = z + corner_pos.z
                 };
 
-                guVector world_pos = {
+                vec3s world_pos = {
                     .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
                     .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
@@ -255,7 +255,7 @@ static void handle_queued_visuals_updating(vec3_s32_t corner_pos) {
     }
 }
 
-void handle_world_flag_processing(vec3_s32_t corner_pos) {
+void handle_world_flag_processing(s32vec3s corner_pos) {
     bool any_procedural_generation = handle_procedural_generation(corner_pos);
     handle_important_visuals_updating(corner_pos);
     if (!any_procedural_generation) { // Only handle queued visuals updating if we did not see any procedural generation

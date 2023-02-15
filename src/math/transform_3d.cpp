@@ -13,7 +13,7 @@ transform_3d::transform_3d(transform_3d&& other) noexcept {
     }
 }
 
-void transform_3d::set_position(const matrix view, f32 x, f32 y, f32 z) {
+void transform_3d::set_position(const Mtx view, f32 x, f32 y, f32 z) {
     guMtxIdentity(model);
     guMtxTransApply(model, model, x, y, z);
     update_model_view(view);
