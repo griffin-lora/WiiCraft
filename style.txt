@@ -1,3 +1,3 @@
 WiiCraft Style Guide
 
-Use snake_case for all names except templates, which use SCREAMING_SNAKE_CASE
+Use snake_case for all names except templates and macros, which use SCREAMING_SNAKE_CASE
