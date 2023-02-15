@@ -3,7 +3,9 @@
 #include "gfx/instruction_size.h"
 #include "util.h"
 #include "block.hpp"
-#include "log.hpp"
+#include <ogc/gx.h>
+#include <ogc/cache.h>
+#include <optional>
 #include <string.h>
 
 using namespace game;
