@@ -1,9 +1,7 @@
-#include "rendering.hpp"
-#include <gccore.h>
+#include "rendering.h"
+#include <ogc/gx.h>
 
-using namespace game;
-
-void game::init_ui_rendering() {
+void init_ui_rendering(void) {
 	GX_SetNumTevStages(1);
 	// set number of rasterized color channels
 	GX_SetNumChans(1);
@@ -33,6 +31,6 @@ void game::init_ui_rendering() {
     GX_SetCullMode(GX_CULL_BACK);
 }
 
-void game::init_text_rendering() {
+void init_text_rendering(void) {
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP3, GX_COLOR0A0);
 }

@@ -1,5 +1,4 @@
 #include "gfx.hpp"
-#include "dbg.hpp"
 #include "game_math.hpp"
 #include "input.hpp"
 #include "chrono.hpp"
@@ -191,11 +190,11 @@ int main(int argc, char** argv) {
 		}
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		game::init_ui_rendering();
+		init_ui_rendering();
 		water_overlay_draw();
 		cursor_draw();
 
-		game::init_text_rendering();
+		init_text_rendering();
 		debug_ui.draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam.look.raw[0], cam.look.raw[1], cam.look.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, std::ceil(fps));
 
 		game::reset_update_params(cam);
