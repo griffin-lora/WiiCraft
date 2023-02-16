@@ -1,7 +1,7 @@
 #pragma once
 #include "game_math.h"
 #include "math/box_raycast.h"
-#include "chunk_core.h"
+#include "block_world_core.h"
 #include "block.h"
 
 typedef struct {

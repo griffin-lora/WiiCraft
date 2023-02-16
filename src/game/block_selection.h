@@ -1,5 +1,5 @@
 #pragma once
-#include "chunk_core.h"
+#include "block_world_core.h"
 #include "chrono.h"
 #include <ogc/gu.h>
 

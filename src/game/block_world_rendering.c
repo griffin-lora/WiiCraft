@@ -1,4 +1,4 @@
-#include "chunk_rendering.h"
+#include "block_world_rendering.h"
 #include "pool.h"
 #include "log.h"
 #include <ogc/gx.h>

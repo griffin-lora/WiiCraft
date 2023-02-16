@@ -4,7 +4,7 @@
 #include "chrono.h"
 #include "game/block_raycast.h"
 #include "game/camera.h"
-#include "game/chunk_rendering.h"
+#include "game/block_world_rendering.h"
 #include "game/logic.h"
 #include "game/block_selection.h"
 #include "game/cursor.h"

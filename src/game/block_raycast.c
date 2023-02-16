@@ -1,5 +1,5 @@
 #include "block_raycast.h"
-#include "chunk_core.h"
+#include "block_world_core.h"
 #include "util.h"
 #include "block.h"
 
