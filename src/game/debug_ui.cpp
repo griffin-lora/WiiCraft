@@ -92,7 +92,7 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block
 }
 
 static u8 ui_buf[sizeof(debug_ui)];
-debug_ui* ui;
+static debug_ui* ui;
 
 void debug_ui_init(void) {
     ui = new (ui_buf) debug_ui();
