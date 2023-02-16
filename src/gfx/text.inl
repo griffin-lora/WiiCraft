@@ -14,7 +14,7 @@ void gfx::write_text_into_display_list(F write_vertex, gfx::display_list& disp_l
     disp_list.resize(disp_list_size);
 
     disp_list.write_into([&]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
+        GX_Begin(GX_QUADS, GX_VTXFMT2, vertex_count);
 
         write_text_vertices<U>(write_vertex, str, char_width, char_height);
 

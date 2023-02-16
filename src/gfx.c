@@ -93,6 +93,8 @@ bool gfx_init(void) {
 	GX_LoadTexObj(&textures.icons, GX_TEXMAP1);
 	GX_LoadTexObj(&textures.skybox, GX_TEXMAP2);
 	GX_LoadTexObj(&textures.font, GX_TEXMAP3);
+	
+	GX_ClearVtxDesc();
 
 	return true;
 }

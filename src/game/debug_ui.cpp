@@ -72,7 +72,7 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block
         auto last_mesh_gen_time_str = std::to_string(last_mesh_gen_time);
         std::size_t vertex_count = 4 * (fps_str.size() + pos_str.size() + dir_str.size() + total_block_gen_time_str.size() + total_mesh_gen_time_str.size() + last_mesh_gen_time_str.size());
 
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
+        GX_Begin(GX_QUADS, GX_VTXFMT2, vertex_count);
 
         write_text(fps_str, 0);
         write_text(pos_str, 1);
@@ -85,7 +85,7 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block
     } else {
         std::size_t vertex_count = 4 * fps_str.size();
 
-        GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
+        GX_Begin(GX_QUADS, GX_VTXFMT2, vertex_count);
         write_text(fps_str, 0);
         GX_End();
     }

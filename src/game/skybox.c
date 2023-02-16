@@ -5,6 +5,7 @@
 #include <stdalign.h>
 
 #define MATRIX_INDEX GX_PNMTX0
+#define VERTEX_FORMAT_INDEX GX_VTXFMT0
 
 #define VERTEX_COUNT 24
 
@@ -23,9 +24,13 @@ static Mtx model_view;
 #define P 0x7f
 
 void skybox_init(Mtx view, vec3s cam_pos) {
+	// Skybox Vtxfmt init
+	GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_S8, 0);
+	GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
+
     GX_BeginDispList(disp_list, DISP_LIST_SIZE);
 
-    GX_Begin(GX_QUADS, GX_VTXFMT0, VERTEX_COUNT);
+    GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, VERTEX_COUNT);
 
     // Front (+x)
 
@@ -139,17 +144,9 @@ void skybox_draw(void) {
 	GX_SetTevOp(GX_TEVSTAGE0,GX_REPLACE);
 	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP2, GX_COLOR0A0);
 
-	//
-
-	GX_ClearVtxDesc();
+    GX_ClearVtxDesc();
 	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
 	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-
-	// GX_VTXFMT0 is for standard geometry
-	
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_S8, 0);
-	// Since the fractional size of the fixed point number is 3, it is equivalent to 1 unit = 2 pixels
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
 
     GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
 

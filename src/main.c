@@ -66,6 +66,9 @@ int main(int argc, char** argv) {
 
 	block_selection_init();
 
+	init_ui_rendering();
+	init_block_world_rendering();
+
 	GX_SetZMode(true, GX_LEQUAL, true);
 	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
 	GX_SetColorUpdate(GX_TRUE);
@@ -167,11 +170,11 @@ int main(int argc, char** argv) {
 		}
 		
 		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
-		init_ui_rendering();
+		enter_ui_rendering();
 		water_overlay_draw();
 		cursor_draw();
 
-		init_text_rendering();
+		enter_text_rendering();
 		debug_ui_draw(total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, ceilf(fps));
 
 		gfx_update_video();

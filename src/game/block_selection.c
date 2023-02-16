@@ -9,6 +9,7 @@
 #include <stdalign.h>
 
 #define MATRIX_INDEX GX_PNMTX4
+#define VERTEX_FORMAT_INDEX GX_VTXFMT4
 
 static bool has_last_block = false;
 static u8vec3s last_block_pos;
@@ -37,6 +38,7 @@ static bool cull_back = true;
 _Alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
 
 void block_selection_init(void) {
+    GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 }
 
 void block_selection_update(Mtx view) {
@@ -63,8 +65,6 @@ void block_selection_draw(us_t now) {
 
     GX_ClearVtxDesc();
     GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
-
-    GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 
     GX_SetCurrentMtx(MATRIX_INDEX);
 
@@ -118,7 +118,7 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
             DCInvalidateRange(disp_list, CUBE_DISP_LIST_SIZE);
             
             GX_BeginDispList(disp_list, CUBE_DISP_LIST_SIZE);
-            GX_Begin(GX_QUADS, GX_VTXFMT0, CUBE_VERTEX_COUNT);
+            GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, CUBE_VERTEX_COUNT);
 
             GX_Position3u8(pox, poy, pz);
             GX_Position3u8(pox, py, pz);
@@ -159,7 +159,7 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
             DCInvalidateRange(disp_list, CROSS_DISP_LIST_SIZE);
 
             GX_BeginDispList(disp_list, CROSS_DISP_LIST_SIZE);
-            GX_Begin(GX_QUADS, GX_VTXFMT0, CROSS_VERTEX_COUNT);
+            GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, CROSS_VERTEX_COUNT);
 
             GX_Position3u8(px, py, pz);
             GX_Position3u8(pox, py, poz);

@@ -22,6 +22,11 @@ static void draw_pool(Mtx view, size_t pool_index) {
 	}
 }
 
+void init_block_world_rendering(void) {
+	GX_SetVtxAttrFmt(BLOCK_WORLD_VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
+	GX_SetVtxAttrFmt(BLOCK_WORLD_VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
+}
+
 void draw_block_display_lists(Mtx view) {
 	GX_SetNumTevStages(2);
 	GX_SetNumChans(1);
@@ -42,12 +47,6 @@ void draw_block_display_lists(Mtx view) {
 	GX_ClearVtxDesc();
 	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
 	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-
-	
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
-	// Since the fractional size of the fixed point number is 4, it is equivalent to 1 unit = 16 pixels
-	// I dont think that information is acccurate
-	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 
 	GX_SetTevColor(GX_TEVREG1, (GXColor){ 0xff, 0xff, 0xff, 0xff }); // Set alpha
 

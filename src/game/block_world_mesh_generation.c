@@ -1,4 +1,5 @@
 #include "block_world_mesh_generation.h"
+#include "block_world_rendering.h"
 #include "log.h"
 #include "block.h"
 #include "pool.h"
@@ -113,7 +114,7 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
     DCInvalidateRange(chunk, display_list_size);
 
     GX_BeginDispList(chunk, display_list_size);
-    GX_Begin(GX_QUADS, GX_VTXFMT0, num_verts);
+    GX_Begin(GX_QUADS, BLOCK_WORLD_VERTEX_FORMAT_INDEX, num_verts);
 
     switch (pool_index) {
         case 0:
