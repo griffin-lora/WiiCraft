@@ -9,115 +9,22 @@
 
 #define VERTEX_COUNT 24
 
-#define DISP_LIST_SIZE (ALIGN_TO_32( \
+#define DISP_LIST_SIZE (ALIGN_TO_32_NEW( \
     GET_BEGIN_INSTRUCTION_SIZE(VERTEX_COUNT) + \
     GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(s8), VERTEX_COUNT) + \
     GET_VECTOR_INSTRUCTION_SIZE(2, sizeof(u8), VERTEX_COUNT) \
 ))
-_Alignas(32) static u8 disp_list[DISP_LIST_SIZE];
-static size_t disp_list_size;
+_Alignas(32) static u8 disp_list[DISP_LIST_SIZE] = {
+    0x80, 0x0, 0x18, 0x7f, 0x80, 0x80, 0x1, 0x2, 0x7f, 0x7f, 0x80, 0x1, 0x1, 0x7f, 0x7f, 0x7f, 0x2, 0x1, 0x7f, 0x80, 0x7f, 0x2, 0x2, 0x80, 0x7f, 0x7f, 0x1, 0x1, 0x80, 0x7f, 0x80, 0x2, 0x1, 0x80, 0x80, 0x80, 0x2, 0x2, 0x80, 0x80, 0x7f, 0x1, 0x2, 0x80, 0x7f, 0x80, 0x0, 0x0, 0x80, 0x7f, 0x7f, 0x1, 0x0, 0x7f, 0x7f, 0x7f, 0x1, 0x1, 0x7f, 0x7f, 0x80, 0x0, 0x1, 0x80, 0x80, 0x80, 0x1, 0x2, 0x7f, 0x80, 0x80, 0x2, 0x2, 0x7f, 0x80, 0x7f, 0x2, 0x3, 0x80, 0x80, 0x7f, 0x1, 0x3, 0x80, 0x80, 0x7f, 0x1, 0x2, 0x7f, 0x80, 0x7f, 0x2, 0x2, 0x7f, 0x7f, 0x7f, 0x2, 0x1, 0x80, 0x7f, 0x7f, 0x1, 0x1, 0x7f, 0x7f, 0x80, 0x1, 0x1, 0x7f, 0x80, 0x80, 0x1, 0x2, 0x80, 0x80, 0x80, 0x2, 0x2, 0x80, 0x7f, 0x80, 0x2, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0
+};
 
 static Mtx model;
 static Mtx model_view;
-
-#define N -0x80
-#define P 0x7f
 
 void skybox_init(Mtx view, vec3s cam_pos) {
 	// Skybox Vtxfmt init
 	GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_S8, 0);
 	GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 3);
-
-    GX_BeginDispList(disp_list, DISP_LIST_SIZE);
-
-    GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, VERTEX_COUNT);
-
-    // Front (+x)
-
-    GX_Position3s8(P, N, N);
-    GX_TexCoord2u8(1, 2);
-
-    GX_Position3s8(P, P, N);
-    GX_TexCoord2u8(1, 1);
-
-    GX_Position3s8(P, P, P);
-    GX_TexCoord2u8(2, 1);
-
-    GX_Position3s8(P, N, P);
-    GX_TexCoord2u8(2, 2);
-
-    // Back (-x)
-
-    GX_Position3s8(N, P, P);
-    GX_TexCoord2u8(1, 1);
-
-    GX_Position3s8(N, P, N);
-    GX_TexCoord2u8(2, 1);
-
-    GX_Position3s8(N, N, N);
-    GX_TexCoord2u8(2, 2);
-
-    GX_Position3s8(N, N, P);
-    GX_TexCoord2u8(1, 2);
-
-    // ToP (+y)
-
-    GX_Position3s8(N, P, N);
-    GX_TexCoord2u8(0, 0);
-
-    GX_Position3s8(N, P, P);
-    GX_TexCoord2u8(1, 0);
-
-    GX_Position3s8(P, P, P);
-    GX_TexCoord2u8(1, 1);
-
-    GX_Position3s8(P, P, N);
-    GX_TexCoord2u8(0, 1);
-
-    // Bottom (-y)
-
-    GX_Position3s8(N, N, N);
-    GX_TexCoord2u8(1, 2);
-
-    GX_Position3s8(P, N, N);
-    GX_TexCoord2u8(2, 2);
-
-    GX_Position3s8(P, N, P);
-    GX_TexCoord2u8(2, 3);
-
-    GX_Position3s8(N, N, P);
-    GX_TexCoord2u8(1, 3);
-
-    // Right (+z)
-
-    GX_Position3s8(N, N, P);
-    GX_TexCoord2u8(1, 2);
-
-    GX_Position3s8(P, N, P);
-    GX_TexCoord2u8(2, 2);
-
-    GX_Position3s8(P, P, P);
-    GX_TexCoord2u8(2, 1);
-
-    GX_Position3s8(N, P, P);
-    GX_TexCoord2u8(1, 1);
-
-    // Left (-z)
-
-    GX_Position3s8(P, P, N);
-    GX_TexCoord2u8(1, 1);
-
-    GX_Position3s8(P, N, N);
-    GX_TexCoord2u8(1, 2);
-
-    GX_Position3s8(N, N, N);
-    GX_TexCoord2u8(2, 2);
-
-    GX_Position3s8(N, P, N);
-    GX_TexCoord2u8(2, 1);
-
-    GX_End();
-    disp_list_size = GX_EndDispList();
 
     skybox_update(view, cam_pos);
 }
@@ -157,5 +64,5 @@ void skybox_draw(void) {
     
     GX_SetCurrentMtx(MATRIX_INDEX);
 
-    GX_CallDispList(disp_list, disp_list_size);
+    GX_CallDispList(disp_list, DISP_LIST_SIZE);
 }
