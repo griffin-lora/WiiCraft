@@ -21,18 +21,18 @@ static Mtx model_view;
 static size_t disp_list_size = 0;
 static bool cull_back = true;
 
-#define CUBE_VERTEX_COUNT 24
+#define NUM_CUBE_VERTICES 24
 
 #define CUBE_DISP_LIST_SIZE (ALIGN_TO_32( \
-    GET_BEGIN_INSTRUCTION_SIZE(CUBE_VERTEX_COUNT) + \
-    GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CUBE_VERTEX_COUNT) \
+    BEGIN_INSTRUCTION_SIZE + \
+    GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), NUM_CUBE_VERTICES) \
 ))
 
-#define CROSS_VERTEX_COUNT 8
+#define NUM_CROSS_VERTICES 8
 
 #define CROSS_DISP_LIST_SIZE (ALIGN_TO_32( \
-    GET_BEGIN_INSTRUCTION_SIZE(CROSS_VERTEX_COUNT) + \
-    GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), CROSS_VERTEX_COUNT) \
+    BEGIN_INSTRUCTION_SIZE + \
+    GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), NUM_CROSS_VERTICES) \
 ))
 
 _Alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
@@ -118,7 +118,7 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
             DCInvalidateRange(disp_list, CUBE_DISP_LIST_SIZE);
             
             GX_BeginDispList(disp_list, CUBE_DISP_LIST_SIZE);
-            GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, CUBE_VERTEX_COUNT);
+            GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, NUM_CUBE_VERTICES);
 
             GX_Position3u8(pox, poy, pz);
             GX_Position3u8(pox, py, pz);
@@ -159,7 +159,7 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
             DCInvalidateRange(disp_list, CROSS_DISP_LIST_SIZE);
 
             GX_BeginDispList(disp_list, CROSS_DISP_LIST_SIZE);
-            GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, CROSS_VERTEX_COUNT);
+            GX_Begin(GX_QUADS, VERTEX_FORMAT_INDEX, NUM_CROSS_VERTICES);
 
             GX_Position3u8(px, py, pz);
             GX_Position3u8(pox, py, poz);

@@ -3,18 +3,18 @@
 
 template<typename U, typename F, typename P>
 void gfx::write_text_into_display_list(F write_vertex, gfx::display_list& disp_list, std::string_view str, P char_width, P char_height) {
-    std::size_t vertex_count = str.size() * 4;
+    std::size_t num_vertices = str.size() * 4;
 
     std::size_t disp_list_size = (
-        gfx::get_begin_instruction_size(vertex_count) +
-        gfx::get_vector_instruction_size<2, u16>(vertex_count) + // Position
-        gfx::get_vector_instruction_size<2, u8>(vertex_count) // UV
+        gfx::get_begin_instruction_size(num_vertices) +
+        gfx::get_vector_instruction_size<2, u16>(num_vertices) + // Position
+        gfx::get_vector_instruction_size<2, u8>(num_vertices) // UV
     );
 
     disp_list.resize(disp_list_size);
 
     disp_list.write_into([&]() {
-        GX_Begin(GX_QUADS, GX_VTXFMT2, vertex_count);
+        GX_Begin(GX_QUADS, GX_VTXFMT2, num_vertices);
 
         write_text_vertices<U>(write_vertex, str, char_width, char_height);
 

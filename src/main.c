@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	camera_update_visuals(0, view, perspective_3d);
 
 	#ifdef PC_PORT
-	u16 frame_count = 0;
+	u16 num_frames = 0;
 	#endif
 
 	skybox_init(view, cam_position);
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
 		gfx_update_video();
 		
 		#ifdef PC_PORT
-		if (++frame_count == 1200) {
+		if (++num_frames == 1200) {
 			std::printf("BGT: %ld\nMGT: %ld\n", total_block_gen_time, total_mesh_gen_time);
 			std::exit(0);
 		}

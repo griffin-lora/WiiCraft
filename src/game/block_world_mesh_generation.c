@@ -103,7 +103,7 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
     disp_list->z = world_pos.z;
     u16 chunk_index = disp_list->chunk_index;
     u16 display_list_size = (u16)align_to_32(
-        GET_BEGIN_INSTRUCTION_SIZE(num_verts) +
+        BEGIN_INSTRUCTION_SIZE +
         GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), num_verts) + 
         GET_VECTOR_INSTRUCTION_SIZE(2, sizeof(u8), num_verts)
     );

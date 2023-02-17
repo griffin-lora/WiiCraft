@@ -6,18 +6,18 @@
 //     tf.set_position(0, 0);
 //     tf.load(mat);
 
-//     constexpr std::size_t vertex_count = 4;
+//     constexpr std::size_t num_vertices = 4;
     
 //     std::size_t disp_list_size = (
-// 		gfx::get_begin_instruction_size(vertex_count) +
-// 		gfx::get_vector_instruction_size<2, u16>(vertex_count) + // Position
-// 		gfx::get_vector_instruction_size<2, u8>(vertex_count) // UV
+// 		gfx::get_begin_instruction_size(num_vertices) +
+// 		gfx::get_vector_instruction_size<2, u16>(num_vertices) + // Position
+// 		gfx::get_vector_instruction_size<2, u8>(num_vertices) // UV
 // 	);
 
 //     disp_list.resize(disp_list_size);
 
-//     disp_list.write_into([vertex_count]() {
-//         GX_Begin(GX_QUADS, GX_VTXFMT0, vertex_count);
+//     disp_list.write_into([num_vertices]() {
+//         GX_Begin(GX_QUADS, GX_VTXFMT0, num_vertices);
 
 //         GX_Position2u16(0, 0);
 //         GX_TexCoord2u8(8, 0);
