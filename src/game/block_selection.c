@@ -92,6 +92,10 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
         return;
     }
 
+    has_last_block = true;
+    last_block_pos = location.bl_pos;
+    last_block_type = *location.bl_tp;
+
     s32vec3s chunk_pos = location.ch_pos;
     u8vec3s block_pos = location.bl_pos;
 
@@ -175,7 +179,4 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
 
             break;
     }
-
-    last_block_pos = location.bl_pos;
-    last_block_type = *location.bl_tp;
 }
