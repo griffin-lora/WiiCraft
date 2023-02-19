@@ -11,7 +11,7 @@ A Minecraft-like clone for the Nintendo Wii
 
 #### Building
 
- - Run make in the repository root
+ - Run make in the repository
 
 #### Screenshots
 
