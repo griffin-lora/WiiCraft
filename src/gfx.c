@@ -100,7 +100,7 @@ bool gfx_init(void) {
 }
 
 void gfx_update_video() {
-    GX_CopyDisp(video.frame_buffers[fb_index], true);
+    GX_CopyDisp(video.frame_buffers[fb_index], GX_TRUE);
 
     GX_DrawDone();
 
