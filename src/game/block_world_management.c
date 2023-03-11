@@ -128,7 +128,7 @@ static bool handle_procedural_generation(s32vec3s corner_pos) {
                 generate_procedural_blocks(pos, chunks[chunk_indices[i]].block_types);
                 total_block_gen_time += get_current_us() - start;
 
-                if (pos.y != 0) {
+                if (pos.y == 0) {
                     return true;
                 }
 
