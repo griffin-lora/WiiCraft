@@ -1,5 +1,6 @@
 #pragma once
 #include <stddef.h>
+#include <gctypes.h>
 
 #define ALIGN_TO_32(N) (((N) | 31) + 33)
 #define ALIGN_TO_32_NEW(N) (((N) + 32) - ((N) % 32))

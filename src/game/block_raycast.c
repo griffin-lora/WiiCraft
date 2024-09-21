@@ -24,10 +24,10 @@ static block_raycast_wrap_t get_closest_raycast(block_raycast_wrap_t closest_ray
 static box_raycast_wrap_t get_box_raycast_for_block(vec3s origin, vec3s dir, vec3s dir_inv, vec3s box_transform, block_box_type_t box_type, vec3s world_block_pos, block_type_t block_type) {
     box_t box;
     switch (block_type) {
-        case block_type_air: return (box_raycast_wrap_t){ false };
+        case block_type_air: return (box_raycast_wrap_t) { .success = false };
         case block_type_tall_grass:
             if (box_type == block_box_type_collision) {
-                return (box_raycast_wrap_t){ false };
+                return (box_raycast_wrap_t) { .success = false };
             }
             box = (box_t) {
                 { .x = 0.2f, .y = 0.0f, .z = 0.2f },
@@ -35,7 +35,7 @@ static box_raycast_wrap_t get_box_raycast_for_block(vec3s origin, vec3s dir, vec
             }; break;
         case block_type_water:
             if (box_type == block_box_type_collision) {
-                return (box_raycast_wrap_t){ false };
+                return (box_raycast_wrap_t) { .success = false };
             }
             box = (box_t) {
                 { .x = 0.0f, .y = 0.0f, .z = 0.0f },
@@ -55,7 +55,7 @@ static box_raycast_wrap_t get_box_raycast_for_block(vec3s origin, vec3s dir, vec
 }
 
 block_raycast_wrap_t get_block_raycast(s32vec3s corner_pos, vec3s origin, vec3s dir, vec3s begin, vec3s end, vec3s box_transform, block_box_type_t box_type) {
-    block_raycast_wrap_t closest_raycast = { false };
+    block_raycast_wrap_t closest_raycast = { .success = false };
 
     vec3s dir_inv = glms_vec3_div((vec3s){ .x = 1.0f, .y = 1.0f, .z = 1.0f }, dir);
 

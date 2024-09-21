@@ -1,6 +1,5 @@
 #pragma once
 #include <gctypes.h>
-#include <math.h>
 #include <cglm/cglm.h>
 #include <cglm/struct.h>
 #include <cglm/types-struct.h>

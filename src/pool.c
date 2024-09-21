@@ -28,7 +28,7 @@ void pool_init(void) {
 
 block_display_list_t* acquire_block_display_list_pool_chunk(size_t pool_index) {
     if (block_disp_list_pools_head[pool_index] >= NUM_BLOCK_DISPLAY_LIST_CHUNKS) {
-        lprintf("Block display list pool %d, has hit allocation limit\n", pool_index);
+        lprintf("Block display list pool %ld, has hit allocation limit\n", pool_index);
         return NULL;
     }
     return &(block_disp_list_pools_disp_lists[pool_index])[block_disp_list_pools_head[pool_index]++];
@@ -53,6 +53,6 @@ bool release_block_display_list_pool_chunk(size_t pool_index, u16 chunk_index) {
         }
     }
     // We should never reach here, report an error if we do
-    lprintf("Block display list pool %d on chunk_index: %d double release occurred.\n", pool_index, chunk_index);
+    lprintf("Block display list pool %ld on chunk_index: %d double release occurred.\n", pool_index, chunk_index);
     return false;
 }

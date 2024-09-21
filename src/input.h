@@ -1,5 +1,6 @@
 #pragma once
 #include "game_math.h"
+#include <ogc/lwp_queue.h>
 #include <wiiuse/wpad.h>
 
 void input_init(u32 width, u32 height);

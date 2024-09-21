@@ -1,5 +1,6 @@
 #include "logic.h"
 #include "block_world_core.h"
+#include <ogc/lwp_queue.h>
 #include <wiiuse/wpad.h>
 
 void update_world_from_location_and_input(s32vec3s corner_pos, u32 buttons_down, world_location_t location, vec3s offset_world_block_position) {

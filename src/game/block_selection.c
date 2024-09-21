@@ -78,7 +78,7 @@ void block_selection_draw(us_t now) {
     }
     
     if (disp_list_size != 0) {
-        GX_CallDispList(disp_list, disp_list_size);
+        GX_CallDispList(disp_list, (u32) disp_list_size);
     }
 
     GX_SetCullMode(GX_CULL_BACK);
