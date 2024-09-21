@@ -9,7 +9,7 @@ static s32 log_sock;
 
 #define LOG_SIZE (0x100)
 
-_Alignas(32) static char log_buf[LOG_SIZE];
+alignas(32) static char log_buf[LOG_SIZE];
 
 #define XSTR(A) STR(A)
 #define STR(A) #A

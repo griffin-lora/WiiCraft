@@ -23,5 +23,5 @@ typedef enum __attribute__((__packed__)) {
     block_face_left // -z
 } block_face_t;
 
-_Static_assert(sizeof(block_type_t) == 1, "");
-_Static_assert(sizeof(block_face_t) == 1, "");
+static_assert(sizeof(block_type_t) == 1, "");
+static_assert(sizeof(block_face_t) == 1, "");

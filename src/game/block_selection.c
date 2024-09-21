@@ -35,7 +35,7 @@ static bool cull_back = true;
     GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), NUM_CROSS_VERTICES) \
 ))
 
-_Alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
+alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
 
 void block_selection_init(void) {
     GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);

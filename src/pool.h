@@ -43,10 +43,10 @@ typedef struct {
 
 typedef struct {
     block_display_list_chunk_descriptor_t disp_list_chunk_descriptors[16];
-    _Alignas(32) block_type_t block_types[4096];
+    alignas(32) block_type_t block_types[4096];
 } block_chunk_t;
 
-_Static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 64, "");
+static_assert(sizeof(block_chunk_t) == (sizeof(block_type_t) * 4096) + 64, "");
 
 #define BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT 0b00000001
 #define BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED 0b00000010

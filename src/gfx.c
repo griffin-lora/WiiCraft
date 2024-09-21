@@ -13,13 +13,13 @@
 GXRModeObj* rmode;
 size_t fb_index;
 
-_Alignas(32) static struct {
+alignas(32) static struct {
 	u8 frame_buffers[2][DEFAULT_FRAMEBUFFER_SIZE];
-	_Alignas(32) u8 gpfifo[DEFAULT_FIFO_SIZE];
+	alignas(32) u8 gpfifo[DEFAULT_FIFO_SIZE];
 } video;
 static bool first_frame = true;
 
-_Alignas(32) static struct {
+alignas(32) static struct {
 	GXTexObj chunk;
 	GXTexObj icons;
 	GXTexObj skybox;

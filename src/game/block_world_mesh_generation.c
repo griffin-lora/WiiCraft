@@ -18,19 +18,19 @@ typedef struct {
     u8 z;
 } block_mesh_t;
 
-_Static_assert(sizeof(block_mesh_t) == 4, "");
+static_assert(sizeof(block_mesh_t) == 4, "");
 
 #define NUM_SOLID_BUILDING_MESHES 204
 #define NUM_TRANSPARENT_BUILDING_MESHES 204
 #define NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES 102
 
 typedef struct {
-    _Alignas(32) block_mesh_t solid[NUM_SOLID_BUILDING_MESHES];
-    _Alignas(32) block_mesh_t transparent[NUM_TRANSPARENT_BUILDING_MESHES];
-    _Alignas(32) block_mesh_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES];
+    alignas(32) block_mesh_t solid[NUM_SOLID_BUILDING_MESHES];
+    alignas(32) block_mesh_t transparent[NUM_TRANSPARENT_BUILDING_MESHES];
+    alignas(32) block_mesh_t transparent_double_sided[NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES];
 } building_meshes_arrays_t;
 
-_Static_assert(sizeof(building_meshes_arrays_t) <= 4096*3, "");
+static_assert(sizeof(building_meshes_arrays_t) <= 4096*3, "");
 
 static building_meshes_arrays_t building_meshes_arrays;
 
@@ -49,7 +49,7 @@ typedef enum __attribute__((__packed__)) {
     block_mesh_category_cross
 } block_mesh_category_t;
 
-_Static_assert(sizeof(block_mesh_category_t) == 1);
+static_assert(sizeof(block_mesh_category_t) == 1);
 
 static block_mesh_category_t get_block_mesh_category(block_type_t type) {
     switch (type) {

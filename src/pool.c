@@ -2,13 +2,13 @@
 #include "log.h"
 #include <string.h>
 
-_Alignas(32) u16 block_disp_list_pools_head[NUM_BLOCK_DISPLAY_LIST_POOLS];
-_Alignas(32) block_display_list_t block_disp_list_pools_disp_lists[NUM_BLOCK_DISPLAY_LIST_POOLS][NUM_BLOCK_DISPLAY_LIST_CHUNKS];
-_Alignas(32) block_display_list_chunk_t block_disp_list_pools_chunks[NUM_BLOCK_DISPLAY_LIST_POOLS][NUM_BLOCK_DISPLAY_LIST_CHUNKS];
+alignas(32) u16 block_disp_list_pools_head[NUM_BLOCK_DISPLAY_LIST_POOLS];
+alignas(32) block_display_list_t block_disp_list_pools_disp_lists[NUM_BLOCK_DISPLAY_LIST_POOLS][NUM_BLOCK_DISPLAY_LIST_CHUNKS];
+alignas(32) block_display_list_chunk_t block_disp_list_pools_chunks[NUM_BLOCK_DISPLAY_LIST_POOLS][NUM_BLOCK_DISPLAY_LIST_CHUNKS];
 
-_Alignas(32) u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
-_Alignas(32) u8 block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
-_Alignas(32) block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
+alignas(32) u8 block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+alignas(32) u8 block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
+alignas(32) block_chunk_t block_pool_chunks[NUM_BLOCK_CHUNKS];
 
 void pool_init(void) {
     for (size_t i = 0; i < NUM_BLOCK_DISPLAY_LIST_POOLS; i++) {

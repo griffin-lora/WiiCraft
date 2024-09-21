@@ -30,8 +30,8 @@ void init_block_world(s32vec3s corner_pos) {
     }
 }
 
-_Alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
-_Alignas(32) u8 temp_block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
+alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
+alignas(32) u8 temp_block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 
 void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
     s32vec3s move_dir;
