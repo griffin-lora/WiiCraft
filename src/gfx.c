@@ -2,6 +2,9 @@
 #include "log.h"
 #include <ogc/tpl.h>
 #include <ogc/video.h>
+#include <ogc/conf.h>
+#include <ogc/system.h>
+#include <ogc/cache.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -19,17 +22,26 @@ bool gfx_init(void) {
     VIDEO_Init();
 
 	render_mode = VIDEO_GetPreferredMode(NULL);
+	if (CONF_GetAspectRatio() == CONF_ASPECT_16_9) {
+		render_mode->viWidth = 678;
+		render_mode->viXOrigin = (VI_MAX_WIDTH_NTSC - 678) / 2;
+	}
 	
-	lprintf("Video dimensions: %d, %d\n", render_mode->fbWidth, render_mode->efbHeight);
+	VIDEO_Configure(render_mode);
+	render_mode = VIDEO_GetPreferredMode(NULL);
+	
+	lprintf("Video dimensions: %d, %d\nAspect ratio mode: %d\n", render_mode->fbWidth, render_mode->efbHeight, CONF_GetAspectRatio());
 
 	size_t num_external_framebuffer_bytes = VIDEO_GetFrameBufferSize(render_mode);
 	for (size_t i = 0; i < 2; i++) {
-		external_framebuffers[i] = malloc(num_external_framebuffer_bytes);
+		external_framebuffers[i] = SYS_AllocateFramebuffer(render_mode);
+		DCInvalidateRange(external_framebuffers[i], num_external_framebuffer_bytes);
+		external_framebuffers[i] = MEM_K0_TO_K1(external_framebuffers[i]);
 	}
 
-	memset(fifo, 0, NUM_FIFO_BYTES);
+	lprintf("Num external framebuffer bytes: %d\n", num_external_framebuffer_bytes);
 
-	VIDEO_Configure(render_mode);
+	memset(fifo, 0, NUM_FIFO_BYTES);
 	VIDEO_SetNextFramebuffer(external_framebuffers[external_framebuffer_index]);
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
@@ -45,7 +57,7 @@ bool gfx_init(void) {
 	GX_SetCopyClear((GXColor) {0, 0, 0, 0xff}, 0x00ffffff);
 
 	GX_SetViewport(0, 0, render_mode->fbWidth, render_mode->efbHeight, 0, 1);
-	u32 external_frame_buffer_height = GX_SetDispCopyYScale(GX_GetYScaleFactor(render_mode->efbHeight,render_mode->xfbHeight));
+	u32 external_frame_buffer_height = GX_SetDispCopyYScale(GX_GetYScaleFactor(render_mode->efbHeight, render_mode->xfbHeight));
 	GX_SetScissor(0, 0, render_mode->fbWidth, render_mode->efbHeight);
 	GX_SetDispCopySrc(0, 0, render_mode->fbWidth, render_mode->efbHeight);
 	GX_SetDispCopyDst(render_mode->fbWidth, (u16) external_frame_buffer_height);
