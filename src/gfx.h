@@ -3,8 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-extern GXRModeObj* rmode;
-extern size_t fb_index;
+extern GXRModeObj* render_mode;
 
 bool gfx_init(void);
 void gfx_update_video(void);

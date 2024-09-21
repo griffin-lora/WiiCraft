@@ -1,98 +1,65 @@
 #include "gfx.h"
-#ifndef PC_PORT
-#include "../build/textures_tpl.h"
-#include "../build/textures.h"
-#endif
 #include <ogc/tpl.h>
 #include <ogc/video.h>
 #include <string.h>
+#include <stdlib.h>
 
-#define DEFAULT_FIFO_SIZE (256 * 1024)
-#define DEFAULT_FRAMEBUFFER_SIZE 614400
+#define NUM_FIFO_BYTES (256 * 1024)
 
-GXRModeObj* rmode;
-size_t fb_index;
+GXRModeObj* render_mode;
 
-alignas(32) static struct {
-	u8 frame_buffers[2][DEFAULT_FRAMEBUFFER_SIZE];
-	alignas(32) u8 gpfifo[DEFAULT_FIFO_SIZE];
-} video;
+static size_t external_framebuffer_index;
+static void* external_framebuffers[2];
 static bool first_frame = true;
 
-alignas(32) static struct {
-	GXTexObj chunk;
-	GXTexObj icons;
-	GXTexObj skybox;
-	GXTexObj font;
-} textures;
+alignas(32) static u8 fifo[NUM_FIFO_BYTES];
 
 bool gfx_init(void) {
     VIDEO_Init();
 
-	rmode = VIDEO_GetPreferredMode(NULL);
+	render_mode = VIDEO_GetPreferredMode(NULL);
 
-    if (VIDEO_GetFrameBufferSize(rmode) != DEFAULT_FRAMEBUFFER_SIZE) {
-		return false;
+	size_t num_external_framebuffer_bytes = VIDEO_GetFrameBufferSize(render_mode);
+	for (size_t i = 0; i < 2; i++) {
+		external_framebuffers[i] = malloc(num_external_framebuffer_bytes);
 	}
 
-	// set the fifo buffer to 0
-	memset(video.gpfifo, 0, DEFAULT_FIFO_SIZE);
+	memset(fifo, 0, NUM_FIFO_BYTES);
 
-	// configure video
-	VIDEO_Configure(rmode);
-	VIDEO_SetNextFramebuffer(video.frame_buffers[fb_index]);
+	VIDEO_Configure(render_mode);
+	VIDEO_SetNextFramebuffer(external_framebuffers[external_framebuffer_index]);
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
-	if(rmode->viTVMode & VI_NON_INTERLACE) VIDEO_WaitVSync();
 
-	fb_index ^= 1;
+	if (render_mode->viTVMode & VI_NON_INTERLACE) {
+		VIDEO_WaitVSync();
+	}
 
-	// init the (not flipper)
-	GX_Init(video.gpfifo, DEFAULT_FIFO_SIZE);
+	external_framebuffer_index ^= 1;
 
-	// clears the bg to color and clears the z buffer
-	GX_SetCopyClear((GXColor){0, 0, 0, 0xff}, 0x00ffffff);
+	GX_Init(fifo, NUM_FIFO_BYTES);
 
-	// other gx setup
-	GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
-	f32 yscale = GX_GetYScaleFactor(rmode->efbHeight,rmode->xfbHeight);
-	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
-	GX_SetScissor(0,0,rmode->fbWidth,rmode->efbHeight);
-	GX_SetDispCopySrc(0,0,rmode->fbWidth,rmode->efbHeight);
-	GX_SetDispCopyDst(rmode->fbWidth,(u16) xfbHeight);
-	GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_TRUE,rmode->vfilter);
-	GX_SetFieldMode(rmode->field_rendering,((rmode->viHeight==2*rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
+	GX_SetCopyClear((GXColor) {0, 0, 0, 0xff}, 0x00ffffff);
 
-	if (rmode->aa) {
+	GX_SetViewport(0, 0, render_mode->fbWidth, render_mode->efbHeight, 0, 1);
+	u32 external_frame_buffer_height = GX_SetDispCopyYScale(GX_GetYScaleFactor(render_mode->efbHeight,render_mode->xfbHeight));
+	GX_SetScissor(0, 0, render_mode->fbWidth, render_mode->efbHeight);
+	GX_SetDispCopySrc(0, 0, render_mode->fbWidth, render_mode->efbHeight);
+	GX_SetDispCopyDst(render_mode->fbWidth, (u16) external_frame_buffer_height);
+	GX_SetCopyFilter(render_mode->aa, render_mode->sample_pattern, GX_TRUE, render_mode->vfilter);
+	GX_SetFieldMode(render_mode->field_rendering, ((render_mode->viHeight == 2*render_mode->xfbHeight) ? GX_ENABLE : GX_DISABLE));
+
+	if (render_mode->aa) {
 		GX_SetPixelFmt(GX_PF_RGB565_Z16, GX_ZC_LINEAR);
 	} else {
 		GX_SetPixelFmt(GX_PF_RGB8_Z24, GX_ZC_LINEAR);
 	}
 
-	GX_CopyDisp(video.frame_buffers[fb_index],GX_TRUE);
+	GX_CopyDisp(external_framebuffers[external_framebuffer_index], GX_TRUE);
 	GX_SetDispCopyGamma(GX_GM_1_0);
 
 	GX_InvVtxCache();
 	GX_InvalidateTexAll();
-
-    #ifndef PC_PORT
-    TPLFile file;
-    TPL_OpenTPLFromMemory(&file, (void*)textures_tpl, textures_tpl_size);
-
-    TPL_GetTexture(&file, chunk_tex, &textures.chunk);
-    TPL_GetTexture(&file, icons_tex, &textures.icons);
-    TPL_GetTexture(&file, skybox_tex, &textures.skybox);
-    TPL_GetTexture(&file, font_tex, &textures.font);
-    #endif
-
-	GX_InitTexObjFilterMode(&textures.chunk, GX_NEAR, GX_NEAR);
-	GX_InitTexObjFilterMode(&textures.icons, GX_NEAR, GX_NEAR);
-	GX_InitTexObjFilterMode(&textures.font, GX_NEAR, GX_NEAR);
-
-	GX_LoadTexObj(&textures.chunk, GX_TEXMAP0);
-	GX_LoadTexObj(&textures.icons, GX_TEXMAP1);
-	GX_LoadTexObj(&textures.skybox, GX_TEXMAP2);
-	GX_LoadTexObj(&textures.font, GX_TEXMAP3);
 	
 	GX_ClearVtxDesc();
 
@@ -100,16 +67,16 @@ bool gfx_init(void) {
 }
 
 void gfx_update_video() {
-    GX_CopyDisp(video.frame_buffers[fb_index], GX_TRUE);
+    GX_CopyDisp(external_framebuffers[external_framebuffer_index], GX_TRUE);
 
     GX_DrawDone();
 
-    VIDEO_SetNextFramebuffer(video.frame_buffers[fb_index]);
+    VIDEO_SetNextFramebuffer(external_framebuffers[external_framebuffer_index]);
     if (first_frame) {
         first_frame = false;
         VIDEO_SetBlack(FALSE);
     }
     VIDEO_Flush();
     VIDEO_WaitVSync();
-    fb_index ^= 1;
+    external_framebuffer_index ^= 1;
 }

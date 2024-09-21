@@ -1,3 +1,4 @@
+#include "asset.h"
 #include "gfx.h"
 #include "game_math.h"
 #include "input.h"
@@ -38,9 +39,11 @@ int main(int, char**) {
 		return 1;
 	}
 
+	asset_init();
+
 	pool_init();
 
-	input_init(rmode->viWidth, rmode->viHeight);
+	input_init(render_mode->viWidth, render_mode->viHeight);
 
 	Mtx44 perspective_2d;
 	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
@@ -48,7 +51,7 @@ int main(int, char**) {
 	Mtx view;
 	Mtx44 perspective_3d;
 	
-	aspect = (f32)((f32)rmode->viWidth / (f32)rmode->viHeight);
+	aspect = (f32)((f32)render_mode->viWidth / (f32)render_mode->viHeight);
 	glm_vec3_normalize(cam_look.raw);
 
 	camera_update_visuals(0, view, perspective_3d);
@@ -117,7 +120,7 @@ int main(int, char**) {
 		handle_world_flag_processing(corner_pos);
 		last_corner_pos = corner_pos;
 
-		cursor_update(rmode->viWidth, rmode->viHeight);
+		cursor_update(render_mode->viWidth, render_mode->viHeight);
 
 		#ifndef PC_PORT
     	vec3w_t wpad_accel;
