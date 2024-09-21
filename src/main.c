@@ -18,15 +18,13 @@
 #include "pool.h"
 #include "game/block_world_management.h"
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
-#include <stdio.h>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
 #include <fat.h>
 #include <math.h>
 
-static s32vec3s corner_pos_offset = { .x = -3, .y =-2, .z = -3 };
+static s32vec3s corner_pos_offset = { .x = -3, .y = -2, .z = -3 };
 
 int main(int, char**) {
 	if (!log_init()) {

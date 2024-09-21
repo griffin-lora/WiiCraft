@@ -56,7 +56,7 @@ void lprintf(const char* fmt, ...) {
     #ifdef LOG_IP
     va_list args;
     va_start(args, fmt);
-    size_t num_chars = vsnprintf(log_buf, LOG_SIZE, fmt, args);
+    s32 num_chars = vsnprintf(log_buf, LOG_SIZE, fmt, args);
     va_end(args);
     
     net_send(log_sock, log_buf, num_chars, 0);
