@@ -19,6 +19,8 @@ bool gfx_init(void) {
     VIDEO_Init();
 
 	render_mode = VIDEO_GetPreferredMode(NULL);
+	
+	lprintf("Video dimensions: %d, %d\n", render_mode->fbWidth, render_mode->efbHeight);
 
 	size_t num_external_framebuffer_bytes = VIDEO_GetFrameBufferSize(render_mode);
 	for (size_t i = 0; i < 2; i++) {
@@ -41,8 +43,6 @@ bool gfx_init(void) {
 	GX_Init(fifo, NUM_FIFO_BYTES);
 
 	GX_SetCopyClear((GXColor) {0, 0, 0, 0xff}, 0x00ffffff);
-	
-	lprintf("%d, %d\n", render_mode->fbWidth, render_mode->efbHeight);
 
 	GX_SetViewport(0, 0, render_mode->fbWidth, render_mode->efbHeight, 0, 1);
 	u32 external_frame_buffer_height = GX_SetDispCopyYScale(GX_GetYScaleFactor(render_mode->efbHeight,render_mode->xfbHeight));
