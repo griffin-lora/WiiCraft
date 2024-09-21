@@ -47,13 +47,13 @@ int main(int, char**) {
 	mat4s projection_2d = glms_ortho(0.0f, 639.0f, 479.0f, 0.0f, 0.0f, 300.0f);
 	projection_2d = glms_mat4_transpose(projection_2d);
 	
-	mat4s view;
 	mat4s projection_3d;
+	mat4s view;
 	
 	aspect = (f32) render_mode->viWidth / (f32) render_mode->viHeight;
 	glm_vec3_normalize(cam_forward.raw);
 
-	camera_update_visuals(0, &view, &projection_3d);
+	camera_update_visuals(0, &projection_3d, &view);
 
 	#ifdef PC_PORT
 	u16 num_frames = 0;
@@ -154,7 +154,7 @@ int main(int, char**) {
 		character_apply_physics(corner_pos, frame_delta);
 		character_apply_velocity(frame_delta);
 		
-		camera_update_visuals(now, &view, &projection_3d);
+		camera_update_visuals(now, &projection_3d, &view);
 
 		skybox_update(&view, cam_position);
 		block_selection_update(&view);
