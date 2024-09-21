@@ -17,6 +17,7 @@
 #include "log.h"
 #include "pool.h"
 #include "game/block_world_management.h"
+#include <cglm/struct/mat4.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gccore.h>
@@ -43,22 +44,22 @@ int main(int, char**) {
 
 	input_init(render_mode->viWidth, render_mode->viHeight);
 
-	Mtx44 perspective_2d;
-	guOrtho(perspective_2d, 0, 479, 0, 639, 0, 300);
+	mat4s projection_2d = glms_ortho(0.0f, 639.0f, 479.0f, 0.0f, 0.0f, 300.0f);
+	projection_2d = glms_mat4_transpose(projection_2d);
 	
-	Mtx view;
-	Mtx44 perspective_3d;
+	mat4s view;
+	mat4s projection_3d;
 	
-	aspect = (f32)((f32)render_mode->viWidth / (f32)render_mode->viHeight);
-	glm_vec3_normalize(cam_look.raw);
+	aspect = (f32) render_mode->viWidth / (f32) render_mode->viHeight;
+	glm_vec3_normalize(cam_forward.raw);
 
-	camera_update_visuals(0, view, perspective_3d);
+	camera_update_visuals(0, &view, &projection_3d);
 
 	#ifdef PC_PORT
 	u16 num_frames = 0;
 	#endif
 
-	skybox_init(view, cam_position);
+	skybox_init(&view, cam_position);
 	
 	water_overlay_init();
 	debug_ui_init();
@@ -143,34 +144,34 @@ int main(int, char**) {
 		#endif
 
 		// auto raycast_dir = get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		vec3s raycast_dir = cam_look;
+		vec3s raycast_dir = cam_forward;
 		block_raycast_wrap_t raycast = get_block_raycast(corner_pos, cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, block_box_type_selection);
 
 		if (raycast.success) {
-			block_selection_handle_location(view, raycast.val.location);
+			block_selection_handle_location(&view, raycast.val.location);
 			update_world_from_location_and_input(corner_pos, buttons_down, raycast.val.location, glms_vec3_add(raycast.val.world_block_position, raycast.val.box_raycast.normal));
 		}
 		character_apply_physics(corner_pos, frame_delta);
 		character_apply_velocity(frame_delta);
 		
-		camera_update_visuals(now, view, perspective_3d);
+		camera_update_visuals(now, &view, &projection_3d);
 
-		skybox_update(view, cam_position);
-		block_selection_update(view);
+		skybox_update(&view, cam_position);
+		block_selection_update(&view);
 		debug_ui_update(buttons_down);
 
-		GX_LoadProjectionMtx(perspective_3d, GX_PERSPECTIVE);
+		GX_LoadProjectionMtx(projection_3d.raw, GX_PERSPECTIVE);
 		skybox_draw();
 
 		GX_SetCurrentMtx(BLOCK_WORLD_MATRIX_INDEX);
 
-		draw_block_display_lists(view);
+		draw_block_display_lists(&view);
 		
 		if (raycast.success) {
 			block_selection_draw(now);
 		}
 		
-		GX_LoadProjectionMtx(perspective_2d, GX_ORTHOGRAPHIC);
+		GX_LoadProjectionMtx(projection_2d.raw, GX_ORTHOGRAPHIC);
 		enter_ui_rendering();
 		water_overlay_draw();
 		cursor_draw();

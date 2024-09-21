@@ -20,16 +20,16 @@ vec3s character_velocity = { .z = 0.0f, .y = 0.0f, .z = 0.0f };
 bool grounded = false;
 bool sprinting = false;
 
-static void apply_movement(vec3s cam_look, us_t now, f32 delta, bool shaking, vec3s input_vector) {
+static void apply_movement(vec3s cam_forward, us_t now, f32 delta, bool shaking, vec3s input_vector) {
     if (shaking && !sprinting) {
         sprinting = true;
         fov_tween_start = now;
     }
 
     mat3s movement_matrix = {{
-        { cam_look.x, 0, cam_look.z },
+        { cam_forward.x, 0, cam_forward.z },
         { 0, 1, 0 },
-        { -cam_look.z, 0, cam_look.x }
+        { -cam_forward.z, 0, cam_forward.x }
     }};
     glm_vec3_normalize(movement_matrix.col[0].raw);
     glm_vec3_normalize(movement_matrix.col[1].raw);
@@ -145,7 +145,7 @@ void character_handle_input(vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel,
             apply_no_movement(now, delta);
         } else {
             vec3s input_vector = { .x = joystick_input_vector.y / 96.0f, .y = 0.0f, .z = joystick_input_vector.x / 96.0f };
-            apply_movement(cam_look, now, delta, shaking, input_vector);
+            apply_movement(cam_forward, now, delta, shaking, input_vector);
         }
     } else {
         apply_no_movement(now, delta);

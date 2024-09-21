@@ -1,6 +1,11 @@
 #include "camera.h"
 #include "input.h"
 #include "character.h"
+#include <cglm/struct/cam.h>
+#include <cglm/struct/vec2.h>
+#include <cglm/struct/vec3.h>
+#include <cglm/struct/mat3.h>
+#include <cglm/struct/affine.h>
 #include <ogc/gu.h>
 #include <math.h>
 
@@ -12,7 +17,7 @@
 
 vec3s cam_position = { .x = 0.0f, .y = 0.0f, .z = 0.0f };
 vec3s cam_up = { .x = 0.0f, .y = 1.0f, .z = 0.0f };
-vec3s cam_look = { .x = 0.0f, .y = 0.0f, .z = 1.0f };
+vec3s cam_forward = { .x = 0.0f, .y = 0.0f, .z = 1.0f };
 f32 cam_yaw = 0.0f;
 f32 cam_pitch = 0.0f;
 
@@ -43,10 +48,10 @@ void camera_update(f32 delta, u32 buttons_held) {
 
     f32 xz_length = cosf(cam_pitch);
     
-    cam_look = glms_vec3_normalize((vec3s){ .x = xz_length * cosf(cam_yaw), .y = sinf(cam_pitch), .z = xz_length * sinf(-cam_yaw) });
+    cam_forward = glms_vec3_normalize((vec3s){ .x = xz_length * cosf(cam_yaw), .y = sinf(cam_pitch), .z = xz_length * sinf(-cam_yaw) });
 }
 
-void camera_update_visuals(us_t now, Mtx view, Mtx44 perspective) {
+void camera_update_visuals(us_t now, mat4s* projection, mat4s* view) {
     us_t elapsed = now - fov_tween_start;
 
     if (elapsed <= FOV_TWEEN_TIME) {
@@ -59,11 +64,10 @@ void camera_update_visuals(us_t now, Mtx view, Mtx44 perspective) {
         }
     }
 
-    guPerspective(perspective, fov, aspect, near_clipping_plane_distance, far_clipping_plane_distance);
+    *projection = glms_perspective(fov, aspect, near_clipping_plane_distance, far_clipping_plane_distance);
+    *projection = glms_mat4_transpose(*projection);
 
-    // Update camera view
     cam_position = glms_vec3_add(character_position, (vec3s){ .x = 0, .y = 0.9f, .z = 0 });
     
-    vec3s look_at = glms_vec3_add(cam_position, cam_look);
-    guLookAt(view, (guVector*)&cam_position, (guVector*)&cam_up, (guVector*)&look_at);
+    *view = glms_look(cam_position, cam_forward, cam_up);
 }

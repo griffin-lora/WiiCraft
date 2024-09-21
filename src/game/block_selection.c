@@ -2,6 +2,8 @@
 #include "gfx/instruction_size.h"
 #include "util.h"
 #include "block.h"
+#include <cglm/struct/affine.h>
+#include <cglm/struct/mat4.h>
 #include <ogc/gx.h>
 #include <ogc/cache.h>
 #include <string.h>
@@ -15,8 +17,7 @@ static bool has_last_block = false;
 static u8vec3s last_block_pos;
 static block_type_t last_block_type;
 
-static Mtx model;
-static Mtx model_view;
+static mat4s model;
 
 static size_t disp_list_size = 0;
 static bool cull_back = true;
@@ -41,9 +42,10 @@ void block_selection_init(void) {
     GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 }
 
-void block_selection_update(Mtx view) {
-    guMtxConcat(view, model, model_view);
-    GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
+void block_selection_update(const mat4s* view) {
+    mat4s model_view = glms_mat4_mul(*view, model);
+    model_view = glms_mat4_transpose(model_view);
+    GX_LoadPosMtxImm(model_view.raw, MATRIX_INDEX);
 }
 
 void block_selection_draw(us_t now) {
@@ -84,7 +86,7 @@ void block_selection_draw(us_t now) {
     GX_SetCullMode(GX_CULL_BACK);
 }
 
-void block_selection_handle_location(Mtx view, world_location_t location) {
+void block_selection_handle_location(const mat4s* view, world_location_t location) {
     // Check if we have a new selected block
     if (has_last_block && location.bl_pos.x == last_block_pos.x && location.bl_pos.y == last_block_pos.y && location.bl_pos.z == last_block_pos.z && *location.bl_tp == last_block_type) {
         last_block_pos = location.bl_pos;
@@ -99,12 +101,10 @@ void block_selection_handle_location(Mtx view, world_location_t location) {
     s32vec3s chunk_pos = location.ch_pos;
     u8vec3s block_pos = location.bl_pos;
 
-    guMtxIdentity(model);
-    guMtxTransApply(model, model, (f32) chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
-    guMtxConcat(view, model, model_view);
-    
-    GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
+    model = glms_translate_make((vec3s) {{ (f32) chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK }});
 
+    block_selection_update(view);
+    
     block_type_t block_type = *location.bl_tp;
 
     u8 px = block_pos.x * 4;

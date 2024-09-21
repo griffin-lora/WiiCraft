@@ -10,7 +10,7 @@ extern "C" {
 #include "game_math.h"
 
 extern vec3s character_position;
-extern vec3s cam_look;
+extern vec3s cam_forward;
 
 using namespace game;
 
@@ -103,5 +103,5 @@ void debug_ui_update(u32 buttons_down) {
 }
 
 void debug_ui_draw(us_t total_block_gen_time, us_t total_mesh_gen_time, us_t last_mesh_gen_time, u32 fps) {
-    ui->draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam_look.raw[0], cam_look.raw[1], cam_look.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, fps);
+    ui->draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam_forward.raw[0], cam_forward.raw[1], cam_forward.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, fps);
 }

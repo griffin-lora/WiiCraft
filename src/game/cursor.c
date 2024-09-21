@@ -1,6 +1,8 @@
 #include "cursor.h"
 #include "gfx/instruction_size.h"
 #include "util.h"
+#include <cglm/struct/affine.h>
+#include <cglm/struct/cam.h>
 #include <ogc/gx.h>
 
 #define MATRIX_INDEX GX_PNMTX3
@@ -17,17 +19,15 @@ alignas(32) static u8 disp_list[DISP_LIST_SIZE] = {
     0x83, 0x0, 0x4, 0x0, 0x0, 0x0, 0x0, 0x30, 0x0, 0x1, 0x0, 0x30, 0x30, 0x1, 0x1, 0x0, 0x30, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
 };
 
-static Mtx model_view;
-
 void cursor_init(void) {
 	GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XY, GX_U8, 0);
 	GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
 void cursor_update(u16 v_width, u16 v_height) {
-    guMtxIdentity(model_view);
-    guMtxTransApply(model_view, model_view, (v_width / 2) - 24.f, (v_height / 2) - 24.f, 0.0f);
-    GX_LoadPosMtxImm(model_view, MATRIX_INDEX);
+    mat4s model = glms_translate_make((vec3s) {{ ((f32) v_width / 2.0f) - 24.f, ((f32) v_height / 2.0f) - 24.f, 0.0f }});
+    model = glms_mat4_transpose(model);
+    GX_LoadPosMtxImm(model.raw, MATRIX_INDEX);
 }
 
 void cursor_draw(void) {

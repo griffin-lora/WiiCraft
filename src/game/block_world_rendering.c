@@ -1,22 +1,23 @@
 #include "block_world_rendering.h"
 #include "pool.h"
 #include "log.h"
+#include <cglm/struct/affine.h>
+#include <cglm/struct/mat4.h>
 #include <ogc/gx.h>
 
-static void draw_pool(Mtx view, size_t pool_index) {
+static void draw_pool(const mat4s* view, size_t pool_index) {
 	const block_display_list_t* disp_lists = block_disp_list_pools_disp_lists[pool_index];
 	block_display_list_chunk_t* chunks = block_disp_list_pools_chunks[pool_index];
 	size_t head = block_disp_list_pools_head[pool_index];
 	for (size_t i = 0; i < head; i++) {
 		const block_display_list_t* disp_list = &disp_lists[i];
 
-		Mtx model;
-		Mtx model_view;
-		guMtxIdentity(model);
-		guMtxTransApply(model, model, disp_list->x, disp_list->y, disp_list->z);
-		guMtxConcat(view, model, model_view);
+		mat4s model = glms_translate_make((vec3s) {{ disp_list->x, disp_list->y, disp_list->z }});
+		mat4s model_view = glms_mat4_mul(*view, model);
 
-		GX_LoadPosMtxImm(model_view, BLOCK_WORLD_MATRIX_INDEX);
+
+    	model_view = glms_mat4_transpose(model_view);
+		GX_LoadPosMtxImm(model_view.raw, BLOCK_WORLD_MATRIX_INDEX);
 
 		GX_CallDispList(chunks[disp_list->chunk_index], disp_list->size);
 	}
@@ -27,7 +28,7 @@ void init_block_world_rendering(void) {
 	GX_SetVtxAttrFmt(BLOCK_WORLD_VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void draw_block_display_lists(Mtx view) {
+void draw_block_display_lists(const mat4s* view) {
 	GX_SetNumTevStages(2);
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
