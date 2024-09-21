@@ -27,7 +27,7 @@
 
 static s32vec3s corner_pos_offset = { .x = -3, .y =-2, .z = -3 };
 
-int main(int argc, char** argv) {
+int main(int, char**) {
 	if (!log_init()) {
 		return 1;
 	}
@@ -87,11 +87,11 @@ int main(int argc, char** argv) {
 	init_block_world(last_corner_pos);
 
 	for (;;) {
-        us_t now = get_current_us() - program_start;
+        us_t now = (us_t) (get_current_us() - program_start);
 
 		us_t delta_time = now - start;
-		f32 frame_delta = delta_time / 1000000.0f;
-		f32 fps = 1000000.0f / delta_time;
+		f32 frame_delta = (f32) delta_time / 1000000.0f;
+		f32 fps = 1.0f / frame_delta;
 
 		start = now;
 
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
 		cursor_draw();
 
 		enter_text_rendering();
-		debug_ui_draw(total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, ceilf(fps));
+		debug_ui_draw(total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, (u32) ceilf(fps));
 
 		gfx_update_video();
 		

@@ -85,9 +85,9 @@ void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
                     }
                 }
 
-                size_t index = (new_pos.z * Z_OFFSET) + (new_pos.y * Y_OFFSET) + (new_pos.x * X_OFFSET);
-                temp_block_pool_chunk_indices[index] = chunk_index;
-                temp_block_pool_chunk_bitfields[index] = chunk_bitfield;
+                size_t index = (size_t) ((new_pos.z * Z_OFFSET) + (new_pos.y * Y_OFFSET) + (new_pos.x * X_OFFSET));
+                temp_block_pool_chunk_indices[index] = (u8) chunk_index;
+                temp_block_pool_chunk_bitfields[index] = (u8) chunk_bitfield;
             }
         }
     }
@@ -126,7 +126,7 @@ static bool handle_procedural_generation(s32vec3s corner_pos) {
 
                 s64 start = get_current_us();
                 generate_procedural_blocks(pos, chunks[chunk_indices[i]].block_types);
-                total_block_gen_time += get_current_us() - start;
+                total_block_gen_time += (us_t) (get_current_us() - start);
 
                 if (pos.y == 0) {
                     return true;
@@ -154,7 +154,7 @@ static void handle_important_visuals_updating(s32vec3s corner_pos) {
                     continue;
                 }
 
-                chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
+                chunk_bitfields[i] &= (u8) (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
                 // Don't get rid of queued visuals update since sometimes there is a good reason for it to update again
 
                 // lprintf("Updating visuals important %d, %d, %d\n", x, y, z);
@@ -168,9 +168,9 @@ static void handle_important_visuals_updating(s32vec3s corner_pos) {
                 };
 
                 vec3s world_pos = {
-                    .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
-                    .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
-                    .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
+                    .x = (f32) pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
+                    .y = (f32) pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
+                    .z = (f32) pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
                 };
 
                 s64 start = get_current_us();
@@ -185,7 +185,7 @@ static void handle_important_visuals_updating(s32vec3s corner_pos) {
                     z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + Z_OFFSET]].block_types,
                     z == 0 ? NULL : chunks[chunk_indices[i - Z_OFFSET]].block_types
                 );
-                us_t time = get_current_us() - start;
+                us_t time = (us_t) (get_current_us() - start);
                 total_mesh_gen_time += time;
                 last_mesh_gen_time = time;
             }
@@ -207,8 +207,8 @@ static void handle_queued_visuals_updating(s32vec3s corner_pos) {
                     continue;
                 }
 
-                chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
-                chunk_bitfields[i] &= (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED);
+                chunk_bitfields[i] &= (u8) (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT);
+                chunk_bitfields[i] &= (u8) (~BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED);
 
                 if (flags & BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS) {
                     continue;
@@ -225,9 +225,9 @@ static void handle_queued_visuals_updating(s32vec3s corner_pos) {
                 };
 
                 vec3s world_pos = {
-                    .x = pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
-                    .y = pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
-                    .z = pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
+                    .x = (f32) pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
+                    .y = (f32) pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK,
+                    .z = (f32) pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
                 };
 
                 s64 start = get_current_us();
@@ -242,7 +242,7 @@ static void handle_queued_visuals_updating(s32vec3s corner_pos) {
                     z == NUM_XZ_ROW_BLOCK_CHUNKS - 1 ? NULL : chunks[chunk_indices[i + Z_OFFSET]].block_types,
                     z == 0 ? NULL : chunks[chunk_indices[i - Z_OFFSET]].block_types
                 );
-                us_t time = get_current_us() - start;
+                us_t time = (us_t) (get_current_us() - start);
                 total_mesh_gen_time += time;
                 last_mesh_gen_time = time;
 

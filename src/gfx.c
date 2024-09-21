@@ -59,7 +59,7 @@ bool gfx_init(void) {
 	u32 xfbHeight = GX_SetDispCopyYScale(yscale);
 	GX_SetScissor(0,0,rmode->fbWidth,rmode->efbHeight);
 	GX_SetDispCopySrc(0,0,rmode->fbWidth,rmode->efbHeight);
-	GX_SetDispCopyDst(rmode->fbWidth,xfbHeight);
+	GX_SetDispCopyDst(rmode->fbWidth,(u16) xfbHeight);
 	GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_TRUE,rmode->vfilter);
 	GX_SetFieldMode(rmode->field_rendering,((rmode->viHeight==2*rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
 

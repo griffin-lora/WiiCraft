@@ -22,7 +22,7 @@ static f32 get_tallgrass_value(vec2s position) {
     );
 }
 
-static void generate_high_blocks(s32vec3s chunk_pos, block_type_t block_types[]) {
+static void generate_high_blocks(s32vec3s, block_type_t block_types[]) {
     memset(block_types, block_type_air, 4096);
 }
 
@@ -36,8 +36,8 @@ static void generate_high_blocks(s32vec3s chunk_pos, block_type_t block_types[])
 static void generate_middle_blocks(s32vec3s chunk_pos, block_type_t block_types[]) {
     size_t i = 0;
 
-    f32 world_chunk_x = chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
-    f32 world_chunk_z = chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
+    f32 world_chunk_x = (f32) chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
+    f32 world_chunk_z = (f32) chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
 
     for (f32 z = 0; z < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; z++) {
         for (f32 x = 0; x < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; x++) {
@@ -47,7 +47,7 @@ static void generate_middle_blocks(s32vec3s chunk_pos, block_type_t block_types[
             
             f32 tallgrass_value = get_tallgrass_value(noise_pos);
 
-            s32 gen_y = (height * 12) + 1;
+            s32 gen_y = (s32) (height * 12) + 1;
 
             for (s32 y = 0; y < NUM_ROW_BLOCKS_PER_BLOCK_CHUNK; y++) {
                 if (y > gen_y) {
@@ -79,13 +79,13 @@ static void generate_middle_blocks(s32vec3s chunk_pos, block_type_t block_types[
                 i += Y_OFFSET;
             }
 
-            i += X_OFFSET - Z_OFFSET;
+            i += (size_t) (X_OFFSET - Z_OFFSET);
         }
         i += Z_OFFSET - Y_OFFSET;
     }
 }
 
-static void generate_low_blocks(s32vec3s chunk_pos, block_type_t block_types[]) {
+static void generate_low_blocks(s32vec3s, block_type_t block_types[]) {
     memset(block_types, block_type_stone, 4096);
 }
 

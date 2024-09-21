@@ -92,7 +92,7 @@ static u8 get_face_tex(block_type_t type, block_face_t face) {
     return 0;
 }
 
-static u8 get_tex(block_type_t type) {
+static u8 get_tex(block_type_t) {
     return 5;
 }
 
@@ -114,7 +114,7 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
     DCInvalidateRange(chunk, display_list_size);
 
     GX_BeginDispList(chunk, display_list_size);
-    GX_Begin(GX_QUADS, BLOCK_WORLD_VERTEX_FORMAT_INDEX, num_verts);
+    GX_Begin(GX_QUADS, BLOCK_WORLD_VERTEX_FORMAT_INDEX, (u16) num_verts);
 
     switch (pool_index) {
         case 0:
@@ -236,7 +236,7 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
     }
     
     GX_End();
-    disp_list->size = GX_EndDispList();
+    disp_list->size = (u16) GX_EndDispList();
 
     return chunk_index;
 }

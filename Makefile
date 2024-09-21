@@ -27,9 +27,9 @@ INCLUDES	:=  src lib
 # options for code generation
 #---------------------------------------------------------------------------------
 
-override XFLAGS += -Ofast -Wall -fno-exceptions $(MACHDEP) $(INCLUDE)
-CFLAGS = $(XFLAGS) -std=c2x
-CXXFLAGS = $(XFLAGS) -std=c++2a
+override XFLAGS += $(MACHDEP) $(INCLUDE)
+CFLAGS = $(XFLAGS) -std=c2x -Ofast -Wall -Wextra -Wpedantic -Wconversion -Wno-override-init -Wno-pointer-arith -Werror -Wfatal-errors
+CXXFLAGS = $(XFLAGS) -std=c++2a -Ofast -Wall -fno-exceptions
 
 LDFLAGS	= $(MACHDEP) -Wl,-Map,$(notdir $@).map
 

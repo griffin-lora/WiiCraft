@@ -39,6 +39,9 @@ bool log_init(void) {
 		printf("Connection failure\n");
         return false;
 	}
+	#else
+	(void)log_sock;
+	(void)log_buf;
     #endif
 
     return true;
@@ -57,5 +60,7 @@ void lprintf(const char* fmt, ...) {
     va_end(args);
     
     net_send(log_sock, log_buf, num_chars, 0);
-    #endif
+    #else
+	(void)fmt;
+	#endif
 }

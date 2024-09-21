@@ -50,7 +50,7 @@ void camera_update_visuals(us_t now, Mtx view, Mtx44 perspective) {
     us_t elapsed = now - fov_tween_start;
 
     if (elapsed <= FOV_TWEEN_TIME) {
-        f32 alpha = get_eased(elapsed / (f32)FOV_TWEEN_TIME);
+        f32 alpha = get_eased((f32) elapsed / (f32) FOV_TWEEN_TIME);
 
         if (sprinting) {
             fov = lerpf(BASE_FOV, SPRINT_FOV, alpha);

@@ -162,7 +162,7 @@ void character_apply_physics(s32vec3s corner_pos, f32 delta) {
     };
     glm_ivec3_sub(chunk_rel_pos.raw, corner_pos.raw, chunk_rel_pos.raw);
 
-    size_t index = (chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
+    size_t index = (size_t) ((chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET));
 
     if (index >= NUM_BLOCK_CHUNKS) {
         character_velocity.y = 0;

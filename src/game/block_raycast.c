@@ -29,7 +29,7 @@ static box_raycast_wrap_t get_box_raycast_for_block(vec3s origin, vec3s dir, vec
             if (box_type == block_box_type_collision) {
                 return (box_raycast_wrap_t){ false };
             }
-            box = (box_t){
+            box = (box_t) {
                 { .x = 0.2f, .y = 0.0f, .z = 0.2f },
                 { .x = 0.8f, .y = 0.8f, .z = 0.8f }
             }; break;
@@ -37,8 +37,12 @@ static box_raycast_wrap_t get_box_raycast_for_block(vec3s origin, vec3s dir, vec
             if (box_type == block_box_type_collision) {
                 return (box_raycast_wrap_t){ false };
             }
+            box = (box_t) {
+                { .x = 0.0f, .y = 0.0f, .z = 0.0f },
+                { .x = 1.0f, .y = 1.0f, .z = 1.0f }
+            }; break;
         default:
-            box = (box_t){
+            box = (box_t) {
                 { .x = 0.0f, .y = 0.0f, .z = 0.0f },
                 { .x = 1.0f, .y = 1.0f, .z = 1.0f }
             }; break;

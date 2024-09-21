@@ -4,7 +4,7 @@
 
 static f32 get_noise_at_grid_position(s32vec2s pos) {
     s32 val = mod_s32((pos.x * 374761393) + (pos.y * 668265263), 1274126177);
-    return val / 1274126177.0f;
+    return (f32)val / 1274126177.0f;
 }
 
 f32 get_eased(f32 x) {
@@ -42,8 +42,8 @@ f32 get_noise_at(vec2s pos) {
     f32 ceil_ceil_noise = get_noise_at_grid_position(ceil_pos);
 
     vec2s dist = {
-        .x = pos.x - floor_pos.x,
-        .y = pos.y - floor_pos.y
+        .x = pos.x - (f32)floor_pos.x,
+        .y = pos.y - (f32)floor_pos.y
     };
 
     vec2s eased_dist = {
