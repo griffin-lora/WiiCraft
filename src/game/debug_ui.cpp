@@ -45,7 +45,7 @@ void debug_ui::update(u32 buttons_down) {
     }
 }
 
-void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block_gen_time, us_t total_mesh_gen_time, us_t last_mesh_gen_time, u32 fps) const {
+void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_procedural_gen_time, us_t total_visual_gen_time, us_t last_visual_gen_time, u32 fps) const {
     constexpr auto write_text = [](std::string_view str, u16 y_offset) {
         gfx::write_text_vertices<u8>([y_offset](u16 x, u16 y, u8 u, u8 v) {
             GX_Position2u16(x + prefix_width, y + (char_size * y_offset));
@@ -67,19 +67,19 @@ void debug_ui::draw(const glm::vec3& pos, const glm::vec3& dir, us_t total_block
 
         auto pos_str = to_string(pos);
         auto dir_str = to_string(dir);
-        auto total_block_gen_time_str = std::to_string(total_block_gen_time);
-        auto total_mesh_gen_time_str = std::to_string(total_mesh_gen_time);
-        auto last_mesh_gen_time_str = std::to_string(last_mesh_gen_time);
-        std::size_t num_vertices = 4 * (fps_str.size() + pos_str.size() + dir_str.size() + total_block_gen_time_str.size() + total_mesh_gen_time_str.size() + last_mesh_gen_time_str.size());
+        auto total_procedural_gen_time_str = std::to_string(total_procedural_gen_time);
+        auto total_visual_gen_time_str = std::to_string(total_visual_gen_time);
+        auto last_visual_gen_time_str = std::to_string(last_visual_gen_time);
+        std::size_t num_vertices = 4 * (fps_str.size() + pos_str.size() + dir_str.size() + total_procedural_gen_time_str.size() + total_visual_gen_time_str.size() + last_visual_gen_time_str.size());
 
         GX_Begin(GX_QUADS, GX_VTXFMT2, num_vertices);
 
         write_text(fps_str, 0);
         write_text(pos_str, 1);
         write_text(dir_str, 2);
-        write_text(total_block_gen_time_str, 3);
-        write_text(total_mesh_gen_time_str, 4);
-        write_text(last_mesh_gen_time_str, 5);
+        write_text(total_procedural_gen_time_str, 3);
+        write_text(total_visual_gen_time_str, 4);
+        write_text(last_visual_gen_time_str, 5);
 
         GX_End();
     } else {
@@ -102,6 +102,6 @@ void debug_ui_update(u32 buttons_down) {
     ui->update(buttons_down);
 }
 
-void debug_ui_draw(us_t total_block_gen_time, us_t total_mesh_gen_time, us_t last_mesh_gen_time, u32 fps) {
-    ui->draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam_forward.raw[0], cam_forward.raw[1], cam_forward.raw[2] }, total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, fps);
+void debug_ui_draw(us_t total_procedural_gen_time, us_t total_visual_gen_time, us_t last_visual_gen_time, u32 fps) {
+    ui->draw({ character_position.raw[0], character_position.raw[1], character_position.raw[2] }, { cam_forward.raw[0], cam_forward.raw[1], cam_forward.raw[2] }, total_procedural_gen_time, total_visual_gen_time, last_visual_gen_time, fps);
 }

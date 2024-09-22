@@ -1,4 +1,5 @@
 #include "character.h"
+#include "game/region.h"
 #include "voxel_raycast.h"
 #include "input.h"
 #include "camera.h"
@@ -154,7 +155,7 @@ void character_handle_input(vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel,
 
 void character_apply_physics(s32vec3s region_pos, f32 delta) {
     #ifndef PC_PORT
-	vec3s div_pos = glms_vec3_scale(character_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+	vec3s div_pos = glms_vec3_scale(character_position, 1.0f/(f32)REGION_SIZE);
     s32vec3s chunk_rel_pos = {
         .x = (s32)floorf(div_pos.x),
         .y = (s32)floorf(div_pos.y),
@@ -162,17 +163,15 @@ void character_apply_physics(s32vec3s region_pos, f32 delta) {
     };
     glm_ivec3_sub(chunk_rel_pos.raw, region_pos.raw, chunk_rel_pos.raw);
 
-    size_t index = (size_t) ((chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET));
+    // if (index >= NUM_BLOCK_CHUNKS) {
+    character_velocity.y = 0;
+        // return;
+    // }
 
-    if (index >= NUM_BLOCK_CHUNKS) {
-        character_velocity.y = 0;
-        return;
-    }
-
-    if (!(block_pool_chunk_bitfields[index] & BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS)) {
-        character_velocity.y = 0;
-        return;
-    }
+    // if (!(block_pool_chunk_bitfields[index] & BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS)) {
+    //     character_velocity.y = 0;
+    //     return;
+    // }
 
     character_velocity.y -= GRAVITY * delta;
 

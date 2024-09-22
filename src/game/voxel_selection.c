@@ -1,4 +1,5 @@
 #include "voxel_selection.h"
+#include "game/region.h"
 #include "gfx/instruction_size.h"
 #include "util.h"
 #include "voxel.h"
@@ -101,7 +102,7 @@ void voxel_selection_handle_location(const mat4s* view, world_location_t locatio
     s32vec3s chunk_pos = location.region_pos;
     u8vec3s voxel_local_pos = location.voxel_local_pos;
 
-    model = glms_translate_make((vec3s) {{ (f32) chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK }});
+    model = glms_translate_make((vec3s) {{ (f32) chunk_pos.x * REGION_SIZE, (f32) chunk_pos.y * REGION_SIZE, (f32) chunk_pos.z * REGION_SIZE }});
 
     voxel_selection_update(view);
     

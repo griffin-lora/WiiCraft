@@ -82,13 +82,20 @@ voxel_raycast_wrap_t get_voxel_raycast(s32vec3s region_pos, vec3s origin, vec3s 
     for (f32 x = floored_begin.x; x <= floored_end.x; x++) {
         for (f32 y = floored_begin.y; y <= floored_end.y; y++) {
             for (f32 z = floored_begin.z; z <= floored_end.z; z++) {
-                vec3s voxel_world_pos = { .x = x, .y = y, .z = z };
+                (void)dir_inv;
+                (void)region_pos;
+                (void)origin;
+                (void)box_transform;
+                (void)box_type;
+                (void)get_closest_raycast;
+                (void)get_box_raycast_for_voxel;
+                // vec3s voxel_world_pos = { .x = x, .y = y, .z = z };
                 
-                world_location_wrap_t world_loc = get_world_location_at_voxel_world_position(region_pos, voxel_world_pos);
-                if (world_loc.success) {
-                    box_raycast_wrap_t box_raycast = get_box_raycast_for_voxel(origin, dir, dir_inv, box_transform, box_type, voxel_world_pos, *world_loc.val.voxel_type);
-                    closest_raycast = get_closest_raycast(closest_raycast, world_loc.val, box_raycast);
-                }
+                // world_location_wrap_t world_loc = get_world_location_at_voxel_world_position(region_pos, voxel_world_pos);
+                // if (world_loc.success) {
+                //     box_raycast_wrap_t box_raycast = get_box_raycast_for_voxel(origin, dir, dir_inv, box_transform, box_type, voxel_world_pos, *world_loc.val.voxel_type);
+                //     closest_raycast = get_closest_raycast(closest_raycast, world_loc.val, box_raycast);
+                // }
             }
         }
     }

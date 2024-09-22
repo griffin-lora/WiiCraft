@@ -1,11 +1,12 @@
 #include "asset.h"
+#include "game/region.h"
+#include "game/region_rendering.h"
 #include "gfx.h"
 #include "game_math.h"
 #include "input.h"
 #include "chrono.h"
 #include "game/voxel_raycast.h"
 #include "game/camera.h"
-#include "game/block_world_rendering.h"
 #include "game/logic.h"
 #include "game/voxel_selection.h"
 #include "game/cursor.h"
@@ -15,7 +16,6 @@
 #include "game/water_overlay.h"
 #include "game/debug_ui.h"
 #include "log.h"
-#include "pool.h"
 #include "game/region_management.h"
 #include <cglm/struct/mat4.h>
 #include <stdlib.h>
@@ -37,8 +37,6 @@ int main(int, char**) {
 	}
 
 	asset_init();
-
-	pool_init();
 
 	input_init(render_mode->viWidth, render_mode->viHeight);
 
@@ -67,7 +65,7 @@ int main(int, char**) {
 	voxel_selection_init();
 
 	init_ui_rendering();
-	init_block_world_rendering();
+	init_region_rendering();
 
 	GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
 	GX_SetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
@@ -80,11 +78,10 @@ int main(int, char**) {
 	s64 program_start = get_current_us();
 	us_t start = 0;
 	
-	vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
-	s32vec3s last_region_local_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
-	glm_ivec3_add(last_region_local_pos.raw, region_pos_offset.raw, last_region_local_pos.raw);
+	vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)REGION_SIZE);
+	s32vec3s last_region_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
 
-	init_block_world(last_region_local_pos);
+	init_region_management();
 
 	for (;;) {
         us_t now = (us_t) (get_current_us() - program_start);
@@ -100,7 +97,7 @@ int main(int, char**) {
 		WPAD_ScanPads();
 		u32 buttons_down = WPAD_ButtonsDown(chan);
 		if (buttons_down & WPAD_BUTTON_HOME) {
-			lprintf("BGT: %d\nMGT: %d\nMGL: %d\nLog ended\n", total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time);
+			lprintf("BGT: %d\nMGT: %d\nMGL: %d\nLog ended\n", total_procedural_gen_time, total_visual_gen_time, last_visual_gen_time);
 			log_term();
 			exit(0);
 		}
@@ -108,13 +105,9 @@ int main(int, char**) {
 
 		camera_update(frame_delta, buttons_held);
 
-		vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
+		vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)REGION_SIZE);
 		s32vec3s region_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
-		glm_ivec3_add(region_pos.raw, region_pos_offset.raw, region_pos.raw);
-		if (last_region_pos.x != region_pos.x || last_region_pos.y != region_pos.y || last_region_pos.z != region_pos.z) {
-			manage_block_world(last_region_pos, region_pos);
-		}
-		handle_world_flag_processing(region_pos);
+		manage_regions(last_region_pos, region_pos);
 		last_region_pos = region_pos;
 
 		cursor_update(render_mode->viWidth, render_mode->viHeight);
@@ -141,14 +134,13 @@ int main(int, char**) {
 		character_handle_input(cam.look, (vec3w_t){ 0, 0, 0 }, (vec3w_t){ 0, 0, 0 }, now, frame_delta, (vec3w_t){ 512, 512, 512 }, (vec3w_t){ 96.0f, 96.0f }, 0, (vec3w_t){ 512, 512, 512 });
 		#endif
 
-		// auto raycast_dir = get_raycast_direction_from_pointer_position(rmode->viWidth, rmode->viHeight, cam, pointer_pos);
-		vec3s raycast_dir = cam_forward;
-		voxel_raycast_wrap_t raycast = get_voxel_raycast(region_pos, cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, voxel_box_type_selection);
+		// vec3s raycast_dir = cam_forward;
+		// voxel_raycast_wrap_t raycast = get_voxel_raycast(region_pos, cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, voxel_box_type_selection);
 
-		if (raycast.success) {
-			voxel_selection_handle_location(&view, raycast.val.location);
-			update_world_from_location_and_input(region_pos, buttons_down, raycast.val.location, glms_vec3_add(get_world_position_from_world_location(&raycast.val.location), raycast.val.box_raycast.normal));
-		}
+		// if (raycast.success) {
+		// 	voxel_selection_handle_location(&view, raycast.val.location);
+		// 	update_world_from_location_and_input(region_pos, buttons_down, raycast.val.location, glms_vec3_add(get_world_position_from_world_location(&raycast.val.location), raycast.val.box_raycast.normal));
+		// }
 		character_apply_physics(region_pos, frame_delta);
 		character_apply_velocity(frame_delta);
 		
@@ -161,13 +153,13 @@ int main(int, char**) {
 		GX_LoadProjectionMtx(projection_3d.raw, GX_PERSPECTIVE);
 		skybox_draw();
 
-		GX_SetCurrentMtx(BLOCK_WORLD_MATRIX_INDEX);
+		GX_SetCurrentMtx(REGION_MATRIX_INDEX);
 
-		draw_block_display_lists(&view);
+		draw_regions(&view);
 		
-		if (raycast.success) {
-			voxel_selection_draw(now);
-		}
+		// if (raycast.success) {
+		// 	voxel_selection_draw(now);
+		// }
 		
 		GX_LoadProjectionMtx(projection_2d.raw, GX_ORTHOGRAPHIC);
 		enter_ui_rendering();
@@ -175,13 +167,13 @@ int main(int, char**) {
 		cursor_draw();
 
 		enter_text_rendering();
-		debug_ui_draw(total_block_gen_time, total_mesh_gen_time, last_mesh_gen_time, (u32) ceilf(fps));
+		debug_ui_draw(total_procedural_gen_time, total_visual_gen_time, last_visual_gen_time, (u32) ceilf(fps));
 
 		gfx_update_video();
 		
 		#ifdef PC_PORT
 		if (++num_frames == 1200) {
-			std::printf("BGT: %ld\nMGT: %ld\n", total_block_gen_time, total_mesh_gen_time);
+			std::printf("BGT: %ld\nMGT: %ld\n", total_procedural_gen_time, total_visual_gen_time);
 			std::exit(0);
 		}
 		#endif
