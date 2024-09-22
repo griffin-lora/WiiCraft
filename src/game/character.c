@@ -1,5 +1,5 @@
 #include "character.h"
-#include "block_raycast.h"
+#include "voxel_raycast.h"
 #include "input.h"
 #include "camera.h"
 #include <math.h>
@@ -68,7 +68,7 @@ static void apply_no_movement(us_t now, f32 delta) {
 
 static const vec3s half_size = { .x = 0.35f, .y = 0.9f, .z = 0.35f };
 
-static bool apply_collision(s32vec3s corner_pos, f32 delta) {
+static bool apply_collision(s32vec3s region_pos, f32 delta) {
     vec3s direction = glms_vec3_scale(character_velocity, delta);
 
     vec3s begin = glms_vec3_sub(character_position, half_size);
@@ -98,7 +98,7 @@ static bool apply_collision(s32vec3s corner_pos, f32 delta) {
         end.z = next_end.z;
     }
 
-    block_raycast_wrap_t raycast = get_block_raycast(corner_pos, character_position, direction, begin, end, half_size, block_box_type_collision);
+    voxel_raycast_wrap_t raycast = get_voxel_raycast(region_pos, character_position, direction, begin, end, half_size, voxel_box_type_collision);
 
     if (raycast.success) {
         vec3s normal = raycast.val.box_raycast.normal;
@@ -152,7 +152,7 @@ void character_handle_input(vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel,
     }
 }
 
-void character_apply_physics(s32vec3s corner_pos, f32 delta) {
+void character_apply_physics(s32vec3s region_pos, f32 delta) {
     #ifndef PC_PORT
 	vec3s div_pos = glms_vec3_scale(character_position, 1.0f/(f32)NUM_ROW_BLOCKS_PER_BLOCK_CHUNK);
     s32vec3s chunk_rel_pos = {
@@ -160,7 +160,7 @@ void character_apply_physics(s32vec3s corner_pos, f32 delta) {
         .y = (s32)floorf(div_pos.y),
         .z = (s32)floorf(div_pos.z)
     };
-    glm_ivec3_sub(chunk_rel_pos.raw, corner_pos.raw, chunk_rel_pos.raw);
+    glm_ivec3_sub(chunk_rel_pos.raw, region_pos.raw, chunk_rel_pos.raw);
 
     size_t index = (size_t) ((chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET));
 
@@ -178,7 +178,7 @@ void character_apply_physics(s32vec3s corner_pos, f32 delta) {
 
     grounded = false;
 
-    while (apply_collision(corner_pos, delta));
+    while (apply_collision(region_pos, delta));
     #endif
 }
 

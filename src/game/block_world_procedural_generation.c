@@ -22,7 +22,7 @@ static f32 get_tallgrass_value(vec2s position) {
     );
 }
 
-static void generate_high_blocks(s32vec3s, block_type_t block_types[]) {
+static void generate_high_blocks(s32vec3s, voxel_type_t block_types[]) {
     memset(block_types, block_type_air, 4096);
 }
 
@@ -33,7 +33,7 @@ static void generate_high_blocks(s32vec3s, block_type_t block_types[]) {
 
 #define NUM_ROW_BLOCKS NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
 
-static void generate_middle_blocks(s32vec3s chunk_pos, block_type_t block_types[]) {
+static void generate_middle_blocks(s32vec3s chunk_pos, voxel_type_t block_types[]) {
     size_t i = 0;
 
     f32 world_chunk_x = (f32) chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK;
@@ -85,11 +85,11 @@ static void generate_middle_blocks(s32vec3s chunk_pos, block_type_t block_types[
     }
 }
 
-static void generate_low_blocks(s32vec3s, block_type_t block_types[]) {
+static void generate_low_blocks(s32vec3s, voxel_type_t block_types[]) {
     memset(block_types, block_type_stone, 4096);
 }
 
-void generate_procedural_blocks(s32vec3s pos, block_type_t block_types[]) {
+void generate_procedural_blocks(s32vec3s pos, voxel_type_t block_types[]) {
     if (pos.y > 0) {
         generate_high_blocks(pos, block_types);
     } else if (pos.y < 0) {

@@ -1,7 +1,7 @@
-#include "block_selection.h"
+#include "voxel_selection.h"
 #include "gfx/instruction_size.h"
 #include "util.h"
-#include "block.h"
+#include "voxel.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/mat4.h>
 #include <ogc/gx.h>
@@ -13,9 +13,9 @@
 #define MATRIX_INDEX GX_PNMTX4
 #define VERTEX_FORMAT_INDEX GX_VTXFMT4
 
-static bool has_last_block = false;
-static u8vec3s last_block_pos;
-static block_type_t last_block_type;
+static bool has_last_selection = false;
+static u8vec3s last_voxel_local_pos;
+static voxel_type_t last_voxel_type;
 
 static mat4s model;
 
@@ -38,17 +38,17 @@ static bool cull_back = true;
 
 alignas(32) static u8 disp_list[CUBE_DISP_LIST_SIZE];
 
-void block_selection_init(void) {
+void voxel_selection_init(void) {
     GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 }
 
-void block_selection_update(const mat4s* view) {
+void voxel_selection_update(const mat4s* view) {
     mat4s model_view = glms_mat4_mul(*view, model);
     model_view = glms_mat4_transpose(model_view);
     GX_LoadPosMtxImm(model_view.raw, MATRIX_INDEX);
 }
 
-void block_selection_draw(us_t now) {
+void voxel_selection_draw(us_t now) {
     GX_SetNumTevStages(1);
     GX_SetNumChans(1);
     GX_SetNumTexGens(0);
@@ -86,35 +86,35 @@ void block_selection_draw(us_t now) {
     GX_SetCullMode(GX_CULL_BACK);
 }
 
-void block_selection_handle_location(const mat4s* view, world_location_t location) {
-    // Check if we have a new selected block
-    if (has_last_block && location.bl_pos.x == last_block_pos.x && location.bl_pos.y == last_block_pos.y && location.bl_pos.z == last_block_pos.z && *location.bl_tp == last_block_type) {
-        last_block_pos = location.bl_pos;
-        last_block_type = *location.bl_tp;
+void voxel_selection_handle_location(const mat4s* view, world_location_t location) {
+    // Check if we have a new selected voxel
+    if (has_last_selection && location.voxel_local_pos.x == last_voxel_local_pos.x && location.voxel_local_pos.y == last_voxel_local_pos.y && location.voxel_local_pos.z == last_voxel_local_pos.z && *location.voxel_type == last_voxel_type) {
+        last_voxel_local_pos = location.voxel_local_pos;
+        last_voxel_type = *location.voxel_type;
         return;
     }
 
-    has_last_block = true;
-    last_block_pos = location.bl_pos;
-    last_block_type = *location.bl_tp;
+    has_last_selection = true;
+    last_voxel_local_pos = location.voxel_local_pos;
+    last_voxel_type = *location.voxel_type;
 
-    s32vec3s chunk_pos = location.ch_pos;
-    u8vec3s block_pos = location.bl_pos;
+    s32vec3s chunk_pos = location.region_pos;
+    u8vec3s voxel_local_pos = location.voxel_local_pos;
 
     model = glms_translate_make((vec3s) {{ (f32) chunk_pos.x * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.y * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK, (f32) chunk_pos.z * NUM_ROW_BLOCKS_PER_BLOCK_CHUNK }});
 
-    block_selection_update(view);
+    voxel_selection_update(view);
     
-    block_type_t block_type = *location.bl_tp;
+    voxel_type_t voxel_type = *location.voxel_type;
 
-    u8 px = block_pos.x * 4;
-    u8 py = block_pos.y * 4;
-    u8 pz = block_pos.z * 4;
+    u8 px = voxel_local_pos.x * 4;
+    u8 py = voxel_local_pos.y * 4;
+    u8 pz = voxel_local_pos.z * 4;
     u8 pox = px + 4;
     u8 poy = py + 4;
     u8 poz = pz + 4;
 
-    switch (block_type) {
+    switch (voxel_type) {
         default:
             cull_back = true;
 
@@ -153,10 +153,10 @@ void block_selection_handle_location(const mat4s* view, world_location_t locatio
             disp_list_size = GX_EndDispList();
 
             break;
-        case block_type_air:
+        case voxel_type_air:
             disp_list_size = 0;
             break;
-        case block_type_tall_grass:
+        case voxel_type_tall_grass:
             cull_back = false;
             
             memset(disp_list, 0, CROSS_DISP_LIST_SIZE);

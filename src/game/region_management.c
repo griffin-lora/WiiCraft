@@ -1,4 +1,4 @@
-#include "block_world_management.h"
+#include "region_management.h"
 #include "block_world_mesh_generation.h"
 #include "block_world_procedural_generation.h"
 #include "pool.h"
@@ -8,17 +8,19 @@
 #include <stdbool.h>
 #include <string.h>
 
+static s32vec3s region_pos_offset = {{ -3, -2, -3 }};
+
 #define Z_OFFSET BLOCK_POOL_CHUNK_INDICES_Z_OFFSET
 #define Y_OFFSET BLOCK_POOL_CHUNK_INDICES_Y_OFFSET
 #define X_OFFSET BLOCK_POOL_CHUNK_INDICES_X_OFFSET
 
-void init_block_world(s32vec3s corner_pos) {
+void init_block_world(s32vec3s region_pos) {
     size_t i = 0;
     for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
         for (s32 y = 0; y < NUM_Y_ROW_BLOCK_CHUNKS; y++) {
             for (s32 x = 0; x < NUM_XZ_ROW_BLOCK_CHUNKS; x++, i++) {
                 block_pool_chunk_bitfields[i] |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED;
-                if (y + corner_pos.y != 0) {
+                if (y + region_pos.y != 0) {
                     block_pool_chunk_bitfields[i] |= BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS;
                 }
 
@@ -33,9 +35,9 @@ void init_block_world(s32vec3s corner_pos) {
 alignas(32) u8 temp_block_pool_chunk_indices[NUM_BLOCK_CHUNKS];
 alignas(32) u8 temp_block_pool_chunk_bitfields[NUM_BLOCK_CHUNKS];
 
-void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
+void manage_block_world(s32vec3s last_region_pos, s32vec3s region_pos) {
     s32vec3s move_dir;
-    glm_ivec3_sub(last_corner_pos.raw, corner_pos.raw, move_dir.raw);
+    glm_ivec3_sub(last_region_pos.raw, region_pos.raw, move_dir.raw);
 
     size_t i = 0;
     for (s32 z = 0; z < NUM_XZ_ROW_BLOCK_CHUNKS; z++) {
@@ -69,7 +71,7 @@ void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
 
                     chunk_bitfield = 0;
                     chunk_bitfield |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_QUEUED;
-                    if (new_pos.y + corner_pos.y != 0) {
+                    if (new_pos.y + region_pos.y != 0) {
                         chunk_bitfield |= BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS;
                     }
                 } else {
@@ -99,7 +101,7 @@ void manage_block_world(s32vec3s last_corner_pos, s32vec3s corner_pos) {
     }
 }
 
-static bool handle_procedural_generation(s32vec3s corner_pos) {
+static bool handle_procedural_generation(s32vec3s region_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -119,9 +121,9 @@ static bool handle_procedural_generation(s32vec3s corner_pos) {
                 chunk_bitfields[i] |= BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS;
 
                 s32vec3s pos = {
-                    .x = x + corner_pos.x,
-                    .y = y + corner_pos.y,
-                    .z = z + corner_pos.z
+                    .x = x + region_pos.x,
+                    .y = y + region_pos.y,
+                    .z = z + region_pos.z
                 };
 
                 s64 start = get_current_us();
@@ -140,7 +142,7 @@ static bool handle_procedural_generation(s32vec3s corner_pos) {
     return num_procedural_generate_items > 0;
 }
 
-static void handle_important_visuals_updating(s32vec3s corner_pos) {
+static void handle_important_visuals_updating(s32vec3s region_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -162,9 +164,9 @@ static void handle_important_visuals_updating(s32vec3s corner_pos) {
                 block_chunk_t* chunk = &chunks[chunk_indices[i]];
 
                 s32vec3s pos = {
-                    .x = x + corner_pos.x,
-                    .y = y + corner_pos.y,
-                    .z = z + corner_pos.z
+                    .x = x + region_pos.x,
+                    .y = y + region_pos.y,
+                    .z = z + region_pos.z
                 };
 
                 vec3s world_pos = {
@@ -193,7 +195,7 @@ static void handle_important_visuals_updating(s32vec3s corner_pos) {
     }
 }
 
-static void handle_queued_visuals_updating(s32vec3s corner_pos) {
+static void handle_queued_visuals_updating(s32vec3s region_pos) {
     u8* chunk_indices = block_pool_chunk_indices;
     u8* chunk_bitfields = block_pool_chunk_bitfields;
     block_chunk_t* chunks = block_pool_chunks;
@@ -219,9 +221,9 @@ static void handle_queued_visuals_updating(s32vec3s corner_pos) {
                 block_chunk_t* chunk = &chunks[chunk_indices[i]];
 
                 s32vec3s pos = {
-                    .x = x + corner_pos.x,
-                    .y = y + corner_pos.y,
-                    .z = z + corner_pos.z
+                    .x = x + region_pos.x,
+                    .y = y + region_pos.y,
+                    .z = z + region_pos.z
                 };
 
                 vec3s world_pos = {
@@ -252,10 +254,60 @@ static void handle_queued_visuals_updating(s32vec3s corner_pos) {
     }
 }
 
-void handle_world_flag_processing(s32vec3s corner_pos) {
-    bool any_procedural_generation = handle_procedural_generation(corner_pos);
-    handle_important_visuals_updating(corner_pos);
+void handle_world_flag_processing(s32vec3s region_pos) {
+    bool any_procedural_generation = handle_procedural_generation(region_pos);
+    handle_important_visuals_updating(region_pos);
     if (!any_procedural_generation) { // Only handle queued visuals updating if we did not see any procedural generation
-        handle_queued_visuals_updating(corner_pos);
+        handle_queued_visuals_updating(region_pos);
     }
+}
+
+static void set_important_update(size_t index) {
+    block_pool_chunk_bitfields[index] |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT;
+    block_pool_chunk_bitfields[index] &= (u8) (~BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS);
+}
+
+bool update_block_chunk_and_neighbors(s32vec3s region_pos, s32vec3s chunk_pos, u8vec3s modification_pos) {
+    s32vec3s chunk_rel_pos;
+    glm_ivec3_sub(chunk_pos.raw, region_pos.raw, chunk_rel_pos.raw);
+
+    size_t index = (size_t) ((chunk_rel_pos.z * BLOCK_POOL_CHUNK_INDICES_Z_OFFSET) + (chunk_rel_pos.y * BLOCK_POOL_CHUNK_INDICES_Y_OFFSET) + (chunk_rel_pos.x * BLOCK_POOL_CHUNK_INDICES_X_OFFSET));
+
+    if (index >= NUM_BLOCK_CHUNKS) {
+        return false;
+    }
+
+    u8* chunk_bitfields = block_pool_chunk_bitfields;
+
+    if (chunk_pos.y != 0) {
+        chunk_bitfields[index] &= (u8) (~BLOCK_CHUNK_FLAG_HAS_TRIVIAL_VISUALS);
+    }
+
+    chunk_bitfields[index] |= BLOCK_CHUNK_FLAG_UPDATE_VISUALS_IMPORTANT;
+
+    if (modification_pos.x == NUM_ROW_BLOCKS_PER_BLOCK_CHUNK - 1 && chunk_rel_pos.x != NUM_XZ_ROW_BLOCK_CHUNKS - 1) {
+        set_important_update(index + BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
+    }
+
+    if (modification_pos.x == 0 && chunk_rel_pos.x != 0) {
+        set_important_update(index - BLOCK_POOL_CHUNK_INDICES_X_OFFSET);
+    }
+
+    if (modification_pos.y == NUM_ROW_BLOCKS_PER_BLOCK_CHUNK - 1 && chunk_rel_pos.y != NUM_Y_ROW_BLOCK_CHUNKS - 1) {
+        set_important_update(index + BLOCK_POOL_CHUNK_INDICES_Y_OFFSET);
+    }
+
+    if (modification_pos.y == 0 && chunk_rel_pos.y != 0) {
+        set_important_update(index - BLOCK_POOL_CHUNK_INDICES_Y_OFFSET);
+    }
+
+    if (modification_pos.z == NUM_ROW_BLOCKS_PER_BLOCK_CHUNK - 1 && chunk_rel_pos.z != NUM_XZ_ROW_BLOCK_CHUNKS - 1) {
+        set_important_update(index + BLOCK_POOL_CHUNK_INDICES_Z_OFFSET);
+    }
+
+    if (modification_pos.z == 0 && chunk_rel_pos.z != 0) {
+        set_important_update(index - BLOCK_POOL_CHUNK_INDICES_Z_OFFSET);
+    }
+
+    return true;
 }

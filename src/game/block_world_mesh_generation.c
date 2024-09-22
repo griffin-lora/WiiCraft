@@ -1,7 +1,7 @@
 #include "block_world_mesh_generation.h"
 #include "block_world_rendering.h"
 #include "log.h"
-#include "block.h"
+#include "voxel.h"
 #include "pool.h"
 #include "gfx/instruction_size.h"
 #include "util.h"
@@ -51,7 +51,7 @@ typedef enum __attribute__((__packed__)) {
 
 static_assert(sizeof(block_mesh_category_t) == 1);
 
-static block_mesh_category_t get_block_mesh_category(block_type_t type) {
+static block_mesh_category_t get_block_mesh_category(voxel_type_t type) {
     switch (type) {
         default:
             return block_mesh_category_invisible;
@@ -70,7 +70,7 @@ static block_mesh_category_t get_block_mesh_category(block_type_t type) {
     }
 }
 
-static u8 get_face_tex(block_type_t type, block_face_t face) {
+static u8 get_face_tex(voxel_type_t type, voxel_face_t face) {
     switch (type) {
         default: break;
         case block_type_debug: return 0;
@@ -92,7 +92,7 @@ static u8 get_face_tex(block_type_t type, block_face_t face) {
     return 0;
 }
 
-static u8 get_tex(block_type_t) {
+static u8 get_tex(voxel_type_t) {
     return 5;
 }
 
@@ -122,8 +122,8 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
             for (size_t i = 0; i < num_meshes; i++) {
                 block_mesh_t mesh = meshes[i];
 
-                block_type_t block_type = (block_type_t)(mesh.type / 8);
-                block_face_t block_face = (block_face_t)(mesh.type % 8);
+                voxel_type_t block_type = (voxel_type_t)(mesh.type / 8);
+                voxel_face_t block_face = (voxel_face_t)(mesh.type % 8);
                 u8 px = mesh.x * 4;
                 u8 py = mesh.y * 4;
                 u8 pz = mesh.z * 4;
@@ -209,7 +209,7 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
                 u8 pox = px + 4;
                 u8 poy = py + 4;
                 u8 poz = pz + 4;
-                u8 tx = get_tex((block_type_t)mesh.type);
+                u8 tx = get_tex((voxel_type_t)mesh.type);
                 u8 tox = tx + 1;
                 u8 ty = 0;
                 u8 toy = 16;
@@ -248,7 +248,7 @@ static u16 write_meshes_into_display_list(size_t pool_index, vec3s world_pos, si
 
 #define NUM_ROW_BLOCKS NUM_ROW_BLOCKS_PER_BLOCK_CHUNK
 
-static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_index) {
+static bool is_out_of_bounds(u32 x, u32 y, voxel_face_t face, size_t neighbor_index) {
     switch (face) {
         case block_face_front: if (x == 15) { return true; } break;
         case block_face_back: if (x == 0) { return true; } break;
@@ -260,7 +260,7 @@ static bool is_out_of_bounds(u32 x, u32 y, block_face_t face, size_t neighbor_in
     return false;
 }
 
-static size_t get_neighbor_blocks_index(block_face_t face, size_t neighbor_index) {
+static size_t get_neighbor_blocks_index(voxel_face_t face, size_t neighbor_index) {
     switch (face) {
         case block_face_front: return neighbor_index - Y_OFFSET;
         case block_face_back: return neighbor_index + Y_OFFSET;
@@ -278,9 +278,9 @@ typedef struct {
 } face_meshes_indices_t;
 
 static face_meshes_indices_t add_face_mesh_if_needed(
-    face_meshes_indices_t indices, const block_type_t block_types[], const block_type_t neighbor_block_types[], u32 x, u32 y, u32 z, block_type_t type, block_mesh_category_t category, block_face_t face, size_t neighbor_index
+    face_meshes_indices_t indices, const voxel_type_t block_types[], const voxel_type_t neighbor_block_types[], u32 x, u32 y, u32 z, voxel_type_t type, block_mesh_category_t category, voxel_face_t face, size_t neighbor_index
 ) {
-    block_type_t neighbor_block_type;
+    voxel_type_t neighbor_block_type;
     if (is_out_of_bounds(x, y, face, neighbor_index)) {
         if (neighbor_block_types == NULL) {
             return indices;
@@ -321,13 +321,13 @@ static face_meshes_indices_t add_face_mesh_if_needed(
 void update_block_chunk_visuals(
     vec3s world_pos,
     block_display_list_chunk_descriptor_t descriptors[],
-    const block_type_t block_types[],
-    const block_type_t front_block_types[],
-    const block_type_t back_block_types[],
-    const block_type_t top_block_types[],
-    const block_type_t bottom_block_types[],
-    const block_type_t right_block_types[],
-    const block_type_t left_block_types[]
+    const voxel_type_t block_types[],
+    const voxel_type_t front_block_types[],
+    const voxel_type_t back_block_types[],
+    const voxel_type_t top_block_types[],
+    const voxel_type_t bottom_block_types[],
+    const voxel_type_t right_block_types[],
+    const voxel_type_t left_block_types[]
 ) {
     for (size_t i = 0; i < 16 && descriptors[i].pool_index != 0xff; i++) {
         if (!release_block_display_list_pool_chunk(descriptors[i].pool_index, descriptors[i].chunk_index)) {
@@ -353,7 +353,7 @@ void update_block_chunk_visuals(
     for (u32 z = 0; z < NUM_ROW_BLOCKS; z++) {
         for (u32 y = 0; y < NUM_ROW_BLOCKS; y++) {
             for (u32 x = 0; x < NUM_ROW_BLOCKS; x++) {
-                block_type_t type = block_types[blocks_index];
+                voxel_type_t type = block_types[blocks_index];
 
                 block_mesh_category_t category = get_block_mesh_category(type);
                 switch (category) {
