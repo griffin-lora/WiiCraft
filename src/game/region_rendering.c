@@ -1,34 +1,35 @@
-#include "block_world_rendering.h"
-#include "pool.h"
-#include "log.h"
+#include "region_rendering.h"
+#include "game/display_list.h"
+#include "game/region.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/mat4.h>
 #include <ogc/gx.h>
 
-static void draw_pool(const mat4s* view, size_t pool_index) {
-	const block_display_list_t* disp_lists = block_disp_list_pools_disp_lists[pool_index];
-	block_display_list_chunk_t* chunks = block_disp_list_pools_chunks[pool_index];
-	size_t head = block_disp_list_pools_head[pool_index];
-	for (size_t i = 0; i < head; i++) {
-		const block_display_list_t* disp_list = &disp_lists[i];
+static void call_display_lists(const mat4s* view, size_t display_list_array_index) {
+	for (size_t i = 0; i < num_regions; i++) {
+		const region_render_info_t* info = &region_render_infos[i];
+		const region_display_list_array_t* display_list_array = &info->display_list_arrays[display_list_array_index];
 
-		mat4s model = glms_translate_make((vec3s) {{ disp_list->x, disp_list->y, disp_list->z }});
+		mat4s model = glms_translate_make(info->position);
 		mat4s model_view = glms_mat4_mul(*view, model);
 
-
     	model_view = glms_mat4_transpose(model_view);
-		GX_LoadPosMtxImm(model_view.raw, BLOCK_WORLD_MATRIX_INDEX);
+		GX_LoadPosMtxImm(model_view.raw, REGION_MATRIX_INDEX);
 
-		GX_CallDispList(chunks[disp_list->chunk_index], disp_list->size);
+		for (size_t j = 0; j < display_list_array->num_display_lists; j++) {
+			const display_list_t* display_list = &display_list_array->display_lists[j];
+
+			GX_CallDispList((void*) display_list->data, display_list->num_bytes);
+		}
 	}
 }
 
-void init_block_world_rendering(void) {
-	GX_SetVtxAttrFmt(BLOCK_WORLD_VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
-	GX_SetVtxAttrFmt(BLOCK_WORLD_VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
+void init_region_rendering(void) {
+	GX_SetVtxAttrFmt(REGION_VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
+	GX_SetVtxAttrFmt(REGION_VERTEX_FORMAT_INDEX, GX_VA_TEX0, GX_TEX_ST, GX_U8, 4);
 }
 
-void draw_block_display_lists(const mat4s* view) {
+void draw_regions(const mat4s* view) {
 	GX_SetNumTevStages(2);
 	GX_SetNumChans(1);
 	GX_SetNumTexGens(1);
@@ -51,12 +52,12 @@ void draw_block_display_lists(const mat4s* view) {
 
 	GX_SetTevColor(GX_TEVREG1, (GXColor){ 0xff, 0xff, 0xff, 0xff }); // Set alpha
 
-	draw_pool(view, 0);
-	draw_pool(view, 1);
+	call_display_lists(view, 0);
+	call_display_lists(view, 1);
 	GX_SetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_ALWAYS, 0);
 	GX_SetZCompLoc(GX_FALSE);
 	GX_SetCullMode(GX_CULL_NONE);
-	draw_pool(view, 2);
+	call_display_lists(view, 2);
 	GX_SetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
 	GX_SetZCompLoc(GX_TRUE);
 	GX_SetCullMode(GX_CULL_BACK);

@@ -29,7 +29,7 @@ world_location_wrap_t get_world_location_at_voxel_world_position(s32vec3s region
 
     size_t region_index = block_pool_chunk_indices[index];
 
-    voxel_type_t* voxel_type = &block_pool_chunks[region_index].block_types[(voxel_local_pos.z * BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET) + (voxel_local_pos.y * BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET) + (voxel_local_pos.x * BLOCKS_PER_BLOCK_CHUNK_X_OFFSET)];
+    voxel_type_t* voxel_type = &block_pool_chunks[region_index].voxel_types[(voxel_local_pos.z * BLOCKS_PER_BLOCK_CHUNK_Z_OFFSET) + (voxel_local_pos.y * BLOCKS_PER_BLOCK_CHUNK_Y_OFFSET) + (voxel_local_pos.x * BLOCKS_PER_BLOCK_CHUNK_X_OFFSET)];
 
     return (world_location_wrap_t){
         .success = true,

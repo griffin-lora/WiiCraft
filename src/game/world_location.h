@@ -1,5 +1,6 @@
 #pragma once
-#include "pool.h"
+#include "game/voxel.h"
+#include "game_math.h"
 #include <stdbool.h>
 
 typedef struct {
