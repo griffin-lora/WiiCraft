@@ -24,8 +24,8 @@ typedef struct {
 } voxel_type_array_t;
 
 extern u32 world_size;
+extern voxel_type_array_t** region_voxel_type_arrays;
 extern region_render_info_t* region_render_infos;
-extern voxel_type_array_t* region_voxel_type_arrays;
 
 inline size_t get_num_regions() {
     return world_size * world_size * world_size;
