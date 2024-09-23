@@ -4,6 +4,7 @@
 #include "log.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/mat4.h>
+#include <ogc/gu.h>
 #include <ogc/gx.h>
 
 static void call_display_lists(const mat4s* view, size_t display_list_array_index) {
@@ -14,11 +15,14 @@ static void call_display_lists(const mat4s* view, size_t display_list_array_inde
 			for (size_t z = 0; z < world_size; z++) {
 				const region_render_info_t* info = &(*render_infos)[x][y][z];
 				const region_display_list_array_t* display_list_array = &info->display_list_arrays[display_list_array_index];
+				
+				mat4s model;
+				guMtxIdentity(model.raw);
+				guMtxTransApply(model.raw, model.raw, (f32) (x * REGION_SIZE), (f32) (y * REGION_SIZE), (f32) (z * REGION_SIZE));
+				
+				mat4s model_view;
+				guMtxConcat(view->raw, model.raw, model_view.raw);
 
-				mat4s model = glms_translate_make((vec3s) {{ (f32) (x * REGION_SIZE), (f32) (y * REGION_SIZE), (f32) (z * REGION_SIZE) }});
-				mat4s model_view = glms_mat4_mul(*view, model);
-
-				model_view = glms_mat4_transpose(model_view);
 				GX_LoadPosMtxImm(model_view.raw, REGION_MATRIX_INDEX);
 
 				for (size_t i = 0; i < display_list_array->num_display_lists; i++) {

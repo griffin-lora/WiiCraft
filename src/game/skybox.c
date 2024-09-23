@@ -3,6 +3,7 @@
 #include "util.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/mat4.h>
+#include <ogc/gu.h>
 #include <ogc/gx.h>
 #include <stdalign.h>
 
@@ -29,9 +30,13 @@ void skybox_init(const mat4s* view, vec3s cam_pos) {
 }
 
 void skybox_update(const mat4s* view, vec3s cam_pos) {
-    mat4s model = glms_translate_make(cam_pos);
-    mat4s model_view = glms_mat4_mul(*view, model);
-    model_view = glms_mat4_transpose(model_view);
+    mat4s model;
+    guMtxIdentity(model.raw);
+    guMtxTransApply(model.raw, model.raw, cam_pos.x, cam_pos.y, cam_pos.z);
+
+    mat4s model_view;
+    guMtxConcat(view->raw, model.raw, model_view.raw);
+
     GX_LoadPosMtxImm(model_view.raw, MATRIX_INDEX);
 }
 

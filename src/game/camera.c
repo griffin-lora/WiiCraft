@@ -64,12 +64,11 @@ void camera_update_visuals(us_t now, mat4s* projection, mat4s* view) {
         }
     }
 
-    // *projection = glms_perspective(fov, aspect, far_clipping_plane_distance, near_clipping_plane_distance);
-    // *projection = glms_mat4_transpose(*projection);
-    
     guPerspective(projection->raw, fov, aspect, near_clipping_plane_distance, far_clipping_plane_distance);
 
     cam_position = glms_vec3_add(character_position, (vec3s){ .x = 0, .y = 0.9f, .z = 0 });
 
-    *view = glms_look(cam_position, cam_forward, cam_up);
+    vec3s look_at = glms_vec3_add(cam_position, cam_forward);
+
+    guLookAt(view->raw, (const guVector*) &cam_position, (const guVector*) &cam_up, (const guVector*) &look_at);
 }

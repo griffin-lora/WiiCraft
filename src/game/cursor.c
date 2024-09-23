@@ -3,6 +3,7 @@
 #include "util.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/cam.h>
+#include <ogc/gu.h>
 #include <ogc/gx.h>
 
 #define MATRIX_INDEX GX_PNMTX3
@@ -25,8 +26,9 @@ void cursor_init(void) {
 }
 
 void cursor_update(u16 v_width, u16 v_height) {
-    mat4s model = glms_translate_make((vec3s) {{ ((f32) v_width / 2.0f) - 24.f, ((f32) v_height / 2.0f) - 24.f, 0.0f }});
-    model = glms_mat4_transpose(model);
+    mat4s model;
+    guMtxIdentity(model.raw);
+    guMtxTransApply(model.raw, model.raw, ((f32) v_width / 2.0f) - 24.f, ((f32) v_height / 2.0f) - 24.f, 0.0f);
     GX_LoadPosMtxImm(model.raw, MATRIX_INDEX);
 }
 

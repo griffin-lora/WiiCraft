@@ -18,6 +18,7 @@
 #include "log.h"
 #include "game/region_management.h"
 #include <cglm/struct/mat4.h>
+#include <ogc/gu.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gccore.h>
@@ -40,8 +41,8 @@ int main(int, char**) {
 
 	input_init(render_mode->viWidth, render_mode->viHeight);
 
-	mat4s projection_2d = glms_ortho(0.0f, 639.0f, 479.0f, 0.0f, 0.0f, 300.0f);
-	projection_2d = glms_mat4_transpose(projection_2d);
+	mat4s projection_2d;
+	guOrtho(projection_2d.raw, 0.0f, 479.0f, 0.0f, 639.0f, 0.0f, 300.0f);
 	
 	mat4s projection_3d;
 	mat4s view;

@@ -8,6 +8,7 @@
 #include "voxel.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/mat4.h>
+#include <ogc/gu.h>
 #include <ogc/gx.h>
 #include <ogc/cache.h>
 #include <string.h>
@@ -47,8 +48,8 @@ void voxel_selection_init(void) {
 }
 
 void voxel_selection_update_view(const mat4s* view) {
-    mat4s model_view = glms_mat4_mul(*view, model);
-    model_view = glms_mat4_transpose(model_view);
+    mat4s model_view;
+    guMtxConcat(view->raw, model.raw, model_view.raw);
     GX_LoadPosMtxImm(model_view.raw, MATRIX_INDEX);
 }
 
@@ -106,8 +107,9 @@ void voxel_selection_update(const mat4s* view, s32vec3s region_pos, u32vec3s vox
     has_last_selection = true;
     last_voxel_local_pos = voxel_local_pos;
     last_voxel_type = voxel_type;
-
-    model = glms_translate_make((vec3s) {{ (f32) region_pos.x * REGION_SIZE, (f32) region_pos.y * REGION_SIZE, (f32) region_pos.z * REGION_SIZE }});
+    
+    guMtxIdentity(model.raw);
+    guMtxTransApply(model.raw, model.raw, (f32) region_pos.x * REGION_SIZE, (f32) region_pos.y * REGION_SIZE, (f32) region_pos.z * REGION_SIZE);
 
     voxel_selection_update_view(view);
 
