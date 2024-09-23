@@ -61,6 +61,12 @@ void lprintf(const char* fmt, ...) {
     
     net_send(log_sock, log_buf, num_chars, 0);
     #else
+	#ifdef PC_PORT
+	va_list args;
+    va_start(args, fmt);
+    s32 num_chars = vprintf(fmt, args);
+    va_end(args);
+	#endif
 	(void)fmt;
 	#endif
 }

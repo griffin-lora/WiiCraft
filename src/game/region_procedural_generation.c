@@ -2,6 +2,7 @@
 #include "game/region.h"
 #include "game/voxel.h"
 #include "game_math.h"
+#include "log.h"
 #include <string.h>
 
 static f32 get_hills_height(vec2s position) {
@@ -24,7 +25,7 @@ static f32 get_tallgrass_value(vec2s position) {
 }
 
 static void generate_high_voxels(s32vec3s, voxel_type_array_t* voxel_types) {
-    memset(voxel_types->types, voxel_type_air, 4096);
+    memset(voxel_types->types, voxel_type_air, sizeof(voxel_types->types));
 }
 
 voxel_type_t get_voxel_type_at_position(s32 y, s32 gen_y, f32 tallgrass_value) {
@@ -75,7 +76,7 @@ static void generate_middle_voxels(s32vec3s region_pos, voxel_type_array_t* voxe
 }
 
 static void generate_low_voxels(s32vec3s, voxel_type_array_t* voxel_types) {
-    memset(voxel_types->types, voxel_type_stone, 4096);
+    memset(voxel_types->types, voxel_type_stone, sizeof(voxel_types->types));
 }
 
 void generate_region_voxels(s32vec3s pos, voxel_type_array_t* voxel_types) {

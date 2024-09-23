@@ -33,9 +33,17 @@ void init_region_management(void) {
 		for (u32 y = 0; y < world_size; y++) {
 			for (u32 z = 0; z < world_size; z++) {
                 voxel_type_array_t* voxel_types = &(*voxel_type_arrays)[x][y][z];
+                generate_region_voxels((s32vec3s) {{ (s32) x, (s32) y, (s32) z }}, voxel_types);
+            }
+        }
+    }
+
+	for (u32 x = 0; x < world_size; x++) {
+		for (u32 y = 0; y < world_size; y++) {
+			for (u32 z = 0; z < world_size; z++) {
+                voxel_type_array_t* voxel_types = &(*voxel_type_arrays)[x][y][z];
                 region_render_info_t* render_info = &(*render_infos)[x][y][z];
 
-                generate_region_voxels((s32vec3s) {{ (s32) x, (s32) y, (s32) z }}, voxel_types);
                 generate_region_visuals(
                     voxel_types,
                     get_neighbor_voxel_type_array(x + 1u, y, z), 
