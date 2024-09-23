@@ -6,14 +6,22 @@
 #include <cglm/ivec3.h>
 #include <cglm/ivec2.h>
 
+typedef union {
+    u32 raw[3];
+    struct {
+        u32 x;
+        u32 y;
+        u32 z;
+    };
+  
+    struct {
+        u32 r;
+        u32 g;
+        u32 b;
+    };
+} u32vec3s;
 typedef ivec3s s32vec3s;
 typedef ivec2s s32vec2s;
-
-typedef struct {
-    u8 x;
-    u8 y;
-    u8 z;
-} u8vec3s;
 
 #define LOOK_VEC(MAT) (MAT[0])
 #define UP_VEC(MAT) (MAT[1])

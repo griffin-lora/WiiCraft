@@ -78,8 +78,7 @@ int main(int, char**) {
 	s64 program_start = get_current_us();
 	us_t start = 0;
 	
-	vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)REGION_SIZE);
-	s32vec3s last_region_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
+	s32vec3s last_region_pos = get_region_position_from_world_position(cam_position);
 
 	init_region_management();
 
@@ -105,8 +104,7 @@ int main(int, char**) {
 
 		camera_update(frame_delta, buttons_held);
 
-		vec3s div_pos = glms_vec3_scale(cam_position, 1.0f/(f32)REGION_SIZE);
-		s32vec3s region_pos = { .x = (s32)floorf(div_pos.x), .y = (s32)floorf(div_pos.y), .z = (s32)floorf(div_pos.z) };
+		s32vec3s region_pos = get_region_position_from_world_position(cam_position);
 		manage_regions(last_region_pos, region_pos);
 		last_region_pos = region_pos;
 
@@ -134,20 +132,21 @@ int main(int, char**) {
 		character_handle_input((vec3w_t) { 0, 0, 0 }, (vec3w_t) { 0, 0, 0 }, now, frame_delta, (vec3w_t) { 512, 512, 512 }, (vec2s) {{ 96.0f, 96.0f }}, 0, (vec3w_t) { 512, 512, 512 });
 		#endif
 
-		// vec3s raycast_dir = cam_forward;
-		// voxel_raycast_wrap_t raycast = get_voxel_raycast(region_pos, cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, voxel_box_type_selection);
+		vec3s raycast_dir = cam_forward;
+		voxel_raycast_wrap_t raycast = get_voxel_raycast(cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, voxel_box_type_selection);
 
-		// if (raycast.success) {
-		// 	voxel_selection_handle_location(&view, raycast.val.location);
-		// 	update_world_from_location_and_input(region_pos, buttons_down, raycast.val.location, glms_vec3_add(get_world_position_from_world_location(&raycast.val.location), raycast.val.box_raycast.normal));
-		// }
-		character_apply_physics(region_pos, frame_delta);
+		if (raycast.success) {
+			voxel_selection_update(&view, raycast.val.region_pos, raycast.val.voxel_local_pos);
+			update_world(&view, &raycast.val, buttons_down);
+		}
+		
+		character_apply_physics(frame_delta);
 		character_apply_velocity(frame_delta);
 		
 		camera_update_visuals(now, &projection_3d, &view);
 
 		skybox_update(&view, cam_position);
-		voxel_selection_update(&view);
+		voxel_selection_update_view(&view);
 		debug_ui_update(buttons_down);
 
 		GX_LoadProjectionMtx(projection_3d.raw, GX_PERSPECTIVE);
@@ -157,9 +156,9 @@ int main(int, char**) {
 
 		draw_regions(&view);
 		
-		// if (raycast.success) {
-		// 	voxel_selection_draw(now);
-		// }
+		if (raycast.success) {
+			voxel_selection_draw(now);
+		}
 		
 		GX_LoadProjectionMtx(projection_2d.raw, GX_ORTHOGRAPHIC);
 		enter_ui_rendering();

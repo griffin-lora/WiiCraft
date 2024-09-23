@@ -1,6 +1,9 @@
 #include "voxel_selection.h"
 #include "game/region.h"
+#include "game/region_management.h"
+#include "game_math.h"
 #include "gfx/instruction_size.h"
+#include "log.h"
 #include "util.h"
 #include "voxel.h"
 #include <cglm/struct/affine.h>
@@ -15,7 +18,7 @@
 #define VERTEX_FORMAT_INDEX GX_VTXFMT4
 
 static bool has_last_selection = false;
-static u8vec3s last_voxel_local_pos;
+static u32vec3s last_voxel_local_pos;
 static voxel_type_t last_voxel_type;
 
 static mat4s model;
@@ -43,7 +46,7 @@ void voxel_selection_init(void) {
     GX_SetVtxAttrFmt(VERTEX_FORMAT_INDEX, GX_VA_POS, GX_POS_XYZ, GX_U8, 2);
 }
 
-void voxel_selection_update(const mat4s* view) {
+void voxel_selection_update_view(const mat4s* view) {
     mat4s model_view = glms_mat4_mul(*view, model);
     model_view = glms_mat4_transpose(model_view);
     GX_LoadPosMtxImm(model_view.raw, MATRIX_INDEX);
@@ -87,30 +90,30 @@ void voxel_selection_draw(us_t now) {
     GX_SetCullMode(GX_CULL_BACK);
 }
 
-void voxel_selection_handle_location(const mat4s* view, world_location_t location) {
+void voxel_selection_update(const mat4s* view, s32vec3s region_pos, u32vec3s voxel_local_pos) {
+    REGION_TYPE_3D(const voxel_type_array_t*) voxel_type_arrays = REGION_CAST_3D(const voxel_type_array_t*, region_voxel_type_arrays);
+    u32vec3s region_rel_pos = get_region_relative_position(region_pos);
+
+    voxel_type_t voxel_type = (*voxel_type_arrays)[region_rel_pos.x][region_rel_pos.y][region_rel_pos.z]->types[voxel_local_pos.x][voxel_local_pos.y][voxel_local_pos.z];
+
     // Check if we have a new selected voxel
-    if (has_last_selection && location.voxel_local_pos.x == last_voxel_local_pos.x && location.voxel_local_pos.y == last_voxel_local_pos.y && location.voxel_local_pos.z == last_voxel_local_pos.z && *location.voxel_type == last_voxel_type) {
-        last_voxel_local_pos = location.voxel_local_pos;
-        last_voxel_type = *location.voxel_type;
+    if (has_last_selection && voxel_local_pos.x == last_voxel_local_pos.x && voxel_local_pos.y == last_voxel_local_pos.y && voxel_local_pos.z == last_voxel_local_pos.z && voxel_type == last_voxel_type) {
+        last_voxel_local_pos = voxel_local_pos;
+        last_voxel_type = voxel_type;
         return;
     }
 
     has_last_selection = true;
-    last_voxel_local_pos = location.voxel_local_pos;
-    last_voxel_type = *location.voxel_type;
+    last_voxel_local_pos = voxel_local_pos;
+    last_voxel_type = voxel_type;
 
-    s32vec3s chunk_pos = location.region_pos;
-    u8vec3s voxel_local_pos = location.voxel_local_pos;
+    model = glms_translate_make((vec3s) {{ (f32) region_pos.x * REGION_SIZE, (f32) region_pos.y * REGION_SIZE, (f32) region_pos.z * REGION_SIZE }});
 
-    model = glms_translate_make((vec3s) {{ (f32) chunk_pos.x * REGION_SIZE, (f32) chunk_pos.y * REGION_SIZE, (f32) chunk_pos.z * REGION_SIZE }});
+    voxel_selection_update_view(view);
 
-    voxel_selection_update(view);
-    
-    voxel_type_t voxel_type = *location.voxel_type;
-
-    u8 px = voxel_local_pos.x * 4;
-    u8 py = voxel_local_pos.y * 4;
-    u8 pz = voxel_local_pos.z * 4;
+    u8 px = (u8) voxel_local_pos.x * 4;
+    u8 py = (u8) voxel_local_pos.y * 4;
+    u8 pz = (u8) voxel_local_pos.z * 4;
     u8 pox = px + 4;
     u8 poy = py + 4;
     u8 poz = pz + 4;

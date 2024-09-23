@@ -1,5 +1,6 @@
 #include "character.h"
 #include "game/region.h"
+#include "game/region_management.h"
 #include "voxel_raycast.h"
 #include "input.h"
 #include "camera.h"
@@ -69,7 +70,7 @@ static void apply_no_movement(us_t now, f32 delta) {
 
 static const vec3s half_size = { .x = 0.35f, .y = 0.9f, .z = 0.35f };
 
-static bool apply_collision(s32vec3s region_pos, f32 delta) {
+static bool apply_collision(f32 delta) {
     vec3s direction = glms_vec3_scale(character_velocity, delta);
 
     vec3s begin = glms_vec3_sub(character_position, half_size);
@@ -99,7 +100,7 @@ static bool apply_collision(s32vec3s region_pos, f32 delta) {
         end.z = next_end.z;
     }
 
-    voxel_raycast_wrap_t raycast = get_voxel_raycast(region_pos, character_position, direction, begin, end, half_size, voxel_box_type_collision);
+    voxel_raycast_wrap_t raycast = get_voxel_raycast(character_position, direction, begin, end, half_size, voxel_box_type_collision);
 
     if (raycast.success) {
         vec3s normal = raycast.val.box_raycast.normal;
@@ -153,31 +154,27 @@ void character_handle_input(vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel,
     }
 }
 
-void character_apply_physics(s32vec3s region_pos, f32 delta) {
+void character_apply_physics(f32 delta) {
+    REGION_TYPE_3D(const voxel_type_array_t*) voxel_type_arrays = REGION_CAST_3D(const voxel_type_array_t*, region_voxel_type_arrays);
+    
     #ifndef PC_PORT
-	vec3s div_pos = glms_vec3_scale(character_position, 1.0f/(f32)REGION_SIZE);
-    s32vec3s chunk_rel_pos = {
-        .x = (s32)floorf(div_pos.x),
-        .y = (s32)floorf(div_pos.y),
-        .z = (s32)floorf(div_pos.z)
-    };
-    glm_ivec3_sub(chunk_rel_pos.raw, region_pos.raw, chunk_rel_pos.raw);
+    u32vec3s region_rel_pos = get_region_relative_position(get_region_position_from_world_position(character_position));
 
-    // if (index >= NUM_BLOCK_CHUNKS) {
-    character_velocity.y = 0;
-        // return;
-    // }
+    if (is_region_relative_position_out_of_bounds(region_rel_pos)) {
+        character_velocity.y = 0;
+        return;
+    }
 
-    // if (!(block_pool_chunk_bitfields[index] & BLOCK_CHUNK_FLAG_HAS_VALID_BLOCKS)) {
-    //     character_velocity.y = 0;
-    //     return;
-    // }
+    if ((*voxel_type_arrays)[region_rel_pos.x][region_rel_pos.y][region_rel_pos.z] == NULL) {
+        character_velocity.y = 0;
+        return;
+    }
 
     character_velocity.y -= GRAVITY * delta;
 
     grounded = false;
 
-    while (apply_collision(region_pos, delta));
+    while (apply_collision(delta));
     #endif
 }
 

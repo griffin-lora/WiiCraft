@@ -1,4 +1,6 @@
 #pragma once
-#include "voxel_raycast.h"
+#include "game/voxel_raycast.h"
+#include <cglm/struct/mat4.h>
+#include <gctypes.h>
 
-void update_world_from_location_and_input(s32vec3s region_pos, u32 buttons_down, world_location_t location, vec3s offset_world_block_position);
+void update_world(const mat4s* view, const voxel_raycast_t* raycast, u32 buttons_down);

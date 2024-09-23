@@ -1,4 +1,5 @@
 #pragma once
+#include "game_math.h"
 #include <sys/cdefs.h> // TODO: compiler stuff
 
 typedef enum __attribute__((__packed__)) {
@@ -25,3 +26,5 @@ typedef enum __attribute__((__packed__)) {
 
 static_assert(sizeof(voxel_type_t) == 1, "");
 static_assert(sizeof(voxel_face_t) == 1, "");
+
+u32vec3s get_voxel_local_position_from_world_position(vec3s world_pos);

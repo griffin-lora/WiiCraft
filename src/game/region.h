@@ -1,6 +1,7 @@
 #pragma once
 #include "game/display_list.h"
 #include "game/voxel.h"
+#include "game_math.h"
 #include <cglm/types-struct.h>
 #include <gctypes.h>
 #include <stddef.h>
@@ -33,3 +34,5 @@ inline size_t get_num_regions() {
 
 #define REGION_TYPE_3D(TYPE) typeof(TYPE (*)[world_size][world_size][world_size]) 
 #define REGION_CAST_3D(TYPE, VAR) (TYPE (*)[world_size][world_size][world_size]) (VAR)
+
+s32vec3s get_region_position_from_world_position(vec3s world_pos);
