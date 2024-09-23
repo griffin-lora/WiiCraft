@@ -7,6 +7,7 @@
 #include "voxel.h"
 #include "gfx/instruction_size.h"
 #include "util.h"
+#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ogc/cache.h>
@@ -42,8 +43,6 @@ typedef struct {
     size_t transparent;
     size_t transparent_double_sided;
 } meshes_indices_t;
-
-
 
 typedef enum __attribute__((__packed__)) {
     voxel_mesh_category_invisible,
@@ -105,7 +104,7 @@ static void write_meshes_into_display_list(size_t display_list_array_index, size
         GET_VECTOR_INSTRUCTION_SIZE(3, sizeof(u8), num_verts) + 
         GET_VECTOR_INSTRUCTION_SIZE(2, sizeof(u8), num_verts)
     );
-    void* display_list_data = malloc(NUM_CHUNK_BYTES);
+    void* display_list_data = memalign(32, NUM_CHUNK_BYTES);
 
     memset(display_list_data, 0, num_display_list_bytes);
     DCInvalidateRange(display_list_data, num_display_list_bytes);
@@ -119,8 +118,8 @@ static void write_meshes_into_display_list(size_t display_list_array_index, size
             for (size_t i = 0; i < num_meshes; i++) {
                 voxel_mesh_t mesh = meshes[i];
 
-                voxel_type_t voxel_type = (voxel_type_t)(mesh.type / 8);
-                voxel_face_t voxel_face = (voxel_face_t)(mesh.type % 8);
+                voxel_type_t voxel_type = (voxel_type_t) (mesh.type / 8);
+                voxel_face_t voxel_face = (voxel_face_t) (mesh.type % 8);
                 u8 px = mesh.x * 4;
                 u8 py = mesh.y * 4;
                 u8 pz = mesh.z * 4;
@@ -206,7 +205,7 @@ static void write_meshes_into_display_list(size_t display_list_array_index, size
                 u8 pox = px + 4;
                 u8 poy = py + 4;
                 u8 poz = pz + 4;
-                u8 tx = get_tex((voxel_type_t)mesh.type);
+                u8 tx = get_tex((voxel_type_t) mesh.type);
                 u8 tox = tx + 1;
                 u8 ty = 0;
                 u8 toy = 16;
@@ -313,44 +312,46 @@ void generate_region_visuals(
     };
 
     // Generate mesh for faces that are not neighboring another region.
-    for (u32 z = 0; z < REGION_SIZE; z++)
-    for (u32 y = 0; y < REGION_SIZE; y++)
-    for (u32 x = 0; x < REGION_SIZE; x++) {
-        voxel_type_t type = voxel_types->types[x][y][z];
-        voxel_mesh_category_t category = get_voxel_mesh_category(type);
-        
-        switch (category) {
-            default: break;
-            case voxel_mesh_category_cube:
-            case voxel_mesh_category_transparent_cube: {
-                indices.face = add_face_mesh_if_needed(indices.face, voxel_types, front_voxel_types, x, y, z, type, category, voxel_face_front, x + 1u, y, z);
-                indices.face = add_face_mesh_if_needed(indices.face, voxel_types, back_voxel_types, x, y, z, type, category, voxel_face_back, x - 1u, y, z);
-                indices.face = add_face_mesh_if_needed(indices.face, voxel_types, top_voxel_types, x, y, z, type, category, voxel_face_top, x, y + 1u, z);
-                indices.face = add_face_mesh_if_needed(indices.face, voxel_types, bottom_voxel_types, x, y, z, type, category, voxel_face_bottom, x, y - 1u, z);
-                indices.face = add_face_mesh_if_needed(indices.face, voxel_types, right_voxel_types, x, y, z, type, category, voxel_face_right, x, y, z + 1u);
-                indices.face = add_face_mesh_if_needed(indices.face, voxel_types, left_voxel_types, x, y, z, type, category, voxel_face_left, x, y, z - 1u);
-            } break;
-            case voxel_mesh_category_cross: {
-                building_meshes_arrays.transparent_double_sided[indices.all.transparent_double_sided++] = (voxel_mesh_t){
-                    .type = (u8) type,
-                    .x = (u8) x,
-                    .y = (u8) y,
-                    .z = (u8) z
-                };
-            } break;
-        }
+    for (u32 z = 0; z < REGION_SIZE; z++) {
+        for (u32 y = 0; y < REGION_SIZE; y++) {
+            for (u32 x = 0; x < REGION_SIZE; x++) {
+                voxel_type_t type = voxel_types->types[x][y][z];
+                voxel_mesh_category_t category = get_voxel_mesh_category(type);
 
-        if (indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6)) {
-            write_meshes_into_display_list(0, indices.all.solid, indices.all.solid * 4, building_meshes_arrays.solid, render_info);
-            indices.all.solid = 0;
-        }
-        if (indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6)) {
-            write_meshes_into_display_list(1, indices.all.transparent, indices.all.transparent * 4, building_meshes_arrays.transparent, render_info);
-            indices.all.transparent = 0;
-        }
-        if (indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)) {
-            write_meshes_into_display_list(2, indices.all.transparent_double_sided, indices.all.transparent_double_sided * 8, building_meshes_arrays.transparent_double_sided, render_info);
-            indices.all.transparent_double_sided = 0;
+                switch (category) {
+                    default: break;
+                    case voxel_mesh_category_cube:
+                    case voxel_mesh_category_transparent_cube: {
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, front_voxel_types, x, y, z, type, category, voxel_face_front, x + 1u, y, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, back_voxel_types, x, y, z, type, category, voxel_face_back, x - 1u, y, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, top_voxel_types, x, y, z, type, category, voxel_face_top, x, y + 1u, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, bottom_voxel_types, x, y, z, type, category, voxel_face_bottom, x, y - 1u, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, right_voxel_types, x, y, z, type, category, voxel_face_right, x, y, z + 1u);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, left_voxel_types, x, y, z, type, category, voxel_face_left, x, y, z - 1u);
+                    } break;
+                    case voxel_mesh_category_cross: {
+                        building_meshes_arrays.transparent_double_sided[indices.all.transparent_double_sided++] = (voxel_mesh_t){
+                            .type = (u8) type,
+                            .x = (u8) x,
+                            .y = (u8) y,
+                            .z = (u8) z
+                        };
+                    } break;
+                }
+
+                if (indices.all.solid >= (NUM_SOLID_BUILDING_MESHES - 6)) {
+                    write_meshes_into_display_list(0, indices.all.solid, indices.all.solid * 4, building_meshes_arrays.solid, render_info);
+                    indices.all.solid = 0;
+                }
+                if (indices.all.transparent >= (NUM_TRANSPARENT_BUILDING_MESHES - 6)) {
+                    write_meshes_into_display_list(1, indices.all.transparent, indices.all.transparent * 4, building_meshes_arrays.transparent, render_info);
+                    indices.all.transparent = 0;
+                }
+                if (indices.all.transparent_double_sided >= (NUM_TRANSPARENT_DOUBLE_SIDED_BUILDING_MESHES - 1)) {
+                    write_meshes_into_display_list(2, indices.all.transparent_double_sided, indices.all.transparent_double_sided * 8, building_meshes_arrays.transparent_double_sided, render_info);
+                    indices.all.transparent_double_sided = 0;
+                }
+            }
         }
     }
 

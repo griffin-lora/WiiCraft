@@ -1,6 +1,7 @@
 #include "region_rendering.h"
 #include "game/display_list.h"
 #include "game/region.h"
+#include "log.h"
 #include <cglm/struct/affine.h>
 #include <cglm/struct/mat4.h>
 #include <ogc/gx.h>

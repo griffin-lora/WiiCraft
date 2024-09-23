@@ -14,5 +14,9 @@ void VIDEO_SetBlack(bool black) {}
 void VIDEO_Flush(void) {}
 
 void VIDEO_WaitVSync(void) {
-    usleep(16666);
+    sleep(1);
+}
+
+u32 VIDEO_GetFrameBufferSize(GXRModeObj *rmode) {
+    return 16;
 }

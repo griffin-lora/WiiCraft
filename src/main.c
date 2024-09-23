@@ -131,7 +131,7 @@ int main(int, char**) {
 		}
 		last_wpad_accel = wpad_accel;
 		#else
-		character_handle_input(cam.look, (vec3w_t){ 0, 0, 0 }, (vec3w_t){ 0, 0, 0 }, now, frame_delta, (vec3w_t){ 512, 512, 512 }, (vec3w_t){ 96.0f, 96.0f }, 0, (vec3w_t){ 512, 512, 512 });
+		character_handle_input((vec3w_t) { 0, 0, 0 }, (vec3w_t) { 0, 0, 0 }, now, frame_delta, (vec3w_t) { 512, 512, 512 }, (vec2s) {{ 96.0f, 96.0f }}, 0, (vec3w_t) { 512, 512, 512 });
 		#endif
 
 		// vec3s raycast_dir = cam_forward;
@@ -173,8 +173,8 @@ int main(int, char**) {
 		
 		#ifdef PC_PORT
 		if (++num_frames == 1200) {
-			std::printf("BGT: %ld\nMGT: %ld\n", total_procedural_gen_time, total_visual_gen_time);
-			std::exit(0);
+			printf("BGT: %ld\nMGT: %ld\n", total_procedural_gen_time, total_visual_gen_time);
+			exit(0);
 		}
 		#endif
 	}

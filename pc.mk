@@ -6,7 +6,7 @@ WARNS := -Wall
 OBJECTS := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCES)))
 DEPENDS := $(patsubst %.c,%.d,$(patsubst %.cpp,%.d,$(SOURCES)))
 
-override XFLAGS += -O3 -fno-exceptions -I lib -I src -I/opt/devkitpro/libogc/include/ -I/opt/devkitpro/libogc/include/ogc -DPC_PORT -g
+override XFLAGS += -O3 -fno-exceptions -I lib -I src -isystem/opt/devkitpro/libogc/include -D__wii__ -DHW_RVL -DPC_PORT -g
 CFLAGS = $(XFLAGS) -std=c2x
 CXXFLAGS = $(XFLAGS) -std=c++2a
 
