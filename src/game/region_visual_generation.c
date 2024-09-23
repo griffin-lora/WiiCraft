@@ -312,9 +312,9 @@ void generate_region_visuals(
     };
 
     // Generate mesh for faces that are not neighboring another region.
-    for (u32 z = 0; z < REGION_SIZE; z++) {
+    for (u32 x = 0; x < REGION_SIZE; x++) {
         for (u32 y = 0; y < REGION_SIZE; y++) {
-            for (u32 x = 0; x < REGION_SIZE; x++) {
+            for (u32 z = 0; z < REGION_SIZE; z++) {
                 voxel_type_t type = voxel_types->types[x][y][z];
                 voxel_mesh_category_t category = get_voxel_mesh_category(type);
 
@@ -322,12 +322,12 @@ void generate_region_visuals(
                     default: break;
                     case voxel_mesh_category_cube:
                     case voxel_mesh_category_transparent_cube: {
-                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, front_voxel_types, x, y, z, type, category, voxel_face_front, x + 1u, y, z);
-                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, back_voxel_types, x, y, z, type, category, voxel_face_back, x - 1u, y, z);
-                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, top_voxel_types, x, y, z, type, category, voxel_face_top, x, y + 1u, z);
-                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, bottom_voxel_types, x, y, z, type, category, voxel_face_bottom, x, y - 1u, z);
                         indices.face = add_face_mesh_if_needed(indices.face, voxel_types, right_voxel_types, x, y, z, type, category, voxel_face_right, x, y, z + 1u);
                         indices.face = add_face_mesh_if_needed(indices.face, voxel_types, left_voxel_types, x, y, z, type, category, voxel_face_left, x, y, z - 1u);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, top_voxel_types, x, y, z, type, category, voxel_face_top, x, y + 1u, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, bottom_voxel_types, x, y, z, type, category, voxel_face_bottom, x, y - 1u, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, front_voxel_types, x, y, z, type, category, voxel_face_front, x + 1u, y, z);
+                        indices.face = add_face_mesh_if_needed(indices.face, voxel_types, back_voxel_types, x, y, z, type, category, voxel_face_back, x - 1u, y, z);
                     } break;
                     case voxel_mesh_category_cross: {
                         building_meshes_arrays.transparent_double_sided[indices.all.transparent_double_sided++] = (voxel_mesh_t){

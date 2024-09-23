@@ -7,20 +7,26 @@
 #include <ogc/gx.h>
 
 static void call_display_lists(const mat4s* view, size_t display_list_array_index) {
-	for (size_t i = 0; i < num_regions; i++) {
-		const region_render_info_t* info = &region_render_infos[i];
-		const region_display_list_array_t* display_list_array = &info->display_list_arrays[display_list_array_index];
+	REGION_TYPE_3D(region_render_info_t) render_infos = REGION_CAST_3D(region_render_info_t, region_render_infos);
 
-		mat4s model = glms_translate_make(info->position);
-		mat4s model_view = glms_mat4_mul(*view, model);
+	for (size_t x = 0; x < world_size; x++) {
+		for (size_t y = 0; y < world_size; y++) {
+			for (size_t z = 0; z < world_size; z++) {
+				const region_render_info_t* info = &(*render_infos)[x][y][z];
+				const region_display_list_array_t* display_list_array = &info->display_list_arrays[display_list_array_index];
 
-    	model_view = glms_mat4_transpose(model_view);
-		GX_LoadPosMtxImm(model_view.raw, REGION_MATRIX_INDEX);
+				mat4s model = glms_translate_make((vec3s) {{ (f32) (x * REGION_SIZE), (f32) (y * REGION_SIZE), (f32) (z * REGION_SIZE) }});
+				mat4s model_view = glms_mat4_mul(*view, model);
 
-		for (size_t j = 0; j < display_list_array->num_display_lists; j++) {
-			const display_list_t* display_list = &display_list_array->display_lists[j];
+				model_view = glms_mat4_transpose(model_view);
+				GX_LoadPosMtxImm(model_view.raw, REGION_MATRIX_INDEX);
 
-			GX_CallDispList((void*) display_list->data, display_list->num_bytes);
+				for (size_t i = 0; i < display_list_array->num_display_lists; i++) {
+					const display_list_t* display_list = &display_list_array->display_lists[i];
+
+					GX_CallDispList((void*) display_list->data, display_list->num_bytes);
+				}
+			}
 		}
 	}
 }

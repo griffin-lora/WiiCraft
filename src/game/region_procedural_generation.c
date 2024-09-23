@@ -56,8 +56,8 @@ static void generate_middle_voxels(s32vec3s region_pos, voxel_type_array_t* voxe
     f32 x_offset = (f32) region_pos.x * REGION_SIZE;
     f32 world_region_z = (f32) region_pos.z * REGION_SIZE;
 
-    for (s32 z = 0; z < REGION_SIZE; z++) {
-        for (s32 x = 0; x < REGION_SIZE; x++) {
+    for (s32 x = 0; x < REGION_SIZE; x++) {
+        for (s32 z = 0; z < REGION_SIZE; z++) {
             vec2s noise_pos = { .x = x_offset + (f32) x, .y = world_region_z + (f32) z };
 
             f32 height = get_hills_height(noise_pos);
