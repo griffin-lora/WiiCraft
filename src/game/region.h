@@ -35,4 +35,4 @@ inline size_t get_num_regions() {
 #define REGION_TYPE_3D(TYPE) typeof(TYPE (*)[world_size][world_size][world_size]) 
 #define REGION_CAST_3D(TYPE, VAR) (TYPE (*)[world_size][world_size][world_size]) (VAR)
 
-s32vec3s get_region_position_from_world_position(vec3s world_pos);
+s32vec3s get_region_position_from_voxel_world_position(s32vec3s voxel_world_pos);

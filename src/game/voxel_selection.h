@@ -8,4 +8,4 @@
 void voxel_selection_init(void);
 void voxel_selection_update_view(const mat4s* view);
 void voxel_selection_draw(us_t now);
-void voxel_selection_update(const mat4s* view, s32vec3s region_pos, u32vec3s voxel_local_pos);
+void voxel_selection_update(const mat4s* view, s32vec3s voxel_world_pos);

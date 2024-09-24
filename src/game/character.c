@@ -1,6 +1,7 @@
 #include "character.h"
 #include "game/region.h"
 #include "game/region_management.h"
+#include "game/voxel.h"
 #include "voxel_raycast.h"
 #include "input.h"
 #include "camera.h"
@@ -155,18 +156,10 @@ void character_handle_input(vec3w_t last_wpad_accel, vec3w_t last_nunchuk_accel,
 }
 
 void character_apply_physics(f32 delta) {
-    REGION_TYPE_3D(const voxel_type_array_t*) voxel_type_arrays = REGION_CAST_3D(const voxel_type_array_t*, region_voxel_type_arrays);
-    
     #ifndef PC_PORT
-    u32vec3s region_rel_pos = get_region_relative_position(get_region_position_from_world_position(character_position));
-
-    if (is_region_relative_position_out_of_bounds(region_rel_pos)) {
-        character_velocity.y = 0;
-        return;
-    }
-
-    if ((*voxel_type_arrays)[region_rel_pos.x][region_rel_pos.y][region_rel_pos.z] == NULL) {
-        character_velocity.y = 0;
+    // Check if there is a valid voxel at the character's position
+    if (get_voxel_type_from_voxel_world_position(get_voxel_world_position(character_position)) == NULL) {
+        character_velocity.y = 0.0f;
         return;
     }
 

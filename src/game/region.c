@@ -1,6 +1,7 @@
 #include "region.h"
+#include "game_math.h"
+#include "util.h"
 
-s32vec3s get_region_position_from_world_position(vec3s world_pos) {
-    vec3s div_pos = glms_vec3_scale(world_pos, 1.0f/(f32) REGION_SIZE);
-	return (s32vec3s) {{ (s32) floorf(div_pos.x), (s32) floorf(div_pos.y), (s32) floorf(div_pos.z) }};
+s32vec3s get_region_position_from_voxel_world_position(s32vec3s voxel_world_pos) {
+	return (s32vec3s) {{ div_s32(voxel_world_pos.x, REGION_SIZE), div_s32(voxel_world_pos.y, REGION_SIZE), div_s32(voxel_world_pos.z, REGION_SIZE) }};
 }

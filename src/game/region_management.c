@@ -2,6 +2,7 @@
 #include "game/region.h"
 #include "game/region_procedural_generation.h"
 #include "game/region_visual_generation.h"
+#include "game/voxel.h"
 #include "game_math.h"
 #include "log.h"
 #include <cglm/ivec3.h>
@@ -30,6 +31,24 @@ static s32vec3s get_region_position(u32vec3s region_rel_pos) {
 
 bool is_region_relative_position_out_of_bounds(u32vec3s region_rel_pos) {
     return region_rel_pos.x >= world_size || region_rel_pos.y >= world_size || region_rel_pos.z >= world_size;
+}
+
+voxel_type_t* get_voxel_type_from_voxel_world_position(s32vec3s voxel_world_pos) {
+    REGION_TYPE_3D(voxel_type_array_t*) voxel_type_arrays = REGION_CAST_3D(voxel_type_array_t*, region_voxel_type_arrays);
+
+    s32vec3s region_pos = get_region_position_from_voxel_world_position(voxel_world_pos);
+    u32vec3s region_rel_pos = get_region_relative_position(region_pos);
+    if (is_region_relative_position_out_of_bounds(region_rel_pos)) {
+        return NULL;
+    }
+
+    voxel_type_array_t* voxel_types = (*voxel_type_arrays)[region_rel_pos.x][region_rel_pos.y][region_rel_pos.z];
+    if (voxel_types == NULL) {
+        return NULL;
+    }
+
+    u32vec3s voxel_local_pos = get_voxel_local_position_from_voxel_world_position(voxel_world_pos);
+    return &voxel_types->types[voxel_local_pos.x][voxel_local_pos.y][voxel_local_pos.z];
 }
 
 static const voxel_type_array_t* get_neighbor_voxel_type_array(u32vec3s region_rel_pos) {

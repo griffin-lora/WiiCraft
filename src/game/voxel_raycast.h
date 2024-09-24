@@ -4,8 +4,7 @@
 #include "voxel.h"
 
 typedef struct {
-    s32vec3s region_pos;
-    u32vec3s voxel_local_pos;
+    s32vec3s voxel_world_pos;
     box_raycast_t box_raycast;
 } voxel_raycast_t;
 

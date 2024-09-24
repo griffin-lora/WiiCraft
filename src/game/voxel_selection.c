@@ -91,7 +91,10 @@ void voxel_selection_draw(us_t now) {
     GX_SetCullMode(GX_CULL_BACK);
 }
 
-void voxel_selection_update(const mat4s* view, s32vec3s region_pos, u32vec3s voxel_local_pos) {
+void voxel_selection_update(const mat4s* view, s32vec3s voxel_world_pos) {
+    s32vec3s region_pos = get_region_position_from_voxel_world_position(voxel_world_pos);
+    u32vec3s voxel_local_pos = get_voxel_local_position_from_voxel_world_position(voxel_world_pos);
+
     REGION_TYPE_3D(const voxel_type_array_t*) voxel_type_arrays = REGION_CAST_3D(const voxel_type_array_t*, region_voxel_type_arrays);
     u32vec3s region_rel_pos = get_region_relative_position(region_pos);
 

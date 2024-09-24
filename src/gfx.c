@@ -30,7 +30,7 @@ bool gfx_init(void) {
 	VIDEO_Configure(render_mode);
 	render_mode = VIDEO_GetPreferredMode(NULL);
 	
-	lprintf("Video dimensions: %d, %d\nAspect ratio mode: %d\n", render_mode->fbWidth, render_mode->efbHeight, CONF_GetAspectRatio());
+	lprintf("Video dimensions: %d, %d\nAspect ratio mode: %d\n", render_mode->viWidth, render_mode->viHeight, CONF_GetAspectRatio());
 
 	size_t num_external_framebuffer_bytes = VIDEO_GetFrameBufferSize(render_mode);
 	for (size_t i = 0; i < 2; i++) {

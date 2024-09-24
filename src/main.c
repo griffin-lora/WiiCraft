@@ -1,6 +1,7 @@
 #include "asset.h"
 #include "game/region.h"
 #include "game/region_rendering.h"
+#include "game/voxel.h"
 #include "gfx.h"
 #include "game_math.h"
 #include "input.h"
@@ -79,7 +80,7 @@ int main(int, char**) {
 	s64 program_start = get_current_us();
 	us_t start = 0;
 	
-	s32vec3s last_region_pos = get_region_position_from_world_position(cam_position);
+	s32vec3s last_region_pos = get_region_position_from_voxel_world_position(get_voxel_world_position(cam_position));
 
 	init_region_management();
 
@@ -105,7 +106,7 @@ int main(int, char**) {
 
 		camera_update(frame_delta, buttons_held);
 
-		s32vec3s region_pos = get_region_position_from_world_position(cam_position);
+		s32vec3s region_pos = get_region_position_from_voxel_world_position(get_voxel_world_position(cam_position));
 		manage_regions(last_region_pos, region_pos);
 		last_region_pos = region_pos;
 
@@ -137,8 +138,8 @@ int main(int, char**) {
 		voxel_raycast_wrap_t raycast = get_voxel_raycast(cam_position, glms_vec3_scale(raycast_dir, 10.0f), cam_position, glms_vec3_add(cam_position, glms_vec3_scale(raycast_dir, 10.0f)), (vec3s){ .x = 0, .y = 0, .z = 0 }, voxel_box_type_selection);
 
 		if (raycast.success) {
-			voxel_selection_update(&view, raycast.val.region_pos, raycast.val.voxel_local_pos);
-			update_world(&view, &raycast.val, buttons_down);
+			voxel_selection_update(&view, raycast.val.voxel_world_pos);
+			update_world(&raycast.val, buttons_down);
 		}
 		
 		character_apply_physics(frame_delta);
